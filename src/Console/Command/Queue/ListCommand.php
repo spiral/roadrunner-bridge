@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Console\Command\Queue;
 
 use Spiral\Console\Command;
+use Spiral\RoadRunner\Jobs\DTO\V1\Stat;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Symfony\Component\Console\Helper\Table;
 
@@ -17,15 +18,22 @@ final class ListCommand extends Command
     {
         $table = new Table($this->output);
 
-        $table->setHeaders(['Name', 'Default delay', 'Priority', 'Is active']);
+        $table->setHeaders(['Name', 'Driver', 'Default delay', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active']);
 
         foreach ($jobs as $queue) {
             $options = $queue->getDefaultOptions();
 
+            /** @var Stat $stat */
+            $stat = $queue->getPipelineStat();
+
             $table->addRow([
-                $queue->getName(),
+                $stat->getPipeline(),
+                $stat->getDriver(),
                 $options->getDelay(),
                 $options->getPriority(),
+                $stat->getActive(),
+                $stat->getDelayed(),
+                $stat->getReserved(),
                 $queue->isPaused() ? '<fg=red> ✖ </>' : '<fg=green> ✓ </>'
             ]);
         }
