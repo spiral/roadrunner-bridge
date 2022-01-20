@@ -22,18 +22,15 @@ use Spiral\Snapshots\SnapshotterInterface;
 final class Dispatcher implements DispatcherInterface
 {
     private EnvironmentInterface $env;
-    private PSR7WorkerInterface $worker;
     private ContainerInterface $container;
     private FinalizerInterface $finalizer;
 
     public function __construct(
         EnvironmentInterface $env,
-        PSR7WorkerInterface $worker,
         ContainerInterface $container,
         FinalizerInterface $finalizer
     ) {
         $this->env = $env;
-        $this->worker = $worker;
         $this->container = $container;
         $this->finalizer = $finalizer;
     }
@@ -45,15 +42,17 @@ final class Dispatcher implements DispatcherInterface
 
     public function serve()
     {
+        /** @var PSR7WorkerInterface $http */
+        $worker = $this->container->get(PSR7WorkerInterface::class);
+
         /** @var Http $http */
         $http = $this->container->get(Http::class);
-        while ($request = $this->worker->waitRequest()) {
+        while ($request = $worker->waitRequest()) {
             try {
                 $response = $http->handle($request);
-
-                $this->worker->respond($response);
+                $worker->respond($response);
             } catch (\Throwable $e) {
-                $this->worker->respond($this->errorToResponse($e));
+                $worker->respond($this->errorToResponse($e));
             } finally {
                 $this->finalizer->finalize(false);
             }
