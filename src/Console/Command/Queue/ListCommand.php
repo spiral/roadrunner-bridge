@@ -18,7 +18,9 @@ final class ListCommand extends Command
     {
         $table = new Table($this->output);
 
-        $table->setHeaders(['Name', 'Driver', 'Default delay', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active']);
+        $table->setHeaders(
+            ['Name', 'Driver', 'Default delay', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active']
+        );
 
         foreach ($jobs as $queue) {
             $options = $queue->getDefaultOptions();
@@ -34,7 +36,7 @@ final class ListCommand extends Command
                 $stat->getActive(),
                 $stat->getDelayed(),
                 $stat->getReserved(),
-                $queue->isPaused() ? '<fg=red> ✖ </>' : '<fg=green> ✓ </>'
+                $queue->isPaused() ? '<fg=red> ✖ </>' : '<fg=green> ✓ </>',
             ]);
         }
 

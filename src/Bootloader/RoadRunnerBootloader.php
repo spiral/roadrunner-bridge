@@ -7,8 +7,10 @@ namespace Spiral\RoadRunnerBridge\Bootloader;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface as GlobalEnvironmentInterface;
 use Spiral\Core\Container;
+use Spiral\Goridge\Relay;
 use Spiral\Goridge\RPC\RPC;
 use Spiral\Goridge\RPC\RPCInterface;
+use Spiral\Goridge\SocketRelay;
 use Spiral\Http\Diactoros\ServerRequestFactory;
 use Spiral\Http\Diactoros\StreamFactory;
 use Spiral\Http\Diactoros\UploadedFileFactory;
@@ -37,7 +39,9 @@ final class RoadRunnerBootloader extends Bootloader
         // Register RPC
         //
         $rpcRegistrar = static function (EnvironmentInterface $env): RPCInterface {
-            return RPC::create($env->getRPCAddress());
+            $relay = Relay::create($env->getRPCAddress());
+
+            return new RPC($relay);
         };
 
         $container->bindSingleton(RPCInterface::class, $rpcRegistrar);

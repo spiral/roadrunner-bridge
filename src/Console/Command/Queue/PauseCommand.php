@@ -18,8 +18,14 @@ final class PauseCommand extends Command
 
     public function perform(JobsInterface $jobs): void
     {
-        $jobs->pause(
-            $this->argument('queue')
-        );
+        $name = $this->argument('queue');
+
+        if ($this->isVerbose()) {
+            $this->writeln(sprintf('<info>Pausing queue [%s]</info>', $name));
+        }
+
+        $jobs->pause($name);
+
+        $this->writeln(sprintf('<info>Queue [%s] has been paused.</info>', $name));
     }
 }

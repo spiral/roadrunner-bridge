@@ -4,30 +4,38 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Queue;
 
-use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Queue\OptionsInterface;
 use Spiral\Queue\QueueInterface;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
-use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\Options;
+use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface as RRQueueInterface;
 
-class Queue implements QueueInterface
+final class Queue implements QueueInterface
 {
     use QueueTrait;
 
-    private RRQueueInterface $queue;
-    private JobsInterface $jobs;
-    private HandlerRegistryInterface $handlerRegistry;
+    private PipelineRegistryInterface $registry;
+    private CreateInfoInterface $connector;
+    private ?RRQueueInterface $queue = null;
+    private bool $consume;
 
     public function __construct(
-        HandlerRegistryInterface $handlerRegistry,
-        JobsInterface $jobs,
-        RRQueueInterface $queue
+        PipelineRegistryInterface $registry,
+        CreateInfoInterface $connector,
+        bool $consume = true
     ) {
-        $this->queue = $queue;
-        $this->jobs = $jobs;
-        $this->handlerRegistry = $handlerRegistry;
+        $this->registry = $registry;
+        $this->consume = $consume;
+        $this->connector = $connector;
+    }
+
+    /**
+     * Queue pipeline name
+     */
+    public function getName(): string
+    {
+        return $this->connector->getName();
     }
 
     /**
@@ -36,13 +44,10 @@ class Queue implements QueueInterface
      */
     public function push(string $name, array $payload = [], OptionsInterface $options = null): string
     {
-        $context = $this->getContext($options);
+        $this->initQueue();
 
-        /** @var \Spiral\RoadRunner\Jobs\QueueInterface $queue */
-        $queue = $context->queue;
-
-        $task = $queue->dispatch(
-            $queue->create(
+        $task = $this->queue->dispatch(
+            $this->queue->create(
                 $name,
                 $payload,
                 $options ? new Options($options->getDelay() ?? Options::DEFAULT_DELAY) : null
@@ -52,19 +57,18 @@ class Queue implements QueueInterface
         return $task->getId();
     }
 
-    /**
-     * @param OptionsInterface|null $options
-     * @return QueueInterface
-     */
-    private function getContext(?OptionsInterface $options): QueueInterface
+    private function initQueue(): void
     {
-        if ($options instanceof OptionsInterface && $options->getPipeline() !== null) {
-            $original = $this->jobs->connect($options->getPipeline());
-
-            return new self($this->handlerRegistry, $this->jobs, $original);
+        if ($this->queue !== null) {
+            return;
         }
 
-        return $this;
-    }
+        if (! $this->registry->isExists($this->connector->getName())) {
+            $this->queue = $this->registry->create($this->connector, $this->consume);
 
+            return;
+        }
+
+        $this->queue = $this->registry->connect($this->connector->getName());
+    }
 }

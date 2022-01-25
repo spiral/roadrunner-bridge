@@ -36,10 +36,14 @@ final class Dispatcher implements DispatcherInterface
         return \PHP_SAPI == 'cli' && $this->env->getMode() === Mode::MODE_JOBS;
     }
 
+    /**
+     * @return void
+     */
     public function serve()
     {
         /** @var ConsumerInterface $consumer */
         $consumer = $this->container->get(ConsumerInterface::class);
+
         /** @var HandlerRegistryInterface $handlerRegistry */
         $handlerRegistry = $this->container->get(HandlerRegistryInterface::class);
 

@@ -29,19 +29,23 @@ final class ShortCircuit implements QueueInterface
     }
 
     /** @inheritdoc */
-    public function push(string $jobType, array $payload = [], OptionsInterface $options = null): string
+    public function push(string $name, array $payload = [], OptionsInterface $options = null): string
     {
         if ($options !== null && $options->getDelay()) {
             sleep($options->getDelay());
         }
 
-        $id = (string) Uuid::uuid4();
+        $id = (string)Uuid::uuid4();
 
         try {
-            $this->registry->getHandler($jobType)->handle($jobType, $id, $payload);
+            $this->registry->getHandler($name)->handle($name, $id, $payload);
         } catch (\Throwable $e) {
             $this->failedJobHandler->handle(
-                'sync', 'default', $jobType, $payload, $e
+                'sync',
+                'default',
+                $name,
+                $payload,
+                $e
             );
         }
 

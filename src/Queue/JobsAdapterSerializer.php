@@ -6,7 +6,10 @@ namespace Spiral\RoadRunnerBridge\Queue;
 
 use Spiral\RoadRunner\Jobs\Serializer\SerializerInterface;
 
-final class RoadRunnerSerializer implements SerializerInterface
+/**
+ * @internal
+ */
+final class JobsAdapterSerializer implements SerializerInterface
 {
     private \Spiral\Queue\SerializerInterface $serializer;
 

@@ -18,8 +18,14 @@ final class ResumeCommand extends Command
 
     public function perform(JobsInterface $jobs): void
     {
-        $jobs->resume(
-            $this->argument('queue')
-        );
+        $name = $this->argument('queue');
+
+        if ($this->isVerbose()) {
+            $this->writeln(sprintf('<info>Pausing queue [%s]</info>', $name));
+        }
+
+        $jobs->resume($name);
+
+        $this->writeln(sprintf('<info>Queue [%s] has been resumed.</info>', $name));
     }
 }

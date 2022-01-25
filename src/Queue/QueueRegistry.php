@@ -24,6 +24,7 @@ final class QueueRegistry implements HandlerRegistryInterface
     }
 
     /**
+     * Associate specific job type with handler class or object
      * @param HandlerInterface|string $handler
      */
     public function setHandler(string $jobType, $handler): void
@@ -31,6 +32,9 @@ final class QueueRegistry implements HandlerRegistryInterface
         $this->handlers[$jobType] = $handler;
     }
 
+    /**
+     * Get handler object for given job type
+     */
     public function getHandler(string $jobType): HandlerInterface
     {
         if (isset($this->handlers[$jobType])) {
@@ -44,11 +48,17 @@ final class QueueRegistry implements HandlerRegistryInterface
         return $this->fallbackHandlers->getHandler($jobType);
     }
 
+    /**
+     * Associate specific job type with connection
+     */
     public function setPipeline(string $jobType, string $pipeline): void
     {
         $this->pipelines[$jobType] = $pipeline;
     }
 
+    /**
+     * Get connection for specific job type
+     */
     public function getPipeline(string $jobType): ?string
     {
         return $this->pipelines[$jobType] ?? null;

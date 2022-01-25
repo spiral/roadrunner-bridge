@@ -7,6 +7,9 @@ namespace Spiral\RoadRunnerBridge\Queue;
 use Spiral\Queue\SerializerInterface;
 use Spiral\RoadRunner\Jobs\Exception\SerializationException;
 
+/**
+ * @internal
+ */
 final class DefaultSerializer implements SerializerInterface
 {
     /**

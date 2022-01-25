@@ -16,23 +16,24 @@ use Spiral\Http\Http;
 use Spiral\RoadRunner\Environment\Mode;
 use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
-use Spiral\Snapshots\SnapshotInterface;
-use Spiral\Snapshots\SnapshotterInterface;
 
 final class Dispatcher implements DispatcherInterface
 {
     private EnvironmentInterface $env;
     private ContainerInterface $container;
     private FinalizerInterface $finalizer;
+    private ErrorHandlerInterface $errorHandler;
 
     public function __construct(
         EnvironmentInterface $env,
         ContainerInterface $container,
+        ErrorHandlerInterface $errorHandler,
         FinalizerInterface $finalizer
     ) {
         $this->env = $env;
         $this->container = $container;
         $this->finalizer = $finalizer;
+        $this->errorHandler = $errorHandler;
     }
 
     public function canServe(): bool
@@ -42,11 +43,12 @@ final class Dispatcher implements DispatcherInterface
 
     public function serve()
     {
-        /** @var PSR7WorkerInterface $http */
+        /** @var PSR7WorkerInterface $worker */
         $worker = $this->container->get(PSR7WorkerInterface::class);
 
         /** @var Http $http */
         $http = $this->container->get(Http::class);
+
         while ($request = $worker->waitRequest()) {
             try {
                 $response = $http->handle($request);
@@ -64,15 +66,15 @@ final class Dispatcher implements DispatcherInterface
         $handler = new HtmlHandler();
 
         try {
-            /** @var SnapshotInterface $snapshot */
-            $snapshot = $this->container->get(SnapshotterInterface::class)->register($e);
-            \file_put_contents('php://stderr', $snapshot->getMessage());
+            $this->errorHandler->handle($e);
 
-            // on demand
-            $state = $this->container->get(StateInterface::class);
+            if ($this->container->has(StateInterface::class)) {
+                // on demand
+                $state = $this->container->get(StateInterface::class);
 
-            if ($state !== null) {
-                $handler = $handler->withState($state);
+                if ($state !== null) {
+                    $handler = $handler->withState($state);
+                }
             }
         } catch (\Throwable|ContainerExceptionInterface $se) {
             \file_put_contents('php://stderr', (string)$e);

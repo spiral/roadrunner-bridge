@@ -4,28 +4,40 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Queue\Job;
 
-use Spiral\Core\Container;
+use Spiral\Core\ResolverInterface;
 use Spiral\Queue\HandlerInterface;
+use Spiral\RoadRunnerBridge\Queue\Exception\InvalidArgumentException;
 
 final class ObjectJob implements HandlerInterface
 {
-    private Container $container;
+    private ResolverInterface $resolver;
 
-    public function __construct(Container $container)
+    public function __construct(ResolverInterface $resolver)
     {
-        $this->container = $container;
+        $this->resolver = $resolver;
     }
 
     public function handle(string $name, string $id, array $payload): void
     {
+        if (! isset($payload['object'])) {
+            throw new InvalidArgumentException('Payload `object` key is required.');
+        }
+
+        if (! is_object($payload['object'])) {
+            throw new InvalidArgumentException('Payload `object` key value type should be an object.');
+        }
+
         $job = $payload['object'];
         $handler = new \ReflectionClass($job);
 
         $method = $handler->getMethod(
-            method_exists($handler, 'handle') ? 'handle' : '__invoke'
+            $handler->hasMethod('handle') ? 'handle' : '__invoke'
         );
 
-        $args = $this->container->resolveArguments($method);
+        $args = $this->resolver->resolveArguments($method, [
+            'name' => $name,
+            'id' => $id,
+        ]);
 
         $method->invokeArgs($job, $args);
     }

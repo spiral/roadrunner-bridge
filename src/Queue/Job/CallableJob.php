@@ -4,27 +4,39 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Queue\Job;
 
-use Spiral\Core\Container;
+use Spiral\Core\ResolverInterface;
 use Spiral\Queue\HandlerInterface;
+use Spiral\RoadRunnerBridge\Queue\Exception\InvalidArgumentException;
 
 final class CallableJob implements HandlerInterface
 {
-    private Container $container;
+    private ResolverInterface $resolver;
 
-    public function __construct(Container $container)
+    public function __construct(ResolverInterface $resolver)
     {
-        $this->container = $container;
+        $this->resolver = $resolver;
     }
 
     public function handle(string $name, string $id, array $payload): void
     {
+        if (! isset($payload['callback'])) {
+            throw new InvalidArgumentException('Payload `callback` key is required.');
+        }
+
+        if (! $payload['callback'] instanceof \Closure) {
+            throw new InvalidArgumentException('Payload `callback` key value type should be a closure.');
+        }
+
         /** @var \Closure $callback */
         $callback = $payload['callback'];
 
         $reflection = new \ReflectionFunction($callback);
 
         $reflection->invokeArgs(
-            $this->container->resolveArguments($reflection)
+            $this->resolver->resolveArguments($reflection, [
+                'name' => $name,
+                'id' => $id,
+            ])
         );
     }
 }

@@ -9,7 +9,6 @@ use Spiral\Core\Exception\Container\ContainerException;
 use Spiral\Queue\Exception\JobException;
 use Spiral\Queue\HandlerInterface;
 use Spiral\Queue\HandlerRegistryInterface;
-use Spiral\Queue\SerializerInterface;
 
 final class ContainerRegistry implements HandlerRegistryInterface
 {

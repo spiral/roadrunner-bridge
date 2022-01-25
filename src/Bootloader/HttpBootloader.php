@@ -9,12 +9,18 @@ use Spiral\Boot\KernelInterface;
 use Spiral\Bootloader\ServerBootloader;
 use Spiral\Core\FactoryInterface;
 use Spiral\RoadRunnerBridge\Http\Dispatcher;
+use Spiral\RoadRunnerBridge\Http\ErrorHandlerInterface;
+use Spiral\RoadRunnerBridge\Http\LogErrorHandler;
 
 final class HttpBootloader extends Bootloader
 {
     protected const DEPENDENCIES = [
         // RoadRunnerBootloader::class,
-        ServerBootloader::class
+        ServerBootloader::class,
+    ];
+
+    protected const SINGLETONS = [
+        ErrorHandlerInterface::class => LogErrorHandler::class,
     ];
 
     public function boot(KernelInterface $kernel, FactoryInterface $factory): void

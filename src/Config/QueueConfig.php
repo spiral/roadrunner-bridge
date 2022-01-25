@@ -5,19 +5,54 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Config;
 
 use Spiral\Core\InjectableConfig;
-use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
+use Spiral\RoadRunnerBridge\Queue\Exception\InvalidArgumentException;
 
 final class QueueConfig extends InjectableConfig
 {
     public const CONFIG = 'queue';
 
-    public function getDefault(): string
+    protected $config = [
+        'default' => 'sync',
+        'aliases' => [],
+        'driverAliases' => [],
+        'connections' => [],
+    ];
+
+    /**
+     * Get connection aliases
+     */
+    public function getAliases(): array
     {
-        return $this->config['default'] ?? 'default';
+        return (array)($this->config['aliases'] ?? []);
     }
 
     /**
-     * @return array<CreateInfoInterface>
+     * @return non-empty-string
+     * @throws InvalidArgumentException
+     */
+    public function getDefaultDriver(): string
+    {
+        if (! isset($this->config['default']) || empty($this->config['default'])) {
+            throw new InvalidArgumentException('Default queue connection is not defined.');
+        }
+
+        if (! \is_string($this->config['default'])) {
+            throw new InvalidArgumentException('Default queue connection config value must be a string');
+        }
+
+        return $this->config['default'];
+    }
+
+    /**
+     * @return array<string, class-string>
+     */
+    public function getDriverAliases(): array
+    {
+        return (array)($this->config['driverAliases'] ?? []);
+    }
+
+    /**
+     * @throws InvalidArgumentException
      */
     public function getConnections(?string $driver = null): array
     {
@@ -27,22 +62,72 @@ final class QueueConfig extends InjectableConfig
             return $connections;
         }
 
-        return array_filter($connections, static function (array $connection) use ($driver) {
-            return $connection['driver'] === $driver;
+        $driverAliases = $this->getDriverAliases();
+
+        if (isset($driverAliases[$driver])) {
+            if (! \is_string($this->config['driverAliases'][$driver])) {
+                throw new InvalidArgumentException(
+                    sprintf('Driver alias for `%s` value must be a string', $driver)
+                );
+            }
+
+            $driver = $driverAliases[$driver];
+        }
+
+        return array_filter($connections, static function (array $connection) use ($driverAliases, $driver): bool {
+            if (empty($connection['driver'])) {
+                return false;
+            }
+
+            $connectionDriver = $driverAliases[$connection['driver']] ?? $connection['driver'];
+
+            return $connectionDriver === $driver;
         });
     }
 
+    /**
+     * @return array<string, mixed>
+     * @throws InvalidArgumentException
+     */
     public function getConnection(string $name): array
     {
-        if (! isset($this->getConnections()[$name]['driver'])) {
-            throw new \RuntimeException('Queue connection `'.$name.'` was not found.');
+        $connections = $this->getConnections();
+
+        if (! isset($connections[$name])) {
+            throw new InvalidArgumentException(sprintf('Queue connection with given name `%s` is not defined.', $name));
         }
 
-        return $this->getConnections()[$name];
+        if (! isset($connections[$name]['driver'])) {
+            throw new InvalidArgumentException(sprintf('Driver for queue connection `%s` is not defined.', $name));
+        }
+
+        $connection = $connections[$name];
+        $driver = $connection['driver'];
+
+        if (! \is_string($driver)) {
+            throw new InvalidArgumentException(
+                sprintf('Driver for queue connection `%s` value must be a string', $name)
+            );
+        }
+
+        if (isset($this->config['driverAliases'][$driver])) {
+            $connection['driver'] = $this->config['driverAliases'][$driver];
+        }
+
+        if (! \is_string($connection['driver'])) {
+            throw new InvalidArgumentException(
+                sprintf('Driver alias for queue connection `%s` value must be a string', $name)
+            );
+        }
+
+        return $connection;
     }
 
+    /**
+     * @return array<string, class-string>
+     */
     public function getRegistryHandlers(): array
     {
-        return $this->config['registry']['handlers'] ?? [];
+        return (array)($this->config['registry']['handlers'] ?? []);
     }
 }

@@ -7,6 +7,7 @@
 Make sure that your server is configured with following PHP version and extensions:
 
 - PHP 7.4+
+- Spiral framework 2.9+
 
 ## Installation
 
@@ -23,50 +24,232 @@ use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 protected const LOAD = [
     RoadRunnerBridge\HttpBootloader::class,
     RoadRunnerBridge\QueueBootloader::class,
+    RoadRunnerBridge\CacheBootloader::class,
+    RoadRunnerBridge\GRPCBootloader::class,
     RoadRunnerBridge\CommandBootloader::class,
     
     // ...
 ];
 ```
 
-## Configuration
+## Usage
 
-### Roadrunner
+### Cache
 
-#### Example
+#### Configuration
 
-```yaml
-rpc:
-  listen: tcp://127.0.0.1:6001
+You can create config file `app/config/cache.php` if you want to configure Cache storages. In this file, you may specify
+which cache driver you would like to be used by default throughout your application.
 
-server:
-  command: "php app.php"
-  relay: pipes
+```php
+<?php
 
-# serve static files
-static:
-  dir: "public"
+declare(strict_types=1);
 
-http:
-  address: 0.0.0.0:8080
-  middleware: [ "gzip", "static" ]
-  static:
-    dir: "public"
-    forbid: [ ".php", ".htaccess" ]
-  pool:
-    num_workers: 1
-    supervisor:
-      max_worker_memory: 100
+use Spiral\Cache\Storage\ArrayStorage;
+use Spiral\Cache\Storage\FileStorage;
 
-jobs:
-  consume: [ ]
-  pool:
-    num_workers: 2
-    supervisor:
-      max_worker_memory: 100
+return [
+
+    'default' => 'array',
+    
+    /**
+     *  Aliases for storages, if you want to use domain specific storages
+     */
+    'aliases' => [
+        'user-data' => 'localMemory'
+    ],
+
+    'storages' => [
+
+        'local' => [
+            // Alias for ArrayStorage type
+            'type' => 'array',
+        ],
+        
+        'localMemory' => [
+            'type' => ArrayStorage::class,
+        ],
+
+        'file' => [
+            // Alias for FileStorage type
+            'type' => 'file',
+            'path' => __DIR__.'/../../runtime/cache',
+        ],
+        
+    ],
+
+    /**
+     * Aliases for storage types
+     */
+    'typeAliases' => [
+        'array' => ArrayStorage::class,
+        'file' => FileStorage::class,
+    ],
+];
 ```
 
-### Queue configuration
+#### Working with default storage
+
+At first, you need to specify default storage in configuration file, and it will be bound
+with `Psr\SimpleCache\CacheInterface` and will be automatically delivered by the container (auto-wiring).
+
+```php
+'default' => 'array',
+```
+
+```php
+use Psr\SimpleCache\CacheInterface;
+
+class MyService {
+
+    private CacheInterface $cache;
+    private PostReposiory $posts;
+    
+    public function __construct(CacheInterface $cache, PostReposiory $posts) 
+    {
+        $this->cache = $cache;
+        $this->posts = $posts;
+    }
+
+    public function handle(): void
+    {
+        $posts = $this->posts->findAll();
+        $this->cache->set('posts', $posts);
+        
+        // ...
+    }
+}
+```
+
+#### Working with storage provider
+
+Storage provider provides convenient access to the underlying implementations of the `Psr\SimpleCache\CacheInterface`
+cache contract. Using the Storage provider, you may access various cache stores via the `storage` method. The key passed
+to the store method should correspond to one of the storages listed in the `storages` configuration array in your cache
+configuration file:
+
+```php
+use Spiral\Cache\CacheStorageProviderInterface;
+
+class MyService {
+
+    private CacheStorageProviderInterface $cacheManager;
+    private PostReposiory $posts;
+    
+    public function __construct(CacheStorageProviderInterface $cacheManager, PostReposiory $posts) 
+    {
+        $this->cacheManager = $cacheManager;
+        $this->posts = $posts;
+    }
+
+    public function handle(): void
+    {
+        /** @var \Psr\SimpleCache\CacheInterface $cache */
+        $cache = $this->cacheManager->storage('inMemory');
+        
+        $posts = $this->posts->findAll();
+        $this->cache->set('posts', $posts);
+        
+        // ...
+    }
+}
+```
+
+#### Working with domain specific storages
+
+You may even associate a domain specific storage name with one of the configured storage and then request storage by its
+alias:
+
+```php
+'aliases' => [
+    'user-data' => 'localMemory'
+],
+'storages' => [
+    'localMemory' => [
+        'type' => ArrayStorage::class,
+    ],
+    // ...
+],
+```
+
+```php
+use Spiral\Cache\CacheStorageProviderInterface;
+
+class MyService {
+
+    private CacheStorageProviderInterface $cacheManager;
+    private PostReposiory $posts;
+    
+    public function __construct(CacheStorageProviderInterface $cacheManager, UserRepository $posts) 
+    {
+        $this->cacheManager = $cacheManager;
+        $this->posts = $posts;
+    }
+
+    public function handle(): void
+    {
+        /** @var \Psr\SimpleCache\CacheInterface $cache */
+        $cache = $this->cacheManager->storage('user-data');
+        
+        // ...
+    }
+}
+```
+
+#### Adding custom cache storages
+
+There are two ways to add cache storages:
+
+1. Create a new class that implements `\Psr\SimpleCache\CacheInterface` interface.
+
+```php
+final class DatabaseStorage implements \Psr\SimpleCache\CacheInterface
+{
+    private string $table;
+    
+    public function __construct(string $table) 
+    {
+        $this->table = $table;
+    }
+
+    // ..
+}
+```
+
+And then just use it in your config
+
+```php
+'memcached' => [
+    'type' => DatabaseStorage::class,
+    'table' => 'cache',
+],
+```
+
+Cache storage will be automatically resolved by `Spiral\Core\FactoryInterface` and all the data from its config will be
+passed in its `__constructor`. It will look like:
+
+```php
+$factory->make(DatabaseStorage::class, [
+    'table' => 'cache'
+])
+```
+
+#### Console commands
+
+| Command               | Description                            |
+|-----------------------|----------------------------------------|
+| cache:clear           | Clear cache for default cache storage  |
+| cache:clear {storage} | Clear cache for specific cache storage |
+
+### Queue
+
+Roadrunner queues provide a unified queueing API across a variety of different queue backends. Full information about
+supported pipelines you can read on official site https://roadrunner.dev/docs/beep-beep-jobs.
+
+#### Configuration
+
+You can create config file `app/config/queue.php` if you want to configure Queue connections:
 
 ```php
 <?php
@@ -75,6 +258,8 @@ declare(strict_types=1);
 
 use Spiral\RoadRunner\Jobs\Queue\MemoryCreateInfo;
 use Spiral\RoadRunner\Jobs\Queue\AMQPCreateInfo;
+use Spiral\RoadRunner\Jobs\Queue\BeanstalkCreateInfo;
+use Spiral\RoadRunner\Jobs\Queue\SQSCreateInfo;
 use Spiral\SendIt\MailJob;
 use Spiral\SendIt\MailQueue;
 
@@ -85,11 +270,20 @@ return [
     'default' => env('QUEUE_CONNECTION', 'memory'),
 
     /**
+     *  Aliases for queue connections, if you want to use domain specific queues
+     */
+    'aliases' => [
+        'mail-queue' => 'amqp',
+        'rating-queue' => 'sqs',
+    ],
+
+    /**
      * Queue Connections
      * Drivers: "sync", "roadrunner"
      */
     'connections' => [
         'sync' => [
+            // Job will be handled immediately without queueing
             'driver' => 'sync',
         ],
         'memory' => [
@@ -100,14 +294,29 @@ return [
             // php app.php queue:pause local
             'consume' => true 
         ],
-        'amqp' => [
-            'driver' => 'roadrunner',
-            'connector' => new AMQPCreateInfo('local'),
-            // Don't consume jobs for this connection on start
-            // You can run consumer for this connection via console command
-            // php app.php queue:resume local
-            'consume' => false 
-        ],
+//        'amqp' => [
+//            'driver' => 'roadrunner',
+//            'connector' => new AMQPCreateInfo('bus'),
+//            // Don't consume jobs for this connection on start
+//            // You can run consumer for this connection via console command
+//            // php app.php queue:resume local
+//            'consume' => false 
+//        ],
+
+//        'beanstalk' => [
+//            'driver' => 'roadrunner',
+//            'connector' => new BeanstalkCreateInfo('bus'),
+//        ],
+
+//        'sqs' => [
+//            'driver' => 'roadrunner',
+//            'connector' => new SQSCreateInfo('amazon'),
+//        ],
+    ],
+    
+    'driverAliases' => [
+        'sync' => \Spiral\RoadRunnerBridge\Queue\ShortCircuit::class,
+        'roadrunner' => \Spiral\RoadRunnerBridge\Queue\Queue::class,
     ],
     
     'registry' => [
@@ -118,11 +327,14 @@ return [
 ];
 ```
 
-## Usage
-
-### Queue
+Connections with `roadrunner` driver will automatically declare pipelines without configuring on the RoadRunner side. If
+pipeline will be declared via RoadRunner config, Queue manager will just connect to it (without declaring).
 
 #### Job handler
+
+To run a job, you must create a proper job handler. The handler must implement `Spiral\Queue\HandlerInterface`. Handlers
+are responsible only for job execution. Use `Spiral\Queue\JobHandler` to simplify your abstraction and perform
+dependency injection in your handler method invoke:
 
 ```php
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -145,20 +357,24 @@ use Psr\Container\ContainerInterface;
 class MyService {
 
     private ContainerInterface $container;
+    private  QueueInterface $queue;
     
-    public function __construct(ContainerInterface $container) 
+    /**
+     * @param QueueInterface $queue - Default queue will be injected
+     * @param ContainerInterface $container
+     */
+    public function __construct(QueueInterface $queue, ContainerInterface $container) 
     {
         $this->container = $container;
+        $this->queue = $queue;
     }
 
     public function handle()
     {
-        // Default queue
-        /** @var QueueInterface $queue */
-        $queue = $this->container->get(QueueInterface::class);
+        $queue = $this->queue;
         
-        // OR
-        
+        // OR gets queue from manager 
+
         /** @var QueueManager $queueManager */
         $queueManager = $this->container->get(QueueManager::class);
         $queue = $queueManager->getConnection('sync');
@@ -183,10 +399,14 @@ $queue->push('ping', ['url' => 'https://google.com']);
 
 #### Job DTO's
 
+Job DTO classes are very simple, normally containing only a `__invoke` or `handle` method that is invoked when the job
+is processed by the queue. To get started, let's take a look at an example job class. In this example, we'll pretend we
+ping a URL:
+
 ```php
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class Ping extends \Spiral\Queue\JobHandler
+class Ping
 {
     private string $url;
     
@@ -205,36 +425,26 @@ class Ping extends \Spiral\Queue\JobHandler
 
 ```php
 use Spiral\Queue\QueueInterface;
-use Spiral\RoadRunnerBridge\Queue\QueueManager;
-use Psr\Container\ContainerInterface;
 
 class MyService {
 
-    private ContainerInterface $container;
+    private QueueInterface $queue;
     
-    public function __construct(ContainerInterface $container) 
+    public function __construct(QueueInterface $queue) 
     {
-        $this->container = $container;
+        $this->queue = $queue;
     }
 
     public function handle()
     {
-        // Default queue
-        /** @var QueueInterface $queue */
-        $queue = $this->container->get(QueueInterface::class);
-        
-        // OR
-        
-        /** @var QueueManager $queueManager */
-        $queueManager = $this->container->get(QueueManager::class);
-        $queue = $queueManager->getConnection('sync');
-        
-        $queue->pushObject(new Ping('https://google.com'));
+        $this->queue->pushObject(new Ping('https://google.com'));
     }
 }
 ```
 
 ### Callable jobs
+
+If you have simply job and you don't want to create job handler you may use php closures to handle some work.
 
 ```php
 use Spiral\Queue\QueueInterface;
@@ -244,31 +454,54 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class MyService {
 
-    private ContainerInterface $container;
+    private QueueInterface $queue;
     
-    public function __construct(ContainerInterface $container) 
+    public function __construct(QueueInterface $queue) 
     {
-        $this->container = $container;
+        $this->queue = $queue;
+    }
+    
+    public function handle()
+    {
+        $url = 'https://google.com';
+        
+        $this->queue->pushCallable(static function(HttpClientInterface $client) use($url) : void {
+            $status = $client->request('GET', $url)->getStatusCode() === 200;
+            echo $status ? 'PONG' : 'ERROR';
+        });
+    }
+}
+```
+
+### Domain specific queues
+
+Domain specific queues are an important part of an application. You can create aliases for exists connections and use
+them instead of real names. When you decide to switch queue connection for alias, you can do it in one place.
+
+```php
+'aliases' => [
+    'user-data' => 'sync',
+],
+```
+
+```php
+use Spiral\Queue\QueueInterface;
+use Spiral\RoadRunnerBridge\Queue\QueueManager;
+use Psr\Container\ContainerInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+class MyService {
+
+    private QueueInterface $queue;
+    
+    public function __construct(QueueManager $manager) 
+    {
+        $this->queue = $manager->getConnection('user-data');
     }
 
     public function handle()
     {
-        // Default queue
-        /** @var QueueInterface $queue */
-        $queue = $this->container->get(QueueInterface::class);
-        
-        // OR
-        
-        /** @var QueueManager $queueManager */
-        $queueManager = $this->container->get(QueueManager::class);
-        $queue = $queueManager->getConnection('sync');
-        
-        $url = 'https://google.com';
-        
-        $queue->pushCallable(static function(HttpClientInterface $client) use($url) : void {
-            $status = $client->request('GET', $url)->getStatusCode() === 200;
-            echo $status ? 'PONG' : 'ERROR';
-        });
+        $this->queue->push(...);
     }
 }
 ```
@@ -312,7 +545,7 @@ class DatabaseFailedJobsHandler implements FailedJobHandlerInterface
 }
 ```
 
-Then you need to bind your implementation with interface.
+Then you need to bind your implementation with `Spiral\RoadRunnerBridge\Queue\Failed\FailedJobHandlerInterface` interface.
 
 ```php
 use Spiral\Boot\Bootloader\Bootloader;
@@ -363,3 +596,171 @@ protected const LOAD = [
 ```bash
 php app.php queue:pause local
 ```
+
+### GRPC
+
+The GRPC protocol provides an extremely efficient way of cross-service communication for distributed applications. The
+public toolkit includes instruments to generate client and server code-bases for many languages allowing the developer
+to use the most optimal language for the task.
+
+## Configuration
+
+Install `protoc-gen-php-grpc` from [pre-build binaries](https://github.com/spiral/roadrunner-binary/releases).
+
+Create config file `app/config/grpc.php` if you want to configure generate service classes:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+return [
+    /**
+     * Path to protoc-gen-php-grpc library.
+     * Default: null 
+     */
+    'binaryPath' => null,
+    // 'binaryPath' => __DIR__.'/../../protoc-gen-php-grpc',
+
+    'services' => [
+        __DIR__.'/../../proto/echo.proto',
+    ],
+];
+```
+
+Then run console command:
+
+```bash
+php app.php grpc:generate
+```
+
+#### Console commands
+
+| Command                                    | Description                                             |
+|--------------------------------------------|---------------------------------------------------------|
+| grpc:services                              | List available GRPC services                            |
+| grpc:generate {path=auto} {namespace=auto} | Generate GPRC service code using protobuf specification |
+
+#### Example GRPC service
+
+```
+// app/proto/echo.proto
+
+syntax = "proto3";
+package service;
+
+option php_namespace = "App\\GRPC\\Echo";
+option php_metadata_namespace = "App\\GRPC\\Echo\\GPBMetadata";
+
+service Echo {
+    rpc Ping (Message) returns (Message) {
+    }
+}
+
+message Message {
+    string msg = 1;
+}
+```
+
+Put proto file into `app/config/grpc.php`
+
+```php
+'services' => [
+    __DIR__.'/../../proto/echo.proto',
+],
+```
+
+Run console command:
+
+```bash
+php app.php grpc:generate
+```
+
+Implement `EchoInterface` interface
+
+```php
+// app/src/GRPC/Echo/EchoService.php
+
+namespace App\GRPC\Echo;
+
+use Spiral\RoadRunner\GRPC\ContextInterface;
+
+class EchoService implements EchoInterface
+{
+    public function Ping(ContextInterface $ctx, Message $in): Message
+    {
+        $out = new Message();
+
+        return $out->setMsg(date('Y-m-d H:i:s').': PONG');
+    }
+}
+```
+
+Configure `grpc` section in the RoadRunner yaml config:
+
+```yaml
+grpc:
+  listen: "tcp://localhost:9001"
+  proto:
+    - "proto/echo.proto"
+```
+
+Start server
+
+```bash
+./rr serve
+```
+
+Full example Echo GRPC service you can find [here](https://github.com/spiral/roadrunner-grpc/tree/master/example/echo)
+
+------
+
+### Roadrunner config example
+
+```yaml
+rpc:
+  listen: tcp://127.0.0.1:6001
+
+server:
+  command: "php app.php"
+  relay: pipes
+
+# serve static files
+static:
+  dir: "public"
+
+http:
+  address: 0.0.0.0:8080
+  middleware: [ "gzip", "static" ]
+  static:
+    dir: "public"
+    forbid: [ ".php", ".htaccess" ]
+  pool:
+    num_workers: 1
+    supervisor:
+      max_worker_memory: 100
+
+jobs:
+  consume: [ ]
+  pool:
+    num_workers: 2
+    supervisor:
+      max_worker_memory: 100
+
+kv:
+  local:
+    driver: memory
+    config:
+      interval: 60
+  redis:
+    driver: redis
+    config:
+      addrs:
+        - "localhost:6379"
+#grpc:
+#  listen: "tcp://localhost:9001"
+#  proto:
+#    - "first.proto"
+```
+
+Read more about RoadRunner configuration on official site https://roadrunner.dev.
