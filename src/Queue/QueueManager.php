@@ -12,7 +12,7 @@ use Spiral\RoadRunnerBridge\Config\QueueConfig;
 final class QueueManager
 {
     /** @var QueueInterface[] */
-    private array $connections = [];
+    private array $pipelines = [];
     private QueueConfig $config;
     private FactoryInterface $factory;
 
@@ -25,33 +25,33 @@ final class QueueManager
     /**
      * @throws Exception\InvalidArgumentException
      */
-    public function getConnection(?string $name = null): QueueInterface
+    public function getPipeline(?string $name = null): QueueInterface
     {
         $name = $name ?: $this->getDefaultDriver();
-        // Replaces alias with real connection name
+        // Replaces alias with real pipeline name
         $name = $this->config->getAliases()[$name] ?? $name;
 
-        if (! isset($this->connections[$name])) {
-            $this->connections[$name] = $this->resolveConnection($name);
+        if (! isset($this->pipelines[$name])) {
+            $this->pipelines[$name] = $this->resolvePipeline($name);
         }
 
-        return $this->connections[$name];
+        return $this->pipelines[$name];
     }
 
     /**
      * @throws Exception\InvalidArgumentException
      * @throws Exception\NotSupportedDriverException
      */
-    private function resolveConnection(string $name): QueueInterface
+    private function resolvePipeline(string $name): QueueInterface
     {
-        $config = $this->config->getConnection($name);
+        $config = $this->config->getPipeline($name);
 
         try {
             return $this->factory->make($config['driver'], $config);
         } catch (ContainerException $e) {
             throw new Exception\NotSupportedDriverException(
                 sprintf(
-                    'Driver `%s` is not supported. Connection `%s` cannot be created.',
+                    'Driver `%s` is not supported. Pipeline `%s` cannot be created.',
                     $config['driver'],
                     $name
                 ),

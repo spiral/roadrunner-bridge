@@ -21,7 +21,7 @@ final class QueueManagerTest extends TestCase
             'aliases' => [
                 'user-data' => 'memory',
             ],
-            'connections' => [
+            'pipelines' => [
                 'sync' => [
                     'driver' => 'sync',
                 ],
@@ -57,42 +57,42 @@ final class QueueManagerTest extends TestCase
         $this->manager = new QueueManager($config, $this->container);
     }
 
-    public function testGetsDefaultConnection()
+    public function testGetsDefaultPipeline()
     {
         $this->assertInstanceOf(
             ShortCircuit::class,
-            $this->manager->getConnection()
+            $this->manager->getPipeline()
         );
     }
 
-    public function testGetsConnectionByNameWithDriverAlias()
+    public function testGetsPipelineByNameWithDriverAlias()
     {
         $this->assertInstanceOf(
             Queue::class,
-            $queue = $this->manager->getConnection('memory')
+            $queue = $this->manager->getPipeline('memory')
         );
 
         $this->assertSame('foo', $queue->getName());
     }
 
-    public function testGetsConnectionByNameWithoutDriverAlias()
+    public function testGetsPipelineByNameWithoutDriverAlias()
     {
         $this->assertInstanceOf(
             Queue::class,
-            $queue = $this->manager->getConnection('localMemory')
+            $queue = $this->manager->getPipeline('localMemory')
         );
 
         $this->assertSame('bar', $queue->getName());
     }
 
-    public function testGetsConnectionByAlias()
+    public function testGetsPipelineByAlias()
     {
         $this->assertInstanceOf(
             Queue::class,
-            $queue = $this->manager->getConnection('user-data')
+            $queue = $this->manager->getPipeline('user-data')
         );
 
         $this->assertSame('foo', $queue->getName());
-        $this->assertSame($queue, $this->manager->getConnection('memory'));
+        $this->assertSame($queue, $this->manager->getPipeline('memory'));
     }
 }

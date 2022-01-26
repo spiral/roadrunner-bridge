@@ -130,7 +130,7 @@ final class QueueBootloader extends Bootloader
     {
         $container->bindSingleton(QueueInterface::class,
             static function (QueueManager $manager): QueueInterface {
-                return $manager->getConnection();
+                return $manager->getPipeline();
             }
         );
 

@@ -37,7 +37,7 @@ final class QueueConfigTest extends TestCase
     public function testGetsEmptyDefaultDriverShouldThrowAnException(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('Default queue connection is not defined.');
+        $this->expectErrorMessage('Default queue pipeline is not defined.');
 
         $config = new QueueConfig();
 
@@ -47,7 +47,7 @@ final class QueueConfigTest extends TestCase
     public function testGetsNonStringDefaultDriverShouldThrowAnException(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('Default queue connection config value must be a string');
+        $this->expectErrorMessage('Default queue pipeline config value must be a string');
 
         $config = new QueueConfig(['default' => ['foo']]);
 
@@ -70,26 +70,26 @@ final class QueueConfigTest extends TestCase
         $this->assertSame([], $config->getDriverAliases());
     }
 
-    public function testGetsConnectionsWithoutDriver(): void
+    public function testGetsPipelinesWithoutDriver(): void
     {
         $config = new QueueConfig([
-            'connections' => ['foo', 'bar'],
+            'pipelines' => ['foo', 'bar'],
         ]);
 
-        $this->assertSame(['foo', 'bar'], $config->getConnections());
+        $this->assertSame(['foo', 'bar'], $config->getPipelines());
     }
 
-    public function testGetsNotExistsConnections(): void
+    public function testGetsNotExistsPipelines(): void
     {
         $config = new QueueConfig();
 
-        $this->assertSame([], $config->getConnections());
+        $this->assertSame([], $config->getPipelines());
     }
 
-    public function testGetsConnectionsWithSpecificDriverAlias(): void
+    public function testGetsPipelinesWithSpecificDriverAlias(): void
     {
         $config = new QueueConfig([
-            'connections' => [
+            'pipelines' => [
                 'foo' => [
                     'driver' => 'baz',
                 ],
@@ -107,13 +107,13 @@ final class QueueConfigTest extends TestCase
             'foo' => [
                 'driver' => 'baz',
             ],
-        ], $config->getConnections('alias'));
+        ], $config->getPipelines('alias'));
     }
 
-    public function testGetsConnectionsWithSpecificDriver(): void
+    public function testGetsPipelinesWithSpecificDriver(): void
     {
         $config = new QueueConfig([
-            'connections' => [
+            'pipelines' => [
                 'foo' => [
                     'driver' => 'alias',
                 ],
@@ -134,13 +134,13 @@ final class QueueConfigTest extends TestCase
             'baz' => [
                 'driver' => 'baz',
             ],
-        ], $config->getConnections('baz'));
+        ], $config->getPipelines('baz'));
     }
 
-    public function testGetsConnection(): void
+    public function testGetsPipeline(): void
     {
         $config = new QueueConfig([
-            'connections' => [
+            'pipelines' => [
                 'foo' => [
                     'driver' => 'alias',
                 ],
@@ -156,55 +156,55 @@ final class QueueConfigTest extends TestCase
 
         $this->assertSame([
             'driver' => 'baz',
-        ], $config->getConnection('foo'));
+        ], $config->getPipeline('foo'));
     }
 
-    public function testGetsNonExistConnectionShouldThrowAnException(): void
+    public function testGetsNonExistPipelineShouldThrowAnException(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('Queue connection with given name `foo` is not defined.');
+        $this->expectErrorMessage('Queue pipeline with given name `foo` is not defined.');
 
         $config = new QueueConfig();
-        $config->getConnection('foo');
+        $config->getPipeline('foo');
     }
 
-    public function testGetsConnectionWithoutDriverShouldThrowAnException(): void
+    public function testGetsPipelineWithoutDriverShouldThrowAnException(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('Driver for queue connection `foo` is not defined.');
+        $this->expectErrorMessage('Driver for queue pipeline `foo` is not defined.');
 
         $config = new QueueConfig([
-            'connections' => [
+            'pipelines' => [
                 'foo' => [],
             ],
         ]);
 
-        $config->getConnection('foo');
+        $config->getPipeline('foo');
     }
 
-    public function testGetsConnectionWithWrongDriverValueTypeShouldThrowAnException(): void
+    public function testGetsPipelineWithWrongDriverValueTypeShouldThrowAnException(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('Driver for queue connection `foo` value must be a string');
+        $this->expectErrorMessage('Driver for queue pipeline `foo` value must be a string');
 
         $config = new QueueConfig([
-            'connections' => [
+            'pipelines' => [
                 'foo' => [
                     'driver' => []
                 ],
             ],
         ]);
 
-        $config->getConnection('foo');
+        $config->getPipeline('foo');
     }
 
-    public function testGetsConnectionWithWrongDriverAliasValueTypeShouldThrowAnException(): void
+    public function testGetsPipelineWithWrongDriverAliasValueTypeShouldThrowAnException(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('Driver alias for queue connection `foo` value must be a string');
+        $this->expectErrorMessage('Driver alias for queue pipeline `foo` value must be a string');
 
         $config = new QueueConfig([
-            'connections' => [
+            'pipelines' => [
                 'foo' => [
                     'driver' => 'bar'
                 ],
@@ -214,7 +214,7 @@ final class QueueConfigTest extends TestCase
             ]
         ]);
 
-        $config->getConnection('foo');
+        $config->getPipeline('foo');
     }
 
     public function testGetsRegistryHandlers(): void

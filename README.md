@@ -249,7 +249,7 @@ supported pipelines you can read on official site https://roadrunner.dev/docs/be
 
 #### Configuration
 
-You can create config file `app/config/queue.php` if you want to configure Queue connections:
+You can create config file `app/config/queue.php` if you want to configure Queue pipelines:
 
 ```php
 <?php
@@ -278,10 +278,10 @@ return [
     ],
 
     /**
-     * Queue Connections
+     * Queue pipelines
      * Drivers: "sync", "roadrunner"
      */
-    'connections' => [
+    'pipelines' => [
         'sync' => [
             // Job will be handled immediately without queueing
             'driver' => 'sync',
@@ -289,16 +289,16 @@ return [
         'memory' => [
             'driver' => 'roadrunner',
             'connector' => new MemoryCreateInfo('local'),
-            // Run consumer for this connection on startup (by default)
-            // You can pause consumer for this connection via console command
+            // Run consumer for this pipeline on startup (by default)
+            // You can pause consumer for this pipeline via console command
             // php app.php queue:pause local
             'consume' => true 
         ],
 //        'amqp' => [
 //            'driver' => 'roadrunner',
 //            'connector' => new AMQPCreateInfo('bus'),
-//            // Don't consume jobs for this connection on start
-//            // You can run consumer for this connection via console command
+//            // Don't consume jobs for this pipeline on start
+//            // You can run consumer for this pipeline via console command
 //            // php app.php queue:resume local
 //            'consume' => false 
 //        ],
@@ -327,7 +327,7 @@ return [
 ];
 ```
 
-Connections with `roadrunner` driver will automatically declare pipelines without configuring on the RoadRunner side. If
+Pipelines with `roadrunner` driver will automatically declare pipelines without configuring on the RoadRunner side. If
 pipeline will be declared via RoadRunner config, Queue manager will just connect to it (without declaring).
 
 #### Job handler
@@ -377,7 +377,7 @@ class MyService {
 
         /** @var QueueManager $queueManager */
         $queueManager = $this->container->get(QueueManager::class);
-        $queue = $queueManager->getConnection('sync');
+        $queue = $queueManager->getPipeline('sync');
         
         $queue->push(PingHandler::class, ['url' => 'https://google.com']);
     }
@@ -475,8 +475,8 @@ class MyService {
 
 ### Domain specific queues
 
-Domain specific queues are an important part of an application. You can create aliases for exists connections and use
-them instead of real names. When you decide to switch queue connection for alias, you can do it in one place.
+Domain specific queues are an important part of an application. You can create aliases for exists pipelines and use
+them instead of real names. When you decide to switch queue pipeline for alias, you can do it in one place.
 
 ```php
 'aliases' => [
@@ -496,7 +496,7 @@ class MyService {
     
     public function __construct(QueueManager $manager) 
     {
-        $this->queue = $manager->getConnection('user-data');
+        $this->queue = $manager->getPipeline('user-data');
     }
 
     public function handle()
