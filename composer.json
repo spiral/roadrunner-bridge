@@ -25,7 +25,7 @@
     "spiral/roadrunner-grpc": "^2.0",
     "spiral/roadrunner-jobs": "^2.0",
     "spiral/roadrunner-kv": "^2.0",
-    "spiral/framework": "dev-feature/rr-bridge as v2.9"
+    "spiral/framework": "2.9.x-dev as v2.9"
   },
   "require-dev": {
     "phpunit/phpunit": "^8.5|^9.0",
