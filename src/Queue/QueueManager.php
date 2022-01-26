@@ -51,9 +51,10 @@ final class QueueManager
         } catch (ContainerException $e) {
             throw new Exception\NotSupportedDriverException(
                 sprintf(
-                    'Driver `%s` is not supported. Pipeline `%s` cannot be created.',
+                    'Driver `%s` is not supported. Pipeline `%s` cannot be created. Reason: `%s`',
                     $config['driver'],
-                    $name
+                    $name,
+                    $e->getMessage()
                 ),
                 (int) $e->getCode(),
                 $e
