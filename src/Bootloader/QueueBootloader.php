@@ -160,7 +160,7 @@ final class QueueBootloader extends Bootloader
         $this->config->setDefaults(
             QueueConfig::CONFIG,
             [
-                'default' => $env->get('QUEUE_CONNECTION', 'sync'),
+                'default' => $env->get('QUEUE_PIPELINE', 'sync'),
                 'connections' => [
                     'sync' => [
                         'driver' => 'sync',

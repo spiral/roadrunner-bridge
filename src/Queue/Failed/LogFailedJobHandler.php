@@ -15,7 +15,7 @@ final class LogFailedJobHandler implements FailedJobHandlerInterface
         $this->snapshotter = $snapshotter;
     }
 
-    public function handle(string $connection, string $queue, string $job, array $payload, \Throwable $e): void
+    public function handle(string $driver, string $queue, string $job, array $payload, \Throwable $e): void
     {
         $this->snapshotter->register($e);
     }

@@ -265,16 +265,16 @@ use Spiral\SendIt\MailQueue;
 
 return [
     /**
-     *  Default Queue Connection Name
+     *  Default Queue pipeline Name
      */
-    'default' => env('QUEUE_CONNECTION', 'memory'),
+    'default' => env('QUEUE_PIPELINE', 'memory'),
 
     /**
-     *  Aliases for queue connections, if you want to use domain specific queues
+     *  Aliases for queue pipelines, if you want to use domain specific queues
      */
     'aliases' => [
-        'mail-queue' => 'amqp',
-        'rating-queue' => 'sqs',
+        // 'mail-queue' => 'amqp',
+        // 'rating-queue' => 'sqs',
     ],
 
     /**
@@ -296,7 +296,7 @@ return [
         ],
 //        'amqp' => [
 //            'driver' => 'roadrunner',
-//            'connector' => new AMQPCreateInfo('bus'),
+//            'connector' => new AMQPCreateInfo('bus', ...),
 //            // Don't consume jobs for this pipeline on start
 //            // You can run consumer for this pipeline via console command
 //            // php app.php queue:resume local
@@ -305,12 +305,12 @@ return [
 
 //        'beanstalk' => [
 //            'driver' => 'roadrunner',
-//            'connector' => new BeanstalkCreateInfo('bus'),
+//            'connector' => new BeanstalkCreateInfo('bus', ...),
 //        ],
 
 //        'sqs' => [
 //            'driver' => 'roadrunner',
-//            'connector' => new SQSCreateInfo('amazon'),
+//            'connector' => new SQSCreateInfo('amazon', ...),
 //        ],
     ],
     
@@ -529,12 +529,12 @@ class DatabaseFailedJobsHandler implements FailedJobHandlerInterface
         $this->serializer = $serializer;
     }
 
-    public function handle(string $connection, string $queue, string $job, array $payload, \Throwable $e): void
+    public function handle(string $driver, string $queue, string $job, array $payload, \Throwable $e): void
     {
         $this->database
             ->insert('failed_jobs')
             ->values([
-                'connection' => connection,
+                'driver' => $driver,
                 'queue' => $queue,
                 'job_name' => $job,
                 'payload' => $this->serializer->serialize($payload),
@@ -575,11 +575,11 @@ protected const LOAD = [
 
 #### Console commands
 
-| Command             | Description                                      |
-|---------------------|--------------------------------------------------|
-| queue:list          | List available queue connections                 |
-| queue:pause {name}  | Pause consuming jobs for queue with given name   |
-| queue:resume {name} | Resume consuming jobs for queue with given name  |
+| Command             | Description                                     |
+|---------------------|-------------------------------------------------|
+| queue:list          | List available queue pipelines                  |
+| queue:pause {name}  | Pause consuming jobs for queue with given name  |
+| queue:resume {name} | Resume consuming jobs for queue with given name |
 
 > `name` - it's a RR jobs pipeline name
 
