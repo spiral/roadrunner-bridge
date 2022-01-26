@@ -39,9 +39,9 @@ final class QueueTest extends TestCase
 
     public function testGetsName(): void
     {
-        $this->connector->shouldReceive('getName')->andReturn('foo-connection');
+        $this->connector->shouldReceive('getName')->andReturn('foo-pipeline');
 
-        $this->assertSame('foo-connection', $this->queue->getName());
+        $this->assertSame('foo-pipeline', $this->queue->getName());
     }
 
     public function testQueueShouldBeCreatedIfItNotExistsInRoadRunner()
@@ -128,15 +128,15 @@ final class QueueTest extends TestCase
      */
     protected function assertQueueInit(bool $exists = true): QueueInterface
     {
-        $this->connector->shouldReceive('getName')->andReturn('foo-connection');
-        $this->registry->shouldReceive('isExists')->once()->with('foo-connection')->andReturn($exists);
+        $this->connector->shouldReceive('getName')->andReturn('foo-pipeline');
+        $this->registry->shouldReceive('isExists')->once()->with('foo-pipeline')->andReturn($exists);
 
         $queue = m::mock(QueueInterface::class);
 
         if ($exists) {
             $this->registry->shouldReceive('connect')
                 ->once()
-                ->with('foo-connection')
+                ->with('foo-pipeline')
                 ->andReturn($queue);
 
             return $queue;
