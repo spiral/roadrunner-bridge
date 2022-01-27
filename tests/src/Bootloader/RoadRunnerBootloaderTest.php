@@ -56,7 +56,6 @@ final class RoadRunnerBootloaderTest extends TestCase
 
         // TODO fix problem with rr worker
         ob_end_flush();
-        ob_get_clean();
     }
 
     public function testGetsPSR7WorkerInterface()
@@ -72,6 +71,6 @@ final class RoadRunnerBootloaderTest extends TestCase
         );
 
         // TODO fix problem with rr worker
-        ob_get_clean();
+        ob_end_flush();
     }
 }

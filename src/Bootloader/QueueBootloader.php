@@ -31,11 +31,11 @@ use Spiral\RoadRunnerBridge\Queue\DefaultSerializer;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher;
 use Spiral\RoadRunnerBridge\Queue\Failed\FailedJobHandlerInterface;
 use Spiral\RoadRunnerBridge\Queue\Failed\LogFailedJobHandler;
+use Spiral\RoadRunnerBridge\Queue\JobsAdapterSerializer;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\Queue;
 use Spiral\RoadRunnerBridge\Queue\QueueManager;
 use Spiral\RoadRunnerBridge\Queue\QueueRegistry;
-use Spiral\RoadRunnerBridge\Queue\JobsAdapterSerializer;
 use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
 use Spiral\RoadRunnerBridge\Queue\ShortCircuit;
 use Spiral\SendIt\MailJob;
@@ -63,20 +63,19 @@ final class QueueBootloader extends Bootloader
         $this->config = $config;
     }
 
-    public function boot(
-        Container $container,
-        EnvironmentInterface $env,
-        KernelInterface $kernel,
-        Dispatcher $jobs
-    ): void {
+    public function register(Container $container, EnvironmentInterface $env): void
+    {
         $this->initQueueConfig($env);
-
-        $kernel->addDispatcher($jobs);
 
         $this->registerJobsSerializer($container);
         $this->registerJobs($container);
         $this->registerConsumer($container);
         $this->registerQueue($container);
+    }
+
+    public function boot(KernelInterface $kernel, Dispatcher $jobs): void
+    {
+        $kernel->addDispatcher($jobs);
     }
 
     public function registerDriverAlias(string $driverClass, string $alias): void

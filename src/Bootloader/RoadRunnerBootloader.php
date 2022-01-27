@@ -10,7 +10,6 @@ use Spiral\Core\Container;
 use Spiral\Goridge\Relay;
 use Spiral\Goridge\RPC\RPC;
 use Spiral\Goridge\RPC\RPCInterface;
-use Spiral\Goridge\SocketRelay;
 use Spiral\Http\Diactoros\ServerRequestFactory;
 use Spiral\Http\Diactoros\StreamFactory;
 use Spiral\Http\Diactoros\UploadedFileFactory;
@@ -23,58 +22,49 @@ use Spiral\RoadRunner\WorkerInterface;
 
 final class RoadRunnerBootloader extends Bootloader
 {
-    public function boot(Container $container)
+    public function register(Container $container)
     {
         //
         // Register RoadRunner Environment
         //
-        $environmentRegistrar = static function (GlobalEnvironmentInterface $env): EnvironmentInterface {
-            return new Environment($env->getAll());
-        };
-
-        $container->bindSingleton(EnvironmentInterface::class, $environmentRegistrar);
-        $container->bindSingleton(Environment::class, $environmentRegistrar);
+        $container->bindSingleton(EnvironmentInterface::class, Environment::class);
+        $container->bindSingleton(
+            Environment::class,
+            static function (GlobalEnvironmentInterface $env): EnvironmentInterface {
+                return new Environment($env->getAll());
+            }
+        );
 
         //
         // Register RPC
         //
-        $rpcRegistrar = static function (EnvironmentInterface $env): RPCInterface {
-            $relay = Relay::create($env->getRPCAddress());
-
-            return new RPC($relay);
-        };
-
-        $container->bindSingleton(RPCInterface::class, $rpcRegistrar);
-        $container->bindSingleton(RPC::class, $rpcRegistrar);
+        $container->bindSingleton(RPCInterface::class, RPC::class);
+        $container->bindSingleton(RPC::class, static function (EnvironmentInterface $env): RPCInterface {
+            return new RPC(
+                Relay::create($env->getRPCAddress())
+            );
+        });
 
         //
         // Register Worker
         //
-        $workerRegistrar = static function (EnvironmentInterface $env): WorkerInterface {
+        $container->bindSingleton(WorkerInterface::class, Worker::class);
+        $container->bindSingleton(Worker::class, static function (EnvironmentInterface $env): WorkerInterface {
             return Worker::createFromEnvironment($env);
-        };
-
-        $container->bindSingleton(WorkerInterface::class, $workerRegistrar);
-        $container->bindSingleton(Worker::class, $workerRegistrar);
+        });
 
         //
         // Register PSR Worker
         //
-        $registrar = static function (
+        $container->bindSingleton(PSR7WorkerInterface::class, PSR7Worker::class);
+
+        $container->bindSingleton(PSR7Worker::class, static function (
             WorkerInterface $worker,
             ServerRequestFactory $requests,
             StreamFactory $streams,
             UploadedFileFactory $uploads
         ): PSR7WorkerInterface {
-            return new PSR7Worker(
-                $worker,
-                $requests,
-                $streams,
-                $uploads
-            );
-        };
-
-        $container->bindSingleton(PSR7WorkerInterface::class, $registrar);
-        $container->bindSingleton(PSR7Worker::class, $registrar);
+            return new PSR7Worker($worker, $requests, $streams, $uploads);
+        });
     }
 }

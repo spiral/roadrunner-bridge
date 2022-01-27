@@ -39,7 +39,7 @@ final class GRPCBootloader extends Bootloader
         $this->config = $config;
     }
 
-    public function boot(
+    public function register(
         EnvironmentInterface $env,
         KernelInterface $kernel,
         FactoryInterface $factory
