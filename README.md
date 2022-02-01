@@ -249,7 +249,7 @@ supported pipelines you can read on official site https://roadrunner.dev/docs/be
 
 #### Configuration
 
-You can create config file `app/config/queue.php` if you want to configure Queue pipelines:
+You can create config file `app/config/queue.php` if you want to configure Queue connections:
 
 ```php
 <?php
@@ -260,74 +260,72 @@ use Spiral\RoadRunner\Jobs\Queue\MemoryCreateInfo;
 use Spiral\RoadRunner\Jobs\Queue\AMQPCreateInfo;
 use Spiral\RoadRunner\Jobs\Queue\BeanstalkCreateInfo;
 use Spiral\RoadRunner\Jobs\Queue\SQSCreateInfo;
-use Spiral\SendIt\MailJob;
-use Spiral\SendIt\MailQueue;
 
 return [
     /**
-     *  Default Queue pipeline Name
+     *  Default queue connection name
      */
-    'default' => env('QUEUE_PIPELINE', 'memory'),
+    'default' => env('QUEUE_CONNECTION', 'sync'),
 
     /**
-     *  Aliases for queue pipelines, if you want to use domain specific queues
+     *  Aliases for queue connections, if you want to use domain specific queues
      */
     'aliases' => [
-        // 'mail-queue' => 'amqp',
-        // 'rating-queue' => 'sqs',
+        // 'mail-queue' => 'roadrunner',
+        // 'rating-queue' => 'sync',
     ],
-
+    
     /**
-     * Queue pipelines
+     * Queue connections
      * Drivers: "sync", "roadrunner"
      */
-    'pipelines' => [
+    'connections' => [
         'sync' => [
             // Job will be handled immediately without queueing
             'driver' => 'sync',
         ],
-        'memory' => [
+        'roadrunner' => [
             'driver' => 'roadrunner',
-            'connector' => new MemoryCreateInfo('local'),
-            // Run consumer for this pipeline on startup (by default)
-            // You can pause consumer for this pipeline via console command
-            // php app.php queue:pause local
-            'consume' => true 
+            'default' => 'memory',
+            'pipelines' => [
+                'memory' => [
+                    'connector' => new MemoryCreateInfo('local'),
+                    // Run consumer for this pipeline on startup (by default)
+                    // You can pause consumer for this pipeline via console command
+                    // php app.php queue:pause local
+                    'consume' => true 
+                ],
+                // 'amqp' => [
+                //     'connector' => new AMQPCreateInfo('bus', ...),
+                //     // Don't consume jobs for this pipeline on start
+                //     // You can run consumer for this pipeline via console command
+                //     // php app.php queue:resume local
+                //     'consume' => false 
+                // ],
+                // 
+                // 'beanstalk' => [
+                //     'connector' => new BeanstalkCreateInfo('bus', ...),
+                // ],
+                // 
+                // 'sqs' => [
+                //     'connector' => new SQSCreateInfo('amazon', ...),
+                // ],
+            ]
         ],
-//        'amqp' => [
-//            'driver' => 'roadrunner',
-//            'connector' => new AMQPCreateInfo('bus', ...),
-//            // Don't consume jobs for this pipeline on start
-//            // You can run consumer for this pipeline via console command
-//            // php app.php queue:resume local
-//            'consume' => false 
-//        ],
-
-//        'beanstalk' => [
-//            'driver' => 'roadrunner',
-//            'connector' => new BeanstalkCreateInfo('bus', ...),
-//        ],
-
-//        'sqs' => [
-//            'driver' => 'roadrunner',
-//            'connector' => new SQSCreateInfo('amazon', ...),
-//        ],
     ],
     
     'driverAliases' => [
-        'sync' => \Spiral\RoadRunnerBridge\Queue\ShortCircuit::class,
+        'sync' => \Spiral\Queue\Driver\SyncDriver::class,
         'roadrunner' => \Spiral\RoadRunnerBridge\Queue\Queue::class,
     ],
     
     'registry' => [
-        'handlers' => [
-            MailQueue::JOB_NAME => MailJob::class,
-        ],
+        'handlers' => [],
     ],
 ];
 ```
 
-Pipelines with `roadrunner` driver will automatically declare pipelines without configuring on the RoadRunner side. If
+Connections with `roadrunner` driver will automatically declare pipelines without configuring on the RoadRunner side. If
 pipeline will be declared via RoadRunner config, Queue manager will just connect to it (without declaring).
 
 #### Job handler
@@ -351,7 +349,7 @@ class PingHandler extends \Spiral\Queue\JobHandler
 
 ```php
 use Spiral\Queue\QueueInterface;
-use Spiral\RoadRunnerBridge\Queue\QueueManager;
+use Spiral\Queue\QueueConnectionProviderInterface;
 use Psr\Container\ContainerInterface;
 
 class MyService {
@@ -376,8 +374,8 @@ class MyService {
         // OR gets queue from manager 
 
         /** @var QueueManager $queueManager */
-        $queueManager = $this->container->get(QueueManager::class);
-        $queue = $queueManager->getPipeline('sync');
+        $queueManager = $this->container->get(QueueConnectionProviderInterface::class);
+        $queue = $queueManager->getConnection('sync');
         
         $queue->push(PingHandler::class, ['url' => 'https://google.com']);
     }
@@ -387,7 +385,7 @@ class MyService {
 You can bind job names with class handlers:
 
 ```php
-use Spiral\RoadRunnerBridge\Queue\QueueRegistry;
+use Spiral\Queue\QueueRegistry;
 /** @var QueueRegistry $registry */
 $registry = $queue = $this->container->get(QueueRegistry::class);
 $registry->setHandler('ping', PingHandler::class);
@@ -448,7 +446,6 @@ If you have simply job and you don't want to create job handler you may use php 
 
 ```php
 use Spiral\Queue\QueueInterface;
-use Spiral\RoadRunnerBridge\Queue\QueueManager;
 use Psr\Container\ContainerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -475,8 +472,8 @@ class MyService {
 
 ### Domain specific queues
 
-Domain specific queues are an important part of an application. You can create aliases for exists pipelines and use
-them instead of real names. When you decide to switch queue pipeline for alias, you can do it in one place.
+Domain specific queues are an important part of an application. You can create aliases for exists connections and use them
+instead of real names. When you decide to switch queue connection for alias, you can do it in one place.
 
 ```php
 'aliases' => [
@@ -486,7 +483,7 @@ them instead of real names. When you decide to switch queue pipeline for alias, 
 
 ```php
 use Spiral\Queue\QueueInterface;
-use Spiral\RoadRunnerBridge\Queue\QueueManager;
+use Spiral\Queue\QueueConnectionProviderInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -494,9 +491,9 @@ class MyService {
 
     private QueueInterface $queue;
     
-    public function __construct(QueueManager $manager) 
+    public function __construct(QueueConnectionProviderInterface $manager) 
     {
-        $this->queue = $manager->getPipeline('user-data');
+        $this->queue = $manager->getConnection('user-data');
     }
 
     public function handle()
@@ -506,7 +503,19 @@ class MyService {
 }
 ```
 
-#### Handle failed jobs
+#### Push on specific queue
+
+For some queue connections you can specify queue _name where the specific job should be pushed.
+
+```php
+use Spiral\Queue\Options;
+
+$this->queue->push('mail.job', [...], Options::onQueue('amqp'));
+```
+
+In case of RoadRunner driver queue are the same as pipelines._
+
+### Handle failed jobs
 
 By default, all failed jobs will be sent into spiral log. But you can change default behavior. At first, you need to
 create your own implementation for `Spiral\RoadRunnerBridge\Queue\Failed\FailedJobHandlerInterface`
@@ -545,7 +554,8 @@ class DatabaseFailedJobsHandler implements FailedJobHandlerInterface
 }
 ```
 
-Then you need to bind your implementation with `Spiral\RoadRunnerBridge\Queue\Failed\FailedJobHandlerInterface` interface.
+Then you need to bind your implementation with `Spiral\RoadRunnerBridge\Queue\Failed\FailedJobHandlerInterface`
+interface.
 
 ```php
 use Spiral\Boot\Bootloader\Bootloader;

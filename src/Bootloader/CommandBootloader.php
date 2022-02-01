@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
 use Spiral\Boot\Bootloader\Bootloader;
-use Spiral\Bootloader\ConsoleBootloader;
+use Spiral\Console\Bootloader\ConsoleBootloader;
 use Spiral\Cache\CacheStorageProviderInterface;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\Patch\Set;
@@ -15,8 +15,6 @@ use Spiral\RoadRunnerBridge\Console\Command\Cache;
 use Spiral\RoadRunnerBridge\Console\Command\GRPC;
 use Spiral\RoadRunnerBridge\Console\Command\Queue;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
-
-
 use Spiral\Command\GRPC as DeprecatedGRPC;
 
 final class CommandBootloader extends Bootloader

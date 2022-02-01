@@ -22,7 +22,7 @@ use Spiral\RoadRunner\WorkerInterface;
 
 final class RoadRunnerBootloader extends Bootloader
 {
-    public function register(Container $container)
+    public function boot(Container $container)
     {
         //
         // Register RoadRunner Environment

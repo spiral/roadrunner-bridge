@@ -13,16 +13,10 @@ use Spiral\RoadRunner\Jobs\Consumer;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Serializer\SerializerInterface as RRSerializerInterface;
 use Spiral\RoadRunner\WorkerInterface;
-use Spiral\RoadRunnerBridge\Queue\DefaultSerializer;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher;
-use Spiral\RoadRunnerBridge\Queue\Failed\FailedJobHandlerInterface;
-use Spiral\RoadRunnerBridge\Queue\Failed\LogFailedJobHandler;
-use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
-use Spiral\RoadRunnerBridge\Queue\QueueManager;
-use Spiral\RoadRunnerBridge\Queue\QueueRegistry;
 use Spiral\RoadRunnerBridge\Queue\JobsAdapterSerializer;
+use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
-use Spiral\RoadRunnerBridge\Queue\ShortCircuit;
 use Spiral\Snapshots\SnapshotterInterface;
 use Spiral\Tests\TestCase;
 
@@ -41,36 +35,48 @@ final class QueueBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             HandlerRegistryInterface::class,
-            QueueRegistry::class
+            \Spiral\Queue\QueueRegistry::class
         );
 
         $this->assertContainerBoundAsSingleton(
-            QueueRegistry::class,
-            QueueRegistry::class
+            \Spiral\Queue\QueueRegistry::class,
+            \Spiral\Queue\QueueRegistry::class
         );
     }
 
     public function testGetsPipelineRegistryInterface(): void
     {
-        $this->assertContainerBoundAsSingleton(
-            PipelineRegistryInterface::class,
-            RPCPipelineRegistry::class
+        $this->assertInstanceOf(
+            RPCPipelineRegistry::class,
+            $registry1 = $this->container->make(PipelineRegistryInterface::class, [
+                'pipelines' => ['foo' => 'bar'],
+                'aliases' => ['bas' => 'bar'],
+            ])
         );
+        $this->assertInstanceOf(
+            RPCPipelineRegistry::class,
+            $registry2 = $this->container->make(PipelineRegistryInterface::class, [
+                'pipelines' => ['foo' => 'bar'],
+                'aliases' => ['bas' => 'bar'],
+            ])
+        );
+
+        $this->assertNotSame($registry1, $registry2);
     }
 
     public function testGetsFailedJobHandlerInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
-            FailedJobHandlerInterface::class,
-            LogFailedJobHandler::class
+            \Spiral\Queue\Failed\FailedJobHandlerInterface::class,
+            \Spiral\Queue\Failed\LogFailedJobHandler::class
         );
     }
 
     public function testGetsQueueManager(): void
     {
         $this->assertContainerBoundAsSingleton(
-            QueueManager::class,
-            QueueManager::class
+            \Spiral\Queue\QueueManager::class,
+            \Spiral\Queue\QueueManager::class
         );
     }
 
@@ -78,16 +84,19 @@ final class QueueBootloaderTest extends TestCase
     {
         $dispatchers = $this->accessProtected($this->app, 'dispatchers');
 
-        $this->assertCount(1, array_filter($dispatchers, function ($dispatcher) {
-            return $dispatcher instanceof Dispatcher;
-        }));
+        $this->assertCount(
+            1,
+            array_filter($dispatchers, function ($dispatcher) {
+                return $dispatcher instanceof Dispatcher;
+            })
+        );
     }
 
     public function testGetsSerializerInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             SerializerInterface::class,
-            DefaultSerializer::class
+            \Spiral\Queue\DefaultSerializer::class
         );
     }
 
@@ -115,7 +124,7 @@ final class QueueBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             QueueInterface::class,
-            ShortCircuit::class
+            \Spiral\Queue\Driver\SyncDriver::class
         );
     }
 

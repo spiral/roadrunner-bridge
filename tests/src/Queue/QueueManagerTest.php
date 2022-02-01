@@ -4,95 +4,64 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Queue;
 
-use Spiral\RoadRunner\Jobs\Queue\AMQPCreateInfo;
-use Spiral\RoadRunner\Jobs\Queue\MemoryCreateInfo;
-use Spiral\RoadRunnerBridge\Config\QueueConfig;
+use Mockery as m;
+use Spiral\Queue\Driver\SyncDriver;
+use Spiral\Queue\QueueConnectionProviderInterface;
+use Spiral\RoadRunner\Jobs\QueueInterface;
+use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
+use Spiral\RoadRunner\Jobs\Task\QueuedTaskInterface;
+use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\Queue;
-use Spiral\RoadRunnerBridge\Queue\QueueManager;
-use Spiral\RoadRunnerBridge\Queue\ShortCircuit;
 use Spiral\Tests\TestCase;
 
-final class QueueManagerTest extends TestCase
+class QueueManagerTest extends TestCase
 {
+    /** @var QueueConnectionProviderInterface */
+    private $manager;
+
     protected function setUp(): void
     {
-        $config = new QueueConfig([
-            'default' => 'sync',
-            'aliases' => [
-                'user-data' => 'memory',
-            ],
-            'pipelines' => [
-                'sync' => [
-                    'driver' => 'sync',
-                ],
-                'sync_without_alias' => [
-                    'driver' => ShortCircuit::class,
-                ],
-                'memory' => [
-                    'driver' => 'roadrunner',
-                    'connector' => new MemoryCreateInfo('foo'),
-                ],
-                'localMemory' => [
-                    'driver' => 'roadrunner',
-                    'connector' => new MemoryCreateInfo('bar'),
-                    'consume' => false,
-                ],
-                'amqp' => [
-                    'driver' => Queue::class,
-                    'connector' => new AMQPCreateInfo('amqp'),
-                ],
-            ],
-            'driverAliases' => [
-                'sync' => ShortCircuit::class,
-                'roadrunner' => Queue::class,
-            ],
-        ]);
-
-        $this->beforeBootload(function ($container) use ($config) {
-            $container->bind(QueueConfig::class, $config);
-        });
-
         parent::setUp();
 
-        $this->manager = new QueueManager($config, $this->container);
+        $this->registry = m::mock(PipelineRegistryInterface::class);
+        $this->container->bind(PipelineRegistryInterface::class, $this->registry);
+
+        $this->manager = $this->container->get(QueueConnectionProviderInterface::class);
     }
 
-    public function testGetsDefaultPipeline()
-    {
-        $this->assertInstanceOf(
-            ShortCircuit::class,
-            $this->manager->getPipeline()
-        );
-    }
-
-    public function testGetsPipelineByNameWithDriverAlias()
+    public function testGetsRoadRunnerQueue(): void
     {
         $this->assertInstanceOf(
             Queue::class,
-            $queue = $this->manager->getPipeline('memory')
+            $this->manager->getConnection('roadrunner')
         );
-
-        $this->assertSame('foo', $queue->getName());
     }
 
-    public function testGetsPipelineByNameWithoutDriverAlias()
+    public function testPushIntoDefaultRoadRunnerPipeline()
     {
-        $this->assertInstanceOf(
-            Queue::class,
-            $queue = $this->manager->getPipeline('localMemory')
-        );
+        $this->registry->shouldReceive('getPipeline')
+            ->once()
+            ->with('memory')
+            ->andReturn($queue = m::mock(QueueInterface::class));
 
-        $this->assertSame('bar', $queue->getName());
+        $queuedTask = m::mock(QueuedTaskInterface::class);
+        $preparedTask = m::mock(PreparedTaskInterface::class);
+        $queuedTask->shouldReceive('getId')->once()->andReturn('task-id');
+
+        $queue->shouldReceive('dispatch')->once()->with($preparedTask)->andReturn($queuedTask);
+        $queue->shouldReceive('create')->once()->andReturn($preparedTask);
+
+        $this->assertSame(
+            'task-id',
+            $this->manager->getConnection('roadrunner')->push('foo', ['boo' => 'bar'])
+        );
     }
 
-    public function testGetsPipelineByAlias()
+    public function testGetsSyncQueue(): void
     {
         $this->assertInstanceOf(
-            Queue::class,
-            $queue = $this->manager->getPipeline('user-data')
+            SyncDriver::class,
+            $this->manager->getConnection('sync')
         );
-
-        $this->assertSame('foo', $queue->getName());
-        $this->assertSame($queue, $this->manager->getPipeline('memory'));
     }
 }

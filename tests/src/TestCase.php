@@ -30,8 +30,6 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
-        $this->container = new Container();
-
         parent::setUp();
 
         $this->app = $this->makeApp(static::ENV);
@@ -84,37 +82,24 @@ abstract class TestCase extends BaseTestCase
 
     private function makeApp(array $env = []): KernelInterface
     {
-        $beforeBootload = $this->beforeBootload;
-        $afterBootload = $this->afterBootload;
-
         $environment = new Environment($env);
 
         $root = dirname(__DIR__);
 
-        $app = new App($this->container, [
+        /** @var App $app */
+        $app = App::create([
             'root' => $root,
             'app' => $root.'/App',
             'runtime' => $root.'/runtime/tests',
             'cache' => $root.'/runtime/tests/cache',
         ]);
 
-        $this->container->bindSingleton(EnvironmentInterface::class, $environment);
+        $this->container = $app->getContainer();
+        $app->getContainer()->bindSingleton(EnvironmentInterface::class, $environment);
 
-        $this->container->runScope(
-            [EnvironmentInterface::class => $environment],
-            \Closure::bind(function () use ($beforeBootload, $afterBootload): void {
-                foreach ($beforeBootload as $callback) {
-                    $callback($this->container);
-                }
-
-                $this->bootload();
-                $this->bootstrap();
-
-                foreach ($afterBootload as $callback) {
-                    $callback($this->container);
-                }
-            }, $app, AbstractKernel::class)
-        );
+        $app->starting(...$this->beforeBootload);
+        $app->started(...$this->afterBootload);
+        $app->run($environment);
 
         return $app;
     }

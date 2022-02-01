@@ -6,7 +6,6 @@ namespace Spiral\RoadRunnerBridge\Bootloader;
 
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\KernelInterface;
-use Spiral\Bootloader\ServerBootloader;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Boot\EnvironmentInterface;
 use Spiral\Core\FactoryInterface;
@@ -21,8 +20,7 @@ use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
 final class GRPCBootloader extends Bootloader
 {
     protected const DEPENDENCIES = [
-        // RoadRunnerBootloader::class,
-        ServerBootloader::class,
+        RoadRunnerBootloader::class,
     ];
 
     protected const SINGLETONS = [
@@ -39,7 +37,7 @@ final class GRPCBootloader extends Bootloader
         $this->config = $config;
     }
 
-    public function register(
+    public function boot(
         EnvironmentInterface $env,
         KernelInterface $kernel,
         FactoryInterface $factory

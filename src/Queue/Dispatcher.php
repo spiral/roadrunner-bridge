@@ -13,7 +13,7 @@ use Spiral\RoadRunner\Environment\Mode;
 use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
-use Spiral\RoadRunnerBridge\Queue\Failed\FailedJobHandlerInterface;
+use Spiral\Queue\Failed\FailedJobHandlerInterface;
 
 final class Dispatcher implements DispatcherInterface
 {
@@ -38,6 +38,9 @@ final class Dispatcher implements DispatcherInterface
 
     /**
      * @return void
+     * @throws ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Spiral\RoadRunner\Jobs\Exception\JobsException
      */
     public function serve()
     {

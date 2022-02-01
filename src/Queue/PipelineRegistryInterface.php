@@ -4,23 +4,17 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Queue;
 
-use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 
+/**
+ * @internal
+ */
 interface PipelineRegistryInterface
 {
     /**
-     * Check if RoadRunner jobs pipeline exists
+     * Get pipeline with given name
+     *
+     * If pipeline not exists in the RoadRunner, it will be created
      */
-    public function isExists(string $pipeline): bool;
-
-    /**
-     * Create a new RoadRunner jobs pipeline
-     */
-    public function create(CreateInfoInterface $pipelineInfo, bool $shouldBeConsumed = true): QueueInterface;
-
-    /**
-     * Create to the RoadRunner jobs pipeline
-     */
-    public function connect(string $pipeline): QueueInterface;
+    public function getPipeline(string $name): QueueInterface;
 }

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Queue;
 
+use Spiral\Core\FactoryInterface;
+use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\Queue\OptionsInterface;
 use Spiral\Queue\QueueInterface;
+use Spiral\Queue\QueueTrait;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Options;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
@@ -15,39 +18,42 @@ final class Queue implements QueueInterface
 {
     use QueueTrait;
 
-    private PipelineRegistryInterface $registry;
-    private CreateInfoInterface $connector;
-    private ?RRQueueInterface $queue = null;
-    private bool $consume;
+    private FactoryInterface $factory;
+    private int $ttl;
+    /** @var non-empty-string|null */
+    private ?string $default;
+    /** @var array<non-empty-string, RRQueueInterface> */
+    private array $queues = [];
+    /** @var array<non-empty-string, array{connector: CreateInfoInterface, consume: bool}> */
+    private array $pipelines;
+    /** @var array<non-empty-string,non-empty-string> */
+    private array $aliases;
 
     public function __construct(
-        PipelineRegistryInterface $registry,
-        CreateInfoInterface $connector,
-        bool $consume = true
+        FactoryInterface $factory,
+        array $pipelines = [],
+        array $aliases = [],
+        ?string $default = null
     ) {
-        $this->registry = $registry;
-        $this->consume = $consume;
-        $this->connector = $connector;
-    }
-
-    /**
-     * Queue pipeline name
-     */
-    public function getName(): string
-    {
-        return $this->connector->getName();
+        $this->default = $default;
+        $this->factory = $factory;
+        $this->pipelines = $pipelines;
+        $this->aliases = $aliases;
     }
 
     /**
      * {@inheritDoc}
      * @throws JobsException
+     * @throws InvalidArgumentException
      */
     public function push(string $name, array $payload = [], OptionsInterface $options = null): string
     {
-        $this->initQueue();
+        $queue = $this->initQueue(
+            $options ? $options->getQueue() ?? $this->default : $this->default
+        );
 
-        $task = $this->queue->dispatch(
-            $this->queue->create(
+        $task = $queue->dispatch(
+            $queue->create(
                 $name,
                 $payload,
                 $options ? new Options($options->getDelay() ?? Options::DEFAULT_DELAY) : null
@@ -57,18 +63,21 @@ final class Queue implements QueueInterface
         return $task->getId();
     }
 
-    private function initQueue(): void
+    private function initQueue(?string $pipeline): RRQueueInterface
     {
-        if ($this->queue !== null) {
-            return;
+        if (! $pipeline) {
+            throw new InvalidArgumentException('You must define default RoadRunner queue pipeline.');
         }
 
-        if (! $this->registry->isExists($this->connector->getName())) {
-            $this->queue = $this->registry->create($this->connector, $this->consume);
-
-            return;
+        if (isset($this->queues[$pipeline])) {
+            return $this->queues[$pipeline];
         }
 
-        $this->queue = $this->registry->connect($this->connector->getName());
+        $registry = $this->factory->make(PipelineRegistryInterface::class, [
+            'pipelines' => $this->pipelines,
+            'aliases' => $this->aliases
+        ]);
+
+        return $this->queues[$pipeline] = $registry->getPipeline($pipeline);
     }
 }
