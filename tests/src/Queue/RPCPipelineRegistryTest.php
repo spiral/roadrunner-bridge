@@ -14,9 +14,9 @@ use Spiral\Tests\TestCase;
 
 final class RPCPipelineRegistryTest extends TestCase
 {
-    /** @var m\LegacyMockInterface|m\MockInterface|CreateInfoInterface */
+    /** @var CreateInfoInterface|m\LegacyMockInterface|m\MockInterface */
     private $memoryConnector;
-    /** @var m\LegacyMockInterface|m\MockInterface|CreateInfoInterface */
+    /** @var CreateInfoInterface|m\LegacyMockInterface|m\MockInterface */
     private $localConnector;
     private RPCPipelineRegistry $registry;
 

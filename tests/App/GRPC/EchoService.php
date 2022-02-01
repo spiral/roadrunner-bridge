@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Spiral\App\GRPC;
 
 use Spiral\App\GRPC\EchoService\EchoInterface;
