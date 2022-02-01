@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Spiral\Tests\GRPC;
 
 use Mockery as m;
-use Spiral\App\GRPC\EchoService\EchoInterface;
 use Spiral\App\GRPC\EchoService\Message;
 use Spiral\Boot\FinalizerInterface;
-use Spiral\Files\Files;
 use Spiral\RoadRunner\Environment;
 use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Payload;

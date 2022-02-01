@@ -10,7 +10,7 @@ use Spiral\Tests\ConsoleTestCase;
 
 final class ClearCommandTest extends ConsoleTestCase
 {
-    /** @var \Mockery\LegacyMockInterface|\Mockery\MockInterface|CacheStorageProviderInterface */
+    /** @var CacheStorageProviderInterface|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
     private $provider;
 
     protected function setUp(): void

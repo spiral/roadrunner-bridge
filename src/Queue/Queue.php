@@ -43,6 +43,7 @@ final class Queue implements QueueInterface
 
     /**
      * {@inheritDoc}
+     *
      * @throws JobsException
      * @throws InvalidArgumentException
      */
@@ -75,7 +76,7 @@ final class Queue implements QueueInterface
 
         $registry = $this->factory->make(PipelineRegistryInterface::class, [
             'pipelines' => $this->pipelines,
-            'aliases' => $this->aliases
+            'aliases' => $this->aliases,
         ]);
 
         return $this->queues[$pipeline] = $registry->getPipeline($pipeline);
