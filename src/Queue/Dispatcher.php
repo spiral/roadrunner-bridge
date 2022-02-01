@@ -37,7 +37,7 @@ final class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * @return void
+     * @return mixed|void
      * @throws \Spiral\RoadRunner\Jobs\Exception\JobsException
      */
     public function serve()
