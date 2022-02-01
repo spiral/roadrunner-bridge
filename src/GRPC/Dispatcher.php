@@ -35,7 +35,10 @@ final class Dispatcher implements DispatcherInterface
         return \PHP_SAPI === 'cli' && $this->env->getMode() === Mode::MODE_GRPC;
     }
 
-    public function serve(): void
+    /**
+     * @return mixed|void
+     */
+    public function serve()
     {
         /** @var Server $server */
         $server = $this->container->get(Server::class);
@@ -64,7 +67,7 @@ final class Dispatcher implements DispatcherInterface
     {
         try {
             $this->container->get(SnapshotterInterface::class)->register($e);
-        } catch (\Throwable|ContainerExceptionInterface $se) {
+        } catch (\Throwable $se) {
             // no need to notify when unable to register an exception
         }
     }

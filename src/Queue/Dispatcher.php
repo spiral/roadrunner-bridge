@@ -38,8 +38,6 @@ final class Dispatcher implements DispatcherInterface
 
     /**
      * @return void
-     * @throws ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \Spiral\RoadRunner\Jobs\Exception\JobsException
      */
     public function serve()

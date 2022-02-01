@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Console\Command\Queue;
 
 use Spiral\Console\Command;
-use Spiral\RoadRunner\Jobs\DTO\V1\Stat;
 use Spiral\RoadRunner\Jobs\JobsInterface;
+use Spiral\RoadRunner\Jobs\Queue;
 use Symfony\Component\Console\Helper\Table;
 
 final class ListCommand extends Command
@@ -23,9 +23,9 @@ final class ListCommand extends Command
         );
 
         foreach ($jobs as $queue) {
-            $options = $queue->getDefaultOptions();
+            /** @var Queue $queue */
 
-            /** @var Stat $stat */
+            $options = $queue->getDefaultOptions();
             $stat = $queue->getPipelineStat();
 
             $table->addRow([
