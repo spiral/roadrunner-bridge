@@ -2,6 +2,11 @@
 
 -----
 
+[![Latest Stable Version](https://poser.pugx.org/spiral/roadrunner-bridge/version)](https://packagist.org/packages/spiral/roadrunner-bridge)
+[![Unit tests](https://github.com/spiral/roadrunner-bridge/actions/workflows/main.yml/badge.svg)](https://github.com/spiral/roadrunner-bridge/actions/workflows/main.yml)
+[![Static analysis](https://github.com/spiral/roadrunner-bridge/actions/workflows/static.yml/badge.svg)](https://github.com/spiral/roadrunner-bridge/actions/workflows/static.yml)
+[![StyleCI](https://github.styleci.io/repos/447581540/shield)](https://github.styleci.io/repos/447581540)
+
 ## Requirements
 
 Make sure that your server is configured with following PHP version and extensions:
@@ -585,11 +590,11 @@ protected const LOAD = [
 
 #### Console commands
 
-| Command             | Description                                     |
-|---------------------|-------------------------------------------------|
-| roadrunner:list          | List available roadrunner pipelines                  |
-| roadrunner:pause {name}  | Pause consuming jobs for pipeline with given name  |
-| roadrunner:resume {name} | Resume consuming jobs for pipeline with given name |
+| Command                  | Description                                         |
+|--------------------------|-----------------------------------------------------|
+| roadrunner:list          | List available roadrunner pipelines                 |
+| roadrunner:pause {name}  | Pause consuming jobs for pipeline with given name   |
+| roadrunner:resume {name} | Resume consuming jobs for pipeline with given name  |
 
 > `name` - it's a RR jobs pipeline name
 
