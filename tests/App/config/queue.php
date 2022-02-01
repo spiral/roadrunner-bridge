@@ -34,7 +34,7 @@ return [
             'driver' => 'roadrunner',
             'default' => 'memory', // Required
             'aliases' => [ // Optional
-                'foo' => 'memory'
+                'foo' => 'memory',
             ],
             'pipelines' => [
                 'memory' => [
@@ -42,7 +42,7 @@ return [
                     // Run consumer for this pipeline on startup (by default)
                     // You can pause consumer for this pipeline via console command
                     // php app.php queue:pause local
-                    'consume' => true // Optional
+                    'consume' => true, // Optional
                 ],
                 // 'amqp' => [
                 //     'connector' => new AMQPCreateInfo('bus', ...),
@@ -59,7 +59,7 @@ return [
                 // 'sqs' => [
                 //     'connector' => new SQSCreateInfo('amazon', ...),
                 // ],
-            ]
+            ],
         ],
     ],
 

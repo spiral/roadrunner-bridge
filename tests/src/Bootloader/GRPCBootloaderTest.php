@@ -57,10 +57,10 @@ final class GRPCBootloaderTest extends TestCase
         $config = $configurator->getConfig('grpc');
 
         $this->assertSame([
-            'binaryPath' => $this->app->dir('app').'../protoc-gen-php-grpc',
+            'binaryPath' => $this->app->dir('app') . '../protoc-gen-php-grpc',
             'services' => [
-                $this->app->dir('app').'proto/echo.proto',
-                $this->app->dir('app').'proto/foo.proto'
+                $this->app->dir('app') . 'proto/echo.proto',
+                $this->app->dir('app') . 'proto/foo.proto',
             ],
         ], $config);
     }

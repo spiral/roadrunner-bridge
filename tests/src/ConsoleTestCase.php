@@ -22,7 +22,7 @@ abstract class ConsoleTestCase extends TestCase
         ];
 
         foreach ($files as $file) {
-            require_once $this->app->dir('app').$file;
+            require_once $this->app->dir('app') . $file;
         }
 
         return $result;
@@ -31,8 +31,8 @@ abstract class ConsoleTestCase extends TestCase
     public function deleteGRPCService(): void
     {
         $fs = new Files();
-        if ($fs->isDirectory($this->app->dir('app').'GRPC/EchoService')) {
-            $fs->deleteDirectory($this->app->dir('app').'GRPC/EchoService');
+        if ($fs->isDirectory($this->app->dir('app') . 'GRPC/EchoService')) {
+            $fs->deleteDirectory($this->app->dir('app') . 'GRPC/EchoService');
         }
     }
 

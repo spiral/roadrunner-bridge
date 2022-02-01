@@ -67,7 +67,6 @@ final class DispatcherTest extends TestCase
         $this->app->get(Dispatcher::class)->serve();
     }
 
-
     public function testServeReceivedTaskWithThrownException(): void
     {
         $this->container->bind(EnvironmentInterface::class, function () {

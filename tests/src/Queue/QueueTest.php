@@ -35,12 +35,12 @@ final class QueueTest extends TestCase
         $pipelines = [
             'memory' => [
                 'connector' => m::mock(CreateInfoInterface::class),
-                'cunsume' => true
-            ]
+                'cunsume' => true,
+            ],
         ];
 
         $aliases = [
-            'user-data' => 'memory'
+            'user-data' => 'memory',
         ];
 
         $this->queue = new Queue($container, $pipelines, $aliases, 'default');
