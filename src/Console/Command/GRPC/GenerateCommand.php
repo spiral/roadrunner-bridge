@@ -28,13 +28,13 @@ final class GenerateCommand extends Command
         FilesInterface $files,
         DirectoriesInterface $dirs,
         GRPCConfig $config
-    ): void {
+    ): int {
         $binaryPath = $config->getBinaryPath();
 
         if ($binaryPath !== null && ! file_exists($binaryPath)) {
             $this->sprintf('<error>PHP Server plugin binary `%s` not found.</error>', $binaryPath);
 
-            return;
+            return self::FAILURE;
         }
 
         $compiler = new ProtoCompiler(
@@ -73,6 +73,8 @@ final class GenerateCommand extends Command
                 );
             }
         }
+
+        return self::SUCCESS;
     }
 
     /**

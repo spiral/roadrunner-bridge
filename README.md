@@ -587,9 +587,9 @@ protected const LOAD = [
 
 | Command             | Description                                     |
 |---------------------|-------------------------------------------------|
-| queue:list          | List available queue pipelines                  |
-| queue:pause {name}  | Pause consuming jobs for queue with given name  |
-| queue:resume {name} | Resume consuming jobs for queue with given name |
+| roadrunner:list          | List available roadrunner pipelines                  |
+| roadrunner:pause {name}  | Pause consuming jobs for pipeline with given name  |
+| roadrunner:resume {name} | Resume consuming jobs for pipeline with given name |
 
 > `name` - it's a RR jobs pipeline name
 
@@ -659,8 +659,8 @@ php app.php grpc:generate
 syntax = "proto3";
 package service;
 
-option php_namespace = "App\\GRPC\\Echo";
-option php_metadata_namespace = "App\\GRPC\\Echo\\GPBMetadata";
+option php_namespace = "App\\GRPC\\EchoService";
+option php_metadata_namespace = "App\\GRPC\\EchoService\\GPBMetadata";
 
 service Echo {
     rpc Ping (Message) returns (Message) {
@@ -689,9 +689,9 @@ php app.php grpc:generate
 Implement `EchoInterface` interface
 
 ```php
-// app/src/GRPC/Echo/EchoService.php
+// app/src/GRPC/EchoService/EchoService.php
 
-namespace App\GRPC\Echo;
+namespace App\GRPC\EchoService;
 
 use Spiral\RoadRunner\GRPC\ContextInterface;
 

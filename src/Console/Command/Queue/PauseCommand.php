@@ -10,22 +10,24 @@ use Symfony\Component\Console\Input\InputArgument;
 
 final class PauseCommand extends Command
 {
-    protected const NAME = 'queue:pause';
-    protected const DESCRIPTION = 'Pause consuming jobs for queue with given name';
+    protected const NAME = 'roadrunner:pause';
+    protected const DESCRIPTION = 'Pause consuming jobs for pipeline with given name';
     protected const ARGUMENTS = [
-        ['queue', InputArgument::REQUIRED, 'Queue name'],
+        ['pipeline', InputArgument::REQUIRED, 'Pipeline name'],
     ];
 
-    public function perform(JobsInterface $jobs): void
+    public function perform(JobsInterface $jobs): int
     {
-        $name = $this->argument('queue');
+        $name = $this->argument('pipeline');
 
         if ($this->isVerbose()) {
-            $this->writeln(sprintf('<info>Pausing queue [%s]</info>', $name));
+            $this->writeln(sprintf('<info>Pausing pipeline [%s]</info>', $name));
         }
 
         $jobs->pause($name);
 
-        $this->writeln(sprintf('<info>Queue [%s] has been paused.</info>', $name));
+        $this->writeln(sprintf('<info>Pipeline [%s] has been paused.</info>', $name));
+
+        return self::SUCCESS;
     }
 }

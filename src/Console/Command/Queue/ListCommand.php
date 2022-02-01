@@ -11,18 +11,24 @@ use Symfony\Component\Console\Helper\Table;
 
 final class ListCommand extends Command
 {
-    protected const NAME = 'queue:list';
-    protected const DESCRIPTION = 'List available queue connections';
+    protected const NAME = 'roadrunner:list';
+    protected const DESCRIPTION = 'List available roadrunner pipelines';
 
-    public function perform(JobsInterface $jobs): void
+    public function perform(JobsInterface $jobs): int
     {
+        $queues = iterator_to_array($jobs->getIterator());
+
+        if ($queues === []) {
+            return self::SUCCESS;
+        }
+
         $table = new Table($this->output);
 
         $table->setHeaders(
             ['Name', 'Driver', 'Default delay', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active']
         );
 
-        foreach ($jobs as $queue) {
+        foreach ($queues as $queue) {
             /** @var Queue $queue */
 
             $options = $queue->getDefaultOptions();
@@ -41,5 +47,7 @@ final class ListCommand extends Command
         }
 
         $table->render();
+
+        return self::SUCCESS;
     }
 }

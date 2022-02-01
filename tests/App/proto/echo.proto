@@ -1,0 +1,16 @@
+// app/proto/echo.proto
+
+syntax = "proto3";
+package service;
+
+option php_namespace = "Spiral\\App\\GRPC\\EchoService";
+option php_metadata_namespace = "Spiral\\App\\GRPC\\EchoService\\GPBMetadata";
+
+service Echo {
+    rpc Ping (Message) returns (Message) {
+    }
+}
+
+message Message {
+    string msg = 1;
+}

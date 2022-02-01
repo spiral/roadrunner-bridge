@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC;
 
-use Spiral\App\GRPC\Echo\EchoService;
+use Spiral\App\GRPC\EchoService;
 use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
 use Spiral\Tests\TestCase;
 
@@ -16,7 +16,7 @@ final class ServiceLocatorTest extends TestCase
 
         $this->assertInstanceOf(
             EchoService::class,
-            $locator->getServices()[\Spiral\App\GRPC\Echo\EchoInterface::class]
+            $locator->getServices()[\Spiral\App\GRPC\EchoService\EchoInterface::class]
         );
     }
 }

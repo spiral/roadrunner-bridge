@@ -1,7 +1,9 @@
 <?php
 
-namespace Spiral\App\GRPC\Echo;
+namespace Spiral\App\GRPC;
 
+use Spiral\App\GRPC\EchoService\EchoInterface;
+use Spiral\App\GRPC\EchoService\Message;
 use Spiral\RoadRunner\GRPC\ContextInterface;
 
 class EchoService implements EchoInterface

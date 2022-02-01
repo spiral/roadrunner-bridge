@@ -16,7 +16,7 @@ final class ClearCommand extends Command
         ['storage', InputArgument::OPTIONAL, 'Storage name'],
     ];
 
-    public function perform(CacheStorageProviderInterface $provider): void
+    public function perform(CacheStorageProviderInterface $provider): int
     {
         if ($this->isVerbose()) {
             $this->writeln('<info>Cleaning application cache:</info>');
@@ -25,5 +25,7 @@ final class ClearCommand extends Command
         $provider->storage($this->argument('storage'))->clear();
 
         $this->writeln('<info>Cache has been cleared.</info>');
+
+        return self::SUCCESS;
     }
 }

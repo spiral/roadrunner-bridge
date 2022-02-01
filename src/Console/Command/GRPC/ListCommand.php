@@ -12,14 +12,14 @@ final class ListCommand extends Command
     protected const NAME = 'grpc:services';
     protected const DESCRIPTION = 'List available GRPC services';
 
-    public function perform(LocatorInterface $locator): void
+    public function perform(LocatorInterface $locator): int
     {
         $services = $locator->getServices();
 
         if ($services === []) {
             $this->writeln('<comment>No GRPC services were found.</comment>');
 
-            return;
+            return self::SUCCESS;
         }
 
         $table = $this->table([
@@ -37,5 +37,7 @@ final class ListCommand extends Command
         }
 
         $table->render();
+
+        return self::SUCCESS;
     }
 }

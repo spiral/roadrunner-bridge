@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\App;
 
 use Spiral\Boot\BootloadManager;
+use Spiral\Boot\DirectoriesInterface;
 use Spiral\Bootloader as Framework;
 use Spiral\Console\Console;
 use Spiral\Core\Container;
@@ -49,5 +50,10 @@ class App extends Kernel
     public function getContainer(): Container
     {
         return $this->container;
+    }
+
+    public function dir(string $alias): string
+    {
+        return $this->container->get(DirectoriesInterface::class)->get($alias);
     }
 }
