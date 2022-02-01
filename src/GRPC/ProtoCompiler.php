@@ -46,7 +46,7 @@ final class ProtoCompiler
         exec(
             sprintf(
                 'protoc %s --php_out=%s --php-grpc_out=%s -I %s %s 2>&1',
-                $this->protocBinaryPath ? '--plugin='.$this->protocBinaryPath : '',
+                $this->protocBinaryPath ? '--plugin=' . $this->protocBinaryPath : '',
                 escapeshellarg($tmpDir),
                 escapeshellarg($tmpDir),
                 escapeshellarg(dirname($protoFile)),
@@ -76,6 +76,7 @@ final class ProtoCompiler
     /**
      * @param string $tmpDir
      * @param string $file
+     *
      * @return string
      */
     private function copy(string $tmpDir, string $file): string
@@ -85,7 +86,7 @@ final class ProtoCompiler
             $source = ltrim(substr($source, strlen($this->baseNamespace)), '\\/');
         }
 
-        $target = $this->files->normalizePath($this->basePath.'/'.$source);
+        $target = $this->files->normalizePath($this->basePath . '/' . $source);
 
         $this->files->ensureDirectory(dirname($target));
         $this->files->copy($file, $target);
@@ -98,7 +99,7 @@ final class ProtoCompiler
      */
     private function tmpDir(): string
     {
-        $directory = sys_get_temp_dir().'/'.spl_object_hash($this);
+        $directory = sys_get_temp_dir() . '/' . spl_object_hash($this);
         $this->files->ensureDirectory($directory);
 
         return $this->files->normalizePath($directory, true);
@@ -108,6 +109,7 @@ final class ProtoCompiler
      * Include all proto files from the directory.
      *
      * @param string $protoFile
+     *
      * @return array
      */
     private function getProtoFiles(string $protoFile): array

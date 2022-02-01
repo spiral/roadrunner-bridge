@@ -63,7 +63,7 @@ final class DispatcherTest extends TestCase
         ));
 
         $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
-           return $payload->body === (new Message())->setMsg('PONG')->serializeToString();
+            return $payload->body === (new Message())->setMsg('PONG')->serializeToString();
         });
 
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();

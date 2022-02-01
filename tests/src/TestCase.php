@@ -7,14 +7,12 @@ namespace Spiral\Tests;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Spiral\App\App;
-use Spiral\Boot\AbstractKernel;
 use Spiral\Boot\DirectoriesInterface;
 use Spiral\Boot\Environment;
 use Spiral\Boot\EnvironmentInterface;
 use Spiral\Boot\KernelInterface;
 use Spiral\Config\Patch\Set;
 use Spiral\Core\ConfigsInterface;
-use Spiral\Core\Container;
 use Spiral\Files\Files;
 
 abstract class TestCase extends BaseTestCase
@@ -89,9 +87,9 @@ abstract class TestCase extends BaseTestCase
         /** @var App $app */
         $app = App::create([
             'root' => $root,
-            'app' => $root.'/App',
-            'runtime' => $root.'/runtime/tests',
-            'cache' => $root.'/runtime/tests/cache',
+            'app' => $root . '/App',
+            'runtime' => $root . '/runtime/tests',
+            'cache' => $root . '/runtime/tests/cache',
         ]);
 
         $this->container = $app->getContainer();
