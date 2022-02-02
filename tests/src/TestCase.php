@@ -87,9 +87,9 @@ abstract class TestCase extends BaseTestCase
         /** @var App $app */
         $app = App::create([
             'root' => $root,
-            'app' => $root.'/App',
-            'runtime' => $root.'/runtime/tests',
-            'cache' => $root.'/runtime/tests/cache',
+            'app' => $root . '/App',
+            'runtime' => $root . '/runtime/tests',
+            'cache' => $root . '/runtime/tests/cache',
         ]);
 
         $this->container = $app->getContainer();
