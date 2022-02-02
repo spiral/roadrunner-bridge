@@ -25,5 +25,12 @@
                 <file name="src/Queue/Dispatcher.php"/>
             </errorLevel>
         </InvalidCatch>
+        <InvalidReturnType>
+            <errorLevel type="suppress">
+                <file name="src/Queue/Dispatcher.php"/>
+                <file name="src/Http/Dispatcher.php"/>
+                <file name="src/GRPC/Dispatcher.php"/>
+            </errorLevel>
+        </InvalidReturnType>
     </issueHandlers>
 </psalm>

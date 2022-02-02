@@ -34,9 +34,6 @@ final class Dispatcher implements DispatcherInterface
         return \PHP_SAPI === 'cli' && $this->env->getMode() === Mode::MODE_GRPC;
     }
 
-    /**
-     * @return mixed|void
-     */
     public function serve()
     {
         /** @var Server $server */

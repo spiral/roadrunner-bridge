@@ -82,14 +82,7 @@ final class QueueBootloaderTest extends TestCase
 
     public function testDispatcherShouldBeRegistered(): void
     {
-        $dispatchers = $this->accessProtected($this->app, 'dispatchers');
-
-        $this->assertCount(
-            1,
-            array_filter($dispatchers, function ($dispatcher) {
-                return $dispatcher instanceof Dispatcher;
-            })
-        );
+        $this->assertDispatcherLoaded(Dispatcher::class);
     }
 
     public function testGetsSerializerInterface(): void

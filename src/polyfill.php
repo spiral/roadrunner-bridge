@@ -11,3 +11,8 @@ class_alias(
     \Spiral\RoadRunnerBridge\Bootloader\GRPCBootloader::class,
     \Spiral\Bootloader\GRPC\GRPCBootloader::class
 );
+
+class_alias(
+    \Spiral\RoadRunnerBridge\Bootloader\QueueBootloader::class,
+    \Spiral\Bootloader\Jobs\JobsBootloader::class
+);

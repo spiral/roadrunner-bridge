@@ -41,14 +41,12 @@ final class GRPCBootloaderTest extends TestCase
 
     public function testDispatcherShouldBeRegistered()
     {
-        $dispatchers = $this->accessProtected($this->app, 'dispatchers');
+        $this->assertDispatcherLoaded(Dispatcher::class);
+    }
 
-        $this->assertCount(
-            1,
-            array_filter($dispatchers, function ($dispatcher) {
-                return $dispatcher instanceof Dispatcher;
-            })
-        );
+    public function testOdlBootloaderShouldNotBeRegistered()
+    {
+        $this->assertBootloaderMissed('Spiral\Bootloader\GRPC');
     }
 
     public function testConfigShouldBeDefined()
@@ -57,10 +55,10 @@ final class GRPCBootloaderTest extends TestCase
         $config = $configurator->getConfig('grpc');
 
         $this->assertSame([
-            'binaryPath' => $this->app->dir('app') . '../protoc-gen-php-grpc',
+            'binaryPath' => $this->app->dir('app').'../protoc-gen-php-grpc',
             'services' => [
-                $this->app->dir('app') . 'proto/echo.proto',
-                $this->app->dir('app') . 'proto/foo.proto',
+                $this->app->dir('app').'proto/echo.proto',
+                $this->app->dir('app').'proto/foo.proto',
             ],
         ], $config);
     }

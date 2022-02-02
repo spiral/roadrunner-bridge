@@ -87,9 +87,9 @@ abstract class TestCase extends BaseTestCase
         /** @var App $app */
         $app = App::create([
             'root' => $root,
-            'app' => $root . '/App',
-            'runtime' => $root . '/runtime/tests',
-            'cache' => $root . '/runtime/tests/cache',
+            'app' => $root.'/App',
+            'runtime' => $root.'/runtime/tests',
+            'cache' => $root.'/runtime/tests/cache',
         ]);
 
         $this->container = $app->getContainer();
@@ -132,5 +132,45 @@ abstract class TestCase extends BaseTestCase
     public function getEnvironment(): EnvironmentInterface
     {
         return $this->container->get(EnvironmentInterface::class);
+    }
+
+    public function assertDispatcherLoaded(string $class): void
+    {
+        $this->assertContains($class, $this->getLoadedDispatchers());
+    }
+
+    public function assertDispatcherMissed(string $class): void
+    {
+        $this->assertNotContains($class, $this->getLoadedDispatchers());
+    }
+
+    public function assertBootloaderLoaded(string $class): void
+    {
+        $this->assertContains($class, $this->getLoadedBootloaders());
+    }
+
+    public function assertBootloaderMissed(string $class): void
+    {
+        $this->assertNotContains($class, $this->getLoadedBootloaders());
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLoadedDispatchers(): array
+    {
+        return array_map(static function ($dispatcher) {
+            return get_class($dispatcher);
+        }, $this->accessProtected($this->app, 'dispatchers'));
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLoadedBootloaders(): array
+    {
+        $bootloader = $this->accessProtected($this->app, 'bootloader');
+
+        return $this->accessProtected($bootloader, 'classes');
     }
 }

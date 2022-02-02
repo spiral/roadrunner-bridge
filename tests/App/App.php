@@ -26,6 +26,14 @@ class App extends Kernel
         Framework\CommandBootloader::class,
         Framework\SnapshotsBootloader::class,
 
+        // Deprecated bootloaders
+        Framework\Http\HttpBootloader::class,
+        Framework\GRPC\GRPCBootloader::class,
+        Framework\Jobs\JobsBootloader::class,
+        Framework\ServerBootloader::class,
+
+        \Spiral\SendIt\Bootloader\MailerBootloader::class,
+
         RoadRunnerBridge\CommandBootloader::class,
     ];
 
