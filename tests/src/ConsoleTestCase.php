@@ -13,8 +13,7 @@ abstract class ConsoleTestCase extends TestCase
 {
     public function generateGRPCService(): string
     {
-        $result = $this->runCommand('grpc:generate');
-        usleep(100000);
+        $result = $this->runCommand('grpc:generate', ['path' => $this->app->dir('app')]);
         $files = [
             'GRPC/EchoService/EchoInterface.php',
             'GRPC/EchoService/Message.php',
@@ -25,6 +24,7 @@ abstract class ConsoleTestCase extends TestCase
 
         foreach ($files as $file) {
             $file = $this->app->dir('app') . $file;
+            $fs->setPermissions($file, 777);
             require_once $file;
         }
 
