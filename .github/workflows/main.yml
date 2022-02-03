@@ -24,13 +24,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+
       # Install PHP Dependencies
       - name: Setup PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           # PHP Extras
-          extensions: pdo, pdo_sqlite, sockets
+          extensions: pdo, pdo_sqlite, sockets, grpc
           coverage: pcov
           tools: pecl
           ini-values: "memory_limit=-1"
