@@ -79,14 +79,14 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      */
     private function isExists(CreateInfoInterface $connector): bool
     {
-        if ($this->expiresAt < time()) {
-            $this->existPipelines = array_keys(
-                iterator_to_array($this->jobs->getIterator())
+        if ($this->expiresAt < \time()) {
+            $this->existPipelines = \array_keys(
+                \iterator_to_array($this->jobs->getIterator())
             );
-            $this->expiresAt = time() + $this->ttl;
+            $this->expiresAt = \time() + $this->ttl;
         }
 
-        return in_array($connector->getName(), $this->existPipelines);
+        return \in_array($connector->getName(), $this->existPipelines, true);
     }
 
     /**
