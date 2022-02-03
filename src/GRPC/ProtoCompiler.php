@@ -89,6 +89,7 @@ final class ProtoCompiler
         $target = $this->files->normalizePath($this->basePath . '/' . $source);
 
         $this->files->ensureDirectory(dirname($target));
+        var_dump($target);
         $this->files->copy($file, $target);
 
         return $target;
