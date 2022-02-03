@@ -22,18 +22,21 @@ final class ProtoCompiler
     private FilesInterface $files;
     private string $basePath;
     private string $baseNamespace;
-    private ?string $protocBinaryPath = null;
+    private ?string $protocBinaryPath;
+    private ?string $tmpDir;
 
     public function __construct(
         string $basePath,
         string $baseNamespace,
         FilesInterface $files,
-        ?string $protocBinaryPath = null
+        ?string $protocBinaryPath = null,
+        ?string $tmpDir = null
     ) {
         $this->basePath = $basePath;
         $this->baseNamespace = str_replace('\\', '/', rtrim($baseNamespace, '\\'));
         $this->files = $files;
         $this->protocBinaryPath = $protocBinaryPath;
+        $this->tmpDir = ($tmpDir ?? sys_get_temp_dir()).'/'.spl_object_hash($this);
     }
 
     /**
@@ -46,7 +49,7 @@ final class ProtoCompiler
         exec(
             sprintf(
                 'protoc %s --php_out=%s --php-grpc_out=%s -I %s %s 2>&1',
-                $this->protocBinaryPath ? '--plugin=' . $this->protocBinaryPath : '',
+                $this->protocBinaryPath ? '--plugin='.$this->protocBinaryPath : '',
                 escapeshellarg($tmpDir),
                 escapeshellarg($tmpDir),
                 escapeshellarg(dirname($protoFile)),
@@ -86,10 +89,9 @@ final class ProtoCompiler
             $source = ltrim(substr($source, strlen($this->baseNamespace)), '\\/');
         }
 
-        $target = $this->files->normalizePath($this->basePath . '/' . $source);
+        $target = $this->files->normalizePath($this->basePath.'/'.$source);
 
         $this->files->ensureDirectory(dirname($target));
-        var_dump($target);
         $this->files->copy($file, $target);
 
         return $target;
@@ -100,10 +102,9 @@ final class ProtoCompiler
      */
     private function tmpDir(): string
     {
-        $directory = sys_get_temp_dir() . '/' . spl_object_hash($this);
-        $this->files->ensureDirectory($directory);
+        $this->files->ensureDirectory($this->tmpDir);
 
-        return $this->files->normalizePath($directory, true);
+        return $this->files->normalizePath($this->tmpDir, true);
     }
 
     /**

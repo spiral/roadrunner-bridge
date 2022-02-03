@@ -21,6 +21,7 @@ final class GenerateCommand extends Command
     protected const ARGUMENTS = [
         ['path', InputArgument::OPTIONAL, 'Base path for generated service code', 'auto'],
         ['namespace', InputArgument::OPTIONAL, 'Base namespace for generated service code', 'auto'],
+        ['tmpdir', InputArgument::OPTIONAL, 'Temp directory for generated service code'],
     ];
 
     public function perform(
@@ -41,7 +42,8 @@ final class GenerateCommand extends Command
             $this->getPath($kernel),
             $this->getNamespace($kernel),
             $files,
-            $binaryPath
+            $binaryPath,
+            $this->argument('tmpdir')
         );
 
         foreach ($config->getServices() as $protoFile) {
