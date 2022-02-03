@@ -14,15 +14,18 @@ abstract class ConsoleTestCase extends TestCase
     public function generateGRPCService(): string
     {
         $result = $this->runCommand('grpc:generate');
-
+        usleep(100000);
         $files = [
             'GRPC/EchoService/EchoInterface.php',
             'GRPC/EchoService/Message.php',
             'GRPC/EchoService/GPBMetadata/PBEcho.php',
         ];
 
+        $fs = new Files();
+
         foreach ($files as $file) {
-            require_once $this->app->dir('app') . $file;
+            $file = $this->app->dir('app') . $file;
+            require_once $file;
         }
 
         return $result;
