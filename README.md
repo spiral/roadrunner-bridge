@@ -299,9 +299,9 @@ return [
         ],
         'roadrunner' => [
             'driver' => 'roadrunner',
-            'default' => 'memory',
+            'default' => 'local',
             'pipelines' => [
-                'memory' => [
+                'local' => [
                     'connector' => new MemoryCreateInfo('local'),
                     // Run consumer for this pipeline on startup (by default)
                     // You can pause consumer for this pipeline via console command
