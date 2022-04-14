@@ -10,6 +10,7 @@ use Spiral\Core\Container;
 use Spiral\Goridge\Relay;
 use Spiral\Goridge\RPC\RPC;
 use Spiral\Goridge\RPC\RPCInterface;
+use Spiral\Http\Config\HttpConfig;
 use Spiral\Http\Diactoros\ServerRequestFactory;
 use Spiral\Http\Diactoros\StreamFactory;
 use Spiral\Http\Diactoros\UploadedFileFactory;
@@ -62,9 +63,16 @@ final class RoadRunnerBootloader extends Bootloader
             WorkerInterface $worker,
             ServerRequestFactory $requests,
             StreamFactory $streams,
-            UploadedFileFactory $uploads
+            UploadedFileFactory $uploads,
+            HttpConfig $config
         ): PSR7WorkerInterface {
-            return new PSR7Worker($worker, $requests, $streams, $uploads);
+            $psr7Worker = new PSR7Worker($worker, $requests, $streams, $uploads);
+
+            if (($chunkSize = $config->getChunkSize()) !== null) {
+                $psr7Worker->chunkSize = $chunkSize;
+            }
+
+            return $psr7Worker;
         });
     }
 }

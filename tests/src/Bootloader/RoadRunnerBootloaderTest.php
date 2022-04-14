@@ -73,4 +73,24 @@ final class RoadRunnerBootloaderTest extends TestCase
         // TODO fix problem with rr worker
         ob_end_flush();
     }
+
+    public function testDefaultPSR7WorkerChunkSize(): void
+    {
+        $worker = $this->container->get(PSR7Worker::class);
+        $this->assertSame(0, $worker->chunkSize);
+
+        // TODO fix problem with rr worker
+        ob_end_flush();
+    }
+
+    public function testPSR7WorkerChunkSize(): void
+    {
+        $this->updateConfig('http.chunkSize', 100);
+
+        $worker = $this->container->get(PSR7Worker::class);
+        $this->assertSame(100, $worker->chunkSize);
+
+        // TODO fix problem with rr worker
+        ob_end_flush();
+    }
 }
