@@ -12,6 +12,13 @@ use Spiral\Tests\TestCase;
 
 final class ServiceLocatorTest extends TestCase
 {
+    public function testGetServerFromObject(): void
+    {
+        $this->updateConfig('tcp.services', ['test' => new TestService()]);
+
+        $this->assertInstanceOf(ServiceInterface::class, $this->getService('test'));
+    }
+
     public function testGetServerFromFCQN(): void
     {
         $this->updateConfig('tcp.services', ['test' => TestService::class]);

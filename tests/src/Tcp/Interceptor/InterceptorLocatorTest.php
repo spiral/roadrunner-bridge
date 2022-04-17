@@ -12,9 +12,16 @@ use Spiral\Tests\TestCase;
 
 final class InterceptorLocatorTest extends TestCase
 {
+    public function testGetInterceptorFromObject(): void
+    {
+        $this->updateConfig('tcp.interceptors', [new TestInterceptor()]);
+
+        $this->assertInstanceOf(CoreInterceptorInterface::class, $this->getInterceptor());
+    }
+
     public function testGetInterceptorFromFCQN(): void
     {
-        $this->updateConfig('tcp.interceptors', ['test' => TestInterceptor::class]);
+        $this->updateConfig('tcp.interceptors', [TestInterceptor::class]);
 
         $this->assertInstanceOf(CoreInterceptorInterface::class, $this->getInterceptor());
     }

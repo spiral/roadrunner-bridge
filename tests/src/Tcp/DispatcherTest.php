@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Tcp;
 
+use Spiral\App\Tcp\ServiceWithException;
 use Spiral\App\Tcp\TestInterceptor;
 use Spiral\App\Tcp\TestService;
 use Spiral\Boot\FinalizerInterface;
@@ -111,6 +112,48 @@ final class DispatcherTest extends TestCase
         });
 
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
+        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+            return $payload->header === 'CLOSE';
+        });
+
+        $this->app->get(Dispatcher::class)->serve();
+    }
+
+    public function testServeWithHandleExceptionAndClose(): void
+    {
+        $worker = \Mockery::mock(WorkerInterface::class);
+        $this->container->bind(WorkerInterface::class, $worker);
+
+        $this->container->bind(EnvironmentInterface::class, function () {
+            return new Environment([
+                'RR_MODE' => Environment\Mode::MODE_TCP,
+            ]);
+        });
+        $this->updateConfig('tcp.services', ['tcp-server' => ServiceWithException::class]);
+
+        $finalizer = \Mockery::mock(FinalizerInterface::class);
+        $this->container->bind(FinalizerInterface::class, $finalizer);
+        $finalizer->shouldReceive('finalize')->once()->with(false);
+
+        $worker->shouldReceive('waitPayload')->once()->andReturn(
+            new Payload(
+                'test',
+                \json_encode([
+                    'remote_addr' => '127.0.0.1',
+                    'server' => 'tcp-server',
+                    'event' => TcpWorkerInterface::EVENT_DATA,
+                    'uuid' => 'test-uuid',
+                ])
+            )
+        );
+        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+            return $payload->header === 'CLOSE';
+        });
+        $worker->shouldReceive('error')->once()->withArgs(function (string $error) {
+            return $error === 'some error';
+        });
+
+       $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
         $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
             return $payload->header === 'CLOSE';
         });
