@@ -30,7 +30,7 @@ final class TcpConfig extends InjectableConfig
     }
 
     /**
-     * @return ServiceInterface|Autowire|string
+     * @return Autowire|ServiceInterface|string
      */
     public function getService(string $server)
     {

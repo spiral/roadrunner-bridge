@@ -28,16 +28,16 @@ final class InterceptorLocator implements LocatorInterface
     {
         $interceptors = [];
         foreach ($this->config->getInterceptors() as $value) {
-             switch (true) {
-                 case $value instanceof CoreInterceptorInterface:
-                     $interceptors[] = $value;
-                     break;
-                 case $value instanceof Autowire:
-                     $interceptors[] = $value->resolve($this->container->get(FactoryInterface::class));
-                     break;
-                 default:
-                     $interceptors[] = $this->container->get($value);
-             }
+            switch (true) {
+                case $value instanceof CoreInterceptorInterface:
+                    $interceptors[] = $value;
+                    break;
+                case $value instanceof Autowire:
+                    $interceptors[] = $value->resolve($this->container->get(FactoryInterface::class));
+                    break;
+                default:
+                    $interceptors[] = $this->container->get($value);
+            }
         }
 
         return $interceptors;

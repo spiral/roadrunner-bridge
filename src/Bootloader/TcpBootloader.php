@@ -48,7 +48,7 @@ final class TcpBootloader extends Bootloader
     }
 
     /**
-     * @param Service\ServiceInterface|Autowire|string $service
+     * @param Autowire|Service\ServiceInterface|string $service
      */
     public function addService(string $server, $service): void
     {
@@ -56,7 +56,7 @@ final class TcpBootloader extends Bootloader
     }
 
     /**
-     * @param Service\ServiceInterface|Autowire|string $interceptor
+     * @param Autowire|Service\ServiceInterface|string $interceptor
      */
     public function addInterceptor($interceptor): void
     {
