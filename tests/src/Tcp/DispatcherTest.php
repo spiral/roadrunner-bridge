@@ -153,7 +153,7 @@ final class DispatcherTest extends TestCase
             return $error === 'some error';
         });
 
-       $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
+        $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
         $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
             return $payload->header === 'CLOSE';
         });
