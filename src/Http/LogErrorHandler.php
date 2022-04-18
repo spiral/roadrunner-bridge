@@ -6,7 +6,7 @@ namespace Spiral\RoadRunnerBridge\Http;
 
 use Psr\Container\ContainerInterface;
 use Spiral\Snapshots\SnapshotInterface;
-use Spiral\Snapshots\SnapshotterInterface;
+use Spiral\Exceptions\ExceptionReporterInterface;
 
 final class LogErrorHandler implements ErrorHandlerInterface
 {
@@ -20,7 +20,7 @@ final class LogErrorHandler implements ErrorHandlerInterface
     public function handle(\Throwable $e): void
     {
         /** @var SnapshotInterface $snapshot */
-        $snapshot = $this->container->get(SnapshotterInterface::class)->register($e);
+        $snapshot = $this->container->get(ExceptionReporterInterface::class)->report($e);
         \file_put_contents('php://stderr', $snapshot->getMessage());
     }
 }

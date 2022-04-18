@@ -11,7 +11,7 @@ use Spiral\RoadRunner\Environment\Mode;
 use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunner\WorkerInterface;
-use Spiral\Snapshots\SnapshotterInterface;
+use Spiral\Exceptions\ExceptionReporterInterface;
 
 final class Dispatcher implements DispatcherInterface
 {
@@ -62,7 +62,7 @@ final class Dispatcher implements DispatcherInterface
     private function handleException(\Throwable $e)
     {
         try {
-            $this->container->get(SnapshotterInterface::class)->register($e);
+            $this->container->get(ExceptionReporterInterface::class)->report($e);
         } catch (\Throwable $se) {
             // no need to notify when unable to register an exception
         }

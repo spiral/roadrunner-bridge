@@ -6,6 +6,7 @@ namespace Spiral\Tests\Bootloader;
 
 use Mockery as m;
 use Spiral\Core\ConfigsInterface;
+use Spiral\Exceptions\ExceptionReporterInterface;
 use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Queue\QueueInterface;
 use Spiral\Queue\SerializerInterface;
@@ -17,7 +18,6 @@ use Spiral\RoadRunnerBridge\Queue\Dispatcher;
 use Spiral\RoadRunnerBridge\Queue\JobsAdapterSerializer;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
-use Spiral\Snapshots\SnapshotterInterface;
 use Spiral\Tests\TestCase;
 
 final class QueueBootloaderTest extends TestCase
@@ -26,8 +26,8 @@ final class QueueBootloaderTest extends TestCase
     {
         parent::setUp();
 
-        $this->container->bind(SnapshotterInterface::class, function () {
-            return m::mock(SnapshotterInterface::class);
+        $this->container->bind(ExceptionReporterInterface::class, function () {
+            return m::mock(ExceptionReporterInterface::class);
         });
     }
 

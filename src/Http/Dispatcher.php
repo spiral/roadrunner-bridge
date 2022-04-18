@@ -11,7 +11,8 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Debug\StateInterface;
-use Spiral\Exceptions\HtmlHandler;
+use Spiral\Exceptions\Renderer\HtmlRenderer;
+use Spiral\Exceptions\Verbosity;
 use Spiral\Http\Http;
 use Spiral\RoadRunner\Environment\Mode;
 use Spiral\RoadRunner\EnvironmentInterface;
@@ -63,7 +64,7 @@ final class Dispatcher implements DispatcherInterface
 
     protected function errorToResponse(\Throwable $e): ResponseInterface
     {
-        $handler = new HtmlHandler();
+        $handler = new HtmlRenderer();
 
         try {
             $this->errorHandler->handle($e);
@@ -86,7 +87,7 @@ final class Dispatcher implements DispatcherInterface
 
         // Reporting system (non handled) exception directly to the client
         $response->getBody()->write(
-            $handler->renderException($e, HtmlHandler::VERBOSITY_VERBOSE)
+            $handler->render($e, Verbosity::VERBOSE)
         );
 
         return $response;
