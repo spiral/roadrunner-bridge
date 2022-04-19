@@ -76,7 +76,7 @@ final class TcpConfigTest extends TestCase
     {
         $config = new TCPConfig([
             'interceptors' => [
-                'test' => ['foo', 'bar']
+                'test' => ['foo', 'bar'],
             ],
         ]);
 

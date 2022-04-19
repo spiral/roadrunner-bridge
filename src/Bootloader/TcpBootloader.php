@@ -54,7 +54,7 @@ final class TcpBootloader extends Bootloader
     }
 
     /**
-     * @param Autowire|Service\ServiceInterface|string|array $interceptor
+     * @param array|Autowire|Service\ServiceInterface|string $interceptor
      */
     public function addInterceptors(string $server, $interceptors): void
     {
