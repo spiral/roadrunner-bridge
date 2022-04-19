@@ -10,13 +10,11 @@ use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\Patch\Append;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\FactoryInterface;
-use Spiral\Core\InterceptableCore;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
 use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
 use Spiral\RoadRunnerBridge\Tcp\Interceptor;
 use Spiral\RoadRunnerBridge\Tcp\Server;
 use Spiral\RoadRunnerBridge\Tcp\Service;
-use Spiral\RoadRunnerBridge\Tcp\TcpServerHandler;
 
 final class TcpBootloader extends Bootloader
 {
@@ -27,7 +25,7 @@ final class TcpBootloader extends Bootloader
     protected const SINGLETONS = [
         Service\LocatorInterface::class => Service\ServiceLocator::class,
         Interceptor\LocatorInterface::class => Interceptor\InterceptorLocator::class,
-        Server::class => [self::class, 'createServer'],
+        Server::class => Server::class,
     ];
 
     private ConfiguratorInterface $config;
@@ -56,11 +54,14 @@ final class TcpBootloader extends Bootloader
     }
 
     /**
-     * @param Autowire|Service\ServiceInterface|string $interceptor
+     * @param Autowire|Service\ServiceInterface|string|array $interceptor
      */
-    public function addInterceptor($interceptor): void
+    public function addInterceptors(string $server, $interceptors): void
     {
-        $this->config->modify(TcpConfig::CONFIG, new Append('interceptors', null, $interceptor));
+        $this->config->modify(
+            TcpConfig::CONFIG,
+            new Append('interceptors', $server, \is_array($interceptors) ? $interceptors : [$interceptors])
+        );
     }
 
     private function initTcpConfig(): void
@@ -73,19 +74,5 @@ final class TcpBootloader extends Bootloader
                 'debug' => false,
             ]
         );
-    }
-
-    private function createServer(
-        TcpServerHandler $handler,
-        Interceptor\LocatorInterface $locator,
-        TcpConfig $config
-    ): Server {
-        $core = new InterceptableCore($handler);
-
-        foreach ($locator->getInterceptors() as $interceptor) {
-            $core->addInterceptor($interceptor);
-        }
-
-        return new Server($config, $core);
     }
 }

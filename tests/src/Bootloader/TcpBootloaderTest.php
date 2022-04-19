@@ -7,6 +7,7 @@ namespace Spiral\Tests\Bootloader;
 use Spiral\App\Tcp\TestInterceptor;
 use Spiral\App\Tcp\TestService;
 use Spiral\Core\ConfigsInterface;
+use Spiral\Core\Container\Autowire;
 use Spiral\RoadRunnerBridge\Bootloader\TcpBootloader;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
 use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
@@ -66,13 +67,23 @@ final class TcpBootloaderTest extends TestCase
         $this->assertSame(['test' => TestService::class], $config['services']);
     }
 
-    public function testAddInterceptor(): void
+    public function testAddOneInterceptor(): void
     {
-        $this->container->get(TcpBootloader::class)->addInterceptor(TestInterceptor::class);
+        $this->container->get(TcpBootloader::class)->addInterceptors('server', new Autowire(TestInterceptor::class));
 
         $configurator = $this->container->get(ConfigsInterface::class);
         $config = $configurator->getConfig(TcpConfig::CONFIG);
 
-        $this->assertSame([TestInterceptor::class], $config['interceptors']);
+        $this->assertInstanceOf(Autowire::class, $config['interceptors']['server'][0]);
+    }
+
+    public function testAddInterceptors(): void
+    {
+        $this->container->get(TcpBootloader::class)->addInterceptors('server', ['foo', 'bar']);
+
+        $configurator = $this->container->get(ConfigsInterface::class);
+        $config = $configurator->getConfig(TcpConfig::CONFIG);
+
+        $this->assertSame(['server' => ['foo', 'bar']], $config['interceptors']);
     }
 }

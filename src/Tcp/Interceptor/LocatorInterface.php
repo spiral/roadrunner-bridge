@@ -9,7 +9,9 @@ use Spiral\Core\CoreInterceptorInterface;
 interface LocatorInterface
 {
     /**
+     * @psalm-param non-empty-string $server
+     *
      * @return CoreInterceptorInterface[]
      */
-    public function getInterceptors(): array;
+    public function getInterceptors(string $server): array;
 }

@@ -14,14 +14,14 @@ final class InterceptorLocatorTest extends TestCase
 {
     public function testGetInterceptorFromObject(): void
     {
-        $this->updateConfig('tcp.interceptors', [new TestInterceptor()]);
+        $this->updateConfig('tcp.interceptors', ['server' => new TestInterceptor()]);
 
         $this->assertInstanceOf(CoreInterceptorInterface::class, $this->getInterceptor());
     }
 
     public function testGetInterceptorFromFCQN(): void
     {
-        $this->updateConfig('tcp.interceptors', [TestInterceptor::class]);
+        $this->updateConfig('tcp.interceptors', ['server' => TestInterceptor::class]);
 
         $this->assertInstanceOf(CoreInterceptorInterface::class, $this->getInterceptor());
     }
@@ -30,21 +30,21 @@ final class InterceptorLocatorTest extends TestCase
     {
         $this->container->bind('alias', static fn () => new TestInterceptor());
 
-        $this->updateConfig('tcp.interceptors', ['alias']);
+        $this->updateConfig('tcp.interceptors', ['server' => 'alias']);
 
         $this->assertInstanceOf(CoreInterceptorInterface::class, $this->getInterceptor());
     }
 
     public function testGetInterceptorFromAutowire(): void
     {
-        $this->updateConfig('tcp.interceptors', [new Autowire(TestInterceptor::class)]);
+        $this->updateConfig('tcp.interceptors', ['server' => new Autowire(TestInterceptor::class)]);
 
         $this->assertInstanceOf(CoreInterceptorInterface::class, $this->getInterceptor());
     }
 
     private function getInterceptor(): CoreInterceptorInterface
     {
-        $interceptors = $this->container->get(LocatorInterface::class)->getInterceptors();
+        $interceptors = $this->container->get(LocatorInterface::class)->getInterceptors('server');
 
         return \array_shift($interceptors);
     }

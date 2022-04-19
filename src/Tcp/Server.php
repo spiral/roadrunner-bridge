@@ -10,17 +10,20 @@ use Spiral\RoadRunner\Tcp\TcpWorker;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
+use Spiral\RoadRunnerBridge\Tcp\Interceptor\LocatorInterface;
 use Spiral\RoadRunnerBridge\Tcp\Response\CloseConnection;
 
 final class Server
 {
     private TcpConfig $config;
-    private InterceptableCore $core;
+    private LocatorInterface $locator;
+    private TcpServerHandler $handler;
 
-    public function __construct(TcpConfig $config, InterceptableCore $core)
+    public function __construct(TcpConfig $config, LocatorInterface $locator, TcpServerHandler $handler)
     {
         $this->config = $config;
-        $this->core = $core;
+        $this->locator = $locator;
+        $this->handler = $handler;
     }
 
     public function serve(WorkerInterface $worker = null, callable $finalize = null): void
@@ -30,7 +33,8 @@ final class Server
 
         while ($request = $tcpWorker->waitRequest()) {
             try {
-                $response = $this->core->callAction($request->server, 'handle', ['request' => $request]);
+                $core = $this->createHandler($request->server);
+                $response = $core->callAction($request->server, 'handle', ['request' => $request]);
             } catch (\Throwable $e) {
                 $worker->error($this->config->isDebugMode() ? (string) $e : $e->getMessage());
                 $response = new CloseConnection();
@@ -44,5 +48,16 @@ final class Server
                 }
             }
         }
+    }
+
+    private function createHandler(string $server): InterceptableCore
+    {
+        $core = new InterceptableCore($this->handler);
+
+        foreach ($this->locator->getInterceptors($server) as $interceptor) {
+            $core->addInterceptor($interceptor);
+        }
+
+        return $core;
     }
 }

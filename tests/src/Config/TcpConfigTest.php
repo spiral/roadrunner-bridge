@@ -75,28 +75,30 @@ final class TcpConfigTest extends TestCase
     public function testGetInterceptors(): void
     {
         $config = new TCPConfig([
-            'interceptors' => ['foo', 'bar'],
+            'interceptors' => [
+                'test' => ['foo', 'bar']
+            ],
         ]);
 
-        $this->assertSame(['foo', 'bar'], $config->getInterceptors());
+        $this->assertSame(['foo', 'bar'], $config->getInterceptors('test'));
     }
 
     public function testGetNotExistsInterceptors(): void
     {
         $config = new TCPConfig();
 
-        $this->assertSame([], $config->getInterceptors());
+        $this->assertSame([], $config->getInterceptors('test'));
     }
 
     public function testInvalidInterceptor(): void
     {
         $config = new TCPConfig([
             'interceptors' => [
-                false,
+                'test' => false,
             ],
         ]);
 
         $this->expectException(InvalidInterceptorException::class);
-        $config->getInterceptors();
+        $config->getInterceptors('test');
     }
 }

@@ -84,7 +84,7 @@ final class DispatcherTest extends TestCase
             ]);
         });
         $this->updateConfig('tcp.services', ['tcp-server' => TestService::class]);
-        $this->updateConfig('tcp.interceptors', [TestInterceptor::class]);
+        $this->updateConfig('tcp.interceptors', ['tcp-server' => TestInterceptor::class]);
 
         $finalizer = \Mockery::mock(FinalizerInterface::class);
         $this->container->bind(FinalizerInterface::class, $finalizer);

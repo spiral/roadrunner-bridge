@@ -30,6 +30,8 @@ final class TcpConfig extends InjectableConfig
     }
 
     /**
+     * @psalm-param non-empty-string $server
+     *
      * @return Autowire|ServiceInterface|string
      */
     public function getService(string $server)
@@ -46,11 +48,16 @@ final class TcpConfig extends InjectableConfig
     }
 
     /**
+     * @psalm-param non-empty-string $server
+     *
      * @return array<object>|array<string>
      */
-    public function getInterceptors(): array
+    public function getInterceptors(string $server): array
     {
-        $interceptors = (array) ($this->config['interceptors'] ?? []);
+        $interceptors = $this->config['interceptors'][$server] ?? [];
+        if (!\is_array($interceptors)) {
+            $interceptors = [$interceptors];
+        }
 
         foreach ($interceptors as $interceptor) {
             if (!$this->isValidInterceptor($interceptor)) {

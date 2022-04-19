@@ -22,12 +22,14 @@ final class InterceptorLocator implements LocatorInterface
     }
 
     /**
+     * @psalm-param non-empty-string $server
+     *
      * @return CoreInterceptorInterface[]
      */
-    public function getInterceptors(): array
+    public function getInterceptors(string $server): array
     {
         $interceptors = [];
-        foreach ($this->config->getInterceptors() as $value) {
+        foreach ($this->config->getInterceptors($server) as $value) {
             switch (true) {
                 case $value instanceof CoreInterceptorInterface:
                     $interceptors[] = $value;

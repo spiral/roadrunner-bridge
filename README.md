@@ -620,6 +620,91 @@ protected const LOAD = [
 php app.php queue:pause local
 ```
 
+### TCP
+
+RoadRunner includes TCP server and can be used to replace classic TCP setup with much greater performance and flexibility.
+
+#### Configuration
+
+Configure `tcp` section in the RoadRunner `.rr.yaml` configuration file with needed TCP servers. Example:
+
+```yaml
+tcp:
+    servers:
+        tcp_access_point_1:
+            addr: tcp://127.0.0.1:7777
+            delimiter: "\r\n" # by default
+        server2:
+            addr: tcp://127.0.0.1:8889
+
+    pool:
+        num_workers: 2
+        max_jobs: 0
+        allocate_timeout: 60s
+        destroy_timeout: 60s
+```
+
+Create configuration file `app/config/tcp.php`. In the configuration, it's required to specify the services that 
+will handle requests from a specific TCP server. Optionally, interceptors can be added for each specific server. 
+With the help there, can add some logic before handling the request in service. Configuration example:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+return [
+    /**
+     * Services for each server.
+     */
+    'services' => [
+        'tcp_access_point_1' => SomeService::class,
+        'server2' => OtherService::class
+    ],
+
+    /**
+     * Interceptors, this section is optional.
+     */
+    'interceptors' => [
+       'tcp_access_point_1' => [SomeInterceptor::class, OtherInterceptor::class], // several interceptors
+       'server2' => SomeInterceptor::class // one interceptor
+    ],
+    
+    'debug' => true
+];
+```
+
+#### Services
+
+A service must implement the interface `Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface` with one required method `handle`.
+After processing a request, the `handle` method must return the `Spiral\RoadRunnerBridge\Tcp\Response\ResponseInterface` object
+with result (`RespondMessage`, `CloseConnection`, `ContinueRead`).
+
+Example:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tcp\Service;
+
+use Spiral\RoadRunner\Tcp\Request;
+use Spiral\RoadRunnerBridge\Tcp\Response\RespondMessage;
+use Spiral\RoadRunnerBridge\Tcp\Response\ResponseInterface;
+use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
+
+class TestService implements ServiceInterface
+{
+    public function handle(Request $request): ResponseInterface
+    {
+        // some logic
+    
+        return new RespondMessage('some message', true);
+    }
+}
+```
+
 ### GRPC
 
 The GRPC protocol provides an extremely efficient way of cross-service communication for distributed applications. The
