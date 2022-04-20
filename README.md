@@ -32,7 +32,7 @@ protected const LOAD = [
     RoadRunnerBridge\CacheBootloader::class,
     RoadRunnerBridge\GRPCBootloader::class,
     RoadRunnerBridge\CommandBootloader::class,
-    
+    RoadRunnerBridge\TcpBootloader::class, // Optional, if need to work with TCP
     // ...
 ];
 ```
@@ -623,6 +623,22 @@ php app.php queue:pause local
 ### TCP
 
 RoadRunner includes TCP server and can be used to replace classic TCP setup with much greater performance and flexibility.
+
+#### Bootloader
+
+Add `Spiral\RoadRunnerBridge\Bootloader\TcpBootloader` to application bootloaders list:
+```php
+use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
+
+protected const LOAD = [
+    // ...
+    RoadRunnerBridge\TcpBootloader::class, 
+    // ...
+];
+```
+
+This bootloader adds a dispatcher and necessary services for TCP to work.
+Also, using the `addService` and `addInterceptors` methods can dynamically add services to TCP servers and configure interceptors.
 
 #### Configuration
 
