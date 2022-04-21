@@ -26,6 +26,7 @@ final class ServiceRegistry implements RegistryInterface
 
     /**
      * @psalm-param non-empty-string $server
+     *
      * @param Autowire|ServiceInterface|string $service
      */
     public function register(string $server, $service): void

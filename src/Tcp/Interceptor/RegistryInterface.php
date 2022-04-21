@@ -18,6 +18,7 @@ interface RegistryInterface
 
     /**
      * @psalm-param non-empty-string $server
+     *
      * @param Autowire|CoreInterceptorInterface|string $interceptor
      */
     public function register(string $server, $interceptor): void;
