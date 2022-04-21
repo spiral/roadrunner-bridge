@@ -12,7 +12,7 @@
 Make sure that your server is configured with following PHP version and extensions:
 
 - PHP 7.4+
-- Spiral framework 2.9+
+- Spiral framework 2.13+
 
 ## Installation
 
@@ -26,11 +26,13 @@ After package install you need to add bootloaders from the package in your appli
 
 ```php
 use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
+
 protected const LOAD = [
     RoadRunnerBridge\HttpBootloader::class,
     RoadRunnerBridge\QueueBootloader::class,
     RoadRunnerBridge\CacheBootloader::class,
     RoadRunnerBridge\GRPCBootloader::class,
+    RoadRunnerBridge\BroadcastingBootloader::class,
     RoadRunnerBridge\CommandBootloader::class,
     
     // ...
