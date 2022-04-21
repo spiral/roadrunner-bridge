@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Tcp\Interceptor;
 
+use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 
-interface LocatorInterface
+interface RegistryInterface
 {
     /**
      * @psalm-param non-empty-string $server
@@ -14,4 +15,9 @@ interface LocatorInterface
      * @return CoreInterceptorInterface[]
      */
     public function getInterceptors(string $server): array;
+
+    /**
+     * @param Autowire|CoreInterceptorInterface|string $interceptor
+     */
+    public function register(string $server, $interceptor): void;
 }

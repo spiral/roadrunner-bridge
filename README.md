@@ -647,11 +647,11 @@ Configure `tcp` section in the RoadRunner `.rr.yaml` configuration file with nee
 ```yaml
 tcp:
     servers:
-        tcp_access_point_1:
-            addr: tcp://127.0.0.1:7777
+        smtp:
+            addr: tcp://127.0.0.1:22
             delimiter: "\r\n" # by default
-        server2:
-            addr: tcp://127.0.0.1:8889
+        monolog:
+            addr: tcp://127.0.0.1:9913
 
     pool:
         num_workers: 2
@@ -674,19 +674,24 @@ return [
      * Services for each server.
      */
     'services' => [
-        'tcp_access_point_1' => SomeService::class,
-        'server2' => OtherService::class
+        'smtp' => SomeService::class,
+        'monolog' => OtherService::class
     ],
 
     /**
      * Interceptors, this section is optional.
+     * @see https://spiral.dev/docs/cookbook-domain-core/2.8/en#core-interceptors  
      */
     'interceptors' => [
-       'tcp_access_point_1' => [SomeInterceptor::class, OtherInterceptor::class], // several interceptors
-       'server2' => SomeInterceptor::class // one interceptor
+        // several interceptors
+        'smtp' => [
+            SomeInterceptor::class, 
+            OtherInterceptor::class
+        ],
+        'monolog' => SomeInterceptor::class // one interceptor 
     ],
     
-    'debug' => true
+    'debug' => env('TCP_DEBUG', false)
 ];
 ```
 

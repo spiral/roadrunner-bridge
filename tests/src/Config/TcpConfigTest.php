@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Config;
 
-use Spiral\RoadRunnerBridge\Config\Exception\Tcp\InvalidInterceptorException;
-use Spiral\RoadRunnerBridge\Config\Exception\Tcp\InvalidServiceException;
-use Spiral\RoadRunnerBridge\Config\Exception\Tcp\ServiceNotFoundException;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
 use Spiral\Tests\TestCase;
 
@@ -37,41 +34,6 @@ final class TcpConfigTest extends TestCase
         $this->assertSame([], $config->getServices());
     }
 
-    public function testGetService(): void
-    {
-        $config = new TCPConfig([
-            'services' => [
-                'server' => 'foo',
-            ],
-        ]);
-
-        $this->assertSame('foo', $config->getService('server'));
-    }
-
-    public function testServiceIsNotExist(): void
-    {
-        $config = new TCPConfig([
-            'services' => [
-                'server' => 'foo',
-            ],
-        ]);
-
-        $this->expectException(ServiceNotFoundException::class);
-        $config->getService('bar');
-    }
-
-    public function testInvalidService(): void
-    {
-        $config = new TCPConfig([
-            'services' => [
-                'server' => false,
-            ],
-        ]);
-
-        $this->expectException(InvalidServiceException::class);
-        $config->getService('server');
-    }
-
     public function testGetInterceptors(): void
     {
         $config = new TCPConfig([
@@ -80,25 +42,13 @@ final class TcpConfigTest extends TestCase
             ],
         ]);
 
-        $this->assertSame(['foo', 'bar'], $config->getInterceptors('test'));
+        $this->assertSame(['test' => ['foo', 'bar']], $config->getInterceptors());
     }
 
     public function testGetNotExistsInterceptors(): void
     {
         $config = new TCPConfig();
 
-        $this->assertSame([], $config->getInterceptors('test'));
-    }
-
-    public function testInvalidInterceptor(): void
-    {
-        $config = new TCPConfig([
-            'interceptors' => [
-                'test' => false,
-            ],
-        ]);
-
-        $this->expectException(InvalidInterceptorException::class);
-        $config->getInterceptors('test');
+        $this->assertSame([], $config->getInterceptors());
     }
 }

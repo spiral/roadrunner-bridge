@@ -6,11 +6,13 @@ namespace Spiral\Tests\Tcp\Service;
 
 use Spiral\App\Tcp\TestService;
 use Spiral\Core\Container\Autowire;
-use Spiral\RoadRunnerBridge\Tcp\Service\LocatorInterface;
+use Spiral\RoadRunnerBridge\Tcp\Service\Exception\InvalidException;
+use Spiral\RoadRunnerBridge\Tcp\Service\Exception\NotFoundException;
+use Spiral\RoadRunnerBridge\Tcp\Service\RegistryInterface;
 use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
 use Spiral\Tests\TestCase;
 
-final class ServiceLocatorTest extends TestCase
+final class ServiceRegistryTest extends TestCase
 {
     public function testGetServerFromObject(): void
     {
@@ -42,8 +44,22 @@ final class ServiceLocatorTest extends TestCase
         $this->assertInstanceOf(ServiceInterface::class, $this->getService('test'));
     }
 
+    public function testGetNotExistenceServer(): void
+    {
+        $this->expectException(NotFoundException::class);
+        $this->assertInstanceOf(ServiceInterface::class, $this->getService('bar'));
+    }
+
+    public function testGetInvalidServer(): void
+    {
+        $this->updateConfig('tcp.services', ['test' => false]);
+
+        $this->expectException(InvalidException::class);
+        $this->assertInstanceOf(ServiceInterface::class, $this->getService('test'));
+    }
+
     private function getService(string $server): ServiceInterface
     {
-        return $this->container->get(LocatorInterface::class)->getService($server);
+        return $this->container->get(RegistryInterface::class)->getService($server);
     }
 }

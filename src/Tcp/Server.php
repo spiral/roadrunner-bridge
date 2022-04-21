@@ -10,19 +10,19 @@ use Spiral\RoadRunner\Tcp\TcpWorker;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
-use Spiral\RoadRunnerBridge\Tcp\Interceptor\LocatorInterface;
+use Spiral\RoadRunnerBridge\Tcp\Interceptor\RegistryInterface;
 use Spiral\RoadRunnerBridge\Tcp\Response\CloseConnection;
 
 final class Server
 {
     private TcpConfig $config;
-    private LocatorInterface $locator;
+    private RegistryInterface $registry;
     private TcpServerHandler $handler;
 
-    public function __construct(TcpConfig $config, LocatorInterface $locator, TcpServerHandler $handler)
+    public function __construct(TcpConfig $config, RegistryInterface $registry, TcpServerHandler $handler)
     {
         $this->config = $config;
-        $this->locator = $locator;
+        $this->registry = $registry;
         $this->handler = $handler;
     }
 
@@ -54,7 +54,7 @@ final class Server
     {
         $core = new InterceptableCore($this->handler);
 
-        foreach ($this->locator->getInterceptors($server) as $interceptor) {
+        foreach ($this->registry->getInterceptors($server) as $interceptor) {
             $core->addInterceptor($interceptor);
         }
 

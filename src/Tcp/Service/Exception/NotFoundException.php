@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Config\Exception\Tcp;
+namespace Spiral\RoadRunnerBridge\Tcp\Service\Exception;
 
-final class ServiceNotFoundException extends \RuntimeException
+final class NotFoundException extends \RuntimeException
 {
     /**
      * @psalm-param non-empty-string $server

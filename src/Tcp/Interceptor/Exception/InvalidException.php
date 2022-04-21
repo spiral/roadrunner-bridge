@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Config\Exception\Tcp;
+namespace Spiral\RoadRunnerBridge\Tcp\Interceptor\Exception;
 
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 
-final class InvalidInterceptorException extends \RuntimeException
+final class InvalidException extends \RuntimeException
 {
     /**
      * @psalm-param non-empty-string $type

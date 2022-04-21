@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Config\Exception\Tcp;
+namespace Spiral\RoadRunnerBridge\Tcp\Service\Exception;
 
 use Spiral\Core\Container\Autowire;
 use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
 
-final class InvalidServiceException extends \RuntimeException
+final class InvalidException extends \RuntimeException
 {
     /**
      * @psalm-param non-empty-string $type

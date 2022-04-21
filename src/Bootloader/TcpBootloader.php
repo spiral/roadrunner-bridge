@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
+use Psr\Container\ContainerInterface;
 use Spiral\Boot\Bootloader\Bootloader;
+use Spiral\Boot\EnvironmentInterface;
 use Spiral\Boot\KernelInterface;
 use Spiral\Config\ConfiguratorInterface;
-use Spiral\Config\Patch\Append;
-use Spiral\Core\Container\Autowire;
 use Spiral\Core\FactoryInterface;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
 use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
@@ -23,8 +23,8 @@ final class TcpBootloader extends Bootloader
     ];
 
     protected const SINGLETONS = [
-        Service\LocatorInterface::class => Service\ServiceLocator::class,
-        Interceptor\LocatorInterface::class => Interceptor\InterceptorLocator::class,
+        Service\RegistryInterface::class => [self::class, 'initServiceRegistry'],
+        Interceptor\RegistryInterface::class => [self::class, 'initInterceptorRegistry'],
         Server::class => Server::class,
     ];
 
@@ -35,9 +35,9 @@ final class TcpBootloader extends Bootloader
         $this->config = $config;
     }
 
-    public function boot(): void
+    public function boot(EnvironmentInterface $environment): void
     {
-        $this->initTcpConfig();
+        $this->initTcpConfig($environment);
     }
 
     public function start(KernelInterface $kernel, FactoryInterface $factory)
@@ -45,34 +45,29 @@ final class TcpBootloader extends Bootloader
         $kernel->addDispatcher($factory->make(Dispatcher::class));
     }
 
-    /**
-     * @param Autowire|Service\ServiceInterface|string $service
-     */
-    public function addService(string $server, $service): void
-    {
-        $this->config->modify(TcpConfig::CONFIG, new Append('services', $server, $service));
-    }
-
-    /**
-     * @param array|Autowire|Service\ServiceInterface|string $interceptor
-     */
-    public function addInterceptors(string $server, $interceptors): void
-    {
-        $this->config->modify(
-            TcpConfig::CONFIG,
-            new Append('interceptors', $server, \is_array($interceptors) ? $interceptors : [$interceptors])
-        );
-    }
-
-    private function initTcpConfig(): void
+    private function initTcpConfig(EnvironmentInterface $environment): void
     {
         $this->config->setDefaults(
             TcpConfig::CONFIG,
             [
                 'services' => [],
                 'interceptors' => [],
-                'debug' => false,
+                'debug' => $environment->get('TCP_DEBUG', false),
             ]
         );
+    }
+
+    private function initInterceptorRegistry(
+        TcpConfig $config,
+        ContainerInterface $container
+    ): Interceptor\RegistryInterface {
+        return new Interceptor\InterceptorRegistry($config->getInterceptors(), $container);
+    }
+
+    private function initServiceRegistry(
+        TcpConfig $config,
+        ContainerInterface $container
+    ): Service\RegistryInterface {
+        return new Service\ServiceRegistry($config->getServices(), $container);
     }
 }
