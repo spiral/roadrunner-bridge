@@ -24,6 +24,10 @@ final class ServiceRegistry implements RegistryInterface
         $this->container = $container;
     }
 
+    /**
+     * @psalm-param non-empty-string $server
+     * @param Autowire|ServiceInterface|string $service
+     */
     public function register(string $server, $service): void
     {
         $this->validate($service);
@@ -33,8 +37,6 @@ final class ServiceRegistry implements RegistryInterface
 
     /**
      * @psalm-param non-empty-string $server
-     *
-     * @return Autowire|ServiceInterface|string
      */
     public function getService(string $server): ServiceInterface
     {
@@ -52,6 +54,9 @@ final class ServiceRegistry implements RegistryInterface
         }
     }
 
+    /**
+     * @psalm-param non-empty-string $server
+     */
     public function hasService(string $server): bool
     {
         return isset($this->services[$server]);
