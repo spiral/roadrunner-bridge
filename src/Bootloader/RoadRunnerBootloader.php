@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
+use Psr\Http\Message\ServerRequestFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\UploadedFileFactoryInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface as GlobalEnvironmentInterface;
 use Spiral\Core\Container;
 use Spiral\Goridge\Relay;
 use Spiral\Goridge\RPC\RPC;
 use Spiral\Goridge\RPC\RPCInterface;
-use Spiral\Http\Diactoros\ServerRequestFactory;
-use Spiral\Http\Diactoros\StreamFactory;
-use Spiral\Http\Diactoros\UploadedFileFactory;
 use Spiral\RoadRunner\Environment;
 use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Http\PSR7Worker;
@@ -60,9 +60,9 @@ final class RoadRunnerBootloader extends Bootloader
 
         $container->bindSingleton(PSR7Worker::class, static function (
             WorkerInterface $worker,
-            ServerRequestFactory $requests,
-            StreamFactory $streams,
-            UploadedFileFactory $uploads
+            ServerRequestFactoryInterface $requests,
+            StreamFactoryInterface $streams,
+            UploadedFileFactoryInterface $uploads
         ): PSR7WorkerInterface {
             return new PSR7Worker($worker, $requests, $streams, $uploads);
         });

@@ -21,6 +21,7 @@
   "require": {
     "php": ">=8.1",
     "psr/simple-cache": "2 - 3",
+    "php-http/message-factory": "^1.0",
     "laminas/laminas-diactoros": "^2.4",
     "spiral/roadrunner-grpc": "^2.0",
     "spiral/roadrunner-jobs": "^2.0",
