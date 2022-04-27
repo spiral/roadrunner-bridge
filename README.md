@@ -37,14 +37,6 @@ protected const LOAD = [
 ];
 ```
 
-**!!! Please, pay attention, the following bootloaders will be automatically skipped after package installation:**
-
-- `Spiral\Bootloader\Jobs\JobsBootloader`
-- `Spiral\Bootloader\ServerBootloader`
-- `Spiral\Bootloader\Server\RoadRunnerBootloader`
-- `Spiral\Bootloader\Server\LegacyRoadRunnerBootloader`
-- `Spiral\Bootloader\GRPC\GRPCBootloader`
-
 ## Usage
 
 ### Cache

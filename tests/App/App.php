@@ -7,8 +7,10 @@ namespace Spiral\App;
 use Spiral\Boot\BootloadManager;
 use Spiral\Boot\DirectoriesInterface;
 use Spiral\Bootloader as Framework;
+use Spiral\Console\Bootloader\ConsoleBootloader;
 use Spiral\Console\Console;
 use Spiral\Core\Container;
+use Spiral\Http\Bootloader\DiactorosBootloader;
 use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 use Spiral\Framework\Kernel;
 
@@ -22,15 +24,11 @@ class App extends Kernel
         RoadRunnerBridge\RoadRunnerBootloader::class,
 
         // Framework commands
-        Framework\ConsoleBootloader::class,
+        ConsoleBootloader::class,
         Framework\CommandBootloader::class,
         Framework\SnapshotsBootloader::class,
-
-        // Deprecated bootloaders
         Framework\Http\HttpBootloader::class,
-        Framework\GRPC\GRPCBootloader::class,
-        Framework\Jobs\JobsBootloader::class,
-        Framework\ServerBootloader::class,
+        DiactorosBootloader::class,
 
         \Spiral\SendIt\Bootloader\MailerBootloader::class,
 

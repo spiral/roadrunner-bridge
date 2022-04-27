@@ -34,9 +34,6 @@
     "mockery/mockery": "^1.5"
   },
   "autoload": {
-    "files": [
-      "src/polyfill.php"
-    ],
     "psr-4": {
       "Spiral\\RoadRunnerBridge\\": "src"
     }
