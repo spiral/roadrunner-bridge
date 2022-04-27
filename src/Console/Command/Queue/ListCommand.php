@@ -16,7 +16,7 @@ final class ListCommand extends Command
 
     public function perform(JobsInterface $jobs): int
     {
-        $queues = iterator_to_array($jobs->getIterator());
+        $queues = \iterator_to_array($jobs->getIterator());
 
         if ($queues === []) {
             return self::SUCCESS;

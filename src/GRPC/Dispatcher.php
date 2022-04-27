@@ -15,18 +15,11 @@ use Spiral\Exceptions\ExceptionReporterInterface;
 
 final class Dispatcher implements DispatcherInterface
 {
-    private EnvironmentInterface $env;
-    private ContainerInterface $container;
-    private FinalizerInterface $finalizer;
-
     public function __construct(
-        EnvironmentInterface $env,
-        ContainerInterface $container,
-        FinalizerInterface $finalizer
+        private readonly EnvironmentInterface $env,
+        private readonly ContainerInterface $container,
+        private readonly FinalizerInterface $finalizer
     ) {
-        $this->env = $env;
-        $this->container = $container;
-        $this->finalizer = $finalizer;
     }
 
     public function canServe(): bool
@@ -34,7 +27,7 @@ final class Dispatcher implements DispatcherInterface
         return \PHP_SAPI === 'cli' && $this->env->getMode() === Mode::MODE_GRPC;
     }
 
-    public function serve()
+    public function serve(): void
     {
         /** @var Server $server */
         $server = $this->container->get(Server::class);
@@ -59,11 +52,11 @@ final class Dispatcher implements DispatcherInterface
         );
     }
 
-    private function handleException(\Throwable $e)
+    private function handleException(\Throwable $e): void
     {
         try {
             $this->container->get(ExceptionReporterInterface::class)->report($e);
-        } catch (\Throwable $se) {
+        } catch (\Throwable) {
             // no need to notify when unable to register an exception
         }
     }

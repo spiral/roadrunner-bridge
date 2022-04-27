@@ -22,13 +22,15 @@ final class CacheBootloader extends Bootloader
 
     public function boot(Container $container, BaseCacheBootloader $cacheBootloader): void
     {
-        $container->bindSingleton(FactoryInterface::class, static function (RPCInterface $rpc) {
-            return new Factory($rpc, new DefaultSerializer());
-        });
+        $container->bindSingleton(
+            FactoryInterface::class,
+            static fn(RPCInterface $rpc) => new Factory($rpc, new DefaultSerializer())
+        );
 
-        $container->bindSingleton(StorageInterface::class, static function (FactoryInterface $factory, string $driver) {
-            return $factory->select($driver);
-        });
+        $container->bindSingleton(
+            StorageInterface::class,
+            static fn(FactoryInterface $factory, string $driver) => $factory->select($driver)
+        );
 
         $cacheBootloader->registerTypeAlias(StorageInterface::class, 'roadrunner');
     }

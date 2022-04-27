@@ -30,28 +30,26 @@ final class RoadRunnerBootloader extends Bootloader
         $container->bindSingleton(EnvironmentInterface::class, Environment::class);
         $container->bindSingleton(
             Environment::class,
-            static function (GlobalEnvironmentInterface $env): EnvironmentInterface {
-                return new Environment($env->getAll());
-            }
+            static fn (GlobalEnvironmentInterface $env): EnvironmentInterface => new Environment($env->getAll())
         );
 
         //
         // Register RPC
         //
         $container->bindSingleton(RPCInterface::class, RPC::class);
-        $container->bindSingleton(RPC::class, static function (EnvironmentInterface $env): RPCInterface {
-            return new RPC(
-                Relay::create($env->getRPCAddress())
-            );
-        });
+        $container->bindSingleton(
+            RPC::class,
+            static fn (EnvironmentInterface $env): RPCInterface => new RPC(Relay::create($env->getRPCAddress()))
+        );
 
         //
         // Register Worker
         //
         $container->bindSingleton(WorkerInterface::class, Worker::class);
-        $container->bindSingleton(Worker::class, static function (EnvironmentInterface $env): WorkerInterface {
-            return Worker::createFromEnvironment($env);
-        });
+        $container->bindSingleton(
+            Worker::class,
+            static fn (EnvironmentInterface $env): WorkerInterface => Worker::createFromEnvironment($env)
+        );
 
         //
         // Register PSR Worker

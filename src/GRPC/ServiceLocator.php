@@ -10,13 +10,10 @@ use Spiral\Tokenizer\ClassesInterface;
 
 final class ServiceLocator implements LocatorInterface
 {
-    private ClassesInterface $classes;
-    private ContainerInterface $container;
-
-    public function __construct(ClassesInterface $classes, ContainerInterface $container)
-    {
-        $this->classes = $classes;
-        $this->container = $container;
+    public function __construct(
+        private readonly ClassesInterface $classes,
+        private readonly ContainerInterface $container
+    ) {
     }
 
     public function getServices(): array

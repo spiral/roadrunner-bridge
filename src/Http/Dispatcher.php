@@ -20,21 +20,12 @@ use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 
 final class Dispatcher implements DispatcherInterface
 {
-    private EnvironmentInterface $env;
-    private ContainerInterface $container;
-    private FinalizerInterface $finalizer;
-    private ErrorHandlerInterface $errorHandler;
-
     public function __construct(
-        EnvironmentInterface $env,
-        ContainerInterface $container,
-        ErrorHandlerInterface $errorHandler,
-        FinalizerInterface $finalizer
+        private readonly EnvironmentInterface $env,
+        private readonly ContainerInterface $container,
+        private readonly ErrorHandlerInterface $errorHandler,
+        private readonly FinalizerInterface $finalizer
     ) {
-        $this->env = $env;
-        $this->container = $container;
-        $this->finalizer = $finalizer;
-        $this->errorHandler = $errorHandler;
     }
 
     public function canServe(): bool
@@ -42,7 +33,7 @@ final class Dispatcher implements DispatcherInterface
         return \PHP_SAPI === 'cli' && $this->env->getMode() === Mode::MODE_HTTP;
     }
 
-    public function serve()
+    public function serve(): void
     {
         /** @var PSR7WorkerInterface $worker */
         $worker = $this->container->get(PSR7WorkerInterface::class);
@@ -77,7 +68,7 @@ final class Dispatcher implements DispatcherInterface
                     $handler = $handler->withState($state);
                 }
             }
-        } catch (\Throwable|ContainerExceptionInterface $se) {
+        } catch (\Throwable|ContainerExceptionInterface) {
             \file_put_contents('php://stderr', (string)$e);
         }
 

@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Queue;
 
 use Spiral\RoadRunner\Jobs\Serializer\SerializerInterface;
+use Spiral\Queue\SerializerInterface as QueueSerializerInterface;
 
 /**
  * @internal
  */
 final class JobsAdapterSerializer implements SerializerInterface
 {
-    private \Spiral\Queue\SerializerInterface $serializer;
-
-    public function __construct(\Spiral\Queue\SerializerInterface $serializer)
-    {
-        $this->serializer = $serializer;
+    public function __construct(
+        private readonly QueueSerializerInterface $serializer
+    ) {
     }
 
     public function serialize(array $payload): string

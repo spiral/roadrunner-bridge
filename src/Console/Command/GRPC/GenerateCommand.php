@@ -31,7 +31,7 @@ final class GenerateCommand extends Command
     ): int {
         $binaryPath = $config->getBinaryPath();
 
-        if ($binaryPath !== null && ! file_exists($binaryPath)) {
+        if ($binaryPath !== null && !\file_exists($binaryPath)) {
             $this->sprintf('<error>PHP Server plugin binary `%s` not found.</error>', $binaryPath);
 
             return self::FAILURE;
@@ -45,7 +45,7 @@ final class GenerateCommand extends Command
         );
 
         foreach ($config->getServices() as $protoFile) {
-            if (! file_exists($protoFile)) {
+            if (!\file_exists($protoFile)) {
                 $this->sprintf('<error>Proto file `%s` not found.</error>', $protoFile);
                 continue;
             }
@@ -89,7 +89,7 @@ final class GenerateCommand extends Command
 
         $r = new \ReflectionObject($kernel);
 
-        return dirname($r->getFileName());
+        return \dirname($r->getFileName());
     }
 
     /**
@@ -102,8 +102,6 @@ final class GenerateCommand extends Command
             return $namespace;
         }
 
-        $r = new \ReflectionObject($kernel);
-
-        return $r->getNamespaceName();
+        return (new \ReflectionObject($kernel))->getNamespaceName();
     }
 }

@@ -31,7 +31,7 @@ final class ListCommand extends Command
         foreach ($services as $interface => $instance) {
             $table->addRow([
                 $interface::NAME,
-                get_class($instance),
+                $instance::class,
                 (new \ReflectionObject($instance))->getFileName(),
             ]);
         }

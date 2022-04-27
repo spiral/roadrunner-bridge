@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
 use Spiral\Boot\Bootloader\Bootloader;
-use Spiral\Boot\EnvironmentInterface;
 use Spiral\Boot\KernelInterface;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Core\FactoryInterface;
@@ -29,24 +28,22 @@ final class GRPCBootloader extends Bootloader
         LocatorInterface::class => ServiceLocator::class,
     ];
 
-    private ConfiguratorInterface $config;
-
-    public function __construct(ConfiguratorInterface $config)
-    {
-        $this->config = $config;
+    public function __construct(
+        private readonly ConfiguratorInterface $config
+    ) {
     }
 
-    public function boot(EnvironmentInterface $env): void
+    public function boot(): void
     {
-        $this->initGrpcConfig($env);
+        $this->initGrpcConfig();
     }
 
-    public function start(KernelInterface $kernel, FactoryInterface $factory)
+    public function start(KernelInterface $kernel, FactoryInterface $factory): void
     {
         $kernel->addDispatcher($factory->make(Dispatcher::class));
     }
 
-    private function initGrpcConfig(EnvironmentInterface $env): void
+    private function initGrpcConfig(): void
     {
         $this->config->setDefaults(
             GRPCConfig::CONFIG,

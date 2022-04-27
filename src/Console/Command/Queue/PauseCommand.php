@@ -21,12 +21,12 @@ final class PauseCommand extends Command
         $name = $this->argument('pipeline');
 
         if ($this->isVerbose()) {
-            $this->writeln(sprintf('<info>Pausing pipeline [%s]</info>', $name));
+            $this->writeln(\sprintf('<info>Pausing pipeline [%s]</info>', $name));
         }
 
         $jobs->pause($name);
 
-        $this->writeln(sprintf('<info>Pipeline [%s] has been paused.</info>', $name));
+        $this->writeln(\sprintf('<info>Pipeline [%s] has been paused.</info>', $name));
 
         return self::SUCCESS;
     }

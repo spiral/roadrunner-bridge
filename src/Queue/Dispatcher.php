@@ -12,34 +12,28 @@ use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\RoadRunner\Environment\Mode;
 use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
+use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\Queue\Failed\FailedJobHandlerInterface;
 
 final class Dispatcher implements DispatcherInterface
 {
-    private EnvironmentInterface $env;
-    private ContainerInterface $container;
-    private FinalizerInterface $finalizer;
-
     public function __construct(
-        ContainerInterface $container,
-        FinalizerInterface $finalizer,
-        EnvironmentInterface $env
+        private readonly ContainerInterface $container,
+        private readonly FinalizerInterface $finalizer,
+        private readonly EnvironmentInterface $env
     ) {
-        $this->env = $env;
-        $this->container = $container;
-        $this->finalizer = $finalizer;
     }
 
     public function canServe(): bool
     {
-        return \PHP_SAPI == 'cli' && $this->env->getMode() === Mode::MODE_JOBS;
+        return \PHP_SAPI === 'cli' && $this->env->getMode() === Mode::MODE_JOBS;
     }
 
     /**
-     * @throws \Spiral\RoadRunner\Jobs\Exception\JobsException
+     * @throws JobsException
      */
-    public function serve()
+    public function serve(): void
     {
         /** @var ConsumerInterface $consumer */
         $consumer = $this->container->get(ConsumerInterface::class);
@@ -72,7 +66,7 @@ final class Dispatcher implements DispatcherInterface
                 $task->getPayload(),
                 $e
             );
-        } catch (\Throwable|ContainerExceptionInterface $se) {
+        } catch (\Throwable|ContainerExceptionInterface) {
             // no need to notify when unable to register an exception
         }
     }

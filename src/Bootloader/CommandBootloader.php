@@ -40,19 +40,19 @@ final class CommandBootloader extends Bootloader
         }
     }
 
-    private function configureJobs(ConsoleBootloader $console)
+    private function configureJobs(ConsoleBootloader $console): void
     {
         $console->addCommand(Queue\PauseCommand::class);
         $console->addCommand(Queue\ResumeCommand::class);
         $console->addCommand(Queue\ListCommand::class);
     }
 
-    private function configureCache(ConsoleBootloader $console)
+    private function configureCache(ConsoleBootloader $console): void
     {
         $console->addCommand(Cache\ClearCommand::class);
     }
 
-    private function configureGrpc(ConsoleBootloader $console)
+    private function configureGrpc(ConsoleBootloader $console): void
     {
         $console->addCommand(GRPC\GenerateCommand::class);
         $console->addCommand(GRPC\ListCommand::class);

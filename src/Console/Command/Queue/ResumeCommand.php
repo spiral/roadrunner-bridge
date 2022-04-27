@@ -21,12 +21,12 @@ final class ResumeCommand extends Command
         $name = $this->argument('pipeline');
 
         if ($this->isVerbose()) {
-            $this->writeln(sprintf('<info>Pausing pipeline [%s]</info>', $name));
+            $this->writeln(\sprintf('<info>Pausing pipeline [%s]</info>', $name));
         }
 
         $jobs->resume($name);
 
-        $this->writeln(sprintf('<info>Pipeline [%s] has been resumed.</info>', $name));
+        $this->writeln(\sprintf('<info>Pipeline [%s] has been resumed.</info>', $name));
 
         return self::SUCCESS;
     }

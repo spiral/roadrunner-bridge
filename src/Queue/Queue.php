@@ -17,28 +17,20 @@ use Spiral\RoadRunner\Jobs\QueueInterface as RRQueueInterface;
 final class Queue implements QueueInterface
 {
     use QueueTrait;
-
-    private FactoryInterface $factory;
-    private int $ttl;
-    /** @var non-empty-string|null */
-    private ?string $default;
     /** @var array<non-empty-string, RRQueueInterface> */
     private array $queues = [];
-    /** @var array<non-empty-string, array{connector: CreateInfoInterface, consume: bool}> */
-    private array $pipelines;
-    /** @var array<non-empty-string,non-empty-string> */
-    private array $aliases;
 
+    /**
+     * @param array<non-empty-string, array{connector: CreateInfoInterface, consume: bool}> $pipelines
+     * @param array<non-empty-string,non-empty-string> $aliases
+     * @param non-empty-string|null $default
+     */
     public function __construct(
-        FactoryInterface $factory,
-        array $pipelines = [],
-        array $aliases = [],
-        ?string $default = null
+        private readonly FactoryInterface $factory,
+        private readonly array $pipelines = [],
+        private readonly array $aliases = [],
+        private readonly ?string $default = null
     ) {
-        $this->default = $default;
-        $this->factory = $factory;
-        $this->pipelines = $pipelines;
-        $this->aliases = $aliases;
     }
 
     /**

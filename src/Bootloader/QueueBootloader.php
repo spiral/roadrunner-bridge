@@ -46,18 +46,18 @@ final class QueueBootloader extends Bootloader
 
     private function registerJobsSerializer(Container $container): void
     {
-        $container->bindSingleton(RRSerializerInterface::class, static function (SerializerInterface $serializer) {
-            return new JobsAdapterSerializer($serializer);
-        });
+        $container->bindSingleton(
+            RRSerializerInterface::class,
+            static fn (SerializerInterface $serializer) => new JobsAdapterSerializer($serializer)
+        );
     }
 
     private function registerConsumer(Container $container): void
     {
         $container->bindSingleton(
             ConsumerInterface::class,
-            static function (WorkerInterface $worker, RRSerializerInterface $serializer): Consumer {
-                return new Consumer($worker, $serializer);
-            }
+            static fn (WorkerInterface $worker, RRSerializerInterface $serializer): Consumer =>
+                new Consumer($worker, $serializer)
         );
     }
 
@@ -65,9 +65,7 @@ final class QueueBootloader extends Bootloader
     {
         $container->bindSingleton(
             JobsInterface::class,
-            static function (RPCInterface $rpc, RRSerializerInterface $serializer): Jobs {
-                return new Jobs($rpc, $serializer);
-            }
+            static fn (RPCInterface $rpc, RRSerializerInterface $serializer): Jobs => new Jobs($rpc, $serializer)
         );
     }
 
@@ -75,9 +73,8 @@ final class QueueBootloader extends Bootloader
     {
         $container->bind(
             PipelineRegistryInterface::class,
-            static function (JobsInterface $jobs, array $pipelines, array $aliases): PipelineRegistryInterface {
-                return new RPCPipelineRegistry($jobs, $pipelines, $aliases);
-            }
+            static fn (JobsInterface $jobs, array $pipelines, array $aliases): PipelineRegistryInterface =>
+                new RPCPipelineRegistry($jobs, $pipelines, $aliases)
         );
     }
 }
