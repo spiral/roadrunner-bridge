@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Spiral\Tests\Broadcasting;
 
 use Mockery as m;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Spiral\Broadcasting\AuthorizationStatus;
 use Spiral\Broadcasting\GuardInterface;
 use Spiral\RoadRunner\Broadcast\BroadcastInterface;
 use Spiral\RoadRunnerBridge\Broadcasting\RoadRunnerBroadcast;
@@ -51,8 +51,8 @@ final class RoadRunnerBroadcastTest extends TestCase
         $this->guard->shouldReceive('authorize')
             ->with($request)
             ->once()
-            ->andReturn($response = m::mock(ResponseInterface::class));
+            ->andReturn($status = new AuthorizationStatus(true, ['foo']));
 
-        $this->assertSame($response, $this->broadcast->authorize($request));
+        $this->assertSame($status, $this->broadcast->authorize($request));
     }
 }

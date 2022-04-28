@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Broadcasting;
 
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Spiral\Broadcasting\AuthorizationStatus;
 use Spiral\Broadcasting\Driver\AbstractBroadcast;
 use Spiral\Broadcasting\GuardInterface;
 use Spiral\RoadRunner\Broadcast\BroadcastInterface;
@@ -38,7 +38,7 @@ final class RoadRunnerBroadcast extends AbstractBroadcast implements GuardInterf
         return $this->broadcast->join($topics);
     }
 
-    public function authorize(ServerRequestInterface $request): ResponseInterface
+    public function authorize(ServerRequestInterface $request): AuthorizationStatus
     {
         return $this->guard->authorize($request);
     }

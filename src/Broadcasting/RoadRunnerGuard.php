@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Broadcasting;
 
-use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Spiral\Broadcasting\AuthorizationStatus;
 use Spiral\Broadcasting\GuardInterface;
 use Spiral\Broadcasting\TopicRegistryInterface;
 use Spiral\Core\InvokerInterface;
@@ -17,18 +16,15 @@ final class RoadRunnerGuard implements GuardInterface
     private TopicRegistryInterface $topics;
     private InvokerInterface $invoker;
     private ScopeInterface $scope;
-    private ResponseFactoryInterface $responseFactory;
     /** @var callable|null */
     private $serverAuthorizeCallback;
 
     public function __construct(
-        ResponseFactoryInterface $responseFactory,
         InvokerInterface $invoker,
         ScopeInterface $scope,
         TopicRegistryInterface $topics,
         ?callable $serverAuthorizeCallback = null
-   ) {
-        $this->responseFactory = $responseFactory;
+    ) {
         $this->invoker = $invoker;
         $this->scope = $scope;
         $this->topics = $topics;
@@ -37,27 +33,30 @@ final class RoadRunnerGuard implements GuardInterface
 
     public function authorize(
         ServerRequestInterface $request
-    ): ResponseInterface {
+    ): AuthorizationStatus {
         // server authorization
         if ($request->getAttribute('ws:joinServer') !== null) {
             if (!$this->authorizeServer($request)) {
-                return $this->responseFactory->createResponse(403);
+                return new AuthorizationStatus(false, []);
             }
 
-            return $this->responseFactory->createResponse(200);
+            return new AuthorizationStatus(true, []);
         }
 
         // topic authorization
         $topics = $request->getAttribute('ws:joinTopics');
         if (\is_string($topics)) {
-            foreach (\explode(',', $topics) as $topic) {
+            $topics = \explode(',', $topics);
+            foreach ($topics as $topic) {
                 if (!$this->authorizeTopic($request, $topic)) {
-                    return $this->responseFactory->createResponse(403);
+                    return new AuthorizationStatus(false, [$topic]);
                 }
             }
+
+            return new AuthorizationStatus(true, $topics);
         }
 
-        return $this->responseFactory->createResponse(200);
+        return new AuthorizationStatus(true, []);
     }
 
     private function authorizeServer(ServerRequestInterface $request): bool
