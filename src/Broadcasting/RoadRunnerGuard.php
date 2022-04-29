@@ -85,7 +85,7 @@ final class RoadRunnerGuard implements GuardInterface
             [
                 ServerRequestInterface::class => $request,
             ],
-            fn(): bool => $this->invoker->invoke($callback, $parameters)
+            fn (): bool => $this->invoker->invoke($callback, $parameters)
         );
     }
 }

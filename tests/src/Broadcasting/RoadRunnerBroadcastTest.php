@@ -15,9 +15,9 @@ use Spiral\Tests\TestCase;
 final class RoadRunnerBroadcastTest extends TestCase
 {
     private RoadRunnerBroadcast $broadcast;
-    /** @var m\LegacyMockInterface|m\MockInterface|BroadcastInterface */
+    /** @var BroadcastInterface|m\LegacyMockInterface|m\MockInterface */
     private $baseBroadcast;
-    /** @var m\LegacyMockInterface|m\MockInterface|GuardInterface */
+    /** @var GuardInterface|m\LegacyMockInterface|m\MockInterface */
     private $guard;
 
     protected function setUp(): void

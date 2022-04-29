@@ -27,6 +27,7 @@ final class RoadRunnerBroadcast extends AbstractBroadcast implements GuardInterf
     /**
      * @param non-empty-list<string> $topics
      * @param non-empty-list<string> $messages
+     *
      * @throws \Spiral\RoadRunner\Broadcast\Exception\BroadcastException
      */
     public function publish($topics, $messages): void

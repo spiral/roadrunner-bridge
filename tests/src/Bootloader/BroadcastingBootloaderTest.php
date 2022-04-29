@@ -25,6 +25,7 @@ final class BroadcastingBootloaderTest extends TestCase
             Broadcast::class
         );
     }
+
     public function testRoadRunnerGuardBinding(): void
     {
         $this->container->bind(
