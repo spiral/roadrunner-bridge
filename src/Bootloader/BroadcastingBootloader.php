@@ -55,7 +55,6 @@ final class BroadcastingBootloader extends Bootloader
         BroadcastConfig $config
     ): RoadRunnerGuard {
         return new RoadRunnerGuard(
-            $responseFactory,
             $invoker,
             $scope,
             $registry,
