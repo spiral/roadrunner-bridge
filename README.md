@@ -34,7 +34,7 @@ protected const LOAD = [
     RoadRunnerBridge\GRPCBootloader::class,
     RoadRunnerBridge\BroadcastingBootloader::class,
     RoadRunnerBridge\CommandBootloader::class,
-    
+    RoadRunnerBridge\TcpBootloader::class, // Optional, if need to work with TCP
     // ...
 ];
 ```
@@ -623,11 +623,119 @@ protected const LOAD = [
 php app.php queue:pause local
 ```
 
+### TCP
+
+RoadRunner includes TCP server and can be used to replace classic TCP setup with much greater performance and flexibility.
+
+#### Bootloader
+
+Add `Spiral\RoadRunnerBridge\Bootloader\TcpBootloader` to application bootloaders list:
+
+```php
+use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
+
+protected const LOAD = [
+    // ...
+    RoadRunnerBridge\TcpBootloader::class, 
+    // ...
+];
+```
+
+This bootloader adds a dispatcher and necessary services for TCP to work.
+Also, using the `addService` and `addInterceptors` methods can dynamically add services to TCP servers and configure interceptors.
+
+#### Configuration
+
+Configure `tcp` section in the RoadRunner `.rr.yaml` configuration file with needed TCP servers. Example:
+
+```yaml
+tcp:
+    servers:
+        smtp:
+            addr: tcp://127.0.0.1:22
+            delimiter: "\r\n" # by default
+        monolog:
+            addr: tcp://127.0.0.1:9913
+
+    pool:
+        num_workers: 2
+        max_jobs: 0
+        allocate_timeout: 60s
+        destroy_timeout: 60s
+```
+
+Create configuration file `app/config/tcp.php`. In the configuration, it's required to specify the services that 
+will handle requests from a specific TCP server. Optionally, interceptors can be added for each specific server. 
+With the help there, can add some logic before handling the request in service. Configuration example:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+return [
+    /**
+     * Services for each server.
+     */
+    'services' => [
+        'smtp' => SomeService::class,
+        'monolog' => OtherService::class
+    ],
+
+    /**
+     * Interceptors, this section is optional.
+     * @see https://spiral.dev/docs/cookbook-domain-core/2.8/en#core-interceptors  
+     */
+    'interceptors' => [
+        // several interceptors
+        'smtp' => [
+            SomeInterceptor::class, 
+            OtherInterceptor::class
+        ],
+        'monolog' => SomeInterceptor::class // one interceptor 
+    ],
+    
+    'debug' => env('TCP_DEBUG', false)
+];
+```
+
+#### Services
+
+A service must implement the interface `Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface` with one required method `handle`.
+After processing a request, the `handle` method must return the `Spiral\RoadRunnerBridge\Tcp\Response\ResponseInterface` object
+with result (`RespondMessage`, `CloseConnection`, `ContinueRead`).
+
+Example:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tcp\Service;
+
+use Spiral\RoadRunner\Tcp\Request;
+use Spiral\RoadRunnerBridge\Tcp\Response\RespondMessage;
+use Spiral\RoadRunnerBridge\Tcp\Response\ResponseInterface;
+use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
+
+class TestService implements ServiceInterface
+{
+    public function handle(Request $request): ResponseInterface
+    {
+        // some logic
+    
+        return new RespondMessage('some message', true);
+    }
+}
+```
+
 ### Broadcasting
 
 #### Configuration
 
 You can create config file `app/config/broadcasting.php` if you want to configure Broadcasting drivers.
+
 
 ```php
 <?php
