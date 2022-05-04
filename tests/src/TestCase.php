@@ -7,6 +7,7 @@ namespace Spiral\Tests;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Spiral\App\App;
+use Spiral\Boot\BootloadManager\BootloadManager;
 use Spiral\Boot\DirectoriesInterface;
 use Spiral\Boot\Environment;
 use Spiral\Boot\EnvironmentInterface;
@@ -106,7 +107,6 @@ abstract class TestCase extends BaseTestCase
     {
         $reflection = new \ReflectionClass($obj);
         $property = $reflection->getProperty($prop);
-        $property->setAccessible(true);
 
         return $property->getValue($obj);
     }
@@ -169,8 +169,9 @@ abstract class TestCase extends BaseTestCase
      */
     public function getLoadedBootloaders(): array
     {
+        /** @var BootloadManager $bootloader */
         $bootloader = $this->accessProtected($this->app, 'bootloader');
 
-        return $this->accessProtected($bootloader, 'classes');
+        return $bootloader->getClasses();
     }
 }

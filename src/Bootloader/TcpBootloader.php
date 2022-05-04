@@ -28,19 +28,17 @@ final class TcpBootloader extends Bootloader
         Server::class => Server::class,
     ];
 
-    private ConfiguratorInterface $config;
-
-    public function __construct(ConfiguratorInterface $config)
-    {
-        $this->config = $config;
+    public function __construct(
+        private readonly ConfiguratorInterface $config
+    ) {
     }
 
-    public function boot(EnvironmentInterface $environment): void
+    public function init(EnvironmentInterface $environment): void
     {
         $this->initTcpConfig($environment);
     }
 
-    public function start(KernelInterface $kernel, FactoryInterface $factory)
+    public function boot(KernelInterface $kernel, FactoryInterface $factory)
     {
         $kernel->addDispatcher($factory->make(Dispatcher::class));
     }

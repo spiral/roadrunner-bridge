@@ -7,25 +7,18 @@ namespace Spiral\RoadRunnerBridge\Tcp;
 use Psr\Container\ContainerInterface;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
+use Spiral\Exceptions\ExceptionReporterInterface;
 use Spiral\RoadRunner\Environment\Mode;
 use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\WorkerInterface;
-use Spiral\Snapshots\SnapshotterInterface;
 
 final class Dispatcher implements DispatcherInterface
 {
-    private EnvironmentInterface $env;
-    private ContainerInterface $container;
-    private FinalizerInterface $finalizer;
-
     public function __construct(
-        EnvironmentInterface $env,
-        ContainerInterface $container,
-        FinalizerInterface $finalizer
+        private readonly EnvironmentInterface $env,
+        private readonly ContainerInterface $container,
+        private readonly FinalizerInterface $finalizer
     ) {
-        $this->env = $env;
-        $this->container = $container;
-        $this->finalizer = $finalizer;
     }
 
     public function canServe(): bool
@@ -55,8 +48,8 @@ final class Dispatcher implements DispatcherInterface
     private function handleException(\Throwable $e): void
     {
         try {
-            $this->container->get(SnapshotterInterface::class)->register($e);
-        } catch (\Throwable $e) {
+            $this->container->get(ExceptionReporterInterface::class)->report($e);
+        } catch (\Throwable) {
             // no need to notify when unable to register an exception
         }
     }

@@ -16,11 +16,7 @@ use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 
 final class CommandBootloader extends Bootloader
 {
-    protected const DEPENDENCIES = [
-        ConsoleBootloader::class,
-    ];
-
-    public function boot(ConsoleBootloader $console, Container $container): void
+    public function init(ConsoleBootloader $console, Container $container): void
     {
         $this->configureExtensions($console, $container);
     }

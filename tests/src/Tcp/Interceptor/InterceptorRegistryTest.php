@@ -7,7 +7,6 @@ namespace Spiral\Tests\Tcp\Interceptor;
 use Spiral\App\Tcp\TestInterceptor;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
-use Spiral\RoadRunnerBridge\Tcp\Interceptor\Exception\InvalidException;
 use Spiral\RoadRunnerBridge\Tcp\Interceptor\RegistryInterface;
 use Spiral\Tests\TestCase;
 
@@ -40,22 +39,6 @@ final class InterceptorRegistryTest extends TestCase
     {
         $this->updateConfig('tcp.interceptors', ['server' => new Autowire(TestInterceptor::class)]);
 
-        $this->assertInstanceOf(CoreInterceptorInterface::class, $this->getInterceptor());
-    }
-
-    public function testInvalidInterceptor(): void
-    {
-        $this->updateConfig('tcp.interceptors', ['server' => false]);
-
-        $this->expectException(InvalidException::class);
-        $this->assertInstanceOf(CoreInterceptorInterface::class, $this->getInterceptor());
-    }
-
-    public function testInArrayInvalidInterceptor(): void
-    {
-        $this->updateConfig('tcp.interceptors', ['server' => [false]]);
-
-        $this->expectException(InvalidException::class);
         $this->assertInstanceOf(CoreInterceptorInterface::class, $this->getInterceptor());
     }
 

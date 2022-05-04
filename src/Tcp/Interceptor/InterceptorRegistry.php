@@ -8,15 +8,15 @@ use Psr\Container\ContainerInterface;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\FactoryInterface;
-use Spiral\RoadRunnerBridge\Tcp\Interceptor\Exception\InvalidException;
 
 final class InterceptorRegistry implements RegistryInterface
 {
     private array $interceptors;
-    private ContainerInterface $container;
 
-    public function __construct(array $interceptors, ContainerInterface $container)
-    {
+    public function __construct(
+        array $interceptors,
+        private readonly ContainerInterface $container
+    ) {
         foreach ($interceptors as $server => $values) {
             if (!\is_array($values)) {
                 $values = [$values];
@@ -26,19 +26,13 @@ final class InterceptorRegistry implements RegistryInterface
                 $this->register($server, $interceptor);
             }
         }
-
-        $this->container = $container;
     }
 
     /**
      * @psalm-param non-empty-string $server
-     *
-     * @param Autowire|CoreInterceptorInterface|string $interceptor
      */
-    public function register(string $server, $interceptor): void
+    public function register(string $server, Autowire|CoreInterceptorInterface|string $interceptor): void
     {
-        $this->validate($interceptor);
-
         $this->interceptors[$server][] = $interceptor;
     }
 
@@ -51,36 +45,13 @@ final class InterceptorRegistry implements RegistryInterface
     {
         $interceptors = [];
         foreach ($this->interceptors[$server] ?? [] as $value) {
-            $this->validate($value);
-
-            switch (true) {
-                case $value instanceof CoreInterceptorInterface:
-                    $interceptors[] = $value;
-                    break;
-                case $value instanceof Autowire:
-                    $interceptors[] = $value->resolve($this->container->get(FactoryInterface::class));
-                    break;
-                default:
-                    $interceptors[] = $this->container->get($value);
-            }
+            $interceptors[] = match (true) {
+                $value instanceof CoreInterceptorInterface => $value,
+                $value instanceof Autowire => $value->resolve($this->container->get(FactoryInterface::class)),
+                default => $this->container->get($value)
+            };
         }
 
         return $interceptors;
-    }
-
-    /**
-     * @param mixed $interceptor
-     */
-    private function validate($interceptor): void
-    {
-        if (
-            $interceptor instanceof CoreInterceptorInterface ||
-            $interceptor instanceof Autowire ||
-            \is_string($interceptor)
-        ) {
-            return;
-        }
-
-        throw new InvalidException(\get_debug_type($interceptor));
     }
 }

@@ -23,7 +23,7 @@ final class HttpBootloader extends Bootloader
         ErrorHandlerInterface::class => LogErrorHandler::class,
     ];
 
-    public function start(KernelInterface $kernel, FactoryInterface $factory): void
+    public function boot(KernelInterface $kernel, FactoryInterface $factory): void
     {
         $kernel->addDispatcher($factory->make(Dispatcher::class));
     }

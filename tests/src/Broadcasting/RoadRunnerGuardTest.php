@@ -36,7 +36,7 @@ final class RoadRunnerGuardTest extends TestCase
         $request->shouldReceive('getAttribute')->with('ws:joinTopics')->andReturnNull();
 
         $status = $this->makeGuard()->authorize($request);
-        $this->assertTrue($status->isSuccessful());
+        $this->assertTrue($status->success);
     }
 
     public function testRequestShouldBeAuthorizedWhenRequestContainJoinServerAttributesWithoutCallback(): void
@@ -46,7 +46,7 @@ final class RoadRunnerGuardTest extends TestCase
         $request->shouldReceive('getAttribute')->with('ws:joinServer')->andReturnTrue();
 
         $status = $this->makeGuard()->authorize($request);
-        $this->assertTrue($status->isSuccessful());
+        $this->assertTrue($status->success);
     }
 
     public function testRequestShouldNotBeAuthorizedWhenRequestContainJoinServerAttributesButCallbackReturnFalse(): void
@@ -59,7 +59,7 @@ final class RoadRunnerGuardTest extends TestCase
             return false;
         })->authorize($request);
 
-        $this->assertFalse($status->isSuccessful());
+        $this->assertFalse($status->success);
     }
 
     public function testRequestShouldBeAuthorizedWhenRequestContainJoinTopicsAttributesButCallbackReturnTrue(): void
@@ -76,8 +76,8 @@ final class RoadRunnerGuardTest extends TestCase
             return true;
         });
         $status = $this->makeGuard()->authorize($request);
-        $this->assertTrue($status->isSuccessful());
-        $this->assertSame(['topic_name', 'topic_name2'], $status->getTopics());
+        $this->assertTrue($status->success);
+        $this->assertSame(['topic_name', 'topic_name2'], $status->topics);
     }
 
     public function testRequestShouldNotBeAuthorizedWhenRequestContainJoinTopicsAttributesButOneOfCallbacksReturnFalse(): void
@@ -97,8 +97,8 @@ final class RoadRunnerGuardTest extends TestCase
 
         $status = $this->makeGuard()->authorize($request);
 
-        $this->assertFalse($status->isSuccessful());
-        $this->assertSame(['topic_name2'], $status->getTopics());
+        $this->assertFalse($status->success);
+        $this->assertSame(['topic_name2'], $status->topics);
     }
 
     private function makeGuard(?callable $serverCallback = null): RoadRunnerGuard

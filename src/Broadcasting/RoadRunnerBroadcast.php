@@ -13,15 +13,10 @@ use Spiral\RoadRunner\Broadcast\TopicInterface;
 
 final class RoadRunnerBroadcast extends AbstractBroadcast implements GuardInterface
 {
-    private BroadcastInterface $broadcast;
-    private GuardInterface $guard;
-
     public function __construct(
-        BroadcastInterface $broadcast,
-        GuardInterface $guard
+        private readonly BroadcastInterface $broadcast,
+        private readonly GuardInterface $guard
     ) {
-        $this->broadcast = $broadcast;
-        $this->guard = $guard;
     }
 
     /**
@@ -30,12 +25,12 @@ final class RoadRunnerBroadcast extends AbstractBroadcast implements GuardInterf
      *
      * @throws \Spiral\RoadRunner\Broadcast\Exception\BroadcastException
      */
-    public function publish($topics, $messages): void
+    public function publish(iterable|string|\Stringable $topics, iterable|string $messages): void
     {
         $this->broadcast->publish($topics, $messages);
     }
 
-    public function join($topics): TopicInterface
+    public function join(iterable|string|\Stringable $topics): TopicInterface
     {
         return $this->broadcast->join($topics);
     }

@@ -15,10 +15,8 @@ interface RegistryInterface
 
     /**
      * @psalm-param non-empty-string $server
-     *
-     * @param Autowire|ServiceInterface|string $service
      */
-    public function register(string $server, $service): void;
+    public function register(string $server, Autowire|ServiceInterface|string $service): void;
 
     /**
      * @psalm-param non-empty-string $server

@@ -15,15 +15,11 @@ use Spiral\RoadRunnerBridge\Tcp\Response\CloseConnection;
 
 final class Server
 {
-    private TcpConfig $config;
-    private RegistryInterface $registry;
-    private TcpServerHandler $handler;
-
-    public function __construct(TcpConfig $config, RegistryInterface $registry, TcpServerHandler $handler)
-    {
-        $this->config = $config;
-        $this->registry = $registry;
-        $this->handler = $handler;
+    public function __construct(
+        private readonly TcpConfig $config,
+        private readonly RegistryInterface $registry,
+        private readonly TcpServerHandler $handler
+    ) {
     }
 
     public function serve(WorkerInterface $worker = null, callable $finalize = null): void

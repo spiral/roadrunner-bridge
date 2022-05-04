@@ -13,21 +13,15 @@ use Spiral\Core\ScopeInterface;
 
 final class RoadRunnerGuard implements GuardInterface
 {
-    private TopicRegistryInterface $topics;
-    private InvokerInterface $invoker;
-    private ScopeInterface $scope;
     /** @var callable|null */
-    private $serverAuthorizeCallback;
+    private mixed $serverAuthorizeCallback;
 
     public function __construct(
-        InvokerInterface $invoker,
-        ScopeInterface $scope,
-        TopicRegistryInterface $topics,
+        private readonly InvokerInterface $invoker,
+        private readonly ScopeInterface $scope,
+        private readonly TopicRegistryInterface $topics,
         ?callable $serverAuthorizeCallback = null
     ) {
-        $this->invoker = $invoker;
-        $this->scope = $scope;
-        $this->topics = $topics;
         $this->serverAuthorizeCallback = $serverAuthorizeCallback;
     }
 

@@ -8,13 +8,10 @@ use Spiral\RoadRunner\Tcp\TcpWorkerInterface;
 
 class RespondMessage implements ResponseInterface
 {
-    private string $body;
-    private bool $close;
-
-    public function __construct(string $body, bool $close = false)
-    {
-        $this->body = $body;
-        $this->close = $close;
+    public function __construct(
+        private string $body,
+        private bool $close = false
+    ) {
     }
 
     public function getAction(): string

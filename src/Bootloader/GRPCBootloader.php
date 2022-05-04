@@ -33,7 +33,7 @@ final class GRPCBootloader extends Bootloader
     ) {
     }
 
-    public function boot(): void
+    public function init(): void
     {
         $this->initGrpcConfig();
     }

@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Http;
 
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
-use Spiral\Debug\StateInterface;
-use Spiral\Exceptions\Renderer\HtmlRenderer;
+use Spiral\Exceptions\ExceptionHandlerInterface;
 use Spiral\Exceptions\Verbosity;
 use Spiral\Http\Http;
 use Spiral\RoadRunner\Environment\Mode;
@@ -55,20 +53,12 @@ final class Dispatcher implements DispatcherInterface
 
     protected function errorToResponse(\Throwable $e): ResponseInterface
     {
-        $handler = new HtmlRenderer();
+        /** @var ExceptionHandlerInterface $handler */
+        $handler = $this->container->get(ExceptionHandlerInterface::class);
 
         try {
             $this->errorHandler->handle($e);
-
-            if ($this->container->has(StateInterface::class)) {
-                // on demand
-                $state = $this->container->get(StateInterface::class);
-
-                if ($state !== null) {
-                    $handler = $handler->withState($state);
-                }
-            }
-        } catch (\Throwable|ContainerExceptionInterface) {
+        } catch (\Throwable) {
             \file_put_contents('php://stderr', (string)$e);
         }
 

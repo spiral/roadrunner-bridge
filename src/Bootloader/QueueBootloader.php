@@ -26,10 +26,9 @@ final class QueueBootloader extends Bootloader
 {
     protected const DEPENDENCIES = [
         RoadRunnerBootloader::class,
-        BaseQueueBootloader::class,
     ];
 
-    public function boot(
+    public function init(
         Container $container,
         BaseQueueBootloader $bootloader,
         KernelInterface $kernel,

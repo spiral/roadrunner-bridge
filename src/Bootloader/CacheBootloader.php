@@ -17,10 +17,9 @@ final class CacheBootloader extends Bootloader
 {
     protected const DEPENDENCIES = [
         RoadRunnerBootloader::class,
-        BaseCacheBootloader::class,
     ];
 
-    public function boot(Container $container, BaseCacheBootloader $cacheBootloader): void
+    public function init(Container $container, BaseCacheBootloader $cacheBootloader): void
     {
         $container->bindSingleton(
             FactoryInterface::class,

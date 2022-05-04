@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
-use Psr\Http\Message\ResponseFactoryInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Broadcasting\Bootloader\BroadcastingBootloader as BaseBroadcastingBootloader;
 use Spiral\Broadcasting\Bootloader\WebsocketsBootloader;
@@ -22,7 +21,6 @@ final class BroadcastingBootloader extends Bootloader
 {
     protected const DEPENDENCIES = [
         RoadRunnerBootloader::class,
-        BaseBroadcastingBootloader::class,
         WebsocketsBootloader::class,
     ];
 
@@ -31,7 +29,7 @@ final class BroadcastingBootloader extends Bootloader
         RoadRunnerGuard::class => [self::class, 'initRoadRunnerGuard'],
     ];
 
-    public function boot(BaseBroadcastingBootloader $broadcastingBootloader): void
+    public function init(BaseBroadcastingBootloader $broadcastingBootloader): void
     {
         $broadcastingBootloader->registerDriverAlias('roadrunner', RoadRunnerBroadcast::class);
     }
@@ -48,7 +46,6 @@ final class BroadcastingBootloader extends Bootloader
     }
 
     private function initRoadRunnerGuard(
-        ResponseFactoryInterface $responseFactory,
         InvokerInterface $invoker,
         ScopeInterface $scope,
         TopicRegistryInterface $registry,

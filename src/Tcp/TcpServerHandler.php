@@ -9,14 +9,12 @@ use Spiral\RoadRunnerBridge\Tcp\Service\RegistryInterface;
 
 class TcpServerHandler implements CoreInterface
 {
-    private RegistryInterface $registry;
-
-    public function __construct(RegistryInterface $registry)
-    {
-        $this->registry = $registry;
+    public function __construct(
+        private RegistryInterface $registry
+    ) {
     }
 
-    public function callAction(string $controller, string $action, array $parameters = [])
+    public function callAction(string $controller, string $action, array $parameters = []): mixed
     {
         return $this->registry->getService($controller)->handle($parameters['request']);
     }
