@@ -21,7 +21,9 @@ class App extends Kernel
         RoadRunnerBridge\GRPCBootloader::class,
         RoadRunnerBridge\HttpBootloader::class,
         RoadRunnerBridge\QueueBootloader::class,
+        RoadRunnerBridge\BroadcastingBootloader::class,
         RoadRunnerBridge\RoadRunnerBootloader::class,
+        RoadRunnerBridge\TcpBootloader::class,
 
         // Framework commands
         ConsoleBootloader::class,

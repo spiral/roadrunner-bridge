@@ -26,6 +26,8 @@
     "spiral/roadrunner-grpc": "^2.0",
     "spiral/roadrunner-jobs": "^2.0",
     "spiral/roadrunner-kv": "^2.2",
+    "spiral/roadrunner-broadcast": "^2.0",
+    "spiral/roadrunner-tcp": "^2.0",
     "spiral/framework": "^3.0"
   },
   "require-dev": {
