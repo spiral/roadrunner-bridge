@@ -31,13 +31,13 @@ final class RoadRunnerBroadcast extends AbstractBroadcast implements GuardInterf
     }
 
     /**
-     * @param non-empty-list<string>|non-empty-list<\Stringable>|string|\Stringable $topics
+     * @param non-empty-list<\Stringable>|non-empty-list<string>|string|\Stringable $topics
      */
     public function join(iterable|string|\Stringable $topics): TopicInterface
     {
         if (\is_iterable($topics)) {
             $topics = \array_map(
-                fn(string|\Stringable $topic) => $topic instanceof \Stringable ? (string) $topic : $topic,
+                fn (string|\Stringable $topic) => $topic instanceof \Stringable ? (string) $topic : $topic,
                 $topics
             );
         }
