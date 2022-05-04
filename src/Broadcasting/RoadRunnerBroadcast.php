@@ -30,9 +30,19 @@ final class RoadRunnerBroadcast extends AbstractBroadcast implements GuardInterf
         $this->broadcast->publish($topics, $messages);
     }
 
+    /**
+     * @param non-empty-list<string>|non-empty-list<\Stringable>|string|\Stringable $topics
+     */
     public function join(iterable|string|\Stringable $topics): TopicInterface
     {
-        return $this->broadcast->join($topics);
+        if (\is_iterable($topics)) {
+            $topics = \array_map(
+                fn(string|\Stringable $topic) => $topic instanceof \Stringable ? (string) $topic : $topic,
+                $topics
+            );
+        }
+
+        return $this->broadcast->join($topics instanceof \Stringable ? (string) $topics : $topics);
     }
 
     public function authorize(ServerRequestInterface $request): AuthorizationStatus
