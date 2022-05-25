@@ -4,64 +4,50 @@ declare(strict_types=1);
 
 namespace Spiral\Tests;
 
-use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
-use PHPUnit\Framework\TestCase as BaseTestCase;
-use Spiral\App\App;
-use Spiral\Boot\BootloadManager\BootloadManager;
-use Spiral\Boot\DirectoriesInterface;
-use Spiral\Boot\Environment;
 use Spiral\Boot\EnvironmentInterface;
-use Spiral\Boot\KernelInterface;
 use Spiral\Config\Patch\Set;
+use Spiral\Console\Bootloader\ConsoleBootloader;
 use Spiral\Core\ConfigsInterface;
-use Spiral\Files\Files;
+use Spiral\Bootloader as Framework;
+use Spiral\Http\Bootloader\DiactorosBootloader;
+use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 
-abstract class TestCase extends BaseTestCase
+abstract class TestCase extends \Spiral\Testing\TestCase
 {
-    use MockeryPHPUnitIntegration;
-
-    protected KernelInterface $app;
-    protected \Spiral\Core\Container $container;
-    private array $beforeBootload = [];
-    private array $afterBootload = [];
-
-    public const ENV = [];
-
-    protected function setUp(): void
+    public function defineBootloaders(): array
     {
-        parent::setUp();
+        return [
+            RoadRunnerBridge\CacheBootloader::class,
+            RoadRunnerBridge\GRPCBootloader::class,
+            RoadRunnerBridge\HttpBootloader::class,
+            RoadRunnerBridge\QueueBootloader::class,
+            RoadRunnerBridge\BroadcastingBootloader::class,
+            RoadRunnerBridge\RoadRunnerBootloader::class,
+            RoadRunnerBridge\TcpBootloader::class,
 
-        $this->app = $this->makeApp(static::ENV);
+            // Framework commands
+            ConsoleBootloader::class,
+            // Framework\CommandBootloader::class,
+            Framework\SnapshotsBootloader::class,
+            Framework\Http\HttpBootloader::class,
+            DiactorosBootloader::class,
+
+            \Spiral\SendIt\Bootloader\MailerBootloader::class,
+
+            RoadRunnerBridge\CommandBootloader::class,
+        ];
     }
 
-    public function beforeBootload(\Closure $callback): void
+    public function rootDirectory(): string
     {
-        $this->beforeBootload[] = $callback;
-    }
-
-    public function afterBootload(\Closure $callback): void
-    {
-        $this->afterBootload[] = $callback;
-    }
-
-    public function getConfig(string $config): array
-    {
-        return $this->app->get(ConfigsInterface::class)->getConfig($config);
-    }
-
-    public function setConfig(string $config, $data): void
-    {
-        $this->app->get(ConfigsInterface::class)->setDefaults(
-            $config,
-            $data
-        );
+        return __DIR__.'/../';
     }
 
     public function updateConfig(string $key, $data): void
     {
         [$config, $key] = explode('.', $key, 2);
 
-        $this->app->get(ConfigsInterface::class)->modify(
+        $this->getContainer()->get(ConfigsInterface::class)->modify(
             $config,
             new Set($key, $data)
         );
@@ -71,36 +57,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::tearDown();
 
-        $fs = new Files();
-
-        $runtime = $this->app->get(DirectoriesInterface::class)->get('runtime');
-        if ($fs->isDirectory($runtime)) {
-            $fs->deleteDirectory($runtime);
-        }
-    }
-
-    private function makeApp(array $env = []): KernelInterface
-    {
-        $environment = new Environment($env);
-
-        $root = dirname(__DIR__);
-
-        /** @var App $app */
-        $app = App::create([
-            'root' => $root,
-            'app' => $root . '/App',
-            'runtime' => $root . '/runtime/tests',
-            'cache' => $root . '/runtime/tests/cache',
-        ]);
-
-        $this->container = $app->getContainer();
-        $app->getContainer()->bindSingleton(EnvironmentInterface::class, $environment);
-
-        $app->starting(...$this->beforeBootload);
-        $app->started(...$this->afterBootload);
-        $app->run($environment);
-
-        return $app;
+        $this->cleanUpRuntimeDirectory();
     }
 
     protected function accessProtected(object $obj, string $prop)
@@ -111,67 +68,8 @@ abstract class TestCase extends BaseTestCase
         return $property->getValue($obj);
     }
 
-    public function assertContainerBound(string $alias, string $class): void
-    {
-        $this->assertInstanceOf(
-            $class,
-            $this->container->get($alias)
-        );
-    }
-
-    public function assertContainerBoundAsSingleton(string $alias, string $class): void
-    {
-        $this->assertInstanceOf(
-            $class,
-            $object = $this->container->get($alias)
-        );
-
-        $this->assertSame($object, $this->container->get($alias));
-    }
-
     public function getEnvironment(): EnvironmentInterface
     {
-        return $this->container->get(EnvironmentInterface::class);
-    }
-
-    public function assertDispatcherLoaded(string $class): void
-    {
-        $this->assertContains($class, $this->getLoadedDispatchers());
-    }
-
-    public function assertDispatcherMissed(string $class): void
-    {
-        $this->assertNotContains($class, $this->getLoadedDispatchers());
-    }
-
-    public function assertBootloaderLoaded(string $class): void
-    {
-        $this->assertContains($class, $this->getLoadedBootloaders());
-    }
-
-    public function assertBootloaderMissed(string $class): void
-    {
-        $this->assertNotContains($class, $this->getLoadedBootloaders());
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getLoadedDispatchers(): array
-    {
-        return array_map(static function ($dispatcher) {
-            return get_class($dispatcher);
-        }, $this->accessProtected($this->app, 'dispatchers'));
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getLoadedBootloaders(): array
-    {
-        /** @var BootloadManager $bootloader */
-        $bootloader = $this->accessProtected($this->app, 'bootloader');
-
-        return $bootloader->getClasses();
+        return $this->getContainer()->get(EnvironmentInterface::class);
     }
 }

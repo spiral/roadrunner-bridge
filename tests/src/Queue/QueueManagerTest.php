@@ -24,9 +24,9 @@ class QueueManagerTest extends TestCase
         parent::setUp();
 
         $this->registry = m::mock(PipelineRegistryInterface::class);
-        $this->container->bind(PipelineRegistryInterface::class, $this->registry);
+        $this->getContainer()->bind(PipelineRegistryInterface::class, $this->registry);
 
-        $this->manager = $this->container->get(QueueConnectionProviderInterface::class);
+        $this->manager = $this->getContainer()->get(QueueConnectionProviderInterface::class);
     }
 
     public function testGetsRoadRunnerQueue(): void

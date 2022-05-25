@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC;
 
-use Mockery as m;
 use Spiral\App\GRPC\EchoService\Message;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\RoadRunner\Environment;
@@ -25,33 +24,31 @@ final class DispatcherTest extends ConsoleTestCase
 
     public function testCanServeShouldReturnFalseWithWrongEnvironment(): void
     {
-        $this->assertFalse($this->app->get(Dispatcher::class)->canServe());
+        $this->assertDispatcherCannotBeServed(Dispatcher::class);
     }
 
     public function testCanServe(): void
     {
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => 'grpc',
             ]);
         });
 
-        $this->assertTrue($this->app->get(Dispatcher::class)->canServe());
+        $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
     public function testServe()
     {
-        $worker = m::mock(Worker::class);
-        $this->container->bind(WorkerInterface::class, $worker);
+        $worker = $this->mockContainer(Worker::class, WorkerInterface::class);
 
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => 'grpc',
             ]);
         });
 
-        $finalizer = m::mock(FinalizerInterface::class);
-        $this->container->bind(FinalizerInterface::class, $finalizer);
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
 
         $worker->shouldReceive('waitPayload')->once()->andReturn(
@@ -67,7 +64,7 @@ final class DispatcherTest extends ConsoleTestCase
 
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
 
-        $this->app->get(Dispatcher::class)->serve();
+        $this->serveDispatcher(Dispatcher::class);
     }
 
     protected function tearDown(): void

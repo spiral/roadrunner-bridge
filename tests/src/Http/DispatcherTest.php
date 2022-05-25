@@ -23,37 +23,34 @@ final class DispatcherTest extends TestCase
 {
     public function testCanServeShouldReturnFalseWithWrongEnvironment(): void
     {
-        $this->assertFalse($this->app->get(Dispatcher::class)->canServe());
+        $this->assertDispatcherCannotBeServed(Dispatcher::class);
     }
 
     public function testCanServe(): void
     {
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => 'http',
             ]);
         });
 
-        $this->assertTrue($this->app->get(Dispatcher::class)->canServe());
+        $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
     public function testServe(): void
     {
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => 'http',
             ]);
         });
 
-        $finalizer = m::mock(FinalizerInterface::class);
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
-        $this->container->bind(FinalizerInterface::class, $finalizer);
 
-        $http = m::mock(RequestHandlerInterface::class);
-        $this->container->bind(Http::class, $http);
+        $http = $this->mockContainer(Http::class, RequestHandlerInterface::class);
 
-        $worker = m::mock(PSR7WorkerInterface::class);
-        $this->container->bind(PSR7WorkerInterface::class, $worker);
+        $worker = $this->mockContainer(PSR7WorkerInterface::class);
 
         $worker->shouldReceive('waitRequest')->once()
             ->andReturn($request = m::mock(ServerRequestInterface::class));
@@ -66,33 +63,27 @@ final class DispatcherTest extends TestCase
 
         $worker->shouldReceive('respond')->once()->with($response);
 
-        $this->app->get(Dispatcher::class)->serve();
+        $this->serveDispatcher(Dispatcher::class);
     }
 
     public function testServeWithError(): void
     {
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => 'http',
             ]);
         });
 
-        $finalizer = m::mock(FinalizerInterface::class);
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
-        $this->container->bind(FinalizerInterface::class, $finalizer);
 
-        $errorHandler = m::mock(ErrorHandlerInterface::class);
-        $this->container->bind(ErrorHandlerInterface::class, $errorHandler);
+        $errorHandler = $this->mockContainer(ErrorHandlerInterface::class);
 
+        $http = $this->mockContainer(Http::class, RequestHandlerInterface::class);
 
-        $http = m::mock(RequestHandlerInterface::class);
-        $this->container->bind(Http::class, $http);
+        $worker = $this->mockContainer(PSR7WorkerInterface::class);
 
-        $worker = m::mock(PSR7WorkerInterface::class);
-        $this->container->bind(PSR7WorkerInterface::class, $worker);
-
-        $responseFactory = m::mock(ResponseFactoryInterface::class);
-        $this->container->bind(ResponseFactoryInterface::class, $responseFactory);
+        $responseFactory = $this->mockContainer(ResponseFactoryInterface::class);
 
         $worker->shouldReceive('waitRequest')->once()
             ->andReturn($request = m::mock(ServerRequestInterface::class));
@@ -116,6 +107,6 @@ final class DispatcherTest extends TestCase
                 return $r === $response;
             });
 
-        $this->app->get(Dispatcher::class)->serve();
+        $this->serveDispatcher(Dispatcher::class);
     }
 }

@@ -26,7 +26,7 @@ final class QueueBootloaderTest extends TestCase
     {
         parent::setUp();
 
-        $this->container->bind(ExceptionReporterInterface::class, function () {
+        $this->getContainer()->bind(ExceptionReporterInterface::class, function () {
             return m::mock(ExceptionReporterInterface::class);
         });
     }
@@ -48,14 +48,14 @@ final class QueueBootloaderTest extends TestCase
     {
         $this->assertInstanceOf(
             RPCPipelineRegistry::class,
-            $registry1 = $this->container->make(PipelineRegistryInterface::class, [
+            $registry1 = $this->getContainer()->make(PipelineRegistryInterface::class, [
                 'pipelines' => ['foo' => 'bar'],
                 'aliases' => ['bas' => 'bar'],
             ])
         );
         $this->assertInstanceOf(
             RPCPipelineRegistry::class,
-            $registry2 = $this->container->make(PipelineRegistryInterface::class, [
+            $registry2 = $this->getContainer()->make(PipelineRegistryInterface::class, [
                 'pipelines' => ['foo' => 'bar'],
                 'aliases' => ['bas' => 'bar'],
             ])
@@ -82,7 +82,7 @@ final class QueueBootloaderTest extends TestCase
 
     public function testDispatcherShouldBeRegistered(): void
     {
-        $this->assertDispatcherLoaded(Dispatcher::class);
+        $this->assertDispatcherRegistered(Dispatcher::class);
     }
 
     public function testGetsSerializerInterface(): void
@@ -103,7 +103,7 @@ final class QueueBootloaderTest extends TestCase
 
     public function testGetsConsumerInterface(): void
     {
-        $this->container->bind(WorkerInterface::class, function () {
+        $this->getContainer()->bind(WorkerInterface::class, function () {
             return m::mock(WorkerInterface::class);
         });
 
@@ -123,7 +123,7 @@ final class QueueBootloaderTest extends TestCase
 
     public function testConfigShouldBeDefined(): void
     {
-        $configurator = $this->container->get(ConfigsInterface::class);
+        $configurator = $this->getContainer()->get(ConfigsInterface::class);
         $config = $configurator->getConfig('queue');
 
         $this->assertIsArray($config);

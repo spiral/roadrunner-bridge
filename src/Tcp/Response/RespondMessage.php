@@ -9,8 +9,8 @@ use Spiral\RoadRunner\Tcp\TcpWorkerInterface;
 class RespondMessage implements ResponseInterface
 {
     public function __construct(
-        private string $body,
-        private bool $close = false
+        private readonly string $body,
+        private readonly bool $close = false
     ) {
     }
 

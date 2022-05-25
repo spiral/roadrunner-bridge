@@ -31,9 +31,8 @@
     "spiral/framework": "^3.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.5.20",
-    "vimeo/psalm": "^4.22",
-    "mockery/mockery": "^1.5"
+    "spiral/testing": "^2.0.x-dev",
+    "vimeo/psalm": "^4.22"
   },
   "autoload": {
     "psr-4": {
@@ -42,12 +41,15 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Spiral\\App\\": "tests/App",
+      "Spiral\\App\\": "tests/app",
       "Spiral\\Tests\\": "tests/src"
     }
   },
   "config": {
-    "sort-packages": true
+    "sort-packages": true,
+    "allow-plugins": {
+      "spiral/composer-publish-plugin": true
+    }
   },
   "minimum-stability": "dev",
   "prefer-stable": true

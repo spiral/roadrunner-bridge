@@ -37,12 +37,12 @@ final class TcpBootloaderTest extends TestCase
 
     public function testDispatcherShouldBeRegistered()
     {
-        $this->assertDispatcherLoaded(Dispatcher::class);
+        $this->assertDispatcherRegistered(Dispatcher::class);
     }
 
     public function testConfigShouldBeDefined(): void
     {
-        $configurator = $this->container->get(ConfigsInterface::class);
+        $configurator = $this->getContainer()->get(ConfigsInterface::class);
         $config = $configurator->getConfig(TcpConfig::CONFIG);
 
         $this->assertIsArray($config);

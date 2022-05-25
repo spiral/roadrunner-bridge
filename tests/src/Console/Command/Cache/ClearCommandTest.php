@@ -18,7 +18,7 @@ final class ClearCommandTest extends ConsoleTestCase
         parent::setUp();
 
         $this->provider = \Mockery::mock(CacheStorageProviderInterface::class);
-        $this->container->bind(CacheStorageProviderInterface::class, $this->provider);
+        $this->getContainer()->bind(CacheStorageProviderInterface::class, $this->provider);
     }
 
     public function testCacheWithDefaultStorageShouldBeCleared(): void

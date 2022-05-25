@@ -24,7 +24,7 @@ final class CacheBootloaderTest extends TestCase
     {
         $this->assertInstanceOf(
             \Spiral\RoadRunner\KeyValue\Cache::class,
-            $cache = $this->container->make(StorageInterface::class, ['driver' => 'memory'])
+            $cache = $this->getContainer()->make(StorageInterface::class, ['driver' => 'memory'])
         );
 
         $this->assertSame('memory', $cache->getName());
@@ -33,7 +33,7 @@ final class CacheBootloaderTest extends TestCase
     public function testStorageAliasForRoadRunnerShouldBeRegistered(): void
     {
         /** @var CacheConfig $config */
-        $config = $this->container->get(CacheConfig::class);
+        $config = $this->getContainer()->get(CacheConfig::class);
 
         $this->assertSame(StorageInterface::class, $config->offsetGet('typeAliases')['roadrunner']);
     }

@@ -12,7 +12,7 @@ final class ResumeCommandTest extends ConsoleTestCase
     public function testPausePipeline()
     {
         $jobs = \Mockery::mock(JobsInterface::class);
-        $this->container->bind(JobsInterface::class, $jobs);
+        $this->getContainer()->bind(JobsInterface::class, $jobs);
 
         $jobs->shouldReceive('resume')->once()->with('foo');
 

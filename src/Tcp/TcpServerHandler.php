@@ -10,7 +10,7 @@ use Spiral\RoadRunnerBridge\Tcp\Service\RegistryInterface;
 class TcpServerHandler implements CoreInterface
 {
     public function __construct(
-        private RegistryInterface $registry
+        private readonly RegistryInterface $registry
     ) {
     }
 

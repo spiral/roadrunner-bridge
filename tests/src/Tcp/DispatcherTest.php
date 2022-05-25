@@ -20,34 +20,32 @@ final class DispatcherTest extends TestCase
 {
     public function testCanServeShouldReturnFalseWithWrongEnvironment(): void
     {
-        $this->assertFalse($this->app->get(Dispatcher::class)->canServe());
+        $this->assertDispatcherCannotBeServed(Dispatcher::class);
     }
 
     public function testCanServe(): void
     {
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => Environment\Mode::MODE_TCP,
             ]);
         });
 
-        $this->assertTrue($this->app->get(Dispatcher::class)->canServe());
+        $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
     public function testServe(): void
     {
-        $worker = \Mockery::mock(WorkerInterface::class);
-        $this->container->bind(WorkerInterface::class, $worker);
+        $worker = $this->mockContainer(WorkerInterface::class);
 
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => Environment\Mode::MODE_TCP,
             ]);
         });
         $this->updateConfig('tcp.services', ['tcp-server' => TestService::class]);
 
-        $finalizer = \Mockery::mock(FinalizerInterface::class);
-        $this->container->bind(FinalizerInterface::class, $finalizer);
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
 
         $worker->shouldReceive('waitPayload')->once()->andReturn(
@@ -70,15 +68,14 @@ final class DispatcherTest extends TestCase
             return $payload->header === 'CLOSE';
         });
 
-        $this->app->get(Dispatcher::class)->serve();
+        $this->serveDispatcher(Dispatcher::class);
     }
 
     public function testServeWithInterceptor(): void
     {
-        $worker = \Mockery::mock(WorkerInterface::class);
-        $this->container->bind(WorkerInterface::class, $worker);
+        $worker = $this->mockContainer(WorkerInterface::class);
 
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => Environment\Mode::MODE_TCP,
             ]);
@@ -86,8 +83,7 @@ final class DispatcherTest extends TestCase
         $this->updateConfig('tcp.services', ['tcp-server' => TestService::class]);
         $this->updateConfig('tcp.interceptors', ['tcp-server' => TestInterceptor::class]);
 
-        $finalizer = \Mockery::mock(FinalizerInterface::class);
-        $this->container->bind(FinalizerInterface::class, $finalizer);
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->times(5)->with(false);
 
         $worker->shouldReceive('waitPayload')->times(5)->andReturn(
@@ -116,23 +112,21 @@ final class DispatcherTest extends TestCase
             return $payload->header === 'CLOSE';
         });
 
-        $this->app->get(Dispatcher::class)->serve();
+        $this->serveDispatcher(Dispatcher::class);
     }
 
     public function testServeWithHandleExceptionAndClose(): void
     {
-        $worker = \Mockery::mock(WorkerInterface::class);
-        $this->container->bind(WorkerInterface::class, $worker);
+        $worker = $this->mockContainer(WorkerInterface::class);
 
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => Environment\Mode::MODE_TCP,
             ]);
         });
         $this->updateConfig('tcp.services', ['tcp-server' => ServiceWithException::class]);
 
-        $finalizer = \Mockery::mock(FinalizerInterface::class);
-        $this->container->bind(FinalizerInterface::class, $finalizer);
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
 
         $worker->shouldReceive('waitPayload')->once()->andReturn(
@@ -158,6 +152,6 @@ final class DispatcherTest extends TestCase
             return $payload->header === 'CLOSE';
         });
 
-        $this->app->get(Dispatcher::class)->serve();
+        $this->serveDispatcher(Dispatcher::class);
     }
 }

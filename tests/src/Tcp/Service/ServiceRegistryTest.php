@@ -29,7 +29,7 @@ final class ServiceRegistryTest extends TestCase
 
     public function testGetServerFromAlias(): void
     {
-        $this->container->bind('alias', static fn () => new TestService());
+        $this->getContainer()->bind('alias', static fn () => new TestService());
 
         $this->updateConfig('tcp.services', ['test' => 'alias']);
 
@@ -51,6 +51,6 @@ final class ServiceRegistryTest extends TestCase
 
     private function getService(string $server): ServiceInterface
     {
-        return $this->container->get(RegistryInterface::class)->getService($server);
+        return $this->getContainer()->get(RegistryInterface::class)->getService($server);
     }
 }

@@ -10,11 +10,8 @@ use Symfony\Component\Console\Input\InputArgument;
 
 final class PauseCommand extends Command
 {
-    protected const NAME = 'roadrunner:pause';
+    protected const SIGNATURE = 'roadrunner:pause {pipeline : Pipeline name}';
     protected const DESCRIPTION = 'Pause consuming jobs for pipeline with given name';
-    protected const ARGUMENTS = [
-        ['pipeline', InputArgument::REQUIRED, 'Pipeline name'],
-    ];
 
     public function perform(JobsInterface $jobs): int
     {

@@ -10,11 +10,8 @@ use Symfony\Component\Console\Input\InputArgument;
 
 final class ResumeCommand extends Command
 {
-    protected const NAME = 'roadrunner:resume';
+    protected const SIGNATURE = 'roadrunner:resume {pipeline : Pipeline name}';
     protected const DESCRIPTION = 'Resume consuming jobs for pipeline with given name';
-    protected const ARGUMENTS = [
-        ['pipeline', InputArgument::REQUIRED, 'Pipeline name'],
-    ];
 
     public function perform(JobsInterface $jobs): int
     {

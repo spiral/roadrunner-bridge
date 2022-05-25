@@ -13,12 +13,12 @@ final class HttpBootloaderTest extends TestCase
 {
     public function testDispatcherShouldBeRegistered(): void
     {
-        $dispatchers = $this->accessProtected($this->app, 'dispatchers');
+        $dispatchers = $this->getRegisteredDispatchers();
 
         $this->assertCount(
             1,
             array_filter($dispatchers, function ($dispatcher) {
-                return $dispatcher instanceof Dispatcher;
+                return $dispatcher === Dispatcher::class;
             })
         );
     }

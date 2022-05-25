@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Config;
 
 use Spiral\Core\InjectableConfig;
+use Spiral\RoadRunner\GRPC\ServiceInterface;
 
 final class GRPCConfig extends InjectableConfig
 {
@@ -16,7 +17,7 @@ final class GRPCConfig extends InjectableConfig
     }
 
     /**
-     * @return array<string>
+     * @return array<class-string<ServiceInterface>>
      */
     public function getServices(): array
     {

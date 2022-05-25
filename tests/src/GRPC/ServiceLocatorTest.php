@@ -12,7 +12,7 @@ final class ServiceLocatorTest extends TestCase
 {
     public function testGetsServices(): void
     {
-        $locator = $this->container->get(ServiceLocator::class);
+        $locator = $this->getContainer()->get(ServiceLocator::class);
 
         $this->assertInstanceOf(
             EchoService::class,

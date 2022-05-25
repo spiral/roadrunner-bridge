@@ -11,9 +11,8 @@ final class ListCommandTest extends ConsoleTestCase
 {
     public function testListEmpty()
     {
-        $locator = \Mockery::mock(LocatorInterface::class);
+        $locator = $this->mockContainer(LocatorInterface::class);
         $locator->shouldReceive('getServices')->andReturn([]);
-        $this->container->bind(LocatorInterface::class, $locator);
 
         $result = $this->runCommand('grpc:services');
 

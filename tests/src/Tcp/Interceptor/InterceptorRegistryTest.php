@@ -28,7 +28,7 @@ final class InterceptorRegistryTest extends TestCase
 
     public function testGetInterceptorFromAlias(): void
     {
-        $this->container->bind('alias', static fn () => new TestInterceptor());
+        $this->getContainer()->bind('alias', static fn () => new TestInterceptor());
 
         $this->updateConfig('tcp.interceptors', ['server' => 'alias']);
 
@@ -44,7 +44,7 @@ final class InterceptorRegistryTest extends TestCase
 
     private function getInterceptor(): CoreInterceptorInterface
     {
-        $interceptors = $this->container->get(RegistryInterface::class)->getInterceptors('server');
+        $interceptors = $this->getContainer()->get(RegistryInterface::class)->getInterceptors('server');
 
         return \array_shift($interceptors);
     }

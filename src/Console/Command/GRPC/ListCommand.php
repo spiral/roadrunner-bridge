@@ -9,7 +9,7 @@ use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 
 final class ListCommand extends Command
 {
-    protected const NAME = 'grpc:services';
+    protected const SIGNATURE = 'grpc:services';
     protected const DESCRIPTION = 'List available GRPC services';
 
     public function perform(LocatorInterface $locator): int

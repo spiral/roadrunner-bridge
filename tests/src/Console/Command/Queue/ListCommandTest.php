@@ -15,7 +15,7 @@ final class ListCommandTest extends ConsoleTestCase
     public function testGetsListOfAvailablePipelines()
     {
         $jobs = \Mockery::mock(JobsInterface::class);
-        $this->container->bind(JobsInterface::class, $jobs);
+        $this->getContainer()->bind(JobsInterface::class, $jobs);
 
         $jobs->shouldReceive('getIterator')->once()->andReturn(
             new \ArrayIterator([

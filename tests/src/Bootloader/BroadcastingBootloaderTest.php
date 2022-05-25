@@ -16,7 +16,8 @@ final class BroadcastingBootloaderTest extends TestCase
 {
     public function testBroadcastInterfaceBinding(): void
     {
-        $this->container->bind(RPCInterface::class, $rpc = m::mock(RPCInterface::class));
+        $rpc = $this->mockContainer(RPCInterface::class);
+
         $rpc->shouldReceive('withCodec')->andReturnSelf();
         $rpc->shouldReceive('call')->once()->with('informer.List', true)->andReturn(['websockets']);
 
@@ -28,10 +29,8 @@ final class BroadcastingBootloaderTest extends TestCase
 
     public function testRoadRunnerGuardBinding(): void
     {
-        $this->container->bind(
-            ResponseFactoryInterface::class,
-            m::mock(ResponseFactoryInterface::class)
-        );
+        $this->mockContainer(ResponseFactoryInterface::class);
+
 
         $this->assertContainerBoundAsSingleton(
             RoadRunnerGuard::class,

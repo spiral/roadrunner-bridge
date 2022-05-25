@@ -15,13 +15,10 @@ use Symfony\Component\Console\Input\InputArgument;
 
 final class GenerateCommand extends Command
 {
-    protected const NAME = 'grpc:generate';
+    protected const SIGNATURE = 'grpc:generate 
+                                         {path=auto : Base path for generated service code}
+                                         {namespace=auto : Base namespace for generated service code}';
     protected const DESCRIPTION = 'Generate GPRC service code using protobuf specification';
-
-    protected const ARGUMENTS = [
-        ['path', InputArgument::OPTIONAL, 'Base path for generated service code', 'auto'],
-        ['namespace', InputArgument::OPTIONAL, 'Base namespace for generated service code', 'auto'],
-    ];
 
     public function perform(
         KernelInterface $kernel,

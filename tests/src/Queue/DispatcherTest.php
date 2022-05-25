@@ -20,31 +20,30 @@ final class DispatcherTest extends TestCase
 {
     public function testCanServeShouldReturnFalseWithWrongEnvironment(): void
     {
-        $this->assertFalse($this->app->get(Dispatcher::class)->canServe());
+        $this->assertDispatcherCannotBeServed(Dispatcher::class);
     }
 
     public function testCanServe(): void
     {
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => 'jobs',
             ]);
         });
 
-        $this->assertTrue($this->app->get(Dispatcher::class)->canServe());
+        $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
     public function testServeReceivedTask(): void
     {
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => 'jobs',
             ]);
         });
 
-        $finalizer = m::mock(FinalizerInterface::class);
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
-        $this->container->bind(FinalizerInterface::class, $finalizer);
 
         $task = m::mock(ReceivedTaskInterface::class);
         $task->shouldReceive('getName')->andReturn('foo-task');
@@ -55,21 +54,19 @@ final class DispatcherTest extends TestCase
         $handler = m::mock(HandlerInterface::class);
         $handler->shouldReceive('handle')->with('foo-task', 'foo-id', ['foo-payload']);
 
-        $handlerRegistry = m::mock(HandlerRegistryInterface::class);
-        $this->container->bind(HandlerRegistryInterface::class, $handlerRegistry);
+        $handlerRegistry = $this->mockContainer(HandlerRegistryInterface::class);
         $handlerRegistry->shouldReceive('getHandler')->once()->with('foo-task')->andReturn($handler);
 
-        $consumer = m::mock(ConsumerInterface::class);
-        $this->container->bind(ConsumerInterface::class, $consumer);
+        $consumer = $this->mockContainer(ConsumerInterface::class);
         $consumer->shouldReceive('waitTask')->once()->andReturn($task);
         $consumer->shouldReceive('waitTask')->once()->andReturnNull();
 
-        $this->app->get(Dispatcher::class)->serve();
+        $this->serveDispatcher(Dispatcher::class);
     }
 
     public function testServeReceivedTaskWithThrownException(): void
     {
-        $this->container->bind(EnvironmentInterface::class, function () {
+        $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
                 'RR_MODE' => 'jobs',
             ]);
@@ -77,11 +74,10 @@ final class DispatcherTest extends TestCase
 
         $e = new \Exception('Something went wrong');
 
-        $finalizer = m::mock(FinalizerInterface::class);
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
-        $this->container->bind(FinalizerInterface::class, $finalizer);
 
-        $failedJobHandler = m::mock(FailedJobHandlerInterface::class);
+        $failedJobHandler = $this->mockContainer(FailedJobHandlerInterface::class);
         $failedJobHandler->shouldReceive('handle')->once()->with(
             'roadrunner',
             'queue-name',
@@ -90,23 +86,19 @@ final class DispatcherTest extends TestCase
             $e
         );
 
-        $this->container->bind(FailedJobHandlerInterface::class, $failedJobHandler);
-
         $task = m::mock(ReceivedTaskInterface::class);
         $task->shouldReceive('getName')->andReturn('foo-task');
         $task->shouldReceive('getQueue')->once()->andReturn('queue-name');
         $task->shouldReceive('getPayload')->once()->andReturn(['foo-payload']);
         $task->shouldReceive('fail')->once()->with($e);
 
-        $handlerRegistry = m::mock(HandlerRegistryInterface::class);
-        $this->container->bind(HandlerRegistryInterface::class, $handlerRegistry);
+        $handlerRegistry = $this->mockContainer(HandlerRegistryInterface::class);
         $handlerRegistry->shouldReceive('getHandler')->once()->with('foo-task')->andThrow($e);
 
-        $consumer = m::mock(ConsumerInterface::class);
-        $this->container->bind(ConsumerInterface::class, $consumer);
+        $consumer = $this->mockContainer(ConsumerInterface::class);
         $consumer->shouldReceive('waitTask')->once()->andReturn($task);
         $consumer->shouldReceive('waitTask')->once()->andReturnNull();
 
-        $this->app->get(Dispatcher::class)->serve();
+        $this->serveDispatcher(Dispatcher::class);
     }
 }

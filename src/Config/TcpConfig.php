@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Config;
 
+use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\InjectableConfig;
+use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
 
 final class TcpConfig extends InjectableConfig
 {
     public const CONFIG = 'tcp';
 
     /**
-     * @return array<object>|array<string>
+     * @return array<object>|array<class-string<ServiceInterface>>
      */
     public function getServices(): array
     {
@@ -19,7 +21,7 @@ final class TcpConfig extends InjectableConfig
     }
 
     /**
-     * @return array<object>|array<string>
+     * @return array<object>|array<class-string<CoreInterceptorInterface>>
      */
     public function getInterceptors(): array
     {

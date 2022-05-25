@@ -11,7 +11,7 @@ use Symfony\Component\Console\Helper\Table;
 
 final class ListCommand extends Command
 {
-    protected const NAME = 'roadrunner:list';
+    protected const SIGNATURE = 'roadrunner:list';
     protected const DESCRIPTION = 'List available roadrunner pipelines';
 
     public function perform(JobsInterface $jobs): int

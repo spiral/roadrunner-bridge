@@ -10,11 +10,8 @@ use Symfony\Component\Console\Input\InputArgument;
 
 final class ClearCommand extends Command
 {
-    protected const NAME = 'cache:clear';
+    protected const SIGNATURE = 'cache:clear {storage? : Storage name}';
     protected const DESCRIPTION = 'Clear cache';
-    protected const ARGUMENTS = [
-        ['storage', InputArgument::OPTIONAL, 'Storage name'],
-    ];
 
     public function perform(CacheStorageProviderInterface $provider): int
     {
