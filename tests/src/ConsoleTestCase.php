@@ -13,7 +13,12 @@ abstract class ConsoleTestCase extends TestCase
 {
     public function generateGRPCService(): string
     {
-        $result = $this->runCommand('grpc:generate');
+        $appPath = $this->getDirectoryByAlias('app');
+
+        $result = $this->runCommand('grpc:generate', [
+            'path' => $appPath,
+            'namespace' => 'Spiral\\App'
+        ]);
 
         $files = [
             'GRPC/EchoService/EchoInterface.php',
@@ -22,7 +27,7 @@ abstract class ConsoleTestCase extends TestCase
         ];
 
         foreach ($files as $file) {
-            require_once $this->getDirectoryByAlias('app') . $file;
+            require_once $appPath.$file;
         }
 
         return $result;
@@ -31,8 +36,8 @@ abstract class ConsoleTestCase extends TestCase
     public function deleteGRPCService(): void
     {
         $fs = new Files();
-        if ($fs->isDirectory($this->getDirectoryByAlias('app') . 'GRPC/EchoService')) {
-            $fs->deleteDirectory($this->getDirectoryByAlias('app') . 'GRPC/EchoService');
+        if ($fs->isDirectory($this->getDirectoryByAlias('app').'GRPC/EchoService')) {
+            $fs->deleteDirectory($this->getDirectoryByAlias('app').'GRPC/EchoService');
         }
     }
 }

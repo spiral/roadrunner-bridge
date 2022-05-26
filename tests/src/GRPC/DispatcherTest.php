@@ -40,7 +40,7 @@ final class DispatcherTest extends ConsoleTestCase
 
     public function testServe()
     {
-        $worker = $this->mockContainer(Worker::class, WorkerInterface::class);
+        $worker = $this->mockContainer(WorkerInterface::class, Worker::class);
 
         $this->getContainer()->bind(EnvironmentInterface::class, function () {
             return new Environment([
@@ -70,7 +70,6 @@ final class DispatcherTest extends ConsoleTestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-
         $this->deleteGRPCService();
     }
 }

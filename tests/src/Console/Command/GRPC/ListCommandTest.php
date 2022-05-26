@@ -39,7 +39,7 @@ final class ListCommandTest extends ConsoleTestCase
         );
 
         $this->assertStringContainsString(
-            'App/GRPC/EchoService.php',
+            'app/GRPC/EchoService.php',
             $result
         );
     }

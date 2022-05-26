@@ -19,12 +19,12 @@ final class GenerateCommandTest extends ConsoleTestCase
         ];
 
         $this->assertStringContainsString(
-            sprintf('Compiling `%s`:', $this->getDirectoryByAlias('app') . 'proto/echo.proto'),
+            sprintf('Compiling `%s`:', $this->getDirectoryByAlias('app').'proto/echo.proto'),
             $result
         );
 
         foreach ($files as $file) {
-            $this->assertFileExists($this->getDirectoryByAlias('app') . $file);
+            $this->assertFileExists($this->getDirectoryByAlias('app').$file);
             $this->assertStringContainsString(
                 $file,
                 $result
@@ -32,7 +32,7 @@ final class GenerateCommandTest extends ConsoleTestCase
         }
 
         $this->assertStringContainsString(
-            sprintf('Proto file `%s` not found.', $this->getDirectoryByAlias('app') . 'proto/foo.proto'),
+            sprintf('Proto file `%s` not found.', $this->getDirectoryByAlias('app').'proto/foo.proto'),
             $result
         );
     }
@@ -40,7 +40,6 @@ final class GenerateCommandTest extends ConsoleTestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-
         $this->deleteGRPCService();
     }
 }
