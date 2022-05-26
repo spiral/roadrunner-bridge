@@ -27,7 +27,7 @@ abstract class TestCase extends \Spiral\Testing\TestCase
 
             // Framework commands
             ConsoleBootloader::class,
-            // Framework\CommandBootloader::class,
+            Framework\CommandBootloader::class,
             Framework\SnapshotsBootloader::class,
             Framework\Http\HttpBootloader::class,
             DiactorosBootloader::class,
@@ -41,16 +41,6 @@ abstract class TestCase extends \Spiral\Testing\TestCase
     public function rootDirectory(): string
     {
         return __DIR__.'/../';
-    }
-
-    public function updateConfig(string $key, $data): void
-    {
-        [$config, $key] = explode('.', $key, 2);
-
-        $this->getContainer()->get(ConfigsInterface::class)->modify(
-            $config,
-            new Set($key, $data)
-        );
     }
 
     protected function tearDown(): void
