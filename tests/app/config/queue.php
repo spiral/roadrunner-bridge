@@ -44,6 +44,11 @@ return [
                     // php app.php queue:pause local
                     'consume' => true, // Optional
                 ],
+                'withSerializer' => [
+                    'connector' => new MemoryCreateInfo('local'),
+                    'serializerFormat' => 'serializer',
+                    'consume' => true,
+                ]
                 // 'amqp' => [
                 //     'connector' => new AMQPCreateInfo('bus', ...),
                 //     // Don't consume jobs for this pipeline on start

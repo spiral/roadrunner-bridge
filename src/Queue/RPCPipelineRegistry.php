@@ -8,6 +8,7 @@ use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
+use Spiral\RoadRunner\Jobs\Serializer\SerializerAwareInterface;
 
 /**
  * @internal
@@ -23,7 +24,8 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      * @param int $ttl Time to cache existing RoadRunner pipelines
      */
     public function __construct(
-        private readonly JobsInterface $jobs,
+        private JobsInterface $jobs,
+        private readonly JobsAdapterSerializer $serializer,
         private readonly array $pipelines,
         private readonly array $aliases,
         private readonly int $ttl = 60
@@ -51,6 +53,12 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         if (!$this->pipelines[$name]['connector'] instanceof CreateInfoInterface) {
             throw new InvalidArgumentException(
                 \sprintf('Connector should implement %s interface.', CreateInfoInterface::class)
+            );
+        }
+
+        if ($this->jobs instanceof SerializerAwareInterface && !empty($this->pipelines[$name]['serializerFormat'])) {
+            $this->jobs = $this->jobs->withSerializer(
+                $this->serializer->withFormat($this->pipelines[$name]['serializerFormat'])
             );
         }
 

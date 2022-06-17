@@ -9,6 +9,7 @@ use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
+use Spiral\RoadRunnerBridge\Queue\JobsAdapterSerializer;
 use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
 use Spiral\Tests\TestCase;
 
@@ -26,6 +27,7 @@ final class RPCPipelineRegistryTest extends TestCase
 
         $this->registry = (new RPCPipelineRegistry(
             $this->jobs = m::mock(JobsInterface::class),
+            $this->getContainer()->get(JobsAdapterSerializer::class),
             [
                 'memory' => [
                     'connector' => $this->memoryConnector = m::mock(CreateInfoInterface::class),
