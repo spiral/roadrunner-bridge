@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace Spiral\Tests;
 
 use Spiral\Boot\EnvironmentInterface;
-use Spiral\Config\Patch\Set;
 use Spiral\Console\Bootloader\ConsoleBootloader;
-use Spiral\Core\ConfigsInterface;
 use Spiral\Bootloader as Framework;
-use Spiral\Http\Bootloader\DiactorosBootloader;
+use Spiral\Nyholm\Bootloader\NyholmBootloader;
 use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 
 abstract class TestCase extends \Spiral\Testing\TestCase
@@ -30,7 +28,7 @@ abstract class TestCase extends \Spiral\Testing\TestCase
             Framework\CommandBootloader::class,
             Framework\SnapshotsBootloader::class,
             Framework\Http\HttpBootloader::class,
-            DiactorosBootloader::class,
+            NyholmBootloader::class,
 
             \Spiral\SendIt\Bootloader\MailerBootloader::class,
 

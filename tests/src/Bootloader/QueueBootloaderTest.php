@@ -7,10 +7,11 @@ namespace Spiral\Tests\Bootloader;
 use Mockery as m;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
+use Spiral\Queue\Config\QueueConfig;
 use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Queue\QueueInterface;
-use Spiral\Queue\SerializerInterface;
-use Spiral\RoadRunner\Jobs\Consumer;
+use Spiral\Serializer\SerializerInterface;
+use Spiral\RoadRunnerBridge\Queue\Consumer;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Serializer\SerializerInterface as RRSerializerInterface;
 use Spiral\RoadRunner\WorkerInterface;
@@ -18,6 +19,7 @@ use Spiral\RoadRunnerBridge\Queue\Dispatcher;
 use Spiral\RoadRunnerBridge\Queue\JobsAdapterSerializer;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
+use Spiral\Serializer\SerializerManager;
 use Spiral\Tests\TestCase;
 
 final class QueueBootloaderTest extends TestCase
@@ -89,7 +91,7 @@ final class QueueBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             SerializerInterface::class,
-            \Spiral\Queue\DefaultSerializer::class
+            SerializerManager::class
         );
     }
 
@@ -127,5 +129,32 @@ final class QueueBootloaderTest extends TestCase
         $config = $configurator->getConfig('queue');
 
         $this->assertIsArray($config);
+    }
+
+    public function testFormatIsNull(): void
+    {
+        $serializer = $this->getContainer()->get(JobsAdapterSerializer::class);
+
+        $ref = new \ReflectionObject($serializer);
+
+        $this->assertNull($ref->getProperty('format')->getValue($serializer));
+    }
+
+    public function testFormatIsDefined(): void
+    {
+        $this->getContainer()->bind(QueueConfig::class, new QueueConfig([
+            'connections' => [
+                'roadrunner' => [
+                    'driver' => 'roadrunner',
+                    'serializerFormat' => 'defined'
+                ]
+            ]
+        ]));
+
+        $serializer = $this->getContainer()->get(JobsAdapterSerializer::class);
+
+        $ref = new \ReflectionObject($serializer);
+
+        $this->assertSame('defined', $ref->getProperty('format')->getValue($serializer));
     }
 }

@@ -9,8 +9,9 @@ use Spiral\Boot\KernelInterface;
 use Spiral\Core\Container;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\Queue\Bootloader\QueueBootloader as BaseQueueBootloader;
-use Spiral\Queue\SerializerInterface;
-use Spiral\RoadRunner\Jobs\Consumer;
+use Spiral\Queue\Config\QueueConfig;
+use Spiral\RoadRunnerBridge\Queue\Consumer;
+use Spiral\Serializer\Bootloader\SerializerBootloader;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Jobs;
 use Spiral\RoadRunner\Jobs\JobsInterface;
@@ -21,11 +22,13 @@ use Spiral\RoadRunnerBridge\Queue\JobsAdapterSerializer;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\Queue;
 use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
+use Spiral\Serializer\SerializerManager;
 
 final class QueueBootloader extends Bootloader
 {
     protected const DEPENDENCIES = [
         RoadRunnerBootloader::class,
+        SerializerBootloader::class,
     ];
 
     public function init(
@@ -46,17 +49,26 @@ final class QueueBootloader extends Bootloader
     private function registerJobsSerializer(Container $container): void
     {
         $container->bindSingleton(
-            RRSerializerInterface::class,
-            static fn (SerializerInterface $serializer) => new JobsAdapterSerializer($serializer)
+            JobsAdapterSerializer::class,
+            static fn (SerializerManager $manager, QueueConfig $config) => new JobsAdapterSerializer(
+                $manager,
+                $config->getConnections('roadrunner')['roadrunner']['serializerFormat'] ?? null
+            )
         );
+
+        $container->bindSingleton(RRSerializerInterface::class, JobsAdapterSerializer::class);
     }
 
     private function registerConsumer(Container $container): void
     {
         $container->bindSingleton(
             ConsumerInterface::class,
-            static fn (WorkerInterface $worker, RRSerializerInterface $serializer): Consumer =>
-                new Consumer($worker, $serializer)
+            static fn (JobsAdapterSerializer $serializer, WorkerInterface $worker, QueueConfig $config): Consumer =>
+                new Consumer(
+                    $serializer,
+                    $worker,
+                    $config->getConnections('roadrunner')['roadrunner']['pipelines'] ?? []
+                )
         );
     }
 
@@ -72,8 +84,13 @@ final class QueueBootloader extends Bootloader
     {
         $container->bind(
             PipelineRegistryInterface::class,
-            static fn (JobsInterface $jobs, array $pipelines, array $aliases): PipelineRegistryInterface =>
-                new RPCPipelineRegistry($jobs, $pipelines, $aliases)
+            static fn (
+                JobsInterface $jobs,
+                JobsAdapterSerializer $serializer,
+                array $pipelines,
+                array $aliases
+            ): PipelineRegistryInterface =>
+                new RPCPipelineRegistry($jobs, $serializer, $pipelines, $aliases)
         );
     }
 }
