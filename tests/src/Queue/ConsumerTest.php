@@ -19,7 +19,7 @@ final class ConsumerTest extends TestCase
         // default json serializer
         $payload = new Payload(\json_encode([
             'test' => 'test',
-            'other' => 'data'
+            'other' => 'data',
         ]));
 
         $result = $ref->invoke($consumer, $payload, 'memory');
@@ -36,7 +36,7 @@ final class ConsumerTest extends TestCase
         // php serialize from config
         $payload = new Payload(\serialize([
             'test' => 'test',
-            'other' => 'data'
+            'other' => 'data',
         ]));
 
         $result = $ref->invoke($consumer, $payload, 'withSerializer');

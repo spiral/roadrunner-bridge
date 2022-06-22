@@ -38,7 +38,7 @@ abstract class TestCase extends \Spiral\Testing\TestCase
 
     public function rootDirectory(): string
     {
-        return __DIR__.'/../';
+        return __DIR__ . '/../';
     }
 
     protected function tearDown(): void

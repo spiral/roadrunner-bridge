@@ -6,7 +6,6 @@ namespace Spiral\RoadRunnerBridge\Console\Command\Queue;
 
 use Spiral\Console\Command;
 use Spiral\RoadRunner\Jobs\JobsInterface;
-use Symfony\Component\Console\Input\InputArgument;
 
 final class ResumeCommand extends Command
 {

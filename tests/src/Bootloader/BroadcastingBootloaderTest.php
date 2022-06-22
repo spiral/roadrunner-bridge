@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Bootloader;
 
-use Mockery as m;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\RoadRunner\Broadcast\Broadcast;

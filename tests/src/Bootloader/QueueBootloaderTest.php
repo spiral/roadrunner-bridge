@@ -146,9 +146,9 @@ final class QueueBootloaderTest extends TestCase
             'connections' => [
                 'roadrunner' => [
                     'driver' => 'roadrunner',
-                    'serializerFormat' => 'defined'
-                ]
-            ]
+                    'serializerFormat' => 'defined',
+                ],
+            ],
         ]));
 
         $serializer = $this->getContainer()->get(JobsAdapterSerializer::class);

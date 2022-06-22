@@ -13,7 +13,7 @@ final class TcpConfig extends InjectableConfig
     public const CONFIG = 'tcp';
 
     /**
-     * @return array<object>|array<class-string<ServiceInterface>>
+     * @return array<class-string<ServiceInterface>>|array<object>
      */
     public function getServices(): array
     {
@@ -21,7 +21,7 @@ final class TcpConfig extends InjectableConfig
     }
 
     /**
-     * @return array<object>|array<class-string<CoreInterceptorInterface>>
+     * @return array<class-string<CoreInterceptorInterface>>|array<object>
      */
     public function getInterceptors(): array
     {
