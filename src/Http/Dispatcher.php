@@ -12,23 +12,22 @@ use Spiral\Boot\FinalizerInterface;
 use Spiral\Exceptions\ExceptionHandlerInterface;
 use Spiral\Exceptions\Verbosity;
 use Spiral\Http\Http;
-use Spiral\RoadRunner\Environment\Mode;
-use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 final class Dispatcher implements DispatcherInterface
 {
     public function __construct(
-        private readonly EnvironmentInterface $env,
         private readonly ContainerInterface $container,
         private readonly ErrorHandlerInterface $errorHandler,
-        private readonly FinalizerInterface $finalizer
+        private readonly FinalizerInterface $finalizer,
+        private readonly RoadRunnerMode $mode
     ) {
     }
 
     public function canServe(): bool
     {
-        return \PHP_SAPI === 'cli' && $this->env->getMode() === Mode::MODE_HTTP;
+        return \PHP_SAPI === 'cli' && $this->mode === RoadRunnerMode::Http;
     }
 
     public function serve(): void
