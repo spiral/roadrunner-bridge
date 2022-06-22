@@ -6,12 +6,11 @@ namespace Spiral\Tests\GRPC;
 
 use Spiral\App\GRPC\EchoService\Message;
 use Spiral\Boot\FinalizerInterface;
-use Spiral\RoadRunner\Environment;
-use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Payload;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\GRPC\Dispatcher;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\ConsoleTestCase;
 
 final class DispatcherTest extends ConsoleTestCase
@@ -29,24 +28,14 @@ final class DispatcherTest extends ConsoleTestCase
 
     public function testCanServe(): void
     {
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => 'grpc',
-            ]);
-        });
-
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Grpc);
         $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
     public function testServe()
     {
         $worker = $this->mockContainer(WorkerInterface::class, Worker::class);
-
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => 'grpc',
-            ]);
-        });
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Grpc);
 
         $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);

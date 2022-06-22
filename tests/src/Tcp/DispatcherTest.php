@@ -13,6 +13,7 @@ use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Payload;
 use Spiral\RoadRunner\Tcp\TcpWorkerInterface;
 use Spiral\RoadRunner\WorkerInterface;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
 use Spiral\Tests\TestCase;
 
@@ -25,11 +26,7 @@ final class DispatcherTest extends TestCase
 
     public function testCanServe(): void
     {
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => Environment\Mode::MODE_TCP,
-            ]);
-        });
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Tcp);
 
         $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
@@ -38,11 +35,7 @@ final class DispatcherTest extends TestCase
     {
         $worker = $this->mockContainer(WorkerInterface::class);
 
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => Environment\Mode::MODE_TCP,
-            ]);
-        });
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Tcp);
         $this->updateConfig('tcp.services', ['tcp-server' => TestService::class]);
 
         $finalizer = $this->mockContainer(FinalizerInterface::class);
@@ -75,11 +68,7 @@ final class DispatcherTest extends TestCase
     {
         $worker = $this->mockContainer(WorkerInterface::class);
 
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => Environment\Mode::MODE_TCP,
-            ]);
-        });
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Tcp);
         $this->updateConfig('tcp.services', ['tcp-server' => TestService::class]);
         $this->updateConfig('tcp.interceptors', ['tcp-server' => TestInterceptor::class]);
 
@@ -119,11 +108,7 @@ final class DispatcherTest extends TestCase
     {
         $worker = $this->mockContainer(WorkerInterface::class);
 
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => Environment\Mode::MODE_TCP,
-            ]);
-        });
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Tcp);
         $this->updateConfig('tcp.services', ['tcp-server' => ServiceWithException::class]);
 
         $finalizer = $this->mockContainer(FinalizerInterface::class);

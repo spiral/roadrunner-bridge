@@ -12,11 +12,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Http\Http;
-use Spiral\RoadRunner\Environment;
-use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunnerBridge\Http\Dispatcher;
 use Spiral\RoadRunnerBridge\Http\ErrorHandlerInterface;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\TestCase;
 
 final class DispatcherTest extends TestCase
@@ -28,22 +27,14 @@ final class DispatcherTest extends TestCase
 
     public function testCanServe(): void
     {
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => 'http',
-            ]);
-        });
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
 
         $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
     public function testServe(): void
     {
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => 'http',
-            ]);
-        });
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
 
         $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
@@ -68,11 +59,7 @@ final class DispatcherTest extends TestCase
 
     public function testServeWithError(): void
     {
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => 'http',
-            ]);
-        });
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
 
         $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
