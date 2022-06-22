@@ -9,8 +9,6 @@ use Spiral\Boot\FinalizerInterface;
 use Spiral\Queue\Failed\FailedJobHandlerInterface;
 use Spiral\Queue\HandlerInterface;
 use Spiral\Queue\HandlerRegistryInterface;
-use Spiral\RoadRunner\Environment;
-use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher;

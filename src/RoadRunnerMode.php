@@ -22,6 +22,6 @@ enum RoadRunnerMode: string implements InjectableEnumInterface
     {
         $value = $environment->getMode();
 
-        return (self::tryFrom($value) ?? self::Unknown);
+        return self::tryFrom($value) ?? self::Unknown;
     }
 }

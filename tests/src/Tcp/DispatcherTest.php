@@ -8,8 +8,6 @@ use Spiral\App\Tcp\ServiceWithException;
 use Spiral\App\Tcp\TestInterceptor;
 use Spiral\App\Tcp\TestService;
 use Spiral\Boot\FinalizerInterface;
-use Spiral\RoadRunner\Environment;
-use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Payload;
 use Spiral\RoadRunner\Tcp\TcpWorkerInterface;
 use Spiral\RoadRunner\WorkerInterface;

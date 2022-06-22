@@ -21,8 +21,8 @@ final class RoadRunnerModeTest extends TestCase
      */
     public function testDetectMode(string $mode, RoadRunnerMode $expected): void
     {
-        $this->getContainer()->bind(EnvironmentInterface::class, static fn() => new Environment([
-            'RR_MODE' => $mode
+        $this->getContainer()->bind(EnvironmentInterface::class, static fn () => new Environment([
+            'RR_MODE' => $mode,
         ]));
 
         $this->assertSame($expected, $this->getContainer()->get(RoadRunnerMode::class));
