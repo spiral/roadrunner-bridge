@@ -6,7 +6,6 @@ namespace Spiral\RoadRunnerBridge\Console\Command\Cache;
 
 use Spiral\Cache\CacheStorageProviderInterface;
 use Spiral\Console\Command;
-use Symfony\Component\Console\Input\InputArgument;
 
 final class ClearCommand extends Command
 {

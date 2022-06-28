@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Spiral\Tests;
 
 use Spiral\Files\Files;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class ConsoleTestCase extends TestCase
 {
@@ -17,7 +14,7 @@ abstract class ConsoleTestCase extends TestCase
 
         $result = $this->runCommand('grpc:generate', [
             'path' => $appPath,
-            'namespace' => 'Spiral\\App'
+            'namespace' => 'Spiral\\App',
         ]);
 
         $files = [
@@ -27,7 +24,7 @@ abstract class ConsoleTestCase extends TestCase
         ];
 
         foreach ($files as $file) {
-            require_once $appPath.$file;
+            require_once $appPath . $file;
         }
 
         return $result;
@@ -36,8 +33,8 @@ abstract class ConsoleTestCase extends TestCase
     public function deleteGRPCService(): void
     {
         $fs = new Files();
-        if ($fs->isDirectory($this->getDirectoryByAlias('app').'GRPC/EchoService')) {
-            $fs->deleteDirectory($this->getDirectoryByAlias('app').'GRPC/EchoService');
+        if ($fs->isDirectory($this->getDirectoryByAlias('app') . 'GRPC/EchoService')) {
+            $fs->deleteDirectory($this->getDirectoryByAlias('app') . 'GRPC/EchoService');
         }
     }
 }

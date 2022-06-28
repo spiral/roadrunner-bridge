@@ -11,11 +11,10 @@ use Spiral\Console\Command;
 use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\ProtoCompiler;
-use Symfony\Component\Console\Input\InputArgument;
 
 final class GenerateCommand extends Command
 {
-    protected const SIGNATURE = 'grpc:generate 
+    protected const SIGNATURE = 'grpc:generate
                                          {path=auto : Base path for generated service code}
                                          {namespace=auto : Base namespace for generated service code}';
     protected const DESCRIPTION = 'Generate GPRC service code using protobuf specification';
