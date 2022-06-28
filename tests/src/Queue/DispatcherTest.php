@@ -9,11 +9,10 @@ use Spiral\Boot\FinalizerInterface;
 use Spiral\Queue\Failed\FailedJobHandlerInterface;
 use Spiral\Queue\HandlerInterface;
 use Spiral\Queue\HandlerRegistryInterface;
-use Spiral\RoadRunner\Environment;
-use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\TestCase;
 
 final class DispatcherTest extends TestCase
@@ -25,22 +24,13 @@ final class DispatcherTest extends TestCase
 
     public function testCanServe(): void
     {
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => 'jobs',
-            ]);
-        });
-
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Jobs);
         $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
     public function testServeReceivedTask(): void
     {
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => 'jobs',
-            ]);
-        });
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Jobs);
 
         $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
@@ -66,11 +56,7 @@ final class DispatcherTest extends TestCase
 
     public function testServeReceivedTaskWithThrownException(): void
     {
-        $this->getContainer()->bind(EnvironmentInterface::class, function () {
-            return new Environment([
-                'RR_MODE' => 'jobs',
-            ]);
-        });
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Jobs);
 
         $e = new \Exception('Something went wrong');
 

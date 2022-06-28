@@ -7,24 +7,23 @@ namespace Spiral\RoadRunnerBridge\GRPC;
 use Psr\Container\ContainerInterface;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
-use Spiral\RoadRunner\Environment\Mode;
-use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 final class Dispatcher implements DispatcherInterface
 {
     public function __construct(
-        private readonly EnvironmentInterface $env,
         private readonly ContainerInterface $container,
-        private readonly FinalizerInterface $finalizer
+        private readonly FinalizerInterface $finalizer,
+        private readonly RoadRunnerMode $mode
     ) {
     }
 
     public function canServe(): bool
     {
-        return \PHP_SAPI === 'cli' && $this->env->getMode() === Mode::MODE_GRPC;
+        return \PHP_SAPI === 'cli' && $this->mode === RoadRunnerMode::Grpc;
     }
 
     public function serve(): void

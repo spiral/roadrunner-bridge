@@ -9,25 +9,24 @@ use Psr\Container\ContainerInterface;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Queue\HandlerRegistryInterface;
-use Spiral\RoadRunner\Environment\Mode;
-use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\Queue\Failed\FailedJobHandlerInterface;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 final class Dispatcher implements DispatcherInterface
 {
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly FinalizerInterface $finalizer,
-        private readonly EnvironmentInterface $env
+        private readonly RoadRunnerMode $mode
     ) {
     }
 
     public function canServe(): bool
     {
-        return \PHP_SAPI === 'cli' && $this->env->getMode() === Mode::MODE_JOBS;
+        return \PHP_SAPI === 'cli' && $this->mode === RoadRunnerMode::Jobs;
     }
 
     /**

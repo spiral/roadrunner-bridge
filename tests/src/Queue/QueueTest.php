@@ -6,7 +6,6 @@ namespace Spiral\Tests\Queue;
 
 use Mockery as m;
 use Spiral\Core\Container;
-use Spiral\Queue\Job\CallableJob;
 use Spiral\Queue\Job\ObjectJob;
 use Spiral\Queue\Options;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
@@ -111,27 +110,5 @@ final class QueueTest extends TestCase
         $queuedTask->shouldReceive('getId')->once()->andReturn('task-id');
 
         $this->assertSame('task-id', $this->queue->pushObject($object));
-    }
-
-    public function testPushCallable()
-    {
-        $this->registry->shouldReceive('getPipeline')
-            ->once()
-            ->with('default')
-            ->andReturn($queue = m::mock(QueueInterface::class));
-
-        $callback = function () {
-            return 'bar';
-        };
-
-        $preparedTask = m::mock(PreparedTaskInterface::class);
-        $queuedTask = m::mock(QueuedTaskInterface::class);
-        $queue->shouldReceive('create')->once()
-            ->withSomeOfArgs(CallableJob::class, ['callback' => $callback])
-            ->andReturn($preparedTask);
-        $queue->shouldReceive('dispatch')->once()->with($preparedTask)->andReturn($queuedTask);
-        $queuedTask->shouldReceive('getId')->once()->andReturn('task-id');
-
-        $this->assertSame('task-id', $this->queue->pushCallable($callback));
     }
 }
