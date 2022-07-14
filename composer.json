@@ -32,7 +32,7 @@
     "spiral/serializer": "^3.0"
   },
   "require-dev": {
-    "spiral/testing": "^2.0.x-dev",
+    "spiral/testing": "^2.0",
     "vimeo/psalm": "^4.22",
     "spiral/nyholm-bridge": "^1.2"
   },
