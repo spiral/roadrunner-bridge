@@ -329,6 +329,10 @@ return [
     'registry' => [
         'handlers' => [],
     ],
+    
+    'interceptors' => [
+        //...
+    ]
 ];
 ```
 
