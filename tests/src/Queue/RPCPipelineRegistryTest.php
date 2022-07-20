@@ -119,20 +119,24 @@ final class RPCPipelineRegistryTest extends TestCase
         );
     }
 
-    public function testGetsNonExistsPipelineShouldThrowAnException(): void
+    public function testGetsNonExistsPipelineShouldReturnQueue(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('Queue pipeline with given name `test` is not found.');
+        $this->jobs->shouldReceive('connect')
+            ->once()
+            ->with('test')
+            ->andReturn($queue = m::mock(QueueInterface::class));
 
-        $this->registry->getPipeline('test');
+        $this->assertSame($queue, $this->registry->getPipeline('test'));
     }
 
-    public function testGetsNonExistsAliasPipelineShouldThrowAnException(): void
+    public function testGetsNonExistsAliasPipelineShouldReturnQueue(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('Queue pipeline with given name `test` is not found.');
+        $this->jobs->shouldReceive('connect')
+            ->once()
+            ->with('test')
+            ->andReturn($queue = m::mock(QueueInterface::class));
 
-        $this->registry->getPipeline('bad-alias');
+        $this->assertSame($queue, $this->registry->getPipeline('bad-alias'));
     }
 
     public function testGetsPipelineWithoutConnectorShouldThrowAnException(): void
