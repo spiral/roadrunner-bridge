@@ -46,7 +46,7 @@ final class RoadRunnerBootloader extends Bootloader
         $container->bindSingleton(RPC::class, static function (EnvironmentInterface $env, GlobalEnvironmentInterface $globalEnv): RPCInterface {
             return new RPC(
                 Relay::create($env->getRPCAddress()),
-                $this->withCodec($globalEnv),
+                self::withCodec($globalEnv),
             );
         });
 
@@ -73,7 +73,7 @@ final class RoadRunnerBootloader extends Bootloader
         });
     }
 
-    private function withCodec(GlobalEnvironmentInterface $env): CodecInterface
+    private static function withCodec(GlobalEnvironmentInterface $env): CodecInterface
     {
         switch ($env->get('RPC_CODEC')) {
             case 'proto':
