@@ -8,6 +8,10 @@ use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface as GlobalEnvironmentInterface;
 use Spiral\Core\Container;
 use Spiral\Goridge\Relay;
+use Spiral\Goridge\RPC\Codec\JsonCodec;
+use Spiral\Goridge\RPC\Codec\MsgpackCodec;
+use Spiral\Goridge\RPC\Codec\ProtobufCodec;
+use Spiral\Goridge\RPC\CodecInterface;
 use Spiral\Goridge\RPC\RPC;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\Http\Diactoros\ServerRequestFactory;
@@ -39,9 +43,10 @@ final class RoadRunnerBootloader extends Bootloader
         // Register RPC
         //
         $container->bindSingleton(RPCInterface::class, RPC::class);
-        $container->bindSingleton(RPC::class, static function (EnvironmentInterface $env): RPCInterface {
+        $container->bindSingleton(RPC::class, static function (EnvironmentInterface $env, GlobalEnvironmentInterface $globalEnv): RPCInterface {
             return new RPC(
-                Relay::create($env->getRPCAddress())
+                Relay::create($env->getRPCAddress()),
+                $this->withCodec($globalEnv),
             );
         });
 
@@ -66,5 +71,18 @@ final class RoadRunnerBootloader extends Bootloader
         ): PSR7WorkerInterface {
             return new PSR7Worker($worker, $requests, $streams, $uploads);
         });
+    }
+
+    private function withCodec(GlobalEnvironmentInterface $env): CodecInterface
+    {
+        switch ($env->get('RPC_CODEC')) {
+            case 'proto':
+            case 'protobuf':
+                return new ProtobufCodec();
+            case 'msgpack':
+                return new MsgpackCodec();
+            default:
+                return new JsonCodec();
+        }
     }
 }
