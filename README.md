@@ -447,36 +447,6 @@ class MyService {
 }
 ```
 
-### Callable jobs
-
-If you have simply job and you don't want to create job handler you may use php closures to handle some work.
-
-```php
-use Spiral\Queue\QueueInterface;
-use Psr\Container\ContainerInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-
-class MyService {
-
-    private QueueInterface $queue;
-    
-    public function __construct(QueueInterface $queue) 
-    {
-        $this->queue = $queue;
-    }
-    
-    public function handle()
-    {
-        $url = 'https://google.com';
-        
-        $this->queue->pushCallable(static function(HttpClientInterface $client) use($url) : void {
-            $status = $client->request('GET', $url)->getStatusCode() === 200;
-            echo $status ? 'PONG' : 'ERROR';
-        });
-    }
-}
-```
-
 ### Domain specific queues
 
 Domain specific queues are an important part of an application. You can create aliases for exists connections and use
