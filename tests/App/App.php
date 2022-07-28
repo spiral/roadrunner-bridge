@@ -22,6 +22,7 @@ class App extends Kernel
         RoadRunnerBridge\BroadcastingBootloader::class,
         RoadRunnerBridge\RoadRunnerBootloader::class,
         RoadRunnerBridge\TcpBootloader::class,
+        RoadRunnerBridge\MetricsBootloader::class,
 
         // Framework commands
         Framework\ConsoleBootloader::class,
