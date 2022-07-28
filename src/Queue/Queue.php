@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Queue;
 
+use Doctrine\Inflector\Inflector;
+use Doctrine\Inflector\Rules\English\InflectorFactory;
 use Spiral\Core\FactoryInterface;
 use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\Queue\OptionsInterface;
@@ -17,8 +19,11 @@ use Spiral\RoadRunner\Jobs\QueueInterface as RRQueueInterface;
 final class Queue implements QueueInterface
 {
     use QueueTrait;
+
     /** @var array<non-empty-string, RRQueueInterface> */
     private array $queues = [];
+
+    private Inflector $inflector;
 
     /**
      * @param array<non-empty-string, array{connector: CreateInfoInterface, consume: bool}> $pipelines
@@ -31,6 +36,7 @@ final class Queue implements QueueInterface
         private readonly array $aliases = [],
         private readonly ?string $default = null
     ) {
+        $this->inflector = (new InflectorFactory())->build();
     }
 
     /**
@@ -41,6 +47,8 @@ final class Queue implements QueueInterface
      */
     public function push(string $name, array $payload = [], OptionsInterface $options = null): string
     {
+        $name = $this->jobName($name);
+
         $queue = $this->initQueue(
             $options ? $options->getQueue() ?? $this->default : $this->default
         );
@@ -72,5 +80,15 @@ final class Queue implements QueueInterface
         ]);
 
         return $this->queues[$pipeline] = $registry->getPipeline($pipeline);
+    }
+
+    private function jobName(string $name): string
+    {
+        $names = \explode('\\', $name);
+        $names = \array_map(function (string $value) {
+            return $this->inflector->camelize($value);
+        }, $names);
+
+        return \join('.', $names);
     }
 }
