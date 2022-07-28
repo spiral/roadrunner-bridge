@@ -27,6 +27,7 @@
     "spiral/roadrunner-kv": "^2.0",
     "spiral/roadrunner-broadcast": "^2.0",
     "spiral/roadrunner-tcp": "^2.0",
+    "spiral/roadrunner-metrics": "^2.0",
     "spiral/framework": "^2.13"
   },
   "require-dev": {
