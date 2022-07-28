@@ -6,9 +6,12 @@ namespace Spiral\Tests\Queue;
 
 use Mockery as m;
 use Spiral\Boot\FinalizerInterface;
+use Spiral\Core\CoreInterface;
 use Spiral\Queue\Failed\FailedJobHandlerInterface;
 use Spiral\Queue\HandlerInterface;
 use Spiral\Queue\HandlerRegistryInterface;
+use Spiral\Queue\Interceptor\Core;
+use Spiral\Queue\Interceptor\Handler;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher;
@@ -36,6 +39,7 @@ final class DispatcherTest extends TestCase
         $finalizer->shouldReceive('finalize')->once()->with(false);
 
         $task = m::mock(ReceivedTaskInterface::class);
+        $task->shouldReceive('getQueue')->andReturn('foo-queue');
         $task->shouldReceive('getName')->andReturn('foo-task');
         $task->shouldReceive('getId')->once()->andReturn('foo-id');
         $task->shouldReceive('getPayload')->once()->andReturn(['foo-payload']);
@@ -63,16 +67,8 @@ final class DispatcherTest extends TestCase
         $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
 
-        $failedJobHandler = $this->mockContainer(FailedJobHandlerInterface::class);
-        $failedJobHandler->shouldReceive('handle')->once()->with(
-            'roadrunner',
-            'queue-name',
-            'foo-task',
-            ['foo-payload'],
-            $e
-        );
-
         $task = m::mock(ReceivedTaskInterface::class);
+        $task->shouldReceive('getId')->andReturn('foo-id');
         $task->shouldReceive('getName')->andReturn('foo-task');
         $task->shouldReceive('getQueue')->once()->andReturn('queue-name');
         $task->shouldReceive('getPayload')->once()->andReturn(['foo-payload']);

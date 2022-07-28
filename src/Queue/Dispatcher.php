@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Queue;
 
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
-use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
-use Spiral\Queue\Failed\FailedJobHandlerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
+use Spiral\Queue\Interceptor\Handler;
 
 final class Dispatcher implements DispatcherInterface
 {
@@ -37,36 +35,30 @@ final class Dispatcher implements DispatcherInterface
         /** @var ConsumerInterface $consumer */
         $consumer = $this->container->get(ConsumerInterface::class);
 
-        /** @var HandlerRegistryInterface $handlerRegistry */
-        $handlerRegistry = $this->container->get(HandlerRegistryInterface::class);
+        /** @var Handler $handler */
+        $handler = $this->container->get(Handler::class);
 
         while ($task = $consumer->waitTask()) {
             try {
-                $instance = $handlerRegistry->getHandler($task->getName());
+                $handler->handle(
+                    name: $task->getName(),
+                    driver: 'roadrunner',
+                    queue: $task->getQueue(),
+                    id: $task->getId(),
+                    payload: $task->getPayload()
+                );
 
-                $instance->handle($task->getName(), $task->getId(), $task->getPayload());
                 $task->complete();
             } catch (\Throwable $e) {
                 $this->handleException($task, $e);
-                $task->fail($e);
+            } finally {
+                $this->finalizer->finalize(false);
             }
-
-            $this->finalizer->finalize(false);
         }
     }
 
     protected function handleException(?ReceivedTaskInterface $task, \Throwable $e): void
     {
-        try {
-            $this->container->get(FailedJobHandlerInterface::class)->handle(
-                'roadrunner',
-                $task->getQueue(),
-                $task->getName(),
-                $task->getPayload(),
-                $e
-            );
-        } catch (\Throwable|ContainerExceptionInterface) {
-            // no need to notify when unable to register an exception
-        }
+        $task->fail($e);
     }
 }
