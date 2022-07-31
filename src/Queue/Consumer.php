@@ -39,7 +39,7 @@ final class Consumer implements ConsumerInterface
             $header['id'],
             $header['pipeline'],
             $header['job'],
-            $this->getPayload($payload, $header['pipeline']),
+            $this->getPayload($payload, $header['pipeline'],  $header['job']),
             (array) $header['headers']
         );
     }
@@ -47,10 +47,11 @@ final class Consumer implements ConsumerInterface
     /**
      * @throws UnserializeException
      */
-    private function getPayload(Payload $payload, string $pipeline): array
+    private function getPayload(Payload $payload, string $pipeline, string $jobType): array
     {
         return $this->serializer
             ->withFormat($this->pipelines[$pipeline]['serializerFormat'] ?? null)
+            ->withJobType($jobType)
             ->deserialize($payload->body);
     }
 }

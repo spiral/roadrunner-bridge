@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Queue;
 
+use Spiral\Queue\HandlerRegistryInterface;
+use Spiral\Queue\QueueRegistry;
 use Spiral\RoadRunner\Jobs\Serializer\SerializerInterface;
 use Spiral\Serializer\SerializerManager;
 
@@ -14,8 +16,21 @@ final class JobsAdapterSerializer implements SerializerInterface
 {
     public function __construct(
         private readonly SerializerManager $manager,
+        private readonly HandlerRegistryInterface $handlerRegistry,
         private ?string $format = null
     ) {
+    }
+
+    public function withJobType(string $jobType): self
+    {
+        if ($this->handlerRegistry instanceof QueueRegistry && $this->handlerRegistry->hasSerializer($jobType)) {
+            $serializer = clone $this;
+            $serializer->format = $this->handlerRegistry->getSerializerFormat($jobType);
+
+            return $serializer;
+        }
+
+        return $this;
     }
 
     public function withFormat(string $format = null): self

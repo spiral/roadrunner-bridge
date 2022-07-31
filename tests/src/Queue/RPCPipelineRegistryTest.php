@@ -65,7 +65,7 @@ final class RPCPipelineRegistryTest extends TestCase
 
         $this->assertInstanceOf(
             QueueInterface::class,
-            $this->registry->getPipeline('memory')
+            $this->registry->getPipeline('memory', 'some')
         );
     }
 
@@ -83,7 +83,7 @@ final class RPCPipelineRegistryTest extends TestCase
 
         $this->assertInstanceOf(
             QueueInterface::class,
-            $this->registry->getPipeline('memory')
+            $this->registry->getPipeline('memory', 'some')
         );
     }
 
@@ -99,7 +99,7 @@ final class RPCPipelineRegistryTest extends TestCase
 
         $this->assertInstanceOf(
             QueueInterface::class,
-            $this->registry->getPipeline('local')
+            $this->registry->getPipeline('local', 'some')
         );
     }
 
@@ -117,7 +117,7 @@ final class RPCPipelineRegistryTest extends TestCase
 
         $this->assertInstanceOf(
             QueueInterface::class,
-            $this->registry->getPipeline('user-data')
+            $this->registry->getPipeline('user-data', 'some')
         );
     }
 
@@ -126,7 +126,7 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectErrorMessage('Queue pipeline with given name `test` is not found.');
 
-        $this->registry->getPipeline('test');
+        $this->registry->getPipeline('test', 'some');
     }
 
     public function testGetsNonExistsAliasPipelineShouldThrowAnException(): void
@@ -134,7 +134,7 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectErrorMessage('Queue pipeline with given name `test` is not found.');
 
-        $this->registry->getPipeline('bad-alias');
+        $this->registry->getPipeline('bad-alias', 'some');
     }
 
     public function testGetsPipelineWithoutConnectorShouldThrowAnException(): void
@@ -142,7 +142,7 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectErrorMessage('You must specify connector for given pipeline `without-connector`.');
 
-        $this->registry->getPipeline('without-connector');
+        $this->registry->getPipeline('without-connector', 'some');
     }
 
     public function testGetsPipelineWithWrongConnectorShouldThrowAnException(): void
@@ -150,6 +150,6 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectErrorMessage('Connector should implement Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface interface.');
 
-        $this->registry->getPipeline('with-wrong-connector');
+        $this->registry->getPipeline('with-wrong-connector', 'some');
     }
 }

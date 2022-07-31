@@ -32,7 +32,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     ) {
     }
 
-    public function getPipeline(string $name): QueueInterface
+    public function getPipeline(string $name, string $jobType): QueueInterface
     {
         if (isset($this->aliases[$name])) {
             $name = $this->aliases[$name];
@@ -56,9 +56,11 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
             );
         }
 
-        if ($this->jobs instanceof SerializerAwareInterface && !empty($this->pipelines[$name]['serializerFormat'])) {
+        if ($this->jobs instanceof SerializerAwareInterface) {
             $this->jobs = $this->jobs->withSerializer(
-                $this->serializer->withFormat($this->pipelines[$name]['serializerFormat'])
+                $this->serializer
+                    ->withFormat($this->pipelines[$name]['serializerFormat'] ?? null)
+                    ->withJobType($jobType)
             );
         }
 

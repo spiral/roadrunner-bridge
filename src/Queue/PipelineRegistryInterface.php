@@ -16,5 +16,5 @@ interface PipelineRegistryInterface
      *
      * If pipeline not exists in the RoadRunner, it will be created
      */
-    public function getPipeline(string $name): QueueInterface;
+    public function getPipeline(string $name, string $jobType): QueueInterface;
 }

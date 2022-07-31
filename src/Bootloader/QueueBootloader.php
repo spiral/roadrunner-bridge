@@ -10,6 +10,7 @@ use Spiral\Core\Container;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\Queue\Bootloader\QueueBootloader as BaseQueueBootloader;
 use Spiral\Queue\Config\QueueConfig;
+use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\Consumer;
 use Spiral\Serializer\Bootloader\SerializerBootloader;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
@@ -50,10 +51,12 @@ final class QueueBootloader extends Bootloader
     {
         $container->bindSingleton(
             JobsAdapterSerializer::class,
-            static fn (SerializerManager $manager, QueueConfig $config) => new JobsAdapterSerializer(
-                $manager,
+            static fn (SerializerManager $manager, QueueConfig $config, HandlerRegistryInterface $registry) =>
+                new JobsAdapterSerializer(
+                    $manager,
+                    $registry,
                 $config->getConnections('roadrunner')['roadrunner']['serializerFormat'] ?? null
-            )
+                )
         );
 
         $container->bindSingleton(RRSerializerInterface::class, JobsAdapterSerializer::class);
