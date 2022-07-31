@@ -39,7 +39,7 @@ final class Consumer implements ConsumerInterface
             $header['id'],
             $header['pipeline'],
             $header['job'],
-            $this->getPayload($payload, $header['pipeline'],  $header['job']),
+            $this->getPayload($payload, $header['pipeline'], $header['job']),
             (array) $header['headers']
         );
     }

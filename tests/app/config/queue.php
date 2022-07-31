@@ -77,7 +77,7 @@ return [
         'handlers' => [],
         'serializers' => [
             \Spiral\Queue\Job\ObjectJob::class => 'json',
-            \Spiral\App\Job\TestJob::class => 'serializer'
-        ]
+            \Spiral\App\Job\TestJob::class => 'serializer',
+        ],
     ],
 ];

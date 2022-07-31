@@ -55,7 +55,7 @@ final class QueueBootloader extends Bootloader
                 new JobsAdapterSerializer(
                     $manager,
                     $registry,
-                $config->getConnections('roadrunner')['roadrunner']['serializerFormat'] ?? null
+                    $config->getConnections('roadrunner')['roadrunner']['serializerFormat'] ?? null
                 )
         );
 
