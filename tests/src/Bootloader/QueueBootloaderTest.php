@@ -7,7 +7,6 @@ namespace Spiral\Tests\Bootloader;
 use Mockery as m;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
-use Spiral\Queue\Config\QueueConfig;
 use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Queue\QueueInterface;
 use Spiral\Serializer\SerializerInterface;
@@ -129,32 +128,5 @@ final class QueueBootloaderTest extends TestCase
         $config = $configurator->getConfig('queue');
 
         $this->assertIsArray($config);
-    }
-
-    public function testFormatIsNull(): void
-    {
-        $serializer = $this->getContainer()->get(JobsAdapterSerializer::class);
-
-        $ref = new \ReflectionObject($serializer);
-
-        $this->assertNull($ref->getProperty('format')->getValue($serializer));
-    }
-
-    public function testFormatIsDefined(): void
-    {
-        $this->getContainer()->bind(QueueConfig::class, new QueueConfig([
-            'connections' => [
-                'roadrunner' => [
-                    'driver' => 'roadrunner',
-                    'serializerFormat' => 'defined',
-                ],
-            ],
-        ]));
-
-        $serializer = $this->getContainer()->get(JobsAdapterSerializer::class);
-
-        $ref = new \ReflectionObject($serializer);
-
-        $this->assertSame('defined', $ref->getProperty('format')->getValue($serializer));
     }
 }

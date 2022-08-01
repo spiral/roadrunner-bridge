@@ -57,11 +57,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         }
 
         if ($this->jobs instanceof SerializerAwareInterface) {
-            $this->jobs = $this->jobs->withSerializer(
-                $this->serializer
-                    ->withFormat($this->pipelines[$name]['serializerFormat'] ?? null)
-                    ->withJobType($jobType)
-            );
+            $this->jobs = $this->jobs->withSerializer($this->serializer->changeSerializer($jobType));
         }
 
         /** @var CreateInfoInterface $connector */

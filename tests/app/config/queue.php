@@ -46,7 +46,6 @@ return [
                 ],
                 'withSerializer' => [
                     'connector' => new MemoryCreateInfo('local'),
-                    'serializerFormat' => 'serializer',
                     'consume' => true,
                 ],
                 // 'amqp' => [
@@ -77,7 +76,7 @@ return [
         'handlers' => [],
         'serializers' => [
             \Spiral\Queue\Job\ObjectJob::class => 'json',
-            \Spiral\App\Job\TestJob::class => 'serializer',
+            \Spiral\App\Job\TestJob::class => new \Spiral\Serializer\Serializer\PhpSerializer(),
         ],
     ],
 ];
