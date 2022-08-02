@@ -31,7 +31,7 @@ final class JobsAdapterSerializer implements SerializerInterface
 
     public function serialize(array $payload): string
     {
-        return $this->serializer->serialize($payload);
+        return (string) $this->serializer->serialize($payload);
     }
 
     public function deserialize(string $payload): array
