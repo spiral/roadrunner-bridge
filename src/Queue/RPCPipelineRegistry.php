@@ -39,9 +39,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         }
 
         if (! isset($this->pipelines[$name])) {
-            throw new InvalidArgumentException(
-                \sprintf('Queue pipeline with given name `%s` is not found.', $name)
-            );
+            return $this->jobs->connect($name);
         }
 
         if (! isset($this->pipelines[$name]['connector'])) {
@@ -62,15 +60,13 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
 
         /** @var CreateInfoInterface $connector */
         $connector = $this->pipelines[$name]['connector'];
-        $consume = (bool)($this->pipelines[$name]['consume'] ?? true);
 
         if (! $this->isExists($connector)) {
-            $queue = $this->create($connector, $consume);
-        } else {
-            $queue = $this->connect($connector);
+            $consume = (bool)($this->pipelines[$name]['consume'] ?? true);
+            return $this->create($connector, $consume);
         }
 
-        return $queue;
+        return $this->connect($connector);
     }
 
     /**

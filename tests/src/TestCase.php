@@ -22,6 +22,7 @@ abstract class TestCase extends \Spiral\Testing\TestCase
             RoadRunnerBridge\BroadcastingBootloader::class,
             RoadRunnerBridge\RoadRunnerBootloader::class,
             RoadRunnerBridge\TcpBootloader::class,
+            RoadRunnerBridge\MetricsBootloader::class,
 
             // Framework commands
             ConsoleBootloader::class,
