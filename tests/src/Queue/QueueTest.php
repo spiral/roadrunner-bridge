@@ -45,11 +45,11 @@ final class QueueTest extends TestCase
         $this->queue = new Queue($container, $pipelines, $aliases, 'default');
     }
 
-    public function testTaskShouldBePushedToDefaultQueue()
+    public function testTaskShouldBePushedToDefaultQueue(): void
     {
         $this->registry->shouldReceive('getPipeline')
             ->once()
-            ->with('default')
+            ->with('default', 'foo')
             ->andReturn($queue = m::mock(QueueInterface::class));
 
         $queuedTask = m::mock(QueuedTaskInterface::class);
@@ -64,16 +64,16 @@ final class QueueTest extends TestCase
         $this->assertSame('task-id2', $this->queue->push('foo', ['foo' => 'bar']));
     }
 
-    public function testTaskShouldBePushedToCustomQueue()
+    public function testTaskShouldBePushedToCustomQueue(): void
     {
         $this->registry->shouldReceive('getPipeline')
             ->once()
-            ->with('foo')
+            ->with('foo', 'foo')
             ->andReturn($fooQueue = m::mock(QueueInterface::class));
 
         $this->registry->shouldReceive('getPipeline')
             ->once()
-            ->with('bar')
+            ->with('bar', 'bar')
             ->andReturn($barQueue = m::mock(QueueInterface::class));
 
         $queuedTask = m::mock(QueuedTaskInterface::class);
@@ -91,11 +91,11 @@ final class QueueTest extends TestCase
         $this->assertSame('task-id2', $this->queue->push('bar', ['foo' => 'bar'], Options::onQueue('bar')));
     }
 
-    public function testPushObject()
+    public function testPushObject(): void
     {
         $this->registry->shouldReceive('getPipeline')
             ->once()
-            ->with('default')
+            ->with('default', ObjectJob::class)
             ->andReturn($queue = m::mock(QueueInterface::class));
 
         $object = new \stdClass();

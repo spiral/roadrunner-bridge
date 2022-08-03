@@ -10,6 +10,7 @@ use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\RoadRunner\Payload;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
+use Spiral\Serializer\Exception\SerializeException;
 use Spiral\Serializer\Exception\UnserializeException;
 
 final class Consumer implements ConsumerInterface
@@ -18,8 +19,7 @@ final class Consumer implements ConsumerInterface
 
     public function __construct(
         private readonly JobsAdapterSerializer $serializer,
-        WorkerInterface $worker = null,
-        private readonly array $pipelines = [],
+        WorkerInterface $worker = null
     ) {
         $this->worker = $worker ?? Worker::create();
     }
@@ -32,14 +32,14 @@ final class Consumer implements ConsumerInterface
             return null;
         }
 
-        $header = $this->serializer->withFormat('json')->deserialize($payload->header);
+        $header = $this->getHeader($payload);
 
         return new ReceivedTask(
             $this->worker,
             $header['id'],
             $header['pipeline'],
             $header['job'],
-            $this->getPayload($payload, $header['pipeline']),
+            $this->getPayload($payload, $header['job']),
             (array) $header['headers']
         );
     }
@@ -47,10 +47,17 @@ final class Consumer implements ConsumerInterface
     /**
      * @throws UnserializeException
      */
-    private function getPayload(Payload $payload, string $pipeline): array
+    private function getPayload(Payload $payload, string $jobType): array
     {
-        return $this->serializer
-            ->withFormat($this->pipelines[$pipeline]['serializerFormat'] ?? null)
-            ->deserialize($payload->body);
+        return $this->serializer->changeSerializer($jobType)->deserialize($payload->body);
+    }
+
+    private function getHeader(Payload $payload): array
+    {
+        try {
+            return (array) \json_decode($payload->header, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new SerializeException($e->getMessage(), (int)$e->getCode(), $e);
+        }
     }
 }

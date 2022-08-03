@@ -32,16 +32,14 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     ) {
     }
 
-    public function getPipeline(string $name): QueueInterface
+    public function getPipeline(string $name, string $jobType): QueueInterface
     {
         if (isset($this->aliases[$name])) {
             $name = $this->aliases[$name];
         }
 
         if (! isset($this->pipelines[$name])) {
-            throw new InvalidArgumentException(
-                \sprintf('Queue pipeline with given name `%s` is not found.', $name)
-            );
+            return $this->jobs->connect($name);
         }
 
         if (! isset($this->pipelines[$name]['connector'])) {
@@ -56,23 +54,19 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
             );
         }
 
-        if ($this->jobs instanceof SerializerAwareInterface && !empty($this->pipelines[$name]['serializerFormat'])) {
-            $this->jobs = $this->jobs->withSerializer(
-                $this->serializer->withFormat($this->pipelines[$name]['serializerFormat'])
-            );
+        if ($this->jobs instanceof SerializerAwareInterface) {
+            $this->jobs = $this->jobs->withSerializer($this->serializer->changeSerializer($jobType));
         }
 
         /** @var CreateInfoInterface $connector */
         $connector = $this->pipelines[$name]['connector'];
-        $consume = (bool)($this->pipelines[$name]['consume'] ?? true);
 
         if (! $this->isExists($connector)) {
-            $queue = $this->create($connector, $consume);
-        } else {
-            $queue = $this->connect($connector);
+            $consume = (bool)($this->pipelines[$name]['consume'] ?? true);
+            return $this->create($connector, $consume);
         }
 
-        return $queue;
+        return $this->connect($connector);
     }
 
     /**

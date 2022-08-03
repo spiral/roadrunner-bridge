@@ -9,7 +9,7 @@ use Spiral\Boot\KernelInterface;
 use Spiral\Core\Container;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\Queue\Bootloader\QueueBootloader as BaseQueueBootloader;
-use Spiral\Queue\Config\QueueConfig;
+use Spiral\Queue\SerializerRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\Consumer;
 use Spiral\Serializer\Bootloader\SerializerBootloader;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
@@ -22,7 +22,6 @@ use Spiral\RoadRunnerBridge\Queue\JobsAdapterSerializer;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\Queue;
 use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
-use Spiral\Serializer\SerializerManager;
 
 final class QueueBootloader extends Bootloader
 {
@@ -50,10 +49,7 @@ final class QueueBootloader extends Bootloader
     {
         $container->bindSingleton(
             JobsAdapterSerializer::class,
-            static fn (SerializerManager $manager, QueueConfig $config) => new JobsAdapterSerializer(
-                $manager,
-                $config->getConnections('roadrunner')['roadrunner']['serializerFormat'] ?? null
-            )
+            static fn (SerializerRegistryInterface $registry) => new JobsAdapterSerializer($registry)
         );
 
         $container->bindSingleton(RRSerializerInterface::class, JobsAdapterSerializer::class);
@@ -63,12 +59,8 @@ final class QueueBootloader extends Bootloader
     {
         $container->bindSingleton(
             ConsumerInterface::class,
-            static fn (JobsAdapterSerializer $serializer, WorkerInterface $worker, QueueConfig $config): Consumer =>
-                new Consumer(
-                    $serializer,
-                    $worker,
-                    $config->getConnections('roadrunner')['roadrunner']['pipelines'] ?? []
-                )
+            static fn (JobsAdapterSerializer $serializer, WorkerInterface $worker): Consumer =>
+                new Consumer($serializer, $worker)
         );
     }
 

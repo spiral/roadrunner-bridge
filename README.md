@@ -28,18 +28,44 @@ After package install you need to add bootloaders from the package in your appli
 use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 
 protected const LOAD = [
-    RoadRunnerBridge\HttpBootloader::class,
-    RoadRunnerBridge\QueueBootloader::class,
-    RoadRunnerBridge\CacheBootloader::class,
-    RoadRunnerBridge\GRPCBootloader::class,
-    RoadRunnerBridge\BroadcastingBootloader::class,
+    RoadRunnerBridge\HttpBootloader::class, // Optional, if it needs to work with http plugin
+    RoadRunnerBridge\QueueBootloader::class, // Optional, if it needs to work with jobs plugin
+    RoadRunnerBridge\CacheBootloader::class, // Optional, if it needs to work with KV plugin
+    RoadRunnerBridge\GRPCBootloader::class, // Optional, if it needs to work with GRPC plugin
+    RoadRunnerBridge\BroadcastingBootloader::class, // Optional, if it needs to work with broadcasting plugin
     RoadRunnerBridge\CommandBootloader::class,
-    RoadRunnerBridge\TcpBootloader::class, // Optional, if need to work with TCP
+    RoadRunnerBridge\TcpBootloader::class, // Optional, if it needs to work with TCP plugin
+    RoadRunnerBridge\MetricsBootloader::class, // Optional, if it needs to work with metrics plugin
     // ...
 ];
 ```
 
 ## Usage
+
+- [Cache](#cache)
+  - [Configuration](#configuration)
+  - [Storage](#working-with-default-storage)
+  - [Storage provider](#working-with-storage-provider)
+  - [Domain specific storages](#working-with-domain-specific-storages)
+  - [Custom cache storage](#adding-custom-cache-storages)
+  - [Commands](#console-commands)
+- [Queue](#queue)
+    - [Configuration](#configuration-1)
+    - [Job handler](#job-handler)
+    - [Job serializer](#job-serializer)
+    - [Domain specific queues](#domain-specific-queues)
+    - [Handle failed jobs](#handle-failed-jobs)
+- [TCP](#tcp)
+    - [Configuration](#configuration-2)
+    - [Services](#services)
+- [Broadcasting](#broadcasting)
+    - [Configuration](#configuration-3)
+    - [Broadcasting](#working-with-default-driver)
+    - [Broadcasting manager](#working-with-broadcasting-manager)
+- [GRPC](#grpc)
+    - [Configuration](#configuration-4)
+    - [Commands](#console-commands-2)
+- [Metrics](#metrics)
 
 ### Cache
 
@@ -249,6 +275,8 @@ $factory->make(DatabaseStorage::class, [
 | cache:clear           | Clear cache for default cache storage  |
 | cache:clear {storage} | Clear cache for specific cache storage |
 
+----
+
 ### Queue
 
 Roadrunner queues provide a unified queueing API across a variety of different queue backends. Full information about
@@ -328,6 +356,13 @@ return [
     
     'registry' => [
         'handlers' => [],
+        'serializers' => [
+            \Spiral\Queue\Job\ObjectJob::class => 'json',
+            \App\Job\TestJob::class => 'serializer',
+            \App\Job\OtherJob::class => CustomSerializer::class,
+            \App\Job\FooJob::class => new CustomSerializer(),
+            \App\Job\BarJob::class => new \Spiral\Core\Container\Autowire(CustomSerializer::class),
+        ]
     ],
 ];
 ```
@@ -401,6 +436,30 @@ $registry->setHandler('ping', PingHandler::class);
 $queue = $this->container->get(QueueInterface::class);
 $queue->push('ping', ['url' => 'https://google.com']);
 ```
+
+#### Job serializer
+
+You can configure a specific serializer for a particular job. Add a job as a key with the desired serializer as a value 
+in the `app/config/queue.php` configuration file:
+
+```php
+return [
+    // ...
+    'registry' => [
+        'serializers' => [
+            \Spiral\Queue\Job\ObjectJob::class => 'json',
+            App\Job\TestJob::class => 'serializer',
+            App\Job\OtherJob::class => CustomSerializer::class,
+            App\Job\FooJob::class => new CustomSerializer(),
+            App\Job\BarJob::class => new \Spiral\Core\Container\Autowire(CustomSerializer::class),
+        ]
+    ],
+];
+```
+
+The serializer can be a string key from the `Spiral\Serializer\SerializerRegistry`. The fully qualified name of the serializer class, 
+serializer instance, `Spiral\Core\Container\Autowire` instance. 
+The serializer class must implement the `Spiral\Serializer\SerializerInterface`.
 
 #### Job DTO's
 
@@ -585,9 +644,12 @@ protected const LOAD = [
 php app.php queue:pause local
 ```
 
+----
+
 ### TCP
 
-RoadRunner includes TCP server and can be used to replace classic TCP setup with much greater performance and flexibility.
+RoadRunner includes TCP server and can be used to replace classic TCP setup with much greater performance and
+flexibility.
 
 #### Bootloader
 
@@ -604,7 +666,8 @@ protected const LOAD = [
 ```
 
 This bootloader adds a dispatcher and necessary services for TCP to work.
-Also, using the `addService` and `addInterceptors` methods can dynamically add services to TCP servers and configure interceptors.
+Also, using the `addService` and `addInterceptors` methods can dynamically add services to TCP servers and configure
+interceptors.
 
 #### Configuration
 
@@ -612,22 +675,22 @@ Configure `tcp` section in the RoadRunner `.rr.yaml` configuration file with nee
 
 ```yaml
 tcp:
-    servers:
-        smtp:
-            addr: tcp://127.0.0.1:22
-            delimiter: "\r\n" # by default
-        monolog:
-            addr: tcp://127.0.0.1:9913
+  servers:
+    smtp:
+      addr: tcp://127.0.0.1:22
+      delimiter: "\r\n" # by default
+    monolog:
+      addr: tcp://127.0.0.1:9913
 
-    pool:
-        num_workers: 2
-        max_jobs: 0
-        allocate_timeout: 60s
-        destroy_timeout: 60s
+  pool:
+    num_workers: 2
+    max_jobs: 0
+    allocate_timeout: 60s
+    destroy_timeout: 60s
 ```
 
-Create configuration file `app/config/tcp.php`. In the configuration, it's required to specify the services that 
-will handle requests from a specific TCP server. Optionally, interceptors can be added for each specific server. 
+Create configuration file `app/config/tcp.php`. In the configuration, it's required to specify the services that
+will handle requests from a specific TCP server. Optionally, interceptors can be added for each specific server.
 With the help there, can add some logic before handling the request in service. Configuration example:
 
 ```php
@@ -663,8 +726,10 @@ return [
 
 #### Services
 
-A service must implement the interface `Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface` with one required method `handle`.
-After processing a request, the `handle` method must return the `Spiral\RoadRunnerBridge\Tcp\Response\ResponseInterface` object
+A service must implement the interface `Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface` with one required
+method `handle`.
+After processing a request, the `handle` method must return the `Spiral\RoadRunnerBridge\Tcp\Response\ResponseInterface`
+object
 with result (`RespondMessage`, `CloseConnection`, `ContinueRead`).
 
 Example:
@@ -692,12 +757,13 @@ class TestService implements ServiceInterface
 }
 ```
 
+----
+
 ### Broadcasting
 
 #### Configuration
 
 You can create config file `app/config/broadcasting.php` if you want to configure Broadcasting drivers.
-
 
 ```php
 <?php
@@ -759,7 +825,7 @@ http:
       allowed_origin: "*"
       allowed_headers: "*"
       allowed_methods: "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS"
-      
+
 websockets:
   broker: default
   path: "/ws"
@@ -834,6 +900,8 @@ final class SendVerificationLink
     }
 }
 ```
+
+----
 
 ### GRPC
 
@@ -1000,5 +1068,112 @@ kv:
 #  proto:
 #    - "first.proto"
 ```
+
+----
+
+### Metrics
+
+Metrics service does not require configuration in the application. However, you must activate this service in .rr.yaml:
+
+```yaml
+metrics:
+  # prometheus client address (path /metrics added automatically)
+  address: localhost:2112
+```
+
+#### Custom Application metrics
+
+You can also publish application-specific metrics. First, you have to register a metric in your configuration file:
+
+```yaml
+metrics:
+  address: localhost:2112
+  collect:
+    app_metric_counter:
+      type: counter
+      help: "Application counter."
+```
+
+or declare metrics in PHP code
+
+```php
+use Spiral\RoadRunner\Metrics\MetricsInterface;
+use Spiral\RoadRunner\Metrics\Collector;
+
+class AppBootloader extends Bootloader
+{
+//...
+
+    public function boot(MetricsInterface $metrics): void
+    {
+        $metrics->declare(
+            'app_metric_counter',
+            Collector::counter()->withHelp('Application counter.')
+        );
+    }
+}
+```
+
+To populate metric from application use `Spiral\RoadRunner\Metrics\MetricsInterface`:
+
+```php
+use Spiral\RoadRunner\Metrics\MetricsInterface; 
+
+// ...
+
+public function index(MetricsInterface $metrics): void
+{
+    $metrics->add('app_metric_counter', 1);
+}
+```
+
+#### Tagged metrics
+
+You can use tagged (labels) metrics to group values:
+
+```php
+metrics:
+  address: localhost:2112
+  collect:
+    app_type_duration:
+      type: histogram
+      help: "Application counter."
+      labels: [ "type" ]
+```
+
+or declare metrics in PHP code:
+
+```php
+use Spiral\RoadRunner\Metrics\MetricsInterface;
+use Spiral\RoadRunner\Metrics\Collector;
+
+class MetricsBootloader extends Bootloader
+{
+    //...
+
+    public function boot(MetricsInterface $metrics): void
+    {
+        $metrics->declare(
+            'app_metric_counter',
+            Collector::counter()->withHelp('Application counter.')->withLabels('type')
+        );
+    }
+}
+```
+
+You should specify values for your labels while pushing the metric:
+
+```php
+use Spiral\RoadRunner\MetricsInterface; 
+
+// ...
+
+public function index(MetricsInterface $metrics): void
+{
+    $metrics->add('app_type_duration', 0.5, ['some-type']);
+}
+```
+
+----
 
 Read more about RoadRunner configuration on official site https://roadrunner.dev.
