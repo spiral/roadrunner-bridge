@@ -7,7 +7,7 @@ namespace Spiral\Tests\Queue;
 use Mockery as m;
 use Spiral\Core\Container;
 use Spiral\Queue\Job\ObjectJob;
-use Spiral\Queue\Options;
+use Spiral\Queue\Options as QueueOptions;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
@@ -87,8 +87,8 @@ final class QueueTest extends TestCase
         $barQueue->shouldReceive('dispatch')->once()->with($preparedTask)->andReturn($queuedTask);
         $barQueue->shouldReceive('create')->once()->withSomeOfArgs('bar')->andReturn($preparedTask);
 
-        $this->assertSame('task-id1', $this->queue->push('foo', ['foo' => 'bar'], Options::onQueue('foo')));
-        $this->assertSame('task-id2', $this->queue->push('bar', ['foo' => 'bar'], Options::onQueue('bar')));
+        $this->assertSame('task-id1', $this->queue->push('foo', ['foo' => 'bar'], QueueOptions::onQueue('foo')));
+        $this->assertSame('task-id2', $this->queue->push('bar', ['foo' => 'bar'], QueueOptions::onQueue('bar')));
     }
 
     public function testPushObject(): void
