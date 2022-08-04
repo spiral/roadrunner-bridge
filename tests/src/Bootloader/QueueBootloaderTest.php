@@ -8,6 +8,7 @@ use Mockery as m;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
 use Spiral\Queue\HandlerRegistryInterface;
+use Spiral\Queue\Queue;
 use Spiral\Queue\QueueInterface;
 use Spiral\Serializer\SerializerInterface;
 use Spiral\RoadRunnerBridge\Queue\Consumer;
@@ -118,7 +119,7 @@ final class QueueBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             QueueInterface::class,
-            \Spiral\Queue\Driver\SyncDriver::class
+            Queue::class
         );
     }
 

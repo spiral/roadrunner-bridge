@@ -39,6 +39,7 @@ final class DispatcherTest extends TestCase
         $task->shouldReceive('getName')->andReturn('foo-task');
         $task->shouldReceive('getId')->once()->andReturn('foo-id');
         $task->shouldReceive('getPayload')->once()->andReturn(['foo-payload']);
+        $task->shouldReceive('getQueue')->once()->andReturn('default');
         $task->shouldReceive('complete')->once();
 
         $handler = m::mock(HandlerInterface::class);
@@ -73,6 +74,7 @@ final class DispatcherTest extends TestCase
         );
 
         $task = m::mock(ReceivedTaskInterface::class);
+        $task->shouldReceive('getId')->andReturn('foo-id');
         $task->shouldReceive('getName')->andReturn('foo-task');
         $task->shouldReceive('getQueue')->once()->andReturn('queue-name');
         $task->shouldReceive('getPayload')->once()->andReturn(['foo-payload']);
