@@ -54,7 +54,7 @@ final class Queue implements QueueInterface
         );
 
         if ($options instanceof ProvidesHeadersInterface) {
-            /** @var non-empty-string|array<non-empty-string> $values */
+            /** @var array<non-empty-string>|non-empty-string $values */
             foreach ($options->getHeaders() as $header => $values) {
                 $preparedTask = $preparedTask->withHeader($header, $values);
             }
