@@ -53,6 +53,7 @@ final class Dispatcher implements DispatcherInterface
             } catch (RetryException $e) {
                 $options = $e->getOptions();
                 if ($options instanceof ProvidesHeadersInterface) {
+                    /** @var non-empty-string|array<non-empty-string> $values */
                     foreach ($options->getHeaders() as $header => $values) {
                         $task = $task->withHeader($header, $values);
                     }
