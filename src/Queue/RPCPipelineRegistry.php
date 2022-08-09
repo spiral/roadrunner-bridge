@@ -8,6 +8,7 @@ use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
+use Spiral\RoadRunner\Jobs\Serializer\SerializerAwareInterface;
 
 /**
  * @internal
@@ -29,15 +30,23 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     /** @var array<non-empty-string,non-empty-string> */
     private array $aliases;
 
-    public function __construct(JobsInterface $jobs, array $pipelines, array $aliases, int $ttl = 60)
-    {
+    private ?JobsAdapterSerializer $serializer = null;
+
+    public function __construct(
+        JobsInterface $jobs,
+        array $pipelines,
+        array $aliases,
+        int $ttl = 60,
+        ?JobsAdapterSerializer $serializer = null
+    ) {
         $this->jobs = $jobs;
         $this->ttl = $ttl;
         $this->pipelines = $pipelines;
         $this->aliases = $aliases;
+        $this->serializer = $serializer;
     }
 
-    public function getPipeline(string $name): QueueInterface
+    public function getPipeline(string $name, string $jobType = null): QueueInterface
     {
         if (isset($this->aliases[$name])) {
             $name = $this->aliases[$name];
@@ -57,6 +66,10 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
             throw new InvalidArgumentException(
                 sprintf('Connector should implement %s interface.', CreateInfoInterface::class)
             );
+        }
+
+        if ($this->serializer !== null && !empty($jobType) && $this->jobs instanceof SerializerAwareInterface) {
+            $this->jobs = $this->jobs->withSerializer($this->serializer->changeSerializer($jobType));
         }
 
         /** @var CreateInfoInterface $connector */

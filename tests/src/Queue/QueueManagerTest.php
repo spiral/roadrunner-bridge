@@ -41,7 +41,7 @@ class QueueManagerTest extends TestCase
     {
         $this->registry->shouldReceive('getPipeline')
             ->once()
-            ->with('memory')
+            ->with('memory', 'foo')
             ->andReturn($queue = m::mock(QueueInterface::class));
 
         $queuedTask = m::mock(QueuedTaskInterface::class);
