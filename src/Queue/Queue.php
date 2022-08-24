@@ -49,9 +49,7 @@ final class Queue implements QueueInterface
      */
     public function push(string $name, array $payload = [], OptionsInterface $options = null): string
     {
-        $queue = $this->initQueue(
-            $options ? $options->getQueue() ?? $this->default : $this->default
-        );
+        $queue = $this->initQueue($name, $options ? $options->getQueue() ?? $this->default : $this->default);
 
         $task = $queue->dispatch(
             $queue->create(
@@ -64,7 +62,7 @@ final class Queue implements QueueInterface
         return $task->getId();
     }
 
-    private function initQueue(?string $pipeline): RRQueueInterface
+    private function initQueue(string $jobType, ?string $pipeline): RRQueueInterface
     {
         if (! $pipeline) {
             throw new InvalidArgumentException('You must define default RoadRunner queue pipeline.');
@@ -79,6 +77,6 @@ final class Queue implements QueueInterface
             'aliases' => $this->aliases,
         ]);
 
-        return $this->queues[$pipeline] = $registry->getPipeline($pipeline);
+        return $this->queues[$pipeline] = $registry->getPipeline($pipeline, $jobType);
     }
 }

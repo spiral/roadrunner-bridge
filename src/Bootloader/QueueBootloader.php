@@ -10,12 +10,12 @@ use Spiral\Core\Container;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\Queue\Bootloader\QueueBootloader as BaseQueueBootloader;
 use Spiral\Queue\SerializerInterface;
-use Spiral\RoadRunner\Jobs\Consumer;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Jobs;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\Serializer\SerializerInterface as RRSerializerInterface;
 use Spiral\RoadRunner\WorkerInterface;
+use Spiral\RoadRunnerBridge\Queue\Consumer;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher;
 use Spiral\RoadRunnerBridge\Queue\JobsAdapterSerializer;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
@@ -55,8 +55,8 @@ final class QueueBootloader extends Bootloader
     {
         $container->bindSingleton(
             ConsumerInterface::class,
-            static function (WorkerInterface $worker, RRSerializerInterface $serializer): Consumer {
-                return new Consumer($worker, $serializer);
+            static function (JobsAdapterSerializer $serializer, WorkerInterface $worker): Consumer {
+                return new Consumer($serializer, $worker);
             }
         );
     }
@@ -75,8 +75,13 @@ final class QueueBootloader extends Bootloader
     {
         $container->bind(
             PipelineRegistryInterface::class,
-            static function (JobsInterface $jobs, array $pipelines, array $aliases): PipelineRegistryInterface {
-                return new RPCPipelineRegistry($jobs, $pipelines, $aliases);
+            static function (
+                JobsInterface $jobs,
+                array $pipelines,
+                array $aliases,
+                JobsAdapterSerializer $serializer
+            ): PipelineRegistryInterface {
+                return new RPCPipelineRegistry($jobs, $pipelines, $aliases, 60, $serializer);
             }
         );
     }

@@ -50,7 +50,7 @@ final class QueueTest extends TestCase
     {
         $this->registry->shouldReceive('getPipeline')
             ->once()
-            ->with('default')
+            ->with('default', 'foo')
             ->andReturn($queue = m::mock(QueueInterface::class));
 
         $queuedTask = m::mock(QueuedTaskInterface::class);
@@ -69,12 +69,12 @@ final class QueueTest extends TestCase
     {
         $this->registry->shouldReceive('getPipeline')
             ->once()
-            ->with('foo')
+            ->with('foo', 'foo')
             ->andReturn($fooQueue = m::mock(QueueInterface::class));
 
         $this->registry->shouldReceive('getPipeline')
             ->once()
-            ->with('bar')
+            ->with('bar', 'bar')
             ->andReturn($barQueue = m::mock(QueueInterface::class));
 
         $queuedTask = m::mock(QueuedTaskInterface::class);
@@ -96,7 +96,7 @@ final class QueueTest extends TestCase
     {
         $this->registry->shouldReceive('getPipeline')
             ->once()
-            ->with('default')
+            ->with('default', ObjectJob::class)
             ->andReturn($queue = m::mock(QueueInterface::class));
 
         $object = new \stdClass();
@@ -117,7 +117,7 @@ final class QueueTest extends TestCase
     {
         $this->registry->shouldReceive('getPipeline')
             ->once()
-            ->with('default')
+            ->with('default', CallableJob::class)
             ->andReturn($queue = m::mock(QueueInterface::class));
 
         $callback = function () {
