@@ -78,9 +78,8 @@ final class Queue implements QueueInterface
         return $this->queues[$pipeline] = $registry->getPipeline($pipeline, $jobType);
     }
 
-    private function createJobsOptions(
-        QueueOptionsInterface|ProvidesHeadersInterface|OptionsInterface $options = null
-    ): ?Options {
+    private function createJobsOptions(QueueOptionsInterface|OptionsInterface $options = null): ?Options
+    {
         return match (true) {
             $options instanceof BridgeOptions => new Options(
                 $options->getDelay() ?? Options::DEFAULT_DELAY,
