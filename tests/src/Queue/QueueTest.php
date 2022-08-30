@@ -142,7 +142,7 @@ final class QueueTest extends TestCase
         yield [new JobsOptions(autoAck: true), (new BridgeOptions())->autoAck()];
         yield [
             new JobsOptions(delay: 2, priority: 4, autoAck: true),
-            (new BridgeOptions())->withDelay(2)->withPriority(4)->autoAck()
+            (new BridgeOptions())->withDelay(2)->withPriority(4)->autoAck(),
         ];
     }
 }

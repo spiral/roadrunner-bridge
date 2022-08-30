@@ -14,7 +14,7 @@ final class Options extends QueueOptions implements WritableHeadersInterface, Op
     use WritableHeadersTrait;
 
     /**
-     * @var positive-int|0
+     * @var 0|positive-int
      */
     private int $priority = JobsOptionsInterface::DEFAULT_PRIORITY;
 
