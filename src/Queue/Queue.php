@@ -9,6 +9,7 @@ use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\Queue\OptionsInterface as QueueOptionsInterface;
 use Spiral\Queue\QueueInterface;
 use Spiral\Queue\QueueTrait;
+use Spiral\RoadRunnerBridge\Queue\Options as BridgeOptions;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Options;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
@@ -47,11 +48,7 @@ final class Queue implements QueueInterface
     ): string {
         $queue = $this->initQueue($name, $options ? $options->getQueue() ?? $this->default : $this->default);
 
-        $preparedTask = $queue->create(
-            $name,
-            $payload,
-            $options ? new Options($options->getDelay() ?? Options::DEFAULT_DELAY) : null
-        );
+        $preparedTask = $queue->create($name, $payload, $this->createJobsOptions($options));
 
         if ($options instanceof ProvidesHeadersInterface) {
             /** @var array<non-empty-string>|non-empty-string $values */
@@ -79,5 +76,19 @@ final class Queue implements QueueInterface
         ]);
 
         return $this->queues[$pipeline] = $registry->getPipeline($pipeline, $jobType);
+    }
+
+    private function createJobsOptions(
+        QueueOptionsInterface|ProvidesHeadersInterface|OptionsInterface $options = null
+    ): ?Options {
+        return match (true) {
+            $options instanceof BridgeOptions => new Options(
+                $options->getDelay() ?? Options::DEFAULT_DELAY,
+                $options->getPriority(),
+                $options->isAutoAck()
+            ),
+            $options instanceof QueueOptionsInterface => new Options($options->getDelay() ?? Options::DEFAULT_DELAY),
+            default => null
+        };
     }
 }

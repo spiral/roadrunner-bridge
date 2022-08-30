@@ -6,12 +6,15 @@ namespace Spiral\Tests\Queue;
 
 use Mockery as m;
 use Spiral\Core\Container;
+use Spiral\Core\FactoryInterface;
 use Spiral\Queue\Job\ObjectJob;
 use Spiral\Queue\Options as QueueOptions;
+use Spiral\RoadRunner\Jobs\Options as JobsOptions;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
 use Spiral\RoadRunner\Jobs\Task\QueuedTaskInterface;
+use Spiral\RoadRunnerBridge\Queue\Options as BridgeOptions;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\Queue;
 use Spiral\Tests\TestCase;
@@ -110,5 +113,36 @@ final class QueueTest extends TestCase
         $queuedTask->shouldReceive('getId')->once()->andReturn('task-id');
 
         $this->assertSame('task-id', $this->queue->pushObject($object));
+    }
+
+    /** @dataProvider optionsDataProvider */
+    public function testCreateJobsOptions(mixed $expected, mixed $arguments): void
+    {
+        $queue = new Queue(m::mock(FactoryInterface::class));
+
+        $ref = new \ReflectionMethod($queue, 'createJobsOptions');
+
+        $this->assertEquals($expected, $ref->invoke($queue, $arguments));
+    }
+
+
+    public function optionsDataProvider(): \Generator
+    {
+        // without options
+        yield [null, null];
+
+        // with spiral/queue options
+        yield [new JobsOptions(), new QueueOptions()];
+        yield [new JobsOptions(delay: 5), (new QueueOptions())->withDelay(5)];
+
+        // with spiral/roadrunner-bridge options
+        yield [new JobsOptions(), new BridgeOptions()];
+        yield [new JobsOptions(delay: 5), (new BridgeOptions())->withDelay(5)];
+        yield [new JobsOptions(priority: 3), (new BridgeOptions())->withPriority(3)];
+        yield [new JobsOptions(autoAck: true), (new BridgeOptions())->autoAck()];
+        yield [
+            new JobsOptions(delay: 2, priority: 4, autoAck: true),
+            (new BridgeOptions())->withDelay(2)->withPriority(4)->autoAck()
+        ];
     }
 }
