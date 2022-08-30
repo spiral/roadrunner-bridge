@@ -125,7 +125,6 @@ final class QueueTest extends TestCase
         $this->assertEquals($expected, $ref->invoke($queue, $arguments));
     }
 
-
     public function optionsDataProvider(): \Generator
     {
         // without options
