@@ -58,7 +58,7 @@ final class Dispatcher implements DispatcherInterface
                         $task = $task->withHeader($header, $values);
                     }
                 }
-                if ($options instanceof OptionsInterface) {
+                if ($options instanceof OptionsInterface && $options->getDelay() !== null) {
                     $task = $task->withDelay($options->getDelay());
                 }
 
