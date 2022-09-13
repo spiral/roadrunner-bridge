@@ -29,7 +29,7 @@
     "spiral/roadrunner-broadcast": "^2.0",
     "spiral/roadrunner-tcp": "^2.0",
     "spiral/roadrunner-metrics": "^2.0",
-    "spiral/framework": "^3.0.x-dev",
+    "spiral/framework": "^3.0",
     "spiral/serializer": "^3.0"
   },
   "require-dev": {
