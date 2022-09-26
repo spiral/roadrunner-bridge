@@ -25,7 +25,7 @@ final class ListCommand extends Command
         $table = new Table($this->output);
 
         $table->setHeaders(
-            ['Name', 'Driver', 'Default delay', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active']
+            ['Name', 'Driver', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active']
         );
 
         foreach ($queues as $queue) {
@@ -36,7 +36,6 @@ final class ListCommand extends Command
             $table->addRow([
                 $stat->getPipeline(),
                 $stat->getDriver(),
-                $stat->getDelayed(),
                 $stat->getPriority(),
                 $stat->getActive(),
                 $stat->getDelayed(),
