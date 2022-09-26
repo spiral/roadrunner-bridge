@@ -1,10 +1,11 @@
 # RoadRunner v2 bridge to Spiral Framework
 
------
-
-[![Latest Stable Version](https://poser.pugx.org/spiral/roadrunner-bridge/version)](https://packagist.org/packages/spiral/roadrunner-bridge)
-[![Unit tests](https://github.com/spiral/roadrunner-bridge/actions/workflows/main.yml/badge.svg)](https://github.com/spiral/roadrunner-bridge/actions/workflows/main.yml)
-[![Static analysis](https://github.com/spiral/roadrunner-bridge/actions/workflows/static.yml/badge.svg)](https://github.com/spiral/roadrunner-bridge/actions/workflows/static.yml)
+[![PHP Version Require](https://poser.pugx.org/spiral/roadrunner-bridge/require/php)](https://packagist.org/packages/spiral/roadrunner-bridge)
+[![Latest Stable Version](https://poser.pugx.org/spiral/roadrunner-bridge/v/stable)](https://packagist.org/packages/spiral/roadrunner-bridge)
+[![phpunit](https://github.com/spiral/roadrunner-bridge/actions/workflows/phpunit.yml/badge.svg)](https://github.com/spiral/roadrunner-bridge/actions)
+[![psalm](https://github.com/spiral/roadrunner-bridge/actions/workflows/psalm.yml/badge.svg)](https://github.com/spiral/roadrunner-bridge/actions)
+[![Codecov](https://codecov.io/gh/spiral/roadrunner-bridge/branch/master/graph/badge.svg)](https://codecov.io/gh/spiral/roadrunner-bridge/)
+[![Total Downloads](https://poser.pugx.org/spiral/roadrunner-bridge/downloads)](https://packagist.org/packages/spiral/roadrunner-bridge)
 [![StyleCI](https://github.styleci.io/repos/447581540/shield)](https://github.styleci.io/repos/447581540)
 
 ## Requirements
@@ -1176,4 +1177,9 @@ public function index(MetricsInterface $metrics): void
 
 ----
 
-Read more about RoadRunner configuration on official site https://roadrunner.dev.
+> **Note**
+> Read more about RoadRunner configuration on official site https://roadrunner.dev.
+
+## License:
+
+MIT License (MIT). Please see [`LICENSE`](./LICENSE) for more information. Maintained by [Spiral Scout](https://spiralscout.com).
