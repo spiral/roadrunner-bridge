@@ -36,7 +36,6 @@ final class ListCommandTest extends ConsoleTestCase
                 'reserved' => 8,
             ])
         );
-        $memory->shouldReceive('isPaused')->once()->andReturnFalse();
 
         $amqp->shouldReceive('getPipelineStat')->once()->andReturn(
             new Stat([
