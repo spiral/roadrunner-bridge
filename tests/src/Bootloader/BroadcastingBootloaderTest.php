@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Spiral\Tests\Bootloader;
 
 use Psr\Http\Message\ResponseFactoryInterface;
-use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\RoadRunner\Broadcast\Broadcast;
 use Spiral\RoadRunner\Broadcast\BroadcastInterface;
 use Spiral\RoadRunnerBridge\Broadcasting\RoadRunnerGuard;
@@ -15,11 +14,6 @@ final class BroadcastingBootloaderTest extends TestCase
 {
     public function testBroadcastInterfaceBinding(): void
     {
-        $rpc = $this->mockContainer(RPCInterface::class);
-
-        $rpc->shouldReceive('withCodec')->andReturnSelf();
-        $rpc->shouldReceive('call')->once()->with('informer.List', true)->andReturn(['websockets']);
-
         $this->assertContainerBoundAsSingleton(
             BroadcastInterface::class,
             Broadcast::class
