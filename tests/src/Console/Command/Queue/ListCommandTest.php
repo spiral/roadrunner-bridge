@@ -50,7 +50,6 @@ final class ListCommandTest extends ConsoleTestCase
                 'reserved' => 56,
             ])
         );
-        $amqp->shouldReceive('isPaused')->once()->andReturnTrue();
 
         $this->assertStringContainsString(
             <<<EOL
