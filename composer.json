@@ -25,7 +25,7 @@
     "laminas/laminas-diactoros": "^2.4",
     "spiral/roadrunner-grpc": "^2.0",
     "spiral/roadrunner-jobs": "^2.0",
-    "spiral/roadrunner-kv": "^2.2",
+    "spiral/roadrunner-kv": "^2.2||^3.0",
     "spiral/roadrunner-broadcast": "^2.0",
     "spiral/roadrunner-tcp": "^2.0",
     "spiral/roadrunner-metrics": "^2.0",

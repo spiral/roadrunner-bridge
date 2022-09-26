@@ -36,13 +36,7 @@ final class BroadcastingBootloader extends Bootloader
 
     private function initBroadcast(RPCInterface $rpc): BroadcastInterface
     {
-        $broadcast = new Broadcast($rpc);
-
-        if (!$broadcast->isAvailable()) {
-            throw new \LogicException('The [broadcast] plugin not available');
-        }
-
-        return $broadcast;
+        return new Broadcast($rpc);
     }
 
     private function initRoadRunnerGuard(
