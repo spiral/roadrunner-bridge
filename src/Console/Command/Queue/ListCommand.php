@@ -31,18 +31,17 @@ final class ListCommand extends Command
         foreach ($queues as $queue) {
             /** @var Queue $queue */
 
-            $options = $queue->getDefaultOptions();
             $stat = $queue->getPipelineStat();
 
             $table->addRow([
                 $stat->getPipeline(),
                 $stat->getDriver(),
-                $options->getDelay(),
-                $options->getPriority(),
+                $stat->getDelayed(),
+                $stat->getPriority(),
                 $stat->getActive(),
                 $stat->getDelayed(),
                 $stat->getReserved(),
-                $queue->isPaused() ? '<fg=red> ✖ </>' : '<fg=green> ✓ </>',
+                $stat->getReady() ? '<fg=red> ✖ </>' : '<fg=green> ✓ </>',
             ]);
         }
 
