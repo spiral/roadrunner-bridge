@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Http;
 
-use Laminas\Diactoros\Response;
 use Mockery as m;
+use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
