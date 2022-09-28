@@ -25,24 +25,22 @@ final class ListCommand extends Command
         $table = new Table($this->output);
 
         $table->setHeaders(
-            ['Name', 'Driver', 'Default delay', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active']
+            ['Name', 'Driver', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active']
         );
 
         foreach ($queues as $queue) {
             /** @var Queue $queue */
 
-            $options = $queue->getDefaultOptions();
             $stat = $queue->getPipelineStat();
 
             $table->addRow([
                 $stat->getPipeline(),
                 $stat->getDriver(),
-                $options->getDelay(),
-                $options->getPriority(),
+                $stat->getPriority(),
                 $stat->getActive(),
                 $stat->getDelayed(),
                 $stat->getReserved(),
-                $queue->isPaused() ? '<fg=red> ✖ </>' : '<fg=green> ✓ </>',
+                $stat->getReady() ? '<fg=red> ✖ </>' : '<fg=green> ✓ </>',
             ]);
         }
 

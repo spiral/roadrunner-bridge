@@ -24,7 +24,6 @@ final class ListCommandTest extends ConsoleTestCase
             ])
         );
 
-        $memory->shouldReceive('getDefaultOptions')->once()->andReturn(new Options(55, 200));
         $memory->shouldReceive('getPipelineStat')->once()->andReturn(
             new Stat([
                 'pipeline' => 'test',
@@ -32,13 +31,12 @@ final class ListCommandTest extends ConsoleTestCase
                 'queue' => 'local',
                 'ready' => true,
                 'active' => 100,
-                'delayed' => 5,
+                'delayed' => 55,
+                'priority' => 200,
                 'reserved' => 8,
             ])
         );
-        $memory->shouldReceive('isPaused')->once()->andReturnFalse();
 
-        $amqp->shouldReceive('getDefaultOptions')->once()->andReturn(new Options(88, 250));
         $amqp->shouldReceive('getPipelineStat')->once()->andReturn(
             new Stat([
                 'pipeline' => 'default',
@@ -46,20 +44,20 @@ final class ListCommandTest extends ConsoleTestCase
                 'queue' => 'local',
                 'ready' => true,
                 'active' => 110,
-                'delayed' => 17,
+                'delayed' => 88,
+                'priority' => 250,
                 'reserved' => 56,
             ])
         );
-        $amqp->shouldReceive('isPaused')->once()->andReturnTrue();
 
         $this->assertStringContainsString(
             <<<EOL
-+---------+--------+---------------+----------+-------------+--------------+---------------+-----------+
-| Name    | Driver | Default delay | Priority | Active jobs | Delayed jobs | Reserved jobs | Is active |
-+---------+--------+---------------+----------+-------------+--------------+---------------+-----------+
-| test    | memory | 55            | 200      | 100         | 5            | 8             |  ✓        |
-| default | amqp   | 88            | 250      | 110         | 17           | 56            |  ✖        |
-+---------+--------+---------------+----------+-------------+--------------+---------------+-----------+
++---------+--------+----------+-------------+--------------+---------------+-----------+
+| Name    | Driver | Priority | Active jobs | Delayed jobs | Reserved jobs | Is active |
++---------+--------+----------+-------------+--------------+---------------+-----------+
+| test    | memory | 200      | 100         | 55           | 8             |  ✖        |
+| default | amqp   | 250      | 110         | 88           | 56            |  ✖        |
++---------+--------+----------+-------------+--------------+---------------+-----------+
 EOL,
             $this->runCommand('roadrunner:list')
         );
