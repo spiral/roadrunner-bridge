@@ -46,7 +46,10 @@ final class Dispatcher implements DispatcherInterface
                     driver: 'roadrunner',
                     queue: $task->getQueue(),
                     id: $task->getId(),
-                    payload: $task->getPayload()
+                    payload: $task->getPayload(),
+                    context: [
+                        'headers' => $task->getHeaders(),
+                    ]
                 );
 
                 $task->complete();
