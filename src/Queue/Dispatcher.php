@@ -48,7 +48,7 @@ final class Dispatcher implements DispatcherInterface
                     id: $task->getId(),
                     payload: $task->getPayload(),
                     context: [
-                        'headers' => $task->getHeaders()
+                        'headers' => $task->getHeaders(),
                     ]
                 );
 
