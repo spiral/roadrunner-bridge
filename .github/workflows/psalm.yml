@@ -1,7 +1,9 @@
 on:
+  pull_request: null
   push:
     branches:
       - master
+      - 2.0
 
 name: static analysis
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Bootloader;
 
+use Spiral\Boot\KernelInterface;
+use Spiral\Console\ConsoleDispatcher;
 use Spiral\Goridge\RPC\RPC;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\RoadRunner\Environment;
@@ -12,11 +14,12 @@ use Spiral\RoadRunner\Http\PSR7Worker;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
+use Spiral\RoadRunnerBridge\FailbackDispatcher;
 use Spiral\Tests\TestCase;
 
 final class RoadRunnerBootloaderTest extends TestCase
 {
-    public function testGetsEnvironmentInterface()
+    public function testGetsEnvironmentInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             EnvironmentInterface::class,
@@ -29,7 +32,7 @@ final class RoadRunnerBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsRPCInterface()
+    public function testGetsRPCInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             RPCInterface::class,
@@ -42,7 +45,7 @@ final class RoadRunnerBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsWorkerInterface()
+    public function testGetsWorkerInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             WorkerInterface::class,
@@ -58,7 +61,7 @@ final class RoadRunnerBootloaderTest extends TestCase
         ob_end_flush();
     }
 
-    public function testGetsPSR7WorkerInterface()
+    public function testGetsPSR7WorkerInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             PSR7WorkerInterface::class,
@@ -72,5 +75,14 @@ final class RoadRunnerBootloaderTest extends TestCase
 
         // TODO fix problem with rr worker
         ob_end_flush();
+    }
+
+    public function testFailbackDispatcherShouldBeLast(): void
+    {
+        $kernel = $this->getContainer()->get(KernelInterface::class);
+        $dispatchers = (new \ReflectionProperty($kernel, 'dispatchers'))->getValue($kernel);
+        $dispatchers = \array_filter($dispatchers, static fn (mixed $disp): bool => !$disp instanceof ConsoleDispatcher);
+
+        $this->assertInstanceOf(FailbackDispatcher::class, $dispatchers[\array_key_last($dispatchers)]);
     }
 }

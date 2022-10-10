@@ -7,8 +7,10 @@ namespace Spiral\RoadRunnerBridge\Bootloader;
 use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UploadedFileFactoryInterface;
+use Spiral\Boot\AbstractKernel;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface as GlobalEnvironmentInterface;
+use Spiral\Boot\KernelInterface;
 use Spiral\Core\Container;
 use Spiral\Goridge\Relay;
 use Spiral\Goridge\RPC\RPC;
@@ -19,10 +21,11 @@ use Spiral\RoadRunner\Http\PSR7Worker;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
+use Spiral\RoadRunnerBridge\FailbackDispatcher;
 
 final class RoadRunnerBootloader extends Bootloader
 {
-    public function init(Container $container)
+    public function init(Container $container, AbstractKernel $kernel): void
     {
         //
         // Register RoadRunner Environment
@@ -63,6 +66,13 @@ final class RoadRunnerBootloader extends Bootloader
             UploadedFileFactoryInterface $uploads
         ): PSR7WorkerInterface {
             return new PSR7Worker($worker, $requests, $streams, $uploads);
+        });
+
+        //
+        // Register FailbackDispatcher after all dispatchers
+        //
+        $kernel->bootstrapped(static function (FailbackDispatcher $dispatcher, KernelInterface $kernel): void {
+            $kernel->addDispatcher($dispatcher);
         });
     }
 }
