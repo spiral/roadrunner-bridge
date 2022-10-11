@@ -9,8 +9,11 @@ use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Queue\Exception\RetryException;
 use Spiral\Queue\Interceptor\Consume\Handler;
+use Spiral\Queue\OptionsInterface;
+use Spiral\Queue\ExtendedOptionsInterface;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
+use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\Task\ProvidesHeadersInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
@@ -47,21 +50,22 @@ final class Dispatcher implements DispatcherInterface
                     queue: $task->getQueue(),
                     id: $task->getId(),
                     payload: $task->getPayload(),
-                    context: [
-                        'headers' => $task->getHeaders(),
-                    ]
+                    headers: $task->getHeaders()
                 );
 
                 $task->complete();
             } catch (RetryException $e) {
                 $options = $e->getOptions();
-                if ($options instanceof ProvidesHeadersInterface) {
+                if ($options instanceof ProvidesHeadersInterface || $options instanceof ExtendedOptionsInterface) {
                     /** @var array<non-empty-string>|non-empty-string $values */
                     foreach ($options->getHeaders() as $header => $values) {
                         $task = $task->withHeader($header, $values);
                     }
                 }
-                if ($options instanceof OptionsInterface && $options->getDelay() !== null) {
+                if (
+                    ($options instanceof OptionsInterface || $options instanceof JobsOptionsInterface) &&
+                    $options->getDelay() !== null
+                ) {
                     $task = $task->withDelay($options->getDelay());
                 }
 

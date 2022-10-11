@@ -46,7 +46,7 @@ final class DispatcherTest extends TestCase
         $handler = m::mock(HandlerInterface::class);
         $handler
             ->shouldReceive('handle')
-            ->with('foo-task', 'foo-id', ['foo-payload'], ['headers' => ['foo-headers']]);
+            ->with('foo-task', 'foo-id', ['foo-payload'], ['foo-headers']);
 
         $handlerRegistry = $this->mockContainer(HandlerRegistryInterface::class);
         $handlerRegistry->shouldReceive('getHandler')->once()->with('foo-task')->andReturn($handler);
