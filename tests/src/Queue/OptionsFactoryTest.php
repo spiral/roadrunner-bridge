@@ -27,11 +27,11 @@ final class OptionsFactoryTest extends TestCase
         yield [new JobsOptions(5), (new Options())->withDelay(5)];
         yield [
             (new JobsOptions())->withHeader('foo', 'bar'),
-            (new Options())->withHeader('foo', 'bar')
+            (new Options())->withHeader('foo', 'bar'),
         ];
         yield [
             (new JobsOptions())->withPriority(4)->withDelay(6)->withAutoAck(true),
-            (new JobsOptions())->withPriority(4)->withDelay(6)->withAutoAck(true)
+            (new JobsOptions())->withPriority(4)->withDelay(6)->withAutoAck(true),
         ];
     }
 }

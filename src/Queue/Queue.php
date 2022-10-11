@@ -44,7 +44,7 @@ final class Queue implements QueueInterface
     ): string {
         $queue = $this->initQueue(
             $name,
-            $options instanceOf OptionsInterface ? $options->getQueue() ?? $this->default : $this->default
+            $options instanceof OptionsInterface ? $options->getQueue() ?? $this->default : $this->default
         );
 
         $preparedTask = $queue->create($name, $payload, OptionsFactory::create($options));
