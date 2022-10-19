@@ -40,7 +40,7 @@ final class ListCommand extends Command
                 $stat->getActive(),
                 $stat->getDelayed(),
                 $stat->getReserved(),
-                $stat->getReady() ? '<fg=red> ✖ </>' : '<fg=green> ✓ </>',
+                $stat->getReady() ? '<fg=green> ✓ </>' : '<fg=red> ✖ </>',
             ]);
         }
 
