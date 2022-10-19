@@ -6,7 +6,6 @@ namespace Spiral\Tests\Console\Command\Queue;
 
 use Spiral\RoadRunner\Jobs\DTO\V1\Stat;
 use Spiral\RoadRunner\Jobs\JobsInterface;
-use Spiral\RoadRunner\Jobs\Options;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\Tests\ConsoleTestCase;
 
