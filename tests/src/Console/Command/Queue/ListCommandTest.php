@@ -42,7 +42,7 @@ final class ListCommandTest extends ConsoleTestCase
                 'pipeline' => 'default',
                 'driver' => 'amqp',
                 'queue' => 'local',
-                'ready' => true,
+                'ready' => false,
                 'active' => 110,
                 'delayed' => 88,
                 'priority' => 250,
@@ -55,7 +55,7 @@ final class ListCommandTest extends ConsoleTestCase
 +---------+--------+----------+-------------+--------------+---------------+-----------+
 | Name    | Driver | Priority | Active jobs | Delayed jobs | Reserved jobs | Is active |
 +---------+--------+----------+-------------+--------------+---------------+-----------+
-| test    | memory | 200      | 100         | 55           | 8             |  ✖        |
+| test    | memory | 200      | 100         | 55           | 8             |  ✓        |
 | default | amqp   | 250      | 110         | 88           | 56            |  ✖        |
 +---------+--------+----------+-------------+--------------+---------------+-----------+
 EOL,
