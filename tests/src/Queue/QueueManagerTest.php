@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Spiral\Tests\Queue;
 
 use Mockery as m;
-use Spiral\Queue\Driver\SyncDriver;
 use Spiral\Queue\QueueConnectionProviderInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
@@ -16,8 +15,7 @@ use Spiral\Tests\TestCase;
 
 class QueueManagerTest extends TestCase
 {
-    /** @var QueueConnectionProviderInterface */
-    private $manager;
+    private QueueConnectionProviderInterface $manager;
 
     protected function setUp(): void
     {
@@ -31,9 +29,15 @@ class QueueManagerTest extends TestCase
 
     public function testGetsRoadRunnerQueue(): void
     {
+        $queue = $this->manager->getConnection('roadrunner');
+
+        $core = $this->accessProtected($queue, 'core');
+        $core = $this->accessProtected($core, 'core');
+        $connection = $this->accessProtected($core, 'connection');
+
         $this->assertInstanceOf(
             Queue::class,
-            $this->manager->getConnection('roadrunner')
+            $connection
         );
     }
 
@@ -54,14 +58,6 @@ class QueueManagerTest extends TestCase
         $this->assertSame(
             'task-id',
             $this->manager->getConnection('roadrunner')->push('foo', ['boo' => 'bar'])
-        );
-    }
-
-    public function testGetsSyncQueue(): void
-    {
-        $this->assertInstanceOf(
-            SyncDriver::class,
-            $this->manager->getConnection('sync')
         );
     }
 }
