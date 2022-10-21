@@ -6,15 +6,13 @@ namespace Spiral\RoadRunnerBridge\Queue;
 
 use Spiral\Core\FactoryInterface;
 use Spiral\Queue\Exception\InvalidArgumentException;
-use Spiral\Queue\OptionsInterface as QueueOptionsInterface;
+use Spiral\Queue\OptionsInterface;
 use Spiral\Queue\QueueInterface;
 use Spiral\Queue\QueueTrait;
-use Spiral\RoadRunnerBridge\Queue\Options as BridgeOptions;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
-use Spiral\RoadRunner\Jobs\Options;
+use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface as RRQueueInterface;
-use Spiral\RoadRunner\Jobs\Task\ProvidesHeadersInterface;
 
 final class Queue implements QueueInterface
 {
@@ -36,26 +34,20 @@ final class Queue implements QueueInterface
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @throws JobsException
      * @throws InvalidArgumentException
      */
     public function push(
         string $name,
         array $payload = [],
-        QueueOptionsInterface|ProvidesHeadersInterface|OptionsInterface $options = null
+        OptionsInterface|JobsOptionsInterface $options = null
     ): string {
-        $queue = $this->initQueue($name, $options ? $options->getQueue() ?? $this->default : $this->default);
+        $queue = $this->initQueue(
+            $name,
+            $options instanceof OptionsInterface ? $options->getQueue() ?? $this->default : $this->default
+        );
 
-        $preparedTask = $queue->create($name, $payload, $this->createJobsOptions($options));
-
-        if ($options instanceof ProvidesHeadersInterface) {
-            /** @var array<non-empty-string>|non-empty-string $values */
-            foreach ($options->getHeaders() as $header => $values) {
-                $preparedTask = $preparedTask->withHeader($header, $values);
-            }
-        }
+        $preparedTask = $queue->create($name, $payload, OptionsFactory::create($options));
 
         return $queue->dispatch($preparedTask)->getId();
     }
@@ -76,18 +68,5 @@ final class Queue implements QueueInterface
         ]);
 
         return $this->queues[$pipeline] = $registry->getPipeline($pipeline, $jobType);
-    }
-
-    private function createJobsOptions(QueueOptionsInterface|OptionsInterface $options = null): ?Options
-    {
-        return match (true) {
-            $options instanceof BridgeOptions => new Options(
-                $options->getDelay() ?? Options::DEFAULT_DELAY,
-                $options->getPriority(),
-                $options->isAutoAck()
-            ),
-            $options instanceof QueueOptionsInterface => new Options($options->getDelay() ?? Options::DEFAULT_DELAY),
-            default => null
-        };
     }
 }

@@ -31,4 +31,10 @@ final class ConsumerTest extends TestCase
         // TestJob set serializer to `serializer`
         yield [new Payload(\serialize(['test' => 'test', 'other' => 'data'])), TestJob::class];
     }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        ob_end_clean();
+    }
 }

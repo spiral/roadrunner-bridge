@@ -23,13 +23,13 @@
     "psr/simple-cache": "2 - 3",
     "php-http/message-factory": "^1.0",
     "spiral/roadrunner-grpc": "^2.0",
-    "spiral/roadrunner-jobs": "^2.0",
+    "spiral/roadrunner-jobs": "^2.6",
     "spiral/roadrunner-kv": "^2.2||^3.0",
     "spiral/roadrunner-broadcast": "^2.0",
     "spiral/roadrunner-tcp": "^2.0",
     "spiral/roadrunner-metrics": "^2.0",
-    "spiral/framework": "^3.0",
-    "spiral/serializer": "^3.0"
+    "spiral/framework": "^3.2",
+    "spiral/serializer": "^3.2"
   },
   "require-dev": {
     "spiral/testing": "^2.0.x-dev",
