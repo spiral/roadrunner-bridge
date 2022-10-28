@@ -13,6 +13,12 @@ final class GRPCConfig extends InjectableConfig
 {
     public const CONFIG = 'grpc';
 
+    protected array $config = [
+        'binaryPath' => null,
+        'services' => [],
+        'interceptors' => []
+    ];
+
     public function getBinaryPath(): ?string
     {
         return $this->config['binaryPath'] ?? null;

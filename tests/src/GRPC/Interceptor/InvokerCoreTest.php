@@ -7,17 +7,17 @@ namespace Spiral\Tests\GRPC\Interceptor;
 use Spiral\App\GRPC\PingService;
 use Spiral\RoadRunner\GRPC\ContextInterface;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
-use Spiral\RoadRunnerBridge\GRPC\Interceptor\Core;
+use Spiral\RoadRunnerBridge\GRPC\Interceptor\InvokerCore;
 use Spiral\Tests\TestCase;
 use Mockery as m;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 use Spiral\RoadRunner\GRPC\Method;
 
-final class CoreTest extends TestCase
+final class InvokerCoreTest extends TestCase
 {
     public function testCallAction(): void
     {
-        $core = new Core($invoker = m::mock(InvokerInterface::class));
+        $core = new InvokerCore($invoker = m::mock(InvokerInterface::class));
 
         $invoker->shouldReceive('invoke')
             ->once()

@@ -17,7 +17,7 @@ use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Dispatcher;
-use Spiral\RoadRunnerBridge\GRPC\Interceptor\Core;
+use Spiral\RoadRunnerBridge\GRPC\Interceptor\InvokerCore;
 use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
@@ -85,7 +85,7 @@ final class GRPCBootloader extends Bootloader
         BaseInvoker $invoker
     ): InvokerInterface {
         $core = new InterceptableCore(
-            new Core($invoker)
+            new InvokerCore($invoker)
         );
 
         foreach ($config->getInterceptors() as $interceptor) {
