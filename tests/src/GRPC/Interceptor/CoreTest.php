@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Spiral\Tests\GRPC\Interceptor;
+
+use Spiral\App\GRPC\PingService;
+use Spiral\RoadRunner\GRPC\ContextInterface;
+use Spiral\RoadRunner\GRPC\InvokerInterface;
+use Spiral\RoadRunnerBridge\GRPC\Interceptor\Core;
+use Spiral\Tests\TestCase;
+use Mockery as m;
+use Spiral\RoadRunner\GRPC\ServiceInterface;
+use Spiral\RoadRunner\GRPC\Method;
+
+final class CoreTest extends TestCase
+{
+    public function testCallAction(): void
+    {
+        $core = new Core($invoker = m::mock(InvokerInterface::class));
+
+        $invoker->shouldReceive('invoke')
+            ->once()
+            ->with(
+                $service = m::mock(ServiceInterface::class),
+                $method = Method::parse(new \ReflectionMethod(PingService::class, 'Ping')),
+                $ctx = m::mock(ContextInterface::class),
+                'some'
+            );
+
+        $core->callAction('foo', 'sync', [
+            'service' => $service,
+            'method' => $method,
+            'ctx' => $ctx,
+            'input' => 'some'
+        ]);
+    }
+}

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Config;
 
+use Spiral\Core\Container\Autowire;
+use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\InjectableConfig;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 
@@ -22,5 +24,13 @@ final class GRPCConfig extends InjectableConfig
     public function getServices(): array
     {
         return (array)($this->config['services'] ?? []);
+    }
+
+    /**
+     * @return array<class-string<CoreInterceptorInterface>|Autowire>
+     */
+    public function getInterceptors(): array
+    {
+        return (array)($this->config['interceptors'] ?? []);
     }
 }
