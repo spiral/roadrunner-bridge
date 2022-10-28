@@ -12,13 +12,14 @@ use Spiral\RoadRunner\GRPC\ServiceInterface;
 
 class Invoker implements InvokerInterface
 {
-    public function __construct(private readonly CoreInterface $core)
-    {
+    public function __construct(
+        private readonly CoreInterface $core
+    ) {
     }
 
     public function invoke(ServiceInterface $service, Method $method, ContextInterface $ctx, ?string $input): string
     {
-        return $this->core->callAction($service::class, $method::class, [
+        return $this->core->callAction($service::class, $method->getName(), [
             'service' => $service,
             'method' => $method,
             'ctx' => $ctx,

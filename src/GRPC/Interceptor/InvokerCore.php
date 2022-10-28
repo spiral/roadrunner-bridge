@@ -12,8 +12,9 @@ use Spiral\RoadRunner\GRPC\ServiceInterface;
 
 final class InvokerCore implements CoreInterface
 {
-    public function __construct(private readonly InvokerInterface $invoker)
-    {
+    public function __construct(
+        private readonly InvokerInterface $invoker
+    ) {
     }
 
     public function callAction(string $controller, string $action, array $parameters = []): string
