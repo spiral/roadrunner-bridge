@@ -17,7 +17,7 @@ class Handler extends AbstractProcessingHandler
 
     protected function write(array $record): void
     {
-        $message = $record['message'] ?? $record['formatted'];
+        $message = $record['formatted'];
 
         switch ($record['level']) {
             case Logger::ERROR:
