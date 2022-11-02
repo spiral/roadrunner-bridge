@@ -31,10 +31,6 @@ final class HandlerTest extends TestCase
             ),
         ]);
 
-        $this->getContainer()->bind(LoggerInterface::class, $monolog);
-
-        $logger = $this->getContainer()->get(LoggerInterface::class);
-
         $rpc->shouldReceive('call')
             ->once()
             ->with($expectedResult['level'], $expectedResult['message'])
@@ -42,7 +38,7 @@ final class HandlerTest extends TestCase
 
         $method = $input['method'];
 
-        $logger->$method($input['message']);
+        $monolog->$method($input['message']);
     }
 
     public function provideLogData(): array
