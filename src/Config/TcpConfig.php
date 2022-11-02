@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Config;
 
+use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\InjectableConfig;
 use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
@@ -12,16 +13,21 @@ final class TcpConfig extends InjectableConfig
 {
     public const CONFIG = 'tcp';
 
+    protected array $config = [
+        'services' => [],
+        'interceptors' => [],
+    ];
+
     /**
-     * @return array<class-string<ServiceInterface>>|array<object>
+     * @return array<non-empty-string, class-string<ServiceInterface>|ServiceInterface|Autowire>
      */
     public function getServices(): array
     {
-        return (array) ($this->config['services'] ?? []);
+        return $this->config['services'] ?? [];
     }
 
     /**
-     * @return array<class-string<CoreInterceptorInterface>>|array<object>
+     * @return array<non-empty-string, list<class-string<CoreInterceptorInterface>|CoreInterceptorInterface|Autowire>>
      */
     public function getInterceptors(): array
     {
@@ -30,6 +36,6 @@ final class TcpConfig extends InjectableConfig
 
     public function isDebugMode(): bool
     {
-        return (bool) $this->config['debug'];
+        return (bool)$this->config['debug'];
     }
 }
