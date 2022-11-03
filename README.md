@@ -1058,7 +1058,7 @@ Also you can define a default message format in `.env`
 LOGGER_FORMAT=%message% foo
 ```
 
-Handler registration example in custom bootloader
+Handler registration example in a custom bootloader
 ```PHP
 use Spiral\Boot\Bootloader;
 use Spiral\Monolog\Bootloader\MonologBootloader;
