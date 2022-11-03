@@ -1055,7 +1055,7 @@ return [
 ];
 ```
 
-Also you can define default message format in ```.env```
+Also you can define a default message format in `.env`
 ```dotenv
 LOGGER_FORMAT=%message% foo
 ```
