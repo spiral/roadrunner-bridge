@@ -1074,7 +1074,7 @@ final class SomeBootloader extends Bootloader
 
 ```
 
-## Usage example
+## Usage
 ```PHP
 <?php
 
