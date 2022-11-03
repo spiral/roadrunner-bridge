@@ -1044,7 +1044,7 @@ return [
    //...
    
    'handlers' => [
-       'default' => [
+       'roadrunner' => [
            Handler::class,
            // or
            new Autowire(Handler::class, ['formatter' => "%message% foo"]),
