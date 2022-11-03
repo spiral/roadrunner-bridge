@@ -75,7 +75,7 @@ final class Dispatcher implements DispatcherInterface
         Interceptor\RegistryInterface $registry,
         RequestType $type
     ): InterceptableCore {
-        if (\isset($this->services[$type->value])) {
+        if (isset($this->services[$type->value])) {
             return $this->services[$type->value];
         }
 
