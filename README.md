@@ -1031,7 +1031,7 @@ Logger provides a simple way to send log messages to RoadRunner.
 
 ## Configuration
 
-Update config file `app/config/monolog.php`:
+You can register `Spiral\RoadRunnerBridge\Logger\Handler` in `app/config/monolog.php` config:
 
 ```php
 <?php
