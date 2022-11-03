@@ -44,18 +44,14 @@ final class Dispatcher implements DispatcherInterface
         $registry = $this->container->get(Interceptor\RegistryInterface::class);
         /** @var RequestHandler $handler */
         $handler = $this->container->get(RequestHandler::class);
+        /** @var ErrorHandlerInterface $errorHandler */
+        $errorHandler = $this->container->get(ErrorHandlerInterface::class);
 
         while ($request = $worker->waitRequest()) {
-            try {
-                $type = RequestType::createFrom($request);
-            } catch (\Throwable $e) {
-                $request->error($e->getCode(), $e->getMessage());
-                continue;
-            }
-
             $service = $this->getService($handler, $registry, $type);
 
             try {
+                $type = RequestType::createFrom($request);
                 $scope->runScope([
                     RequestInterface::class => $request,
                 ], static fn() => $service->callAction($request::class, 'handle', [
@@ -63,7 +59,7 @@ final class Dispatcher implements DispatcherInterface
                     'request' => $request,
                 ]));
             } catch (\Throwable $e) {
-                $request->error($e->getCode(), $e->getMessage());
+                $errorHandler->handle($request, $e);
             }
 
             $this->finalizer->finalize();

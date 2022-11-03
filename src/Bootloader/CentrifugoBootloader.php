@@ -10,6 +10,8 @@ use Spiral\Config\ConfiguratorInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Broadcast;
 use Spiral\RoadRunnerBridge\Centrifugo\Dispatcher;
+use Spiral\RoadRunnerBridge\Centrifugo\ErrorHandlerInterface;
+use Spiral\RoadRunnerBridge\Centrifugo\LogErrorHandler;
 use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\ServiceRegistry;
 use RoadRunner\Centrifugo\CentrifugoWorkerInterface;
@@ -25,6 +27,7 @@ final class CentrifugoBootloader extends Bootloader
         RegistryInterface::class => [self::class, 'initServiceRegistry'],
         Interceptor\RegistryInterface::class => [self::class, 'initInterceptorRegistry'],
         CentrifugoWorkerInterface::class => CentrifugoWorker::class,
+        ErrorHandlerInterface::class => LogErrorHandler::class,
     ];
 
     public function __construct(
