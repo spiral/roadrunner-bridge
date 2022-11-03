@@ -69,6 +69,7 @@ protected const LOAD = [
     - [Commands](#console-commands-2)
 - [Logger](#logger)
   - [Configuration](#configuration-5)
+  - [Usage example](#usage-example-5)
 - [Metrics](#metrics)
 
 ### Cache
