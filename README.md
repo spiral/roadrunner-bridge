@@ -1049,7 +1049,6 @@ return [
            // or
            new Autowire(Handler::class, ['formatter' => "%message% foo"]),
            // or alias (first, you need to register it)
-           'my-handler'
        ]
    ]
 ];
