@@ -19,7 +19,7 @@ final class InterceptorRegistry implements RegistryInterface
     private array $interceptors;
 
     /**
-     * @param array<RequestType, list<TInterceptor>> $interceptors
+     * @param array<non-empty-string, list<TInterceptor>> $interceptors
      */
     public function __construct(
         array $interceptors,
@@ -32,7 +32,7 @@ final class InterceptorRegistry implements RegistryInterface
             }
 
             foreach ($values as $interceptor) {
-                $this->register($type, $interceptor);
+                $this->register(RequestType::from($type), $interceptor);
             }
         }
     }

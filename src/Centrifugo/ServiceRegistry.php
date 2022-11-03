@@ -18,13 +18,16 @@ final class ServiceRegistry implements RegistryInterface
     private array $services = [];
 
     /**
-     * @param array<RequestType, TService> $services
+     * @param array<non-empty-string, TService> $services
      */
     public function __construct(
         array $services,
         private readonly ContainerInterface $container,
         private readonly FactoryInterface $factory,
     ) {
+        foreach ($services as $type => $service) {
+            $this->register(RequestType::from($type), $service);
+        }
     }
 
     public function register(RequestType $requestType, Autowire|ServiceInterface|string $service): void
