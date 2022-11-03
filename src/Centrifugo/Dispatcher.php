@@ -48,10 +48,9 @@ final class Dispatcher implements DispatcherInterface
         $errorHandler = $this->container->get(ErrorHandlerInterface::class);
 
         while ($request = $worker->waitRequest()) {
-            $service = $this->getService($handler, $registry, $type);
-
             try {
                 $type = RequestType::createFrom($request);
+                $service = $this->getService($handler, $registry, $type);
                 $scope->runScope([
                     RequestInterface::class => $request,
                 ], static fn() => $service->callAction($request::class, 'handle', [
