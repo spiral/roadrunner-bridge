@@ -37,6 +37,7 @@ protected const LOAD = [
     RoadRunnerBridge\CommandBootloader::class,
     RoadRunnerBridge\TcpBootloader::class, // Optional, if it needs to work with TCP plugin
     RoadRunnerBridge\MetricsBootloader::class, // Optional, if it needs to work with metrics plugin
+    RoadRunnerBridge\LoggerBootloader::class, // Optional, if it needs to work with app-logger plugin
     // ...
 ];
 ```
@@ -66,6 +67,8 @@ protected const LOAD = [
 - [GRPC](#grpc)
     - [Configuration](#configuration-4)
     - [Commands](#console-commands-2)
+- [Logger](#logger)
+  - [Configuration](#configuration-5)
 - [Metrics](#metrics)
 
 ### Cache
@@ -1019,6 +1022,86 @@ Start server
 ```
 
 Full example Echo GRPC service you can find [here](https://github.com/spiral/roadrunner-grpc/tree/master/example/echo)
+
+------
+
+### Logger
+Logger provide a simple way to send log messages to RoadRunner.
+
+## Configuration
+
+Update config file `app/config/monolog.php`:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Spiral\RoadRunnerBridge\Logger\Handler;
+
+return [
+   //...
+   
+   'handlers' => [
+       'default' => [
+           Handler::class,
+           // or
+           new Autowire(Handler::class, ['formatter' => "%message% foo"]),
+           // or alias (first, you need to register it)
+           'my-handler'
+       ]
+   ]
+];
+```
+
+Also you can define default message format in ```.env```
+```dotenv
+LOGGER_FORMAT=%message% foo
+```
+
+Handler registration example in custom bootloader
+```PHP
+use Spiral\Boot\Bootloader;
+use Spiral\Monolog\Bootloader\MonologBootloader;
+use Spiral\RoadRunnerBridge\Logger\Handler;
+
+final class SomeBootloader extends Bootloader
+{
+    public function init(MonologBootloader $monolog, Handler $handler): void 
+    {
+        $monolog->addHandler($handler);
+    }
+}
+
+```
+
+
+## Usage example
+```PHP
+<?php
+
+declare(strict_types=1);
+
+use Psr\Log\LoggerInterface;
+use Spiral\Router\Annotation\Route;
+
+class HomeController
+{
+    #[Route(route: '/', name: 'home', methods: ['GET'])]
+    public function index(LoggerInterface $logger): string
+    {
+        $logger->warning('Warning message');
+        $logger->error('Error message');
+        $logger->debug('Debug message');
+        $logger->critical("Critical message");
+        $logger->info('Info message');
+        $logger->emergency("Emergency message");
+    }
+}
+```
+
+Meanwhile in RoadRunner...
+![image](https://user-images.githubusercontent.com/44509066/199532199-deba73a9-fca7-4098-afe1-0cb1fc1bf897.png)
 
 ------
 
