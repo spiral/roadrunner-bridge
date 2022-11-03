@@ -1027,7 +1027,7 @@ Full example Echo GRPC service you can find [here](https://github.com/spiral/roa
 ------
 
 ### Logger
-Logger provide a simple way to send log messages to RoadRunner.
+Logger provides a simple way to send log messages to RoadRunner.
 
 ## Configuration
 
@@ -1075,7 +1075,6 @@ final class SomeBootloader extends Bootloader
 }
 
 ```
-
 
 ## Usage example
 ```PHP
