@@ -10,7 +10,6 @@ use RoadRunner\Centrifugo\RequestInterface;
 use RoadRunner\Centrifugo\RequestType;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
-use Spiral\Core\CoreInterface;
 use Spiral\Core\InterceptableCore;
 use Spiral\Core\ScopeInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
@@ -18,12 +17,15 @@ use Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
 
 final class Dispatcher implements DispatcherInterface
 {
+    /**
+     * @var array<non-empty-string, InterceptableCore>
+     */
+    private array $services = [];
+
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly FinalizerInterface $finalizer,
-        private readonly RoadRunnerMode $mode,
-        private readonly RequestHandler $handler,
-        private readonly Interceptor\RegistryInterface $registry,
+        private readonly RoadRunnerMode $mode
     ) {
     }
 
@@ -38,13 +40,20 @@ final class Dispatcher implements DispatcherInterface
         $worker = $this->container->get(CentrifugoWorker::class);
         /** @var ScopeInterface $scope */
         $scope = $this->container->get(ScopeInterface::class);
+        /** @var Interceptor\RegistryInterface $registry */
+        $registry = $this->container->get(Interceptor\RegistryInterface::class);
+        /** @var RequestHandler $handler */
+        $handler = $this->container->get(RequestHandler::class);
 
         while ($request = $worker->waitRequest()) {
-            $type = RequestType::createFrom($request);
-            $service = $this->createHandler($type, $request);
-            if ($service === null) {
+            try {
+                $type = RequestType::createFrom($request);
+            } catch (\Throwable $e) {
+                $request->error($e->getCode(), $e->getMessage());
                 continue;
             }
+
+            $service = $this->getService($handler, $registry, $type);
 
             try {
                 $scope->runScope([
@@ -61,14 +70,20 @@ final class Dispatcher implements DispatcherInterface
         }
     }
 
-    private function createHandler(RequestType $type, RequestInterface $request): ?CoreInterface
-    {
-        $core = new InterceptableCore($this->handler);
-
-        foreach ($this->registry->getInterceptors($type) as $interceptor) {
-            $core->addInterceptor($interceptor);
+    public function getService(
+        RequestHandler $handler,
+        Interceptor\RegistryInterface $registry,
+        RequestType $type
+    ): InterceptableCore {
+        if (\isset($this->services[$type->value])) {
+            return $this->services[$type->value];
         }
 
-        return $core;
+        $service = new InterceptableCore($handler);
+        foreach ($registry->getInterceptors($type) as $interceptor) {
+            $service->addInterceptor($interceptor);
+        }
+
+        return $this->services[$type->value] = $service;
     }
 }
