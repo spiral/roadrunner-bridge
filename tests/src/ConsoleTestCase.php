@@ -23,9 +23,10 @@ abstract class ConsoleTestCase extends TestCase
             'GRPC/EchoService/GPBMetadata/PBEcho.php',
         ];
 
+
         foreach ($files as $file) {
             $filePath = $appPath . $file;
-            \chmod($filePath, 0777);
+            \clearstatcache(true, $filePath);
             require_once $filePath;
         }
 
