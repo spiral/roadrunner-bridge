@@ -24,7 +24,9 @@ abstract class ConsoleTestCase extends TestCase
         ];
 
         foreach ($files as $file) {
-            require $appPath . $file;
+            $filePath = \realpath($appPath . $file);
+            \chmod($filePath, 0777);
+            require_once $filePath;
         }
 
         return $result;
