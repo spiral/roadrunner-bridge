@@ -68,7 +68,7 @@ final class GRPCBootloader extends Bootloader
     }
 
     /**
-     * @param class-string<CoreInterceptorInterface>|CoreInterceptorInterface|Autowire $interceptor
+     * @param Autowire|class-string<CoreInterceptorInterface>|CoreInterceptorInterface $interceptor
      */
     public function addInterceptor(string|CoreInterceptorInterface|Autowire $interceptor): void
     {

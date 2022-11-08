@@ -32,7 +32,7 @@ final class InvokerCoreTest extends TestCase
             'service' => $service,
             'method' => $method,
             'ctx' => $ctx,
-            'input' => 'some'
+            'input' => 'some',
         ]);
     }
 }

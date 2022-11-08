@@ -16,7 +16,7 @@ final class GRPCConfig extends InjectableConfig
     protected array $config = [
         'binaryPath' => null,
         'services' => [],
-        'interceptors' => []
+        'interceptors' => [],
     ];
 
     public function getBinaryPath(): ?string
@@ -33,7 +33,7 @@ final class GRPCConfig extends InjectableConfig
     }
 
     /**
-     * @return array<class-string<CoreInterceptorInterface>|Autowire>
+     * @return array<Autowire|class-string<CoreInterceptorInterface>>
      */
     public function getInterceptors(): array
     {
