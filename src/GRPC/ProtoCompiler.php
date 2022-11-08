@@ -95,7 +95,7 @@ final class ProtoCompiler
     {
         return \array_filter(
             $this->files->getFiles(\dirname($protoFile)),
-            static fn(string $file) => str_contains($file, '.proto')
+            static fn (string $file) => str_contains($file, '.proto')
         );
     }
 }
