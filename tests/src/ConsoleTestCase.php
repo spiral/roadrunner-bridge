@@ -24,7 +24,7 @@ abstract class ConsoleTestCase extends TestCase
         ];
 
         foreach ($files as $file) {
-            require_once $appPath . $file;
+            require $appPath . $file;
         }
 
         return $result;
