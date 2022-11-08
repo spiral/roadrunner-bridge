@@ -26,12 +26,13 @@ abstract class ConsoleTestCase extends TestCase
         $tries = 5;
 
         foreach ($files as $file) {
-            do {
+            $filePath = $appPath . $file;
+            while (!\file_exists($filePath) && $tries > 0) {
                 --$tries;
-                $filePath = $appPath . $file;
-                require_once $filePath;
                 \usleep(500);
-            } while (!\file_exists($filePath) && $tries > 0);
+            }
+
+            require_once $filePath;
         }
 
         return $result;
