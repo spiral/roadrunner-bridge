@@ -23,11 +23,15 @@ abstract class ConsoleTestCase extends TestCase
             'GRPC/EchoService/GPBMetadata/PBEcho.php',
         ];
 
+        $tries = 5;
 
         foreach ($files as $file) {
-            $filePath = $appPath . $file;
-            \clearstatcache(true, $filePath);
-            require_once $filePath;
+            do {
+                --$tries;
+                $filePath = $appPath . $file;
+                require_once $filePath;
+                \usleep(500);
+            } while (!\file_exists($filePath) && $tries > 0);
         }
 
         return $result;
