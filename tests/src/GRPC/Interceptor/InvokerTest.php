@@ -35,3 +35,4 @@ final class InvokerTest extends TestCase
         $this->assertSame('hello', $invoker->invoke($service, $method, $ctx, $input));
     }
 }
+
