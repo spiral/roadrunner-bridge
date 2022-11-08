@@ -39,8 +39,13 @@ final class ProtoCompiler
                 \escapeshellarg(dirname($protoFile)),
                 \implode(' ', \array_map('escapeshellarg', $this->getProtoFiles($protoFile)))
             ),
-            $output
+            $output,
+            $exitCode
         );
+
+        if ($exitCode !== 0) {
+            throw new CompileException(\implode("\n", $output), $exitCode);
+        }
 
         $output = \trim(\implode("\n", $output), "\n ,");
 
@@ -90,7 +95,7 @@ final class ProtoCompiler
     {
         return \array_filter(
             $this->files->getFiles(\dirname($protoFile)),
-            static fn (string $file) => str_contains($file, '.proto')
+            static fn(string $file) => str_contains($file, '.proto')
         );
     }
 }

@@ -10,6 +10,7 @@ use Spiral\Boot\KernelInterface;
 use Spiral\Console\Command;
 use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
+use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 use Spiral\RoadRunnerBridge\GRPC\ProtoCompiler;
 
 final class GenerateCommand extends Command
@@ -50,6 +51,8 @@ final class GenerateCommand extends Command
 
             try {
                 $result = $compiler->compile($protoFile);
+            } catch (CompileException $e) {
+                throw $e;
             } catch (\Throwable $e) {
                 $this->sprintf("<error>Error:</error> <fg=red>%s</fg=red>\n", $e->getMessage());
                 continue;

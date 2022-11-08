@@ -17,24 +17,14 @@ abstract class ConsoleTestCase extends TestCase
             'namespace' => 'Spiral\\App',
         ]);
 
-        var_dump($result);
-
         $files = [
             'GRPC/EchoService/EchoInterface.php',
             'GRPC/EchoService/Message.php',
             'GRPC/EchoService/GPBMetadata/PBEcho.php',
         ];
 
-        $tries = 5;
-
         foreach ($files as $file) {
-            $filePath = $appPath . $file;
-            while (!\file_exists($filePath) && $tries > 0) {
-                --$tries;
-                \usleep(500 * 1000);
-            }
-
-            require_once $filePath;
+            require_once $appPath . $file;
         }
 
         return $result;
