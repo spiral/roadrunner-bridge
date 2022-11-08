@@ -29,7 +29,7 @@ abstract class ConsoleTestCase extends TestCase
             $filePath = $appPath . $file;
             while (!\file_exists($filePath) && $tries > 0) {
                 --$tries;
-                \usleep(500);
+                \usleep(500 * 1000);
             }
 
             require_once $filePath;
