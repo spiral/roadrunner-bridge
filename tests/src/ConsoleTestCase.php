@@ -17,6 +17,8 @@ abstract class ConsoleTestCase extends TestCase
             'namespace' => 'Spiral\\App',
         ]);
 
+        var_dump($result);
+
         $files = [
             'GRPC/EchoService/EchoInterface.php',
             'GRPC/EchoService/Message.php',
