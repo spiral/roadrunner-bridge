@@ -6,8 +6,8 @@ namespace Spiral\RoadRunnerBridge\Centrifugo;
 
 use Psr\Container\ContainerInterface;
 use RoadRunner\Centrifugo\CentrifugoWorker;
-use RoadRunner\Centrifugo\RequestInterface;
-use RoadRunner\Centrifugo\RequestType;
+use RoadRunner\Centrifugo\Request\RequestInterface;
+use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Core\InterceptableCore;

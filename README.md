@@ -1259,14 +1259,14 @@ declare(strict_types=1);
 
 namespace App\Centrifugo\Service;
 
-use RoadRunner\Centrifugo\ConnectRequest;
 use RoadRunner\Centrifugo\Payload\ConnectResponse;
-use RoadRunner\Centrifugo\RequestInterface;
+use RoadRunner\Centrifugo\Request\Connect;
+use RoadRunner\Centrifugo\Request\RequestInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\ServiceInterface;
 
 class TestService implements ServiceInterface
 {
-    public function handle(ConnectRequest $request): void
+    public function handle(Connect $request): void
     {
         $request->respond(new ConnectResponse());
     }

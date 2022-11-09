@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
 
 use Psr\Container\ContainerInterface;
-use RoadRunner\Centrifugo\RequestType;
+use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\FactoryInterface;

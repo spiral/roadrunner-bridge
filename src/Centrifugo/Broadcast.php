@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Centrifugo;
 
-use RoadRunner\Centrifugo\CentrifugApiInterface;
+use RoadRunner\Centrifugo\CentrifugoApiInterface;
 use Spiral\Broadcasting\Driver\AbstractBroadcast;
 
 final class Broadcast extends AbstractBroadcast
 {
     public function __construct(
-        private readonly CentrifugApiInterface $api
+        private readonly CentrifugoApiInterface $api
     ) {
     }
 

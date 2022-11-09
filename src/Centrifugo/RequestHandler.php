@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Centrifugo;
 
-use RoadRunner\Centrifugo\RequestInterface;
-use RoadRunner\Centrifugo\RequestType;
+use RoadRunner\Centrifugo\Request\RequestInterface;
+use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\Core\CoreInterface;
 
 final class RequestHandler implements CoreInterface

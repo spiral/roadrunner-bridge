@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Config;
 
-use RoadRunner\Centrifugo\RequestType;
+use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\Core\InjectableConfig;
 use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Interceptor;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Centrifugo;
 
-use RoadRunner\Centrifugo\RequestType;
+use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\Core\Container\Autowire;
 
 /**

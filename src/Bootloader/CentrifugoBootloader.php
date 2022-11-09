@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
 use Psr\Container\ContainerInterface;
-use RoadRunner\Centrifugo\CentrifugApiInterface;
+use RoadRunner\Centrifugo\CentrifugoApiInterface;
 use RoadRunner\Centrifugo\CentrifugoWorker;
-use RoadRunner\Centrifugo\RPCCentrifugApi;
+use RoadRunner\Centrifugo\RPCCentrifugoApi;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Broadcast;
@@ -30,7 +30,7 @@ final class CentrifugoBootloader extends Bootloader
         Interceptor\RegistryInterface::class => [self::class, 'initInterceptorRegistry'],
         CentrifugoWorkerInterface::class => CentrifugoWorker::class,
         ErrorHandlerInterface::class => LogErrorHandler::class,
-        CentrifugApiInterface::class => RPCCentrifugApi::class,
+        CentrifugoApiInterface::class => RPCCentrifugoApi::class,
     ];
 
     public function __construct(

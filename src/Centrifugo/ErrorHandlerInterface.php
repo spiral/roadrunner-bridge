@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Centrifugo;
 
-use RoadRunner\Centrifugo\RequestInterface;
+use RoadRunner\Centrifugo\Request\RequestInterface;
 
 interface ErrorHandlerInterface
 {
