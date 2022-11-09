@@ -6,5 +6,5 @@ namespace Spiral\App\GRPC;
 
 class Message extends \Google\Protobuf\Internal\Message
 {
-
 }
+
