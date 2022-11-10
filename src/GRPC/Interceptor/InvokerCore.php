@@ -32,4 +32,3 @@ final class InvokerCore implements CoreInterface
         );
     }
 }
-
