@@ -27,4 +27,3 @@ class Invoker implements InvokerInterface
         ]);
     }
 }
-

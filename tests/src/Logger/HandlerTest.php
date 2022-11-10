@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Logger;
 
-use Psr\Log\LoggerInterface;
 use RoadRunner\Logger\Logger;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\RoadRunnerBridge\Logger\Handler;
@@ -27,7 +26,7 @@ final class HandlerTest extends TestCase
         $monolog->setHandlers([
             new Handler(
                 new Logger($rpc),
-                "%message% foo"
+                '%message% foo'
             ),
         ]);
 

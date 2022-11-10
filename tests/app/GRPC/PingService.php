@@ -13,4 +13,3 @@ class PingService
         return $input;
     }
 }
-

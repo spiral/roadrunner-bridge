@@ -13,11 +13,11 @@ use Spiral\RoadRunnerBridge\Logger\Handler;
 final class LoggerBootloader extends Bootloader
 {
     protected const DEPENDENCIES = [
-        MonologBootloader::class
+        MonologBootloader::class,
     ];
 
     protected const SINGLETONS = [
-        Handler::class => [self::class, 'initHandler']
+        Handler::class => [self::class, 'initHandler'],
     ];
 
     private function initHandler(Logger $logger, EnvironmentInterface $env): Handler
