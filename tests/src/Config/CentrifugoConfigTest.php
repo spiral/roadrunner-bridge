@@ -18,7 +18,7 @@ final class CentrifugoConfigTest extends TestCase
             'string-alias' => 'foo',
             'autowire' => new Autowire(TestService::class),
             'class-string' => TestService::class,
-            'instance' => new TestService()
+            'instance' => new TestService(),
         ];
 
         $config = new CentrifugoConfig(['services' => $services]);
@@ -39,7 +39,7 @@ final class CentrifugoConfigTest extends TestCase
             'string-alias' => 'foo',
             'autowire' => new Autowire(TestInterceptor::class),
             'class-string' => TestInterceptor::class,
-            'instance' => new TestInterceptor()
+            'instance' => new TestInterceptor(),
         ];
 
         $config = new CentrifugoConfig(['interceptors' => $interceptors]);

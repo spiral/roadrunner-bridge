@@ -14,6 +14,7 @@ interface RegistryInterface
 {
     /**
      * @param non-empty-string $type
+     *
      * @return CoreInterceptorInterface[]
      */
     public function getInterceptors(string $type): array;

@@ -49,7 +49,7 @@ final class InterceptorRegistryTest extends TestCase
     {
         $interceptors = [
             new TestInterceptor(),
-            new OtherInterceptor()
+            new OtherInterceptor(),
         ];
 
         $this->updateConfig('centrifugo.interceptors', ['*' => $interceptors]);
@@ -64,7 +64,7 @@ final class InterceptorRegistryTest extends TestCase
     {
         $this->updateConfig('centrifugo.interceptors', [
             '*' => new TestInterceptor(),
-            'publish' => new OtherInterceptor()
+            'publish' => new OtherInterceptor(),
         ]);
 
         $registry = $this->getContainer()->get(RegistryInterface::class);
