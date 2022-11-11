@@ -62,6 +62,8 @@ final class InterceptorRegistry implements RegistryInterface
 
     /**
      * @param non-empty-string $type
+     *
+     * @return CoreInterceptorInterface[]
      */
     public function getInterceptors(string $type): array
     {
