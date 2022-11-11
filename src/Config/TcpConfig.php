@@ -19,7 +19,7 @@ final class TcpConfig extends InjectableConfig
     ];
 
     /**
-     * @return array<non-empty-string, class-string<ServiceInterface>|ServiceInterface|Autowire>
+     * @return array<non-empty-string, Autowire|class-string<ServiceInterface>|ServiceInterface>
      */
     public function getServices(): array
     {
@@ -27,7 +27,7 @@ final class TcpConfig extends InjectableConfig
     }
 
     /**
-     * @return array<non-empty-string, list<class-string<CoreInterceptorInterface>|CoreInterceptorInterface|Autowire>>
+     * @return array<non-empty-string, list<Autowire|class-string<CoreInterceptorInterface>|CoreInterceptorInterface>>
      */
     public function getInterceptors(): array
     {

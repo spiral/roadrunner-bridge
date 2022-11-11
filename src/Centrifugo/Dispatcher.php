@@ -13,7 +13,6 @@ use Spiral\Boot\FinalizerInterface;
 use Spiral\Core\InterceptableCore;
 use Spiral\Core\ScopeInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
-use Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
 
 final class Dispatcher implements DispatcherInterface
 {
@@ -53,7 +52,7 @@ final class Dispatcher implements DispatcherInterface
                 $service = $this->getService($handler, $registry, $type);
                 $scope->runScope([
                     RequestInterface::class => $request,
-                ], static fn() => $service->callAction($request::class, 'handle', [
+                ], static fn () => $service->callAction($request::class, 'handle', [
                     'type' => $type,
                     'request' => $request,
                 ]));
