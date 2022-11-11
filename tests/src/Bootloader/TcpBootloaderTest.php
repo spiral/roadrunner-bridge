@@ -35,7 +35,7 @@ final class TcpBootloaderTest extends TestCase
         );
     }
 
-    public function testDispatcherShouldBeRegistered()
+    public function testDispatcherShouldBeRegistered(): void
     {
         $this->assertDispatcherRegistered(Dispatcher::class);
     }

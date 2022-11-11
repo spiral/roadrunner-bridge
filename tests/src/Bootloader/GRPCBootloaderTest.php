@@ -22,7 +22,7 @@ use Mockery as m;
 
 final class GRPCBootloaderTest extends TestCase
 {
-    public function testGetsServerAsASingleton()
+    public function testGetsServerAsASingleton(): void
     {
         $this->assertContainerBoundAsSingleton(
             Server::class,
@@ -30,7 +30,7 @@ final class GRPCBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsInvoker()
+    public function testGetsInvoker(): void
     {
         $this->assertContainerBoundAsSingleton(
             InvokerInterface::class,
@@ -38,7 +38,7 @@ final class GRPCBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsServiceLocator()
+    public function testGetsServiceLocator(): void
     {
         $this->assertContainerBoundAsSingleton(
             LocatorInterface::class,
@@ -46,17 +46,17 @@ final class GRPCBootloaderTest extends TestCase
         );
     }
 
-    public function testDispatcherShouldBeRegistered()
+    public function testDispatcherShouldBeRegistered(): void
     {
         $this->assertDispatcherRegistered(Dispatcher::class);
     }
 
-    public function testOdlBootloaderShouldNotBeRegistered()
+    public function testOdlBootloaderShouldNotBeRegistered(): void
     {
         $this->assertBootloaderMissed('Spiral\Bootloader\GRPC');
     }
 
-    public function testConfigShouldBeDefined()
+    public function testConfigShouldBeDefined(): void
     {
         $configurator = $this->getContainer()->get(ConfigsInterface::class);
         $config = $configurator->getConfig('grpc');

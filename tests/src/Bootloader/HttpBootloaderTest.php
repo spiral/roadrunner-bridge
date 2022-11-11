@@ -37,7 +37,7 @@ final class HttpBootloaderTest extends TestCase
         $this->assertDispatcherMissed('Spiral\Http\RrDispatcher');
     }
 
-    public function testOldRoadRunnerBootloadersShouldNotBeLoaded()
+    public function testOldRoadRunnerBootloadersShouldNotBeLoaded(): void
     {
         $this->assertBootloaderMissed('Spiral\Bootloader\ServerBootloader');
         $this->assertBootloaderMissed('Spiral\Bootloader\Server\LegacyRoadRunnerBootloader');
