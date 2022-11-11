@@ -67,7 +67,7 @@ final class GRPCBootloaderTest extends TestCase
                 $this->getDirectoryByAlias('app') . 'proto/echo.proto',
                 $this->getDirectoryByAlias('app') . 'proto/foo.proto',
             ],
-            'interceptors' => []
+            'interceptors' => [],
         ], $config);
     }
 
@@ -85,7 +85,7 @@ final class GRPCBootloaderTest extends TestCase
         $bootloader->addInterceptor($autowire);
 
         $this->assertSame([
-            'foo', $interceptor, $autowire
+            'foo', $interceptor, $autowire,
         ], $configs->getConfig(GRPCConfig::CONFIG)['interceptors']);
     }
 }

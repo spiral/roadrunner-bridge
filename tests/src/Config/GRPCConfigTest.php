@@ -44,7 +44,7 @@ final class GRPCConfigTest extends TestCase
     public function testGetInterceptors()
     {
         $config = new GRPCConfig([
-            'interceptors' => ['foo', 'bar']
+            'interceptors' => ['foo', 'bar'],
         ]);
 
         $this->assertSame(['foo', 'bar'], $config->getInterceptors());
