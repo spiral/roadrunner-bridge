@@ -74,7 +74,7 @@ final class Dispatcher implements DispatcherInterface
         }
 
         $service = new InterceptableCore($handler);
-        foreach ($registry->getInterceptors($type) as $interceptor) {
+        foreach ($registry->getInterceptors($type->value) as $interceptor) {
             $service->addInterceptor($interceptor);
         }
 

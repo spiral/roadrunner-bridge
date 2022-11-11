@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
 
-use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 
@@ -14,12 +13,14 @@ use Spiral\Core\CoreInterceptorInterface;
 interface RegistryInterface
 {
     /**
+     * @param non-empty-string $type
      * @return CoreInterceptorInterface[]
      */
-    public function getInterceptors(RequestType $type): array;
+    public function getInterceptors(string $type): array;
 
     /**
+     * @param non-empty-string $type
      * @param TInterceptor $interceptor
      */
-    public function register(RequestType $type, Autowire|CoreInterceptorInterface|string $interceptor): void;
+    public function register(string $type, Autowire|CoreInterceptorInterface|string $interceptor): void;
 }
