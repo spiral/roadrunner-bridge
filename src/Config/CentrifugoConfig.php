@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Config;
 
-use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\Core\InjectableConfig;
 use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
@@ -23,7 +22,7 @@ final class CentrifugoConfig extends InjectableConfig
     ];
 
     /**
-     * @return array<RequestType, TService>
+     * @return array<non-empty-string, TService>
      */
     public function getServices(): array
     {
@@ -31,7 +30,7 @@ final class CentrifugoConfig extends InjectableConfig
     }
 
     /**
-     * @return array<RequestType, TInterceptor[]>
+     * @return array<non-empty-string, TInterceptor[]>
      */
     public function getInterceptors(): array
     {
