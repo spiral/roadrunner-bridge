@@ -67,7 +67,7 @@ final class InterceptorRegistry implements RegistryInterface
     {
         return \array_merge(
             $this->interceptors[self::INTERCEPTORS_FOR_ALL_SERVICES] ?? [],
-                $this->interceptors[$type] ?? []
+            $this->interceptors[$type] ?? []
         );
     }
 }
