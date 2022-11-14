@@ -40,4 +40,52 @@ final class GRPCConfigTest extends TestCase
 
         $this->assertSame([], $config->getServices());
     }
+    
+    public function testGetGeneratedPath(): void
+    {
+        $config = new GRPCConfig([
+            'generatedPath' => 'foo',
+        ]);
+
+        $this->assertSame('foo', $config->getGeneratedPath());
+    }
+
+    public function testGetNonExistsGeneratedPath(): void
+    {
+        $config = new GRPCConfig();
+
+        $this->assertNull($config->getGeneratedPath());
+    }
+
+    public function testGetNamespace(): void
+    {
+        $config = new GRPCConfig([
+            'namespace' => 'foo',
+        ]);
+
+        $this->assertSame('foo', $config->getNamespace());
+    }
+
+    public function testGetNonExistsNamespace(): void
+    {
+        $config = new GRPCConfig();
+
+        $this->assertNull($config->getNamespace());
+    }
+
+    public function testGetServicesBasePath(): void
+    {
+        $config = new GRPCConfig([
+            'servicesBasePath' => 'foo',
+        ]);
+
+        $this->assertSame('foo', $config->getServicesBasePath());
+    }
+
+    public function testGetNonExistsServicesBasePath(): void
+    {
+        $config = new GRPCConfig();
+
+        $this->assertNull($config->getServicesBasePath());
+    }
 }

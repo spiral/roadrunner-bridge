@@ -28,16 +28,17 @@ final class GenerateCommand extends Command
         $binaryPath = $config->getBinaryPath();
 
         if ($binaryPath !== null && !\file_exists($binaryPath)) {
-            $this->sprintf('<error>PHP Server plugin binary `%s` not found.</error>', $binaryPath);
+            $this->sprintf('<error>Protoc plugin binary `%s` was not found.  Use command `./vendor/bin/rr download` to download it.`</error>', $binaryPath);
 
             return self::FAILURE;
         }
 
         $compiler = new ProtoCompiler(
-            $this->getPath($kernel),
-            $this->getNamespace($kernel),
+            $this->getPath($kernel, $config),
+            $this->getNamespace($kernel, $config),
             $files,
-            $binaryPath
+            $binaryPath,
+            $config->getServicesBasePath(),
         );
 
         foreach ($config->getServices() as $protoFile) {
@@ -76,11 +77,15 @@ final class GenerateCommand extends Command
     /**
      * Get or detect base source code path. By default fallbacks to kernel location.
      */
-    protected function getPath(KernelInterface $kernel): string
+    protected function getPath(KernelInterface $kernel, GRPCConfig $config): string
     {
         $path = $this->argument('path');
         if ($path !== 'auto') {
             return $path;
+        }
+
+        if ($generated = $config->getGeneratedPath()) {
+            return $generated;
         }
 
         $r = new \ReflectionObject($kernel);
@@ -91,10 +96,14 @@ final class GenerateCommand extends Command
     /**
      * Get or detect base namespace. By default fallbacks to kernel namespace.
      */
-    protected function getNamespace(KernelInterface $kernel): string
+    protected function getNamespace(KernelInterface $kernel, GRPCConfig $config): string
     {
         $namespace = $this->argument('namespace');
         if ($namespace !== 'auto') {
+            return $namespace;
+        }
+
+        if ($namespace = $config->getNamespace()) {
             return $namespace;
         }
 

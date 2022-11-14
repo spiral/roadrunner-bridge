@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\GRPC;
 
 use Spiral\Files\FilesInterface;
+use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 
 /**
@@ -18,7 +19,8 @@ final class ProtoCompiler
         private readonly string $basePath,
         string $baseNamespace,
         private readonly FilesInterface $files,
-        private readonly ?string $protocBinaryPath = null
+        private readonly ?string $protocBinaryPath = null,
+        private readonly ?string $servicesBasePath = null,
     ) {
         $this->baseNamespace = \str_replace('\\', '/', \rtrim($baseNamespace, '\\'));
     }
@@ -32,10 +34,11 @@ final class ProtoCompiler
 
         \exec(
             \sprintf(
-                'protoc %s --php_out=%s --php-grpc_out=%s -I %s %s 2>&1',
+                'protoc %s --php_out=%s --php-grpc_out=%s -I=%s -I=%s %s 2>&1',
                 $this->protocBinaryPath ? '--plugin=' . $this->protocBinaryPath : '',
                 \escapeshellarg($tmpDir),
                 \escapeshellarg($tmpDir),
+                \escapeshellarg(realpath($this->basePath . $this->servicesBasePath)),
                 \escapeshellarg(dirname($protoFile)),
                 \implode(' ', \array_map('escapeshellarg', $this->getProtoFiles($protoFile)))
             ),
@@ -63,7 +66,7 @@ final class ProtoCompiler
     private function copy(string $tmpDir, string $file): string
     {
         $source = \ltrim($this->files->relativePath($file, $tmpDir), '\\/');
-        if (str_starts_with($source, $this->baseNamespace)) {
+        if (\str_starts_with($source, $this->baseNamespace)) {
             $source = \ltrim(\substr($source, \strlen($this->baseNamespace)), '\\/');
         }
 
