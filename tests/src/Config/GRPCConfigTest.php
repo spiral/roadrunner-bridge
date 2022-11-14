@@ -40,7 +40,23 @@ final class GRPCConfigTest extends TestCase
 
         $this->assertSame([], $config->getServices());
     }
-    
+
+    public function testGetInterceptors()
+    {
+        $config = new GRPCConfig([
+            'interceptors' => ['foo', 'bar'],
+        ]);
+
+        $this->assertSame(['foo', 'bar'], $config->getInterceptors());
+    }
+
+    public function testGetNotExistsInterceptors(): void
+    {
+        $config = new GRPCConfig();
+
+        $this->assertSame([], $config->getInterceptors());
+    }
+
     public function testGetGeneratedPath(): void
     {
         $config = new GRPCConfig([

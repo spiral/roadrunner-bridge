@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Bootloader;
 
+use Spiral\Config\ConfigManager;
+use Spiral\Config\LoaderInterface;
 use Spiral\Core\ConfigsInterface;
-use Spiral\RoadRunner\GRPC\Invoker;
+use Spiral\Core\Container\Autowire;
+use Spiral\Core\CoreInterceptorInterface;
+use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
+use Spiral\RoadRunnerBridge\Bootloader\GRPCBootloader;
+use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Dispatcher;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
 use Spiral\Tests\TestCase;
+use Mockery as m;
 
 final class GRPCBootloaderTest extends TestCase
 {
@@ -60,6 +67,25 @@ final class GRPCBootloaderTest extends TestCase
                 $this->getDirectoryByAlias('app') . 'proto/echo.proto',
                 $this->getDirectoryByAlias('app') . 'proto/foo.proto',
             ],
+            'interceptors' => [],
         ], $config);
+    }
+
+    public function testAddInterceptor(): void
+    {
+        $configs = new ConfigManager($this->createMock(LoaderInterface::class));
+        $configs->setDefaults(GRPCConfig::CONFIG, ['interceptors' => []]);
+
+        $interceptor = m::mock(CoreInterceptorInterface::class);
+        $autowire = new Autowire('test');
+
+        $bootloader = new GRPCBootloader($configs);
+        $bootloader->addInterceptor('foo');
+        $bootloader->addInterceptor($interceptor);
+        $bootloader->addInterceptor($autowire);
+
+        $this->assertSame([
+            'foo', $interceptor, $autowire,
+        ], $configs->getConfig(GRPCConfig::CONFIG)['interceptors']);
     }
 }

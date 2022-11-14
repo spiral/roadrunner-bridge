@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
+use Psr\Container\ContainerInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\KernelInterface;
 use Spiral\Config\ConfiguratorInterface;
+use Spiral\Config\Patch\Append;
+use Spiral\Core\Container\Autowire;
+use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\FactoryInterface;
-use Spiral\RoadRunner\GRPC\Invoker;
+use Spiral\Core\InterceptableCore;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Dispatcher;
+use Spiral\RoadRunnerBridge\GRPC\Interceptor\InvokerCore;
+use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
+use Spiral\RoadRunner\GRPC\Invoker as BaseInvoker;
 
 final class GRPCBootloader extends Bootloader
 {
@@ -24,7 +31,7 @@ final class GRPCBootloader extends Bootloader
 
     protected const SINGLETONS = [
         Server::class => Server::class,
-        InvokerInterface::class => Invoker::class,
+        InvokerInterface::class => [self::class, 'initInvoker'],
         LocatorInterface::class => ServiceLocator::class,
     ];
 
@@ -54,7 +61,47 @@ final class GRPCBootloader extends Bootloader
                 'binaryPath' => null,
 
                 'services' => [],
+
+                'interceptors' => [],
             ]
         );
+    }
+
+    /**
+     * @param Autowire|class-string<CoreInterceptorInterface>|CoreInterceptorInterface $interceptor
+     */
+    public function addInterceptor(string|CoreInterceptorInterface|Autowire $interceptor): void
+    {
+        $this->config->modify(
+            GRPCConfig::CONFIG,
+            new Append('interceptors', null, $interceptor)
+        );
+    }
+
+    private function initInvoker(
+        GRPCConfig $config,
+        ContainerInterface $container,
+        FactoryInterface $factory,
+        BaseInvoker $invoker
+    ): InvokerInterface {
+        $core = new InterceptableCore(
+            new InvokerCore($invoker)
+        );
+
+        foreach ($config->getInterceptors() as $interceptor) {
+            if (\is_string($interceptor)) {
+                $interceptor = $container->get($interceptor);
+            }
+
+            if ($interceptor instanceof Autowire) {
+                $interceptor = $interceptor->resolve($factory);
+            }
+
+            \assert($interceptor instanceof CoreInterceptorInterface);
+
+            $core->addInterceptor($interceptor);
+        }
+
+        return new Invoker($core);
     }
 }
