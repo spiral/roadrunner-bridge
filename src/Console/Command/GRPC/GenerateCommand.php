@@ -90,8 +90,8 @@ final class GenerateCommand extends Command
             return $path;
         }
 
-        if ($generated = $config->getGeneratedPath()) {
-            return $generated;
+        if ($config->getGeneratedPath() !== null) {
+            return $config->getGeneratedPath();
         }
 
         $r = new \ReflectionObject($kernel);
@@ -109,7 +109,7 @@ final class GenerateCommand extends Command
             return $namespace;
         }
 
-        if ($namespace = $config->getNamespace()) {
+        if ($config->getNamespace() !== null) {
             return $namespace;
         }
 
