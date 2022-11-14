@@ -110,7 +110,7 @@ final class GenerateCommand extends Command
         }
 
         if ($config->getNamespace() !== null) {
-            return $namespace;
+            return $config->getNamespace();
         }
 
         return (new \ReflectionObject($kernel))->getNamespaceName();
