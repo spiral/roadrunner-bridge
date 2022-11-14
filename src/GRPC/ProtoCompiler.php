@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\GRPC;
 
 use Spiral\Files\FilesInterface;
-use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 
 /**
