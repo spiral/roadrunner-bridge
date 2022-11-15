@@ -16,6 +16,8 @@ use Spiral\RoadRunnerBridge\Bootloader\GRPCBootloader;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Dispatcher;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
+use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
+use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
 use Spiral\Tests\TestCase;
 use Mockery as m;
@@ -43,6 +45,14 @@ final class GRPCBootloaderTest extends TestCase
         $this->assertContainerBoundAsSingleton(
             LocatorInterface::class,
             ServiceLocator::class
+        );
+    }
+
+    public function testGetsProtoFilesRepository()
+    {
+        $this->assertContainerBoundAsSingleton(
+            ProtoFilesRepositoryInterface::class,
+            FileRepository::class
         );
     }
 
