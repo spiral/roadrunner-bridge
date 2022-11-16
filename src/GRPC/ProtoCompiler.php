@@ -18,8 +18,8 @@ final class ProtoCompiler
         private readonly string $basePath,
         string $baseNamespace,
         private readonly FilesInterface $files,
+        private readonly ProtocCommandBuilder $commandBuilder,
         private readonly ?string $protocBinaryPath = null,
-        private readonly ?string $servicesBasePath = null,
     ) {
         $this->baseNamespace = \str_replace('\\', '/', \rtrim($baseNamespace, '\\'));
     }
@@ -32,15 +32,7 @@ final class ProtoCompiler
         $tmpDir = $this->tmpDir();
 
         \exec(
-            \sprintf(
-                'protoc %s --php_out=%s --php-grpc_out=%s -I=%s -I=%s %s 2>&1',
-                $this->protocBinaryPath ? '--plugin=' . $this->protocBinaryPath : '',
-                \escapeshellarg($tmpDir),
-                \escapeshellarg($tmpDir),
-                \escapeshellarg(realpath($this->basePath . $this->servicesBasePath)),
-                \escapeshellarg(dirname($protoFile)),
-                \implode(' ', \array_map('escapeshellarg', $this->getProtoFiles($protoFile)))
-            ),
+            $this->commandBuilder->build($protoFile, $tmpDir, $this->protocBinaryPath),
             $output,
             $exitCode
         );
@@ -88,16 +80,5 @@ final class ProtoCompiler
         $this->files->ensureDirectory($directory);
 
         return $this->files->normalizePath($directory, true);
-    }
-
-    /**
-     * Include all proto files from the directory.
-     */
-    private function getProtoFiles(string $protoFile): array
-    {
-        return \array_filter(
-            $this->files->getFiles(\dirname($protoFile)),
-            static fn (string $file) => str_contains($file, '.proto')
-        );
     }
 }

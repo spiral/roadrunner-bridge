@@ -11,6 +11,7 @@ use Spiral\Console\Command;
 use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
+use Spiral\RoadRunnerBridge\GRPC\ProtocCommandBuilder;
 use Spiral\RoadRunnerBridge\GRPC\ProtoCompiler;
 
 final class GenerateCommand extends Command
@@ -24,7 +25,8 @@ final class GenerateCommand extends Command
         KernelInterface $kernel,
         FilesInterface $files,
         DirectoriesInterface $dirs,
-        GRPCConfig $config
+        GRPCConfig $config,
+        ProtocCommandBuilder $commandBuilder
     ): int {
         $binaryPath = $config->getBinaryPath();
 
@@ -41,8 +43,8 @@ final class GenerateCommand extends Command
             $this->getPath($kernel, $config),
             $this->getNamespace($kernel, $config),
             $files,
-            $binaryPath,
-            $config->getServicesBasePath(),
+            $commandBuilder,
+            $binaryPath
         );
 
         foreach ($config->getServices() as $protoFile) {

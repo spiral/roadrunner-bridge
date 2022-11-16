@@ -60,6 +60,10 @@ final class GRPCBootloader extends Bootloader
                  */
                 'binaryPath' => null,
 
+                'generatedPath' => null,
+                'namespace' => null,
+                'servicesBasePath' => null,
+
                 'services' => [],
 
                 'interceptors' => [],

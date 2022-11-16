@@ -90,7 +90,7 @@ use Spiral\Cache\Storage\FileStorage;
 return [
 
     'default' => 'array',
-    
+
     /**
      *  Aliases for storages, if you want to use domain specific storages
      */
@@ -104,7 +104,7 @@ return [
             // Alias for ArrayStorage type
             'type' => 'array',
         ],
-        
+
         'localMemory' => [
             'type' => ArrayStorage::class,
         ],
@@ -114,7 +114,7 @@ return [
             'type' => 'file',
             'path' => __DIR__.'/../../runtime/cache',
         ],
-        
+
     ],
 
     /**
@@ -143,8 +143,8 @@ class MyService {
 
     private CacheInterface $cache;
     private PostReposiory $posts;
-    
-    public function __construct(CacheInterface $cache, PostReposiory $posts) 
+
+    public function __construct(CacheInterface $cache, PostReposiory $posts)
     {
         $this->cache = $cache;
         $this->posts = $posts;
@@ -154,7 +154,7 @@ class MyService {
     {
         $posts = $this->posts->findAll();
         $this->cache->set('posts', $posts);
-        
+
         // ...
     }
 }
@@ -174,8 +174,8 @@ class MyService {
 
     private CacheStorageProviderInterface $cacheManager;
     private PostReposiory $posts;
-    
-    public function __construct(CacheStorageProviderInterface $cacheManager, PostReposiory $posts) 
+
+    public function __construct(CacheStorageProviderInterface $cacheManager, PostReposiory $posts)
     {
         $this->cacheManager = $cacheManager;
         $this->posts = $posts;
@@ -185,10 +185,10 @@ class MyService {
     {
         /** @var \Psr\SimpleCache\CacheInterface $cache */
         $cache = $this->cacheManager->storage('inMemory');
-        
+
         $posts = $this->posts->findAll();
         $this->cache->set('posts', $posts);
-        
+
         // ...
     }
 }
@@ -218,8 +218,8 @@ class MyService {
 
     private CacheStorageProviderInterface $cacheManager;
     private PostReposiory $posts;
-    
-    public function __construct(CacheStorageProviderInterface $cacheManager, UserRepository $posts) 
+
+    public function __construct(CacheStorageProviderInterface $cacheManager, UserRepository $posts)
     {
         $this->cacheManager = $cacheManager;
         $this->posts = $posts;
@@ -229,7 +229,7 @@ class MyService {
     {
         /** @var \Psr\SimpleCache\CacheInterface $cache */
         $cache = $this->cacheManager->storage('user-data');
-        
+
         // ...
     }
 }
@@ -245,8 +245,8 @@ There are two ways to add cache storages:
 final class DatabaseStorage implements \Psr\SimpleCache\CacheInterface
 {
     private string $table;
-    
-    public function __construct(string $table) 
+
+    public function __construct(string $table)
     {
         $this->table = $table;
     }
@@ -314,7 +314,7 @@ return [
         // 'mail-queue' => 'roadrunner',
         // 'rating-queue' => 'sync',
     ],
-    
+
     /**
      * Queue connections
      * Drivers: "sync", "roadrunner"
@@ -333,32 +333,32 @@ return [
                     // Run consumer for this pipeline on startup (by default)
                     // You can pause consumer for this pipeline via console command
                     // php app.php queue:pause local
-                    'consume' => true 
+                    'consume' => true
                 ],
                 // 'amqp' => [
                 //     'connector' => new AMQPCreateInfo('bus', ...),
                 //     // Don't consume jobs for this pipeline on start
                 //     // You can run consumer for this pipeline via console command
                 //     // php app.php queue:resume local
-                //     'consume' => false 
+                //     'consume' => false
                 // ],
-                // 
+                //
                 // 'beanstalk' => [
                 //     'connector' => new BeanstalkCreateInfo('bus', ...),
                 // ],
-                // 
+                //
                 // 'sqs' => [
                 //     'connector' => new SQSCreateInfo('amazon', ...),
                 // ],
             ]
         ],
     ],
-    
+
     'driverAliases' => [
         'sync' => \Spiral\Queue\Driver\SyncDriver::class,
         'roadrunner' => \Spiral\RoadRunnerBridge\Queue\Queue::class,
     ],
-    
+
     'registry' => [
         'handlers' => [],
         'serializers' => [
@@ -403,12 +403,12 @@ class MyService {
 
     private ContainerInterface $container;
     private  QueueInterface $queue;
-    
+
     /**
      * @param QueueInterface $queue - Default queue will be injected
      * @param ContainerInterface $container
      */
-    public function __construct(QueueInterface $queue, ContainerInterface $container) 
+    public function __construct(QueueInterface $queue, ContainerInterface $container)
     {
         $this->container = $container;
         $this->queue = $queue;
@@ -417,13 +417,13 @@ class MyService {
     public function handle()
     {
         $queue = $this->queue;
-        
-        // OR gets queue from manager 
+
+        // OR gets queue from manager
 
         /** @var QueueManager $queueManager */
         $queueManager = $this->container->get(QueueConnectionProviderInterface::class);
         $queue = $queueManager->getConnection('sync');
-        
+
         $queue->push(PingHandler::class, ['url' => 'https://google.com']);
     }
 }
@@ -444,7 +444,7 @@ $queue->push('ping', ['url' => 'https://google.com']);
 
 #### Job serializer
 
-You can configure a specific serializer for a particular job. Add a job as a key with the desired serializer as a value 
+You can configure a specific serializer for a particular job. Add a job as a key with the desired serializer as a value
 in the `app/config/queue.php` configuration file:
 
 ```php
@@ -462,8 +462,8 @@ return [
 ];
 ```
 
-The serializer can be a string key from the `Spiral\Serializer\SerializerRegistry`. The fully qualified name of the serializer class, 
-serializer instance, `Spiral\Core\Container\Autowire` instance. 
+The serializer can be a string key from the `Spiral\Serializer\SerializerRegistry`. The fully qualified name of the serializer class,
+serializer instance, `Spiral\Core\Container\Autowire` instance.
 The serializer class must implement the `Spiral\Serializer\SerializerInterface`.
 
 #### Job DTO's
@@ -478,12 +478,12 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class Ping
 {
     private string $url;
-    
-    public function __construct(string $url) 
+
+    public function __construct(string $url)
     {
         $this->url = $url;
     }
-    
+
     public function __invoke(HttpClientInterface $client): void
     {
         $status = $client->request('GET', $this->url)->getStatusCode() === 200;
@@ -498,8 +498,8 @@ use Spiral\Queue\QueueInterface;
 class MyService {
 
     private QueueInterface $queue;
-    
-    public function __construct(QueueInterface $queue) 
+
+    public function __construct(QueueInterface $queue)
     {
         $this->queue = $queue;
     }
@@ -532,8 +532,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class MyService {
 
     private QueueInterface $queue;
-    
-    public function __construct(QueueConnectionProviderInterface $manager) 
+
+    public function __construct(QueueConnectionProviderInterface $manager)
     {
         $this->queue = $manager->getConnection('user-data');
     }
@@ -573,7 +573,7 @@ class DatabaseFailedJobsHandler implements FailedJobHandlerInterface
 {
     private DatabaseInterface $database;
     private SerializerInterface $serializer;
-    
+
     public function __construct(DatabaseInterface $database, SerializerInterface $serializer)
     {
         $this->database = $database;
@@ -620,7 +620,7 @@ protected const LOAD = [
     RoadRunnerBridge\QueueBootloader::class,
     App\Bootloader\QueueFailedJobsBootloader::class,
     RoadRunnerBridge\CommandBootloader::class,
-    
+
     // ...
 ];
 ```
@@ -641,7 +641,7 @@ protected const LOAD = [
 'memory' => [
     'driver' => 'roadrunner',
     'connector' => new MemoryCreateInfo('local'),
-    'consume' => true // Consume jobs 
+    'consume' => true // Consume jobs
 ],
 ```
 
@@ -665,7 +665,7 @@ use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 
 protected const LOAD = [
     // ...
-    RoadRunnerBridge\TcpBootloader::class, 
+    RoadRunnerBridge\TcpBootloader::class,
     // ...
 ];
 ```
@@ -714,17 +714,17 @@ return [
 
     /**
      * Interceptors, this section is optional.
-     * @see https://spiral.dev/docs/cookbook-domain-core/2.8/en#core-interceptors  
+     * @see https://spiral.dev/docs/cookbook-domain-core/2.8/en#core-interceptors
      */
     'interceptors' => [
         // several interceptors
         'smtp' => [
-            SomeInterceptor::class, 
+            SomeInterceptor::class,
             OtherInterceptor::class
         ],
-        'monolog' => SomeInterceptor::class // one interceptor 
+        'monolog' => SomeInterceptor::class // one interceptor
     ],
-    
+
     'debug' => env('TCP_DEBUG', false)
 ];
 ```
@@ -756,7 +756,7 @@ class TestService implements ServiceInterface
     public function handle(Request $request): ResponseInterface
     {
         // some logic
-    
+
         return new RespondMessage('some message', true);
     }
 }
@@ -846,12 +846,12 @@ broadcast:
 ```php
 use Spiral\Broadcasting\BroadcastInterface;
 
-final class SendVerificationLink 
+final class SendVerificationLink
 {
     private BroadcastInterface $broadcast;
     private UserReposiory $users;
     private VerificationLinkGenerator $linkGenerator;
-    
+
     public function __construct(
         BroadcastInterface $broadcast,
         UserReposiory $users,
@@ -865,11 +865,11 @@ final class SendVerificationLink
     public function handle(int $userId): void
     {
         $user = $this->users->findByPK($userId);
-        
+
         // ...
-        
+
         $this->broadcast->publish(
-            'user.{$user->id}', 
+            'user.{$user->id}',
             \sprintf('Your verification link is: %s', $this->linkGenerator->getLink($user))
         );
     }
@@ -881,12 +881,12 @@ final class SendVerificationLink
 ```php
 use Spiral\Broadcasting\BroadcastManagerInterface;
 
-final class SendVerificationLink 
+final class SendVerificationLink
 {
     private BroadcastManagerInterface $broadcastManager;
     private UserReposiory $users;
     private VerificationLinkGenerator $linkGenerator;
-    
+
     public function __construct(
         BroadcastManagerInterface $broadcastManager,
         UserReposiory $users,
@@ -900,7 +900,7 @@ final class SendVerificationLink
     public function handle(int $userId): void
     {
         $broadcast = $this->broadcastManager->connection('log');
-        
+
         // ...
     }
 }
@@ -928,10 +928,28 @@ declare(strict_types=1);
 return [
     /**
      * Path to protoc-gen-php-grpc library.
-     * Default: null 
+     * Default: null
      */
     'binaryPath' => null,
     // 'binaryPath' => __DIR__.'/../../protoc-gen-php-grpc',
+
+    /**
+     * Path to proto directory, where generated files put
+     * Default: null
+     */
+    'generatedPath' => null,
+
+    /**
+     * Proto file namespace
+     * Default: null
+     */
+    'namespace' => null,
+
+    /**
+     * Base path, root for all proto files
+     * Default: null
+     */
+    'servicesBasePath' => null
 
     'services' => [
         __DIR__.'/../../proto/echo.proto',
@@ -1042,7 +1060,7 @@ use Spiral\RoadRunnerBridge\Logger\Handler;
 
 return [
    //...
-   
+
    'handlers' => [
        'roadrunner' => [
            Handler::class,
@@ -1066,7 +1084,7 @@ use Spiral\RoadRunnerBridge\Logger\Handler;
 
 final class SomeBootloader extends Bootloader
 {
-    public function init(MonologBootloader $monolog, Handler $handler): void 
+    public function init(MonologBootloader $monolog, Handler $handler): void
     {
         $monolog->addHandler($handler);
     }
@@ -1199,7 +1217,7 @@ class AppBootloader extends Bootloader
 To populate metric from application use `Spiral\RoadRunner\Metrics\MetricsInterface`:
 
 ```php
-use Spiral\RoadRunner\Metrics\MetricsInterface; 
+use Spiral\RoadRunner\Metrics\MetricsInterface;
 
 // ...
 
@@ -1246,7 +1264,7 @@ class MetricsBootloader extends Bootloader
 You should specify values for your labels while pushing the metric:
 
 ```php
-use Spiral\RoadRunner\MetricsInterface; 
+use Spiral\RoadRunner\MetricsInterface;
 
 // ...
 
