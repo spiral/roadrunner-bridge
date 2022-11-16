@@ -44,7 +44,7 @@ final class GRPCConfig extends InjectableConfig
     }
 
     /**
-     * Get proto files base path
+     * Root path for all proto files in which imports will be searched.
      */
     public function getServicesBasePath(): ?string
     {
