@@ -17,7 +17,7 @@ class ProtocCommandBuilderTest extends TestCase
         $builder = new ProtocCommandBuilder(
             $files = m::mock(FilesInterface::class),
             new GRPCConfig([
-                'servicesBasePath' => 'path4'
+                'servicesBasePath' => 'path4',
             ])
         );
 
