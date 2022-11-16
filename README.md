@@ -965,10 +965,10 @@ php app.php grpc:generate
 
 #### Console commands
 
-| Command                                    | Description                                             |
-|--------------------------------------------|---------------------------------------------------------|
-| grpc:services                              | List available GRPC services                            |
-| grpc:generate {path=auto} {namespace=auto} | Generate GPRC service code using protobuf specification |
+| Command                                    | Description                                                                                                                                                         |
+|--------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| grpc:services                              | List available GRPC services                                                                                                                                        |
+| grpc:generate {path=auto} {namespace=auto} | Generate GPRC service code using protobuf specification. By default `path` and `namespace` options is `auto`, will use the values from config for generating files. |
 
 #### Example GRPC service
 
