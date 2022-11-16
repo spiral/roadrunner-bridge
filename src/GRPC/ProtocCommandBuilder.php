@@ -7,17 +7,23 @@ namespace Spiral\RoadRunnerBridge\GRPC;
 use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 
-class ProtocCommandBuilder
+/**
+ * @internal
+ */
+final class ProtocCommandBuilder
 {
-    public function __construct(private readonly FilesInterface $files, private readonly GRPCConfig $config)
-    {
+    public function __construct(
+        private readonly FilesInterface $files,
+        private readonly GRPCConfig $config,
+        private readonly string $protocBinaryPath
+    ) {
     }
 
-    public function build(string $protoFile, string $tmpDir, ?string $protocBinaryPath): string
+    public function build(string $protoFile, string $tmpDir): string
     {
         return \sprintf(
             'protoc %s --php_out=%s --php-grpc_out=%s -I=%s -I=%s %s 2>&1',
-            $protocBinaryPath ? '--plugin=' . $protocBinaryPath : '',
+            $this->protocBinaryPath ? '--plugin=' . $this->protocBinaryPath : '',
             \escapeshellarg($tmpDir),
             \escapeshellarg($tmpDir),
             \escapeshellarg($this->config->getServicesBasePath()),
@@ -33,7 +39,7 @@ class ProtocCommandBuilder
     {
         return \array_filter(
             $this->files->getFiles(\dirname($protoFile)),
-            static fn (string $file) => str_contains($file, '.proto')
+            static fn(string $file) => \str_ends_with($file, '.proto')
         );
     }
 }

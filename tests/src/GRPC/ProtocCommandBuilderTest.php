@@ -18,7 +18,8 @@ class ProtocCommandBuilderTest extends TestCase
             $files = m::mock(FilesInterface::class),
             new GRPCConfig([
                 'servicesBasePath' => 'path4',
-            ])
+            ]),
+            'path3'
         );
 
         $files->shouldReceive('ensureDirectory')
@@ -27,11 +28,30 @@ class ProtocCommandBuilderTest extends TestCase
 
         $files->shouldReceive('normalizePath')->with($directory, true)->andReturn('path5');
 
-        $files->shouldReceive('getFiles')->with(\dirname('path1'))->andReturn();
+        $files->shouldReceive('getFiles')->with(\dirname('path1'))
+            ->andReturn([
+                'foo.proto',
+                'bar.proto',
+            ]);
 
         $this->assertSame(
-            "protoc --plugin=path3 --php_out='path2' --php-grpc_out='path2' -I='path4' -I='.'  2>&1",
-            $builder->build('path1', 'path2', 'path3')
+            "protoc --plugin=path3 --php_out='path2' --php-grpc_out='path2' -I='path4' -I='.' 'foo.proto' 'bar.proto' 2>&1",
+            $builder->build('path1', 'path2')
         );
+    }
+
+    public function testBuildWithNullServicesBasePath(): void
+    {
+        $this->expectException(\TypeError::class);
+
+        $builder = new ProtocCommandBuilder(
+            m::mock(FilesInterface::class),
+            new GRPCConfig([
+                'servicesBasePath' => null,
+            ]),
+            'path3'
+        );
+
+        $builder->build('path1', 'path2');
     }
 }

@@ -25,8 +25,7 @@ final class GenerateCommand extends Command
         KernelInterface $kernel,
         FilesInterface $files,
         DirectoriesInterface $dirs,
-        GRPCConfig $config,
-        ProtocCommandBuilder $commandBuilder
+        GRPCConfig $config
     ): int {
         $binaryPath = $config->getBinaryPath();
 
@@ -40,11 +39,10 @@ final class GenerateCommand extends Command
         }
 
         $compiler = new ProtoCompiler(
-            $this->getPath($kernel, $config),
-            $this->getNamespace($kernel, $config),
+            $this->getPath($kernel, $config->getGeneratedPath()),
+            $this->getNamespace($kernel, $config->getNamespace()),
             $files,
-            $commandBuilder,
-            $binaryPath
+            new ProtocCommandBuilder($files, $config, $binaryPath),
         );
 
         foreach ($config->getServices() as $protoFile) {
@@ -85,14 +83,13 @@ final class GenerateCommand extends Command
     /**
      * Get or detect base source code path. By default fallbacks to kernel location.
      */
-    protected function getPath(KernelInterface $kernel, GRPCConfig $config): string
+    protected function getPath(KernelInterface $kernel, ?string $generatedPath): string
     {
         $path = $this->argument('path');
         if ($path !== 'auto') {
             return $path;
         }
 
-        $generatedPath = $config->getGeneratedPath();
         if ($generatedPath !== null) {
             return $generatedPath;
         }
@@ -105,16 +102,15 @@ final class GenerateCommand extends Command
     /**
      * Get or detect base namespace. By default fallbacks to kernel namespace.
      */
-    protected function getNamespace(KernelInterface $kernel, GRPCConfig $config): string
+    protected function getNamespace(KernelInterface $kernel, ?string $protoNamespace): string
     {
         $namespace = $this->argument('namespace');
         if ($namespace !== 'auto') {
             return $namespace;
         }
 
-        $namespace = $config->getNamespace();
-        if ($namespace !== null) {
-            return $namespace;
+        if ($protoNamespace !== null) {
+            return $protoNamespace;
         }
 
         return (new \ReflectionObject($kernel))->getNamespaceName();
