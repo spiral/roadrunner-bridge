@@ -28,7 +28,7 @@ final class GRPCConfig extends InjectableConfig
     }
 
     /**
-     * Get proto directory path, where generated files put
+     * Path, where generated DTO files put.
      */
     public function getGeneratedPath(): ?string
     {
