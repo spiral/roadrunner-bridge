@@ -9,6 +9,8 @@ use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 
 /**
  * Compiles GRPC protobuf declaration and moves files into proper location.
+ *
+ * @internal
  */
 final class ProtoCompiler
 {

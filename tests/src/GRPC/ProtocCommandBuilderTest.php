@@ -32,6 +32,8 @@ class ProtocCommandBuilderTest extends TestCase
             ->andReturn([
                 'foo.proto',
                 'bar.proto',
+                '.gitignore',
+                '.gitattributes'
             ]);
 
         $this->assertSame(
