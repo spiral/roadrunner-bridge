@@ -1003,6 +1003,7 @@ class SomeRepository implements ProtoFilesRepositoryInterface
 ```
 
 Then you need to bind repository in bootloader:
+
 ```php
 <?php
 
@@ -1010,7 +1011,7 @@ declare(strict_types=1);
 
 namespace App\Bootloader\SomeBootloader;
 
-use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\CompositeProtoFilesRepository;
+use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\CompositeRepository;
 use App\GRPC\ProtoRepository\SomeRepository;
 
 final class SomeBootloader extends Bootloader
@@ -1023,7 +1024,7 @@ final class SomeBootloader extends Bootloader
     {
         return new SomeRepository();
         // or this for multiple repositories
-        return new CompositeProtoFilesRepository(
+        return new CompositeRepository(
             new SomeRepository(),
             new YamlRepository(),
             new BufRepository(),
