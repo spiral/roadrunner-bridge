@@ -1030,7 +1030,6 @@ final class SomeBootloader extends Bootloader
         );
     }
 }
-
 ```
 
 Run console command:
