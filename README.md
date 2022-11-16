@@ -1008,7 +1008,7 @@ Then you need to bind repository in bootloader:
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Bootloader;
+namespace App\Bootloader\SomeBootloader;
 
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\CompositeProtoFilesRepository;
 use App\GRPC\ProtoRepository\SomeRepository;
