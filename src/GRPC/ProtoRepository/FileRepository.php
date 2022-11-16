@@ -10,11 +10,8 @@ class FileRepository implements ProtoFilesRepositoryInterface
     {
     }
 
-    /**
-     * @return array<non-empty-string>
-     */
     public function getProtos(): iterable
     {
-        return $this->protoFiles;
+        yield from $this->protoFiles;
     }
 }
