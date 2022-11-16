@@ -983,7 +983,7 @@ Put proto file into `app/config/grpc.php`
 
 #### Proto files repository
 
-You have the ability to use repository for looking proto files.
+By default, GRPC looks for proto file in a directory. You have the ability to use repository for looking proto files.
 
 The first thing you need to do is create a repository that implements `ProtoFilesRepositoryInterface`:
 ```php

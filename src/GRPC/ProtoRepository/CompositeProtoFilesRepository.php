@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\GRPC\ProtoRepository;
 
-class CompositeProtoFilesRepository implements ProtoFilesRepositoryInterface
+final class CompositeProtoFilesRepository implements ProtoFilesRepositoryInterface
 {
     private readonly array $repositories;
 
