@@ -946,7 +946,7 @@ return [
     'namespace' => null,
 
     /**
-     * Base path, root for all proto files
+     * Base path for all proto files
      * Default: null
      */
     'servicesBasePath' => null

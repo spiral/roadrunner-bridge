@@ -27,16 +27,25 @@ final class GRPCConfig extends InjectableConfig
         return $this->config['binaryPath'] ?? null;
     }
 
+    /**
+     * Get proto directory path, where generated files put
+     */
     public function getGeneratedPath(): ?string
     {
         return $this->config['generatedPath'] ?? null;
     }
 
+    /**
+     * Get proto file namespace
+     */
     public function getNamespace(): ?string
     {
         return $this->config['namespace'] ?? null;
     }
 
+    /**
+     * Get proto files base path
+     */
     public function getServicesBasePath(): ?string
     {
         return $this->config['servicesBasePath'] ?? null;
