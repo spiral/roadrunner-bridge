@@ -934,19 +934,19 @@ return [
     // 'binaryPath' => __DIR__.'/../../protoc-gen-php-grpc',
 
     /**
-     * Path to proto directory, where generated files put
+     * Path, where generated DTO files put.
      * Default: null
      */
     'generatedPath' => null,
 
     /**
-     * Proto file namespace
+     * Base namespace for generated proto files.
      * Default: null
      */
     'namespace' => null,
 
     /**
-     * Base path for all proto files
+     * Root path for all proto files in which imports will be searched.
      * Default: null
      */
     'servicesBasePath' => null
