@@ -10,7 +10,7 @@ use Spiral\RoadRunnerBridge\GRPC\ProtocCommandBuilder;
 use Spiral\Tests\TestCase;
 use Mockery as m;
 
-class ProtocCommandBuilderTest extends TestCase
+final class ProtocCommandBuilderTest extends TestCase
 {
     public function testBuild(): void
     {
@@ -30,14 +30,16 @@ class ProtocCommandBuilderTest extends TestCase
 
         $files->shouldReceive('getFiles')->with(\dirname('path1'))
             ->andReturn([
-                'foo.proto',
-                'bar.proto',
-                '.gitignore',
-                '.gitattributes'
+                 'message.proto.tmp',
+                 'service.proto.tmp',
+                 'message.proto',
+                 'service.proto',
+                 '.gitignore',
+                 '.gitattributes'
             ]);
 
         $this->assertSame(
-            "protoc --plugin=path3 --php_out='path2' --php-grpc_out='path2' -I='path4' -I='.' 'foo.proto' 'bar.proto' 2>&1",
+            "protoc --plugin=path3 --php_out='path2' --php-grpc_out='path2' -I='path4' -I='.' 'message.proto' 'service.proto' 2>&1",
             $builder->build('path1', 'path2')
         );
     }
