@@ -36,7 +36,7 @@ final class GRPCConfig extends InjectableConfig
     }
 
     /**
-     * Get proto file namespace
+     * Base namespace for generated proto files.
      */
     public function getNamespace(): ?string
     {
