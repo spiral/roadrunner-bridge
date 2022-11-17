@@ -983,7 +983,7 @@ Put proto file into `app/config/grpc.php`
 
 By default, generator will look for proto files using `Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository` in local folder.
 
-You can extend a behavior and change the place where to look for list of proto files, for example, create a repository like RRConfigProtoFilesRepository, or BufProtoFilesRepository
+You can extend a behavior and change the place where to look for list of proto files, for example, create a repository like `RRConfigProtoFilesRepository`, or `BufProtoFilesRepository`
 
 There is complete example of how to use proto files repositories:
 ```php
