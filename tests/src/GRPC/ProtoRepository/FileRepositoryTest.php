@@ -13,6 +13,6 @@ class FileRepositoryTest extends TestCase
     {
         $repository = new FileRepository($arr = ['foo', 'bar']);
 
-        $this->assertSame($arr, iterator_to_array($repository->getProtos(), false));
+        $this->assertSame($arr, \iterator_to_array($repository->getProtos(), false));
     }
 }
