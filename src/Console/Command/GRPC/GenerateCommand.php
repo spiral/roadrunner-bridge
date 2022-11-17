@@ -12,6 +12,7 @@ use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 use Spiral\RoadRunnerBridge\GRPC\ProtoCompiler;
+use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 
 final class GenerateCommand extends Command
 {
@@ -24,7 +25,8 @@ final class GenerateCommand extends Command
         KernelInterface $kernel,
         FilesInterface $files,
         DirectoriesInterface $dirs,
-        GRPCConfig $config
+        GRPCConfig $config,
+        ProtoFilesRepositoryInterface $repository
     ): int {
         $binaryPath = $config->getBinaryPath();
 
@@ -41,7 +43,7 @@ final class GenerateCommand extends Command
             $binaryPath
         );
 
-        foreach ($config->getServices() as $protoFile) {
+        foreach ($repository->getProtos() as $protoFile) {
             if (!\file_exists($protoFile)) {
                 $this->sprintf('<error>Proto file `%s` not found.</error>', $protoFile);
                 continue;

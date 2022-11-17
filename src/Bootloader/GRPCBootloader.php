@@ -13,15 +13,17 @@ use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\InterceptableCore;
+use Spiral\RoadRunner\GRPC\Invoker as BaseInvoker;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Dispatcher;
-use Spiral\RoadRunnerBridge\GRPC\Interceptor\InvokerCore;
 use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
+use Spiral\RoadRunnerBridge\GRPC\Interceptor\InvokerCore;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
+use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
+use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
-use Spiral\RoadRunner\GRPC\Invoker as BaseInvoker;
 
 final class GRPCBootloader extends Bootloader
 {
@@ -33,6 +35,7 @@ final class GRPCBootloader extends Bootloader
         Server::class => Server::class,
         InvokerInterface::class => [self::class, 'initInvoker'],
         LocatorInterface::class => ServiceLocator::class,
+        ProtoFilesRepositoryInterface::class => [self::class, 'initProtoFilesRepository'],
     ];
 
     public function __construct(
@@ -103,5 +106,10 @@ final class GRPCBootloader extends Bootloader
         }
 
         return new Invoker($core);
+    }
+
+    private function initProtoFilesRepository(GRPCConfig $config): ProtoFilesRepositoryInterface
+    {
+        return new FileRepository($config->getServices());
     }
 }
