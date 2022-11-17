@@ -24,6 +24,7 @@ abstract class TestCase extends \Spiral\Testing\TestCase
             RoadRunnerBridge\TcpBootloader::class,
             RoadRunnerBridge\MetricsBootloader::class,
             RoadRunnerBridge\LoggerBootloader::class,
+            RoadRunnerBridge\CentrifugoBootloader::class,
 
             // Framework commands
             ConsoleBootloader::class,

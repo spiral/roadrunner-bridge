@@ -1310,6 +1310,105 @@ public function index(MetricsInterface $metrics): void
 
 ----
 
+### Centrifugo
+
+RoadRunner includes Centrifugo client and can be used to communicate with Centrifugo server and to receive events from it.
+
+#### Bootloader
+
+Add `Spiral\RoadRunnerBridge\Bootloader\CentrifugoBootloader` to application bootloaders list:
+
+```php
+use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
+
+protected const LOAD = [
+    // ...
+    RoadRunnerBridge\CentrifugoBootloader::class, 
+    // ...
+];
+```
+
+The bootloader adds a dispatcher and necessary services for Centrifugo to work.
+
+#### Configuration
+
+Configure `centrifugo` section in the RoadRunner `.rr.yaml` configuration. Example:
+
+```yaml
+
+centrifuge:
+  proxy_address: "tcp://0.0.0.0:10001" # Address to connect from Centrifugo server
+  grpc_api_address: "tcp://127.0.0.1:10000" # Centrifugo server address
+  use_compressor: true
+  version: "1.0.0"
+  poll:
+    num_workers: 5
+```
+
+and centrifugo to proxy client events to the RoadRunner:
+
+```json
+{
+  "admin": true,
+  "api_key": "secret",
+  "admin_password": "password",
+  "admin_secret": "admin_secret",
+  "allowed_origins": ["*"],
+  "token_hmac_secret_key": "test",
+  "publish": true,
+  "proxy_publish": true,
+  "proxy_subscribe": true,
+  "proxy_connect": true,
+  "allow_subscribe_for_client": true,
+  "grpc_api": true,
+  "grpc_api_address": "0.0.0.0",
+  "grpc_api_port": 10000,
+  "proxy_connect_endpoint": "grpc://127.0.0.1:10001",
+  "proxy_connect_timeout": "10s",
+  "proxy_publish_endpoint": "grpc://127.0.0.1:10001",
+  "proxy_publish_timeout": "10s",
+  "proxy_subscribe_endpoint": "grpc://127.0.0.1:10001",
+  "proxy_subscribe_timeout": "10s",
+  "proxy_refresh_endpoint": "grpc://127.0.0.1:10001",
+  "proxy_refresh_timeout": "10s",
+  "proxy_rpc_endpoint": "grpc://127.0.0.1:10001",
+  "proxy_rpc_timeout": "10s"
+}
+```
+
+#### Services
+
+A service must implement the interface `Spiral\RoadRunnerBridge\Centrifugo\ServiceInterface` with one required
+method `handle`.
+
+After processing a request, the `handle` method will be fired and response should be sent inside service.
+
+Example:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Centrifugo\Service;
+
+use RoadRunner\Centrifugo\Payload\ConnectResponse;
+use RoadRunner\Centrifugo\Request\Connect;
+use RoadRunner\Centrifugo\Request\RequestInterface;
+use Spiral\RoadRunnerBridge\Centrifugo\ServiceInterface;
+
+class TestService implements ServiceInterface
+{
+    public function handle(Connect $request): void
+    {
+        $request->respond(new ConnectResponse());
+    }
+}
+```
+
+
+----
+
 > **Note**
 > Read more about RoadRunner configuration on official site https://roadrunner.dev.
 

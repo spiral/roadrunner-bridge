@@ -6,6 +6,7 @@ namespace Spiral\RoadRunnerBridge;
 
 use Spiral\Boot\DispatcherInterface;
 use Spiral\RoadRunnerBridge\Exception\DispatcherNotFoundException as Exception;
+use Spiral\RoadRunnerBridge\Centrifugo\Dispatcher as Centrifugo;
 use Spiral\RoadRunnerBridge\GRPC\Dispatcher as GRPC;
 use Spiral\RoadRunnerBridge\Http\Dispatcher as Http;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher as Queue;
@@ -32,6 +33,9 @@ final class FailbackDispatcher implements DispatcherInterface
             RoadRunnerMode::Jobs => throw new Exception(\sprintf(self::ERROR, $this->mode->name, Queue::class)),
             RoadRunnerMode::Grpc => throw new Exception(\sprintf(self::ERROR, $this->mode->name, GRPC::class)),
             RoadRunnerMode::Tcp => throw new Exception(\sprintf(self::ERROR, $this->mode->name, Tcp::class)),
+            RoadRunnerMode::Centrifuge => throw new Exception(
+                \sprintf(self::ERROR, $this->mode->name, Centrifugo::class)
+            ),
             RoadRunnerMode::Temporal => throw new Exception(
                 'To use Temporal with RoadRunner, please install the package `spiral/temporal-bridge`.'
             ),

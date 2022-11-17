@@ -17,6 +17,7 @@ enum RoadRunnerMode: string implements InjectableEnumInterface
     case Jobs = 'jobs';
     case Grpc = 'grpc';
     case Tcp = 'tcp';
+    case Centrifuge = 'centrifuge';
 
     public static function detect(EnvironmentInterface $environment): self
     {
