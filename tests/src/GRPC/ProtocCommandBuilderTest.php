@@ -28,7 +28,7 @@ final class ProtocCommandBuilderTest extends TestCase
 
         $files->shouldReceive('normalizePath')->with($directory, true)->andReturn('path5');
 
-        $files->shouldReceive('getFiles')->with(\dirname('path1'))
+        $files->shouldReceive('getFiles')->with('path1')
             ->andReturn([
                  'message.proto.tmp',
                  'service.proto.tmp',
@@ -39,23 +39,34 @@ final class ProtocCommandBuilderTest extends TestCase
             ]);
 
         $this->assertSame(
-            "protoc --plugin=path3 --php_out='path2' --php-grpc_out='path2' -I='path4' -I='.' 'message.proto' 'service.proto' 2>&1",
+            "protoc --plugin=path3 --php_out='path2' --php-grpc_out='path2' -I='path4' -I='path1' 'message.proto' 'service.proto' 2>&1",
             $builder->build('path1', 'path2')
         );
     }
 
     public function testBuildWithNullServicesBasePath(): void
     {
-        $this->expectException(\TypeError::class);
-
         $builder = new ProtocCommandBuilder(
-            m::mock(FilesInterface::class),
+            $files = m::mock(FilesInterface::class),
             new GRPCConfig([
                 'servicesBasePath' => null,
             ]),
             'path3'
         );
 
-        $builder->build('path1', 'path2');
+        $files->shouldReceive('getFiles')->with('path1')
+            ->andReturn([
+                'message.proto.tmp',
+                'service.proto.tmp',
+                'message.proto',
+                'service.proto',
+                '.gitignore',
+                '.gitattributes'
+            ]);
+
+        $this->assertSame(
+            "protoc --plugin=path3 --php_out='path2' --php-grpc_out='path2' -I='path1' 'message.proto' 'service.proto' 2>&1",
+            $builder->build('path1', 'path2')
+        );
     }
 }

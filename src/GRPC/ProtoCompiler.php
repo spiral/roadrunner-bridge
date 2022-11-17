@@ -20,7 +20,8 @@ final class ProtoCompiler
         private readonly string $basePath,
         string $baseNamespace,
         private readonly FilesInterface $files,
-        private readonly ProtocCommandBuilder $commandBuilder
+        private readonly ProtocCommandBuilder $commandBuilder,
+        private readonly CommandExecutor $executor
     ) {
         $this->baseNamespace = \str_replace('\\', '/', \rtrim($baseNamespace, '\\'));
     }
@@ -32,17 +33,9 @@ final class ProtoCompiler
     {
         $tmpDir = $this->tmpDir();
 
-        \exec(
-            $this->commandBuilder->build($protoFile, $tmpDir),
-            $output,
-            $exitCode
+        $output = $this->executor->execute(
+            $this->commandBuilder->build(\dirname($protoFile), $tmpDir)
         );
-
-        if ($exitCode !== 0) {
-            throw new CompileException(\implode("\n", $output), $exitCode);
-        }
-
-        $output = \trim(\implode("\n", $output), "\n ,");
 
         if ($output !== '') {
             $this->files->deleteDirectory($tmpDir);

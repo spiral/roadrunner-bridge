@@ -21,13 +21,19 @@ final class ProtocCommandBuilder
 
     public function build(string $protoDir, string $tmpDir): string
     {
+        $dirs = \array_filter([
+            $this->config->getServicesBasePath(),
+            $protoDir
+        ]);
+
+        $dirs = $dirs !== [] ? ' -I=' . \implode(' -I=', \array_map('escapeshellarg', $dirs)) : '';
+
         return \sprintf(
-            'protoc %s --php_out=%s --php-grpc_out=%s -I=%s -I=%s %s 2>&1',
+            'protoc %s --php_out=%s --php-grpc_out=%s%s %s 2>&1',
             $this->protocBinaryPath ? '--plugin=' . $this->protocBinaryPath : '',
             \escapeshellarg($tmpDir),
             \escapeshellarg($tmpDir),
-            \escapeshellarg($this->config->getServicesBasePath()),
-            \escapeshellarg(dirname($protoDir)),
+            $dirs,
             \implode(' ', \array_map('escapeshellarg', $this->getProtoFiles($protoDir)))
         );
     }
@@ -38,7 +44,7 @@ final class ProtocCommandBuilder
     private function getProtoFiles(string $protoDir): array
     {
         return \array_filter(
-            $this->files->getFiles(\dirname($protoDir)),
+            $this->files->getFiles($protoDir),
             static fn(string $file) => \str_ends_with($file, '.proto')
         );
     }

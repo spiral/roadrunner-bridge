@@ -10,6 +10,7 @@ use Spiral\Boot\KernelInterface;
 use Spiral\Console\Command;
 use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
+use Spiral\RoadRunnerBridge\GRPC\CommandExecutor;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 use Spiral\RoadRunnerBridge\GRPC\ProtocCommandBuilder;
 use Spiral\RoadRunnerBridge\GRPC\ProtoCompiler;
@@ -43,6 +44,7 @@ final class GenerateCommand extends Command
             $this->getNamespace($kernel, $config->getNamespace()),
             $files,
             new ProtocCommandBuilder($files, $config, $binaryPath),
+            new CommandExecutor()
         );
 
         foreach ($config->getServices() as $protoFile) {
