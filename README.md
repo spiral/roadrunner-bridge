@@ -981,40 +981,24 @@ Put proto file into `app/config/grpc.php`
 ],
 ```
 
-#### Proto files repository
+By default, generator will look for proto files using `Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository` in local folder.
 
-By default, GRPC looks for proto file in a directory. You have the ability to use repository for looking proto files.
+You can extend a behavior and change the place where to look for list of proto files, for example, create a repository like RRConfigProtoFilesRepository, or BufProtoFilesRepository
 
-The first thing you need to do is create a repository that implements `ProtoFilesRepositoryInterface`:
+There is complete example of how to use proto files repositories:
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\GRPC\ProtoRepository;
-
-class SomeRepository implements ProtoFilesRepositoryInterface
-{
-    public function getProtos(): iterable
-    {
-        // ...
-    }
-}
-```
-
-Then you need to bind repository in bootloader:
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Bootloader\SomeBootloader;
+namespace App\Bootloader;
 
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\CompositeRepository;
-use App\GRPC\ProtoRepository\SomeRepository;
+use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
+use App\GRPC\ProtoRepository\RRConfigProtoFilesRepository;
+use App\GRPC\ProtoRepository\BufProtoFilesRepository;
 
-final class SomeBootloader extends Bootloader
+final class AppBootloaderextends Bootloader
 {
     protected const SINGLETONS = [
         ProtoFilesRepositoryInterface::class => [self::class, 'initProtoFilesRepository'],
@@ -1022,12 +1006,11 @@ final class SomeBootloader extends Bootloader
 
     private function initProtoFilesRepository(): ProtoFilesRepositoryInterface
     {
-        return new SomeRepository();
-        // or this for multiple repositories
         return new CompositeRepository(
-            new SomeRepository(),
-            new YamlRepository(),
-            new BufRepository(),
+            new RRConfigProtoFilesRepository($pathToRRConfig),
+            new BufRepository([
+                  'https://buf.build/roadrunner-server/api/file/main:proto/shared/status.proto'
+            ]),
         );
     }
 }
