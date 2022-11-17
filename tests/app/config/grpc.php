@@ -9,6 +9,10 @@ return [
      */
     'binaryPath' => directory('app') . '../protoc-gen-php-grpc',
 
+    'generatedPath' => null,
+    'namespace' => null,
+    'servicesBasePath' => directory('app') . 'proto',
+
     'services' => [
         directory('app') . 'proto/echo.proto',
         directory('app') . 'proto/foo.proto',

@@ -15,6 +15,9 @@ final class GRPCConfig extends InjectableConfig
 
     protected array $config = [
         'binaryPath' => null,
+        'generatedPath' => null,
+        'namespace' => null,
+        'servicesBasePath' => null,
         'services' => [],
         'interceptors' => [],
     ];
@@ -22,6 +25,30 @@ final class GRPCConfig extends InjectableConfig
     public function getBinaryPath(): ?string
     {
         return $this->config['binaryPath'] ?? null;
+    }
+
+    /**
+     * Path, where generated DTO files put.
+     */
+    public function getGeneratedPath(): ?string
+    {
+        return $this->config['generatedPath'] ?? null;
+    }
+
+    /**
+     * Base namespace for generated proto files.
+     */
+    public function getNamespace(): ?string
+    {
+        return $this->config['namespace'] ?? null;
+    }
+
+    /**
+     * Root path for all proto files in which imports will be searched.
+     */
+    public function getServicesBasePath(): ?string
+    {
+        return $this->config['servicesBasePath'] ?? null;
     }
 
     /**

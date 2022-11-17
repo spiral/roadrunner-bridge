@@ -933,6 +933,24 @@ return [
     'binaryPath' => null,
     // 'binaryPath' => __DIR__.'/../../protoc-gen-php-grpc',
 
+    /**
+     * Path, where generated DTO files put.
+     * Default: null
+     */
+    'generatedPath' => null,
+
+    /**
+     * Base namespace for generated proto files.
+     * Default: null
+     */
+    'namespace' => null,
+
+    /**
+     * Root path for all proto files in which imports will be searched.
+     * Default: null
+     */
+    'servicesBasePath' => null
+
     'services' => [
         __DIR__.'/../../proto/echo.proto',
     ],
@@ -947,10 +965,10 @@ php app.php grpc:generate
 
 #### Console commands
 
-| Command                                    | Description                                             |
-|--------------------------------------------|---------------------------------------------------------|
-| grpc:services                              | List available GRPC services                            |
-| grpc:generate {path=auto} {namespace=auto} | Generate GPRC service code using protobuf specification |
+| Command                                    | Description                                                                                                                                                                        |
+|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| grpc:services                              | List available GRPC services                                                                                                                                                       |
+| grpc:generate {path=auto} {namespace=auto} | Generate GPRC service code using protobuf specification. By default `path` and `namespace` options are `auto`. Defined values from config will be used in `auto` mode, by default. |
 
 #### Example GRPC service
 

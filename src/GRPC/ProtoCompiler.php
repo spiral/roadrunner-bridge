@@ -9,6 +9,8 @@ use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 
 /**
  * Compiles GRPC protobuf declaration and moves files into proper location.
+ *
+ * @internal
  */
 final class ProtoCompiler
 {
@@ -18,7 +20,8 @@ final class ProtoCompiler
         private readonly string $basePath,
         string $baseNamespace,
         private readonly FilesInterface $files,
-        private readonly ?string $protocBinaryPath = null
+        private readonly ProtocCommandBuilder $commandBuilder,
+        private readonly CommandExecutor $executor
     ) {
         $this->baseNamespace = \str_replace('\\', '/', \rtrim($baseNamespace, '\\'));
     }
@@ -30,24 +33,9 @@ final class ProtoCompiler
     {
         $tmpDir = $this->tmpDir();
 
-        \exec(
-            \sprintf(
-                'protoc %s --php_out=%s --php-grpc_out=%s -I %s %s 2>&1',
-                $this->protocBinaryPath ? '--plugin=' . $this->protocBinaryPath : '',
-                \escapeshellarg($tmpDir),
-                \escapeshellarg($tmpDir),
-                \escapeshellarg(dirname($protoFile)),
-                \implode(' ', \array_map('escapeshellarg', $this->getProtoFiles($protoFile)))
-            ),
-            $output,
-            $exitCode
+        $output = $this->executor->execute(
+            $this->commandBuilder->build(\dirname($protoFile), $tmpDir)
         );
-
-        if ($exitCode !== 0) {
-            throw new CompileException(\implode("\n", $output), $exitCode);
-        }
-
-        $output = \trim(\implode("\n", $output), "\n ,");
 
         if ($output !== '') {
             $this->files->deleteDirectory($tmpDir);
@@ -68,7 +56,7 @@ final class ProtoCompiler
     private function copy(string $tmpDir, string $file): string
     {
         $source = \ltrim($this->files->relativePath($file, $tmpDir), '\\/');
-        if (str_starts_with($source, $this->baseNamespace)) {
+        if (\str_starts_with($source, $this->baseNamespace)) {
             $source = \ltrim(\substr($source, \strlen($this->baseNamespace)), '\\/');
         }
 
@@ -86,16 +74,5 @@ final class ProtoCompiler
         $this->files->ensureDirectory($directory);
 
         return $this->files->normalizePath($directory, true);
-    }
-
-    /**
-     * Include all proto files from the directory.
-     */
-    private function getProtoFiles(string $protoFile): array
-    {
-        return \array_filter(
-            $this->files->getFiles(\dirname($protoFile)),
-            static fn (string $file) => str_contains($file, '.proto')
-        );
     }
 }

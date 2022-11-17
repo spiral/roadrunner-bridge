@@ -73,6 +73,9 @@ final class GRPCBootloaderTest extends TestCase
 
         $this->assertSame([
             'binaryPath' => $this->getDirectoryByAlias('app') . '../protoc-gen-php-grpc',
+            'generatedPath' => null,
+            'namespace' => null,
+            'servicesBasePath' => $this->getDirectoryByAlias('app') . 'proto',
             'services' => [
                 $this->getDirectoryByAlias('app') . 'proto/echo.proto',
                 $this->getDirectoryByAlias('app') . 'proto/foo.proto',

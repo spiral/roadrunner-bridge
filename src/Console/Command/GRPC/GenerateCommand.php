@@ -10,7 +10,9 @@ use Spiral\Boot\KernelInterface;
 use Spiral\Console\Command;
 use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
+use Spiral\RoadRunnerBridge\GRPC\CommandExecutor;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
+use Spiral\RoadRunnerBridge\GRPC\ProtocCommandBuilder;
 use Spiral\RoadRunnerBridge\GRPC\ProtoCompiler;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 
@@ -31,16 +33,20 @@ final class GenerateCommand extends Command
         $binaryPath = $config->getBinaryPath();
 
         if ($binaryPath !== null && !\file_exists($binaryPath)) {
-            $this->sprintf('<error>PHP Server plugin binary `%s` not found.</error>', $binaryPath);
+            $this->sprintf(
+                '<error>Protoc plugin binary `%s` was not found.  Use command `./vendor/bin/rr download-protoc-binary` to download it.`</error>',
+                $binaryPath
+            );
 
             return self::FAILURE;
         }
 
         $compiler = new ProtoCompiler(
-            $this->getPath($kernel),
-            $this->getNamespace($kernel),
+            $this->getPath($kernel, $config->getGeneratedPath()),
+            $this->getNamespace($kernel, $config->getNamespace()),
             $files,
-            $binaryPath
+            new ProtocCommandBuilder($files, $config, $binaryPath),
+            new CommandExecutor()
         );
 
         foreach ($repository->getProtos() as $protoFile) {
@@ -81,11 +87,15 @@ final class GenerateCommand extends Command
     /**
      * Get or detect base source code path. By default fallbacks to kernel location.
      */
-    protected function getPath(KernelInterface $kernel): string
+    protected function getPath(KernelInterface $kernel, ?string $generatedPath): string
     {
         $path = $this->argument('path');
         if ($path !== 'auto') {
             return $path;
+        }
+
+        if ($generatedPath !== null) {
+            return $generatedPath;
         }
 
         $r = new \ReflectionObject($kernel);
@@ -96,11 +106,15 @@ final class GenerateCommand extends Command
     /**
      * Get or detect base namespace. By default fallbacks to kernel namespace.
      */
-    protected function getNamespace(KernelInterface $kernel): string
+    protected function getNamespace(KernelInterface $kernel, ?string $protoNamespace): string
     {
         $namespace = $this->argument('namespace');
         if ($namespace !== 'auto') {
             return $namespace;
+        }
+
+        if ($protoNamespace !== null) {
+            return $protoNamespace;
         }
 
         return (new \ReflectionObject($kernel))->getNamespaceName();
