@@ -21,6 +21,6 @@ class CompositeProtoFilesRepositoryTest extends TestCase
 
         $fooRepository->shouldReceive('getProtos')->withNoArgs()->andReturn(['path1', 'path2']);
 
-        $this->assertSame(['path1', 'path2', 'path3', 'path4'], iterator_to_array($repository->getProtos(), false));
+        $this->assertSame(['path1', 'path2', 'path3', 'path4'], \iterator_to_array($repository->getProtos(), false));
     }
 }
