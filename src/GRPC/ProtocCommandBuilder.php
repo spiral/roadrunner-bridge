@@ -38,7 +38,7 @@ final class ProtocCommandBuilder
     {
         return \array_filter(
             $this->files->getFiles($protoDir),
-            static fn(string $file) => \str_ends_with($file, '.proto')
+            static fn (string $file) => \str_ends_with($file, '.proto')
         );
     }
 

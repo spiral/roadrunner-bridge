@@ -30,12 +30,12 @@ final class ProtocCommandBuilderTest extends TestCase
 
         $files->shouldReceive('getFiles')->with('path1')
             ->andReturn([
-                 'message.proto.tmp',
-                 'service.proto.tmp',
-                 'message.proto',
-                 'service.proto',
-                 '.gitignore',
-                 '.gitattributes'
+                'message.proto.tmp',
+                'service.proto.tmp',
+                'message.proto',
+                'service.proto',
+                '.gitignore',
+                '.gitattributes',
             ]);
 
         $this->assertSame(
@@ -61,7 +61,7 @@ final class ProtocCommandBuilderTest extends TestCase
                 'message.proto',
                 'service.proto',
                 '.gitignore',
-                '.gitattributes'
+                '.gitattributes',
             ]);
 
         $this->assertSame(
