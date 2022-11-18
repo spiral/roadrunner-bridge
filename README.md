@@ -7,6 +7,7 @@
 [![Codecov](https://codecov.io/gh/spiral/roadrunner-bridge/branch/master/graph/badge.svg)](https://codecov.io/gh/spiral/roadrunner-bridge/)
 [![Total Downloads](https://poser.pugx.org/spiral/roadrunner-bridge/downloads)](https://packagist.org/packages/spiral/roadrunner-bridge)
 [![StyleCI](https://github.styleci.io/repos/447581540/shield)](https://github.styleci.io/repos/447581540)
+<a href="https://discord.gg/8bZsjYhVVk"><img src="https://img.shields.io/badge/discord-chat-magenta.svg"></a>
 
 ## Requirements
 
@@ -1324,7 +1325,7 @@ use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 
 protected const LOAD = [
     // ...
-    RoadRunnerBridge\CentrifugoBootloader::class, 
+    RoadRunnerBridge\CentrifugoBootloader::class,
     // ...
 ];
 ```
