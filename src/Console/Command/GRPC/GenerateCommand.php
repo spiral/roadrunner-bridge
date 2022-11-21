@@ -34,7 +34,7 @@ final class GenerateCommand extends Command
 
         if ($binaryPath !== null && !\file_exists($binaryPath)) {
             $this->sprintf(
-                '<error>Protoc plugin binary `%s` was not found.  Use command `./vendor/bin/rr download-protoc-binary` to download it.`</error>',
+                "<error>Protoc plugin binary `%s` was not found.  Use command `./vendor/bin/rr download-protoc-binary` to download it.`</error>\n",
                 $binaryPath
             );
 
