@@ -7,16 +7,19 @@ namespace Spiral\RoadRunnerBridge\Logger;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use RoadRunner\Logger\Logger as RoadRunnerLogger;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
-class Handler extends AbstractProcessingHandler
+final class Handler extends AbstractProcessingHandler
 {
     public const FORMAT = "%message% %context% %extra%\n";
 
     public function __construct(
         private readonly RoadRunnerLogger $logger,
-        string|FormatterInterface $formatter = self::FORMAT
+        private readonly RoadRunnerMode $mode,
+        string|FormatterInterface $formatter = self::FORMAT,
     ) {
         parent::__construct();
 
@@ -25,6 +28,15 @@ class Handler extends AbstractProcessingHandler
         }
 
         $this->setFormatter($formatter);
+    }
+
+    public function handle(array $record): bool
+    {
+        if ($this->mode === RoadRunnerMode::Unknown) {
+            return (new ErrorLogHandler())->handle($record);
+        }
+
+        return parent::handle($record);
     }
 
     protected function write(array $record): void

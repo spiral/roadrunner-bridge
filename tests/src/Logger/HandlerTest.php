@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Spiral\Tests\Logger;
 
 use RoadRunner\Logger\Logger;
+use Spiral\Core\Container\Autowire;
 use Spiral\Goridge\RPC\RPCInterface;
+use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunnerBridge\Logger\Handler;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\TestCase;
 use Mockery as m;
 use Monolog\Logger as Monolog;
@@ -26,6 +29,7 @@ final class HandlerTest extends TestCase
         $monolog->setHandlers([
             new Handler(
                 new Logger($rpc),
+                RoadRunnerMode::Http,
                 '%message% foo'
             ),
         ]);

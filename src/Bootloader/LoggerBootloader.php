@@ -8,6 +8,7 @@ use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface;
 use RoadRunner\Logger\Logger;
 use Spiral\RoadRunnerBridge\Logger\Handler;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 final class LoggerBootloader extends Bootloader
 {
@@ -19,8 +20,8 @@ final class LoggerBootloader extends Bootloader
         Handler::class => [self::class, 'initHandler'],
     ];
 
-    private function initHandler(Logger $logger, EnvironmentInterface $env): Handler
+    private function initHandler(Logger $logger, RoadRunnerMode $mode, EnvironmentInterface $env): Handler
     {
-        return new Handler($logger, $env->get('LOGGER_FORMAT', Handler::FORMAT));
+        return new Handler($logger, $mode, $env->get('LOGGER_FORMAT', Handler::FORMAT));
     }
 }
