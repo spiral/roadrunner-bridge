@@ -24,18 +24,21 @@ final class HandlerTest extends TestCase
         $rpc->shouldReceive('withServicePrefix')->once()->with('app')->andReturnSelf();
 
         $monolog = new Monolog('default');
+
         $monolog->setHandlers([
             new Handler(
                 new Logger($rpc),
-                RoadRunnerMode::Http,
+                $input['mode'],
                 '%message% foo'
             ),
         ]);
 
-        $rpc->shouldReceive('call')
-            ->once()
-            ->with($expectedResult['level'], $expectedResult['message'])
-            ->andReturnSelf();
+        if ($input['mode'] !== RoadRunnerMode::Unknown) {
+            $rpc->shouldReceive('call')
+                ->once()
+                ->with($expectedResult['level'], $expectedResult['message'])
+                ->andReturnSelf();
+        }
 
         $method = $input['method'];
 
@@ -53,6 +56,7 @@ final class HandlerTest extends TestCase
                 [
                     'method' => 'error',
                     'message' => 'Error message',
+                    'mode' => RoadRunnerMode::Http,
                 ],
             ],
             [
@@ -63,6 +67,7 @@ final class HandlerTest extends TestCase
                 [
                     'method' => 'warning',
                     'message' => 'Warning message',
+                    'mode' => RoadRunnerMode::Temporal,
                 ],
             ],
             [
@@ -73,6 +78,7 @@ final class HandlerTest extends TestCase
                 [
                     'method' => 'info',
                     'message' => 'Info message',
+                    'mode' => RoadRunnerMode::Jobs,
                 ],
             ],
             [
@@ -83,6 +89,7 @@ final class HandlerTest extends TestCase
                 [
                     'method' => 'debug',
                     'message' => 'Debug message',
+                    'mode' => RoadRunnerMode::Grpc,
                 ],
             ],
             [
@@ -93,6 +100,7 @@ final class HandlerTest extends TestCase
                 [
                     'method' => 'emergency',
                     'message' => 'Emergency message',
+                    'mode' => RoadRunnerMode::Tcp,
                 ],
             ],
             [
@@ -103,6 +111,7 @@ final class HandlerTest extends TestCase
                 [
                     'method' => 'alert',
                     'message' => 'Alert message',
+                    'mode' => RoadRunnerMode::Centrifuge,
                 ],
             ],
             [
@@ -113,6 +122,7 @@ final class HandlerTest extends TestCase
                 [
                     'method' => 'critical',
                     'message' => 'Critical message',
+                    'mode' => RoadRunnerMode::Unknown,
                 ],
             ],
             [
@@ -123,6 +133,7 @@ final class HandlerTest extends TestCase
                 [
                     'method' => 'notice',
                     'message' => 'Notice message',
+                    'mode' => RoadRunnerMode::Http,
                 ],
             ],
         ];
