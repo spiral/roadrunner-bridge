@@ -35,7 +35,7 @@ final class HandlerTest extends TestCase
             ->with('Error', 'Error message foo')
             ->andReturnSelf();
 
-        $monolog->error("Error message");
+        $monolog->error('Error message');
     }
 
     public function testLoggerShouldSendDataToFallback(): void
@@ -58,6 +58,6 @@ final class HandlerTest extends TestCase
             return $record['message'] === 'Error message';
         })->andReturn(true);
 
-        $monolog->error("Error message");
+        $monolog->error('Error message');
     }
 }
