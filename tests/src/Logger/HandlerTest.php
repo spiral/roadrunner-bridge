@@ -6,6 +6,7 @@ namespace Spiral\Tests\Logger;
 
 use RoadRunner\Logger\Logger;
 use Spiral\Goridge\RPC\RPCInterface;
+use Monolog\Handler\HandlerInterface;
 use Spiral\RoadRunnerBridge\Logger\Handler;
 use Spiral\Tests\TestCase;
 use Mockery as m;
@@ -13,116 +14,50 @@ use Monolog\Logger as Monolog;
 
 final class HandlerTest extends TestCase
 {
-    /**
-     * @dataProvider provideLogData
-     */
-    public function testSendLog($expectedResult, $input): void
+    public function testLoggerShouldSendDataToRRIfFallbackNull(): void
     {
         $rpc = m::mock(RPCInterface::class);
 
         $rpc->shouldReceive('withServicePrefix')->once()->with('app')->andReturnSelf();
 
         $monolog = new Monolog('default');
+
         $monolog->setHandlers([
             new Handler(
                 new Logger($rpc),
+                null,
                 '%message% foo'
             ),
         ]);
 
         $rpc->shouldReceive('call')
             ->once()
-            ->with($expectedResult['level'], $expectedResult['message'])
+            ->with('Error', 'Error message foo')
             ->andReturnSelf();
 
-        $method = $input['method'];
-
-        $monolog->$method($input['message']);
+        $monolog->error('Error message');
     }
 
-    public function provideLogData(): array
+    public function testLoggerShouldSendDataToFallback(): void
     {
-        return [
-            [
-                [
-                    'level' => 'Error',
-                    'message' => 'Error message foo',
-                ],
-                [
-                    'method' => 'error',
-                    'message' => 'Error message',
-                ],
-            ],
-            [
-                [
-                    'level' => 'Warning',
-                    'message' => 'Warning message foo',
-                ],
-                [
-                    'method' => 'warning',
-                    'message' => 'Warning message',
-                ],
-            ],
-            [
-                [
-                    'level' => 'Info',
-                    'message' => 'Info message foo',
-                ],
-                [
-                    'method' => 'info',
-                    'message' => 'Info message',
-                ],
-            ],
-            [
-                [
-                    'level' => 'Debug',
-                    'message' => 'Debug message foo',
-                ],
-                [
-                    'method' => 'debug',
-                    'message' => 'Debug message',
-                ],
-            ],
-            [
-                [
-                    'level' => 'Warning',
-                    'message' => 'Emergency message foo',
-                ],
-                [
-                    'method' => 'emergency',
-                    'message' => 'Emergency message',
-                ],
-            ],
-            [
-                [
-                    'level' => 'Warning',
-                    'message' => 'Alert message foo',
-                ],
-                [
-                    'method' => 'alert',
-                    'message' => 'Alert message',
-                ],
-            ],
-            [
-                [
-                    'level' => 'Error',
-                    'message' => 'Critical message foo',
-                ],
-                [
-                    'method' => 'critical',
-                    'message' => 'Critical message',
-                ],
-            ],
-            [
-                [
-                    'level' => 'Info',
-                    'message' => 'Notice message foo',
-                ],
-                [
-                    'method' => 'notice',
-                    'message' => 'Notice message',
-                ],
-            ],
-        ];
+        $rpc = m::mock(RPCInterface::class);
+
+        $rpc->shouldReceive('withServicePrefix')->once()->with('app')->andReturnSelf();
+
+        $monolog = new Monolog('default');
+
+        $monolog->setHandlers([
+            new Handler(
+                new Logger($rpc),
+                $fallback = m::mock(HandlerInterface::class),
+                '%message% foo'
+            ),
+        ]);
+
+        $fallback->shouldReceive('handle')->withArgs(function (array $record) {
+            return $record['message'] === 'Error message';
+        })->andReturn(true);
+
+        $monolog->error('Error message');
     }
 }
