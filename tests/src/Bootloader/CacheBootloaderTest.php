@@ -28,6 +28,13 @@ final class CacheBootloaderTest extends TestCase
         );
 
         $this->assertSame('memory', $cache->getName());
+
+        $this->assertInstanceOf(
+            \Spiral\RoadRunner\KeyValue\Cache::class,
+            $cache = $this->getContainer()->make(StorageInterface::class, ['driver' => 'test'])
+        );
+
+        $this->assertSame('test', $cache->getName());
     }
 
     public function testStorageAliasForRoadRunnerShouldBeRegistered(): void

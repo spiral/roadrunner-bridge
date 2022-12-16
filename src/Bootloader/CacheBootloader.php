@@ -26,7 +26,7 @@ final class CacheBootloader extends Bootloader
             static fn (RPCInterface $rpc) => new Factory($rpc, new DefaultSerializer())
         );
 
-        $container->bindSingleton(
+        $container->bind(
             StorageInterface::class,
             static fn (FactoryInterface $factory, string $driver) => $factory->select($driver)
         );
