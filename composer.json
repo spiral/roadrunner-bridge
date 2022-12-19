@@ -30,7 +30,7 @@
     "spiral/roadrunner-tcp": "^2.0",
     "spiral/roadrunner-metrics": "^2.0",
     "roadrunner-php/app-logger": "^1.0",
-    "spiral/framework": "^3.2",
+    "spiral/framework": "^3.5",
     "spiral/serializer": "^3.2"
   },
   "require-dev": {
