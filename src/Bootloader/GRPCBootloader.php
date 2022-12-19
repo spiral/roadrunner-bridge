@@ -42,7 +42,7 @@ final class GRPCBootloader extends Bootloader
         InvokerInterface::class => [self::class, 'initInvoker'],
         LocatorInterface::class => ServiceLocator::class,
         ProtoFilesRepositoryInterface::class => [self::class, 'initProtoFilesRepository'],
-        GeneratorRegistryInterface::class => [self::class, 'initGeneratorRegistry']
+        GeneratorRegistryInterface::class => [self::class, 'initGeneratorRegistry'],
     ];
 
     public function __construct(
@@ -78,7 +78,7 @@ final class GRPCBootloader extends Bootloader
                     ServiceClientGenerator::class,
                     ConfigGenerator::class,
                     BootloaderGenerator::class,
-                ]
+                ],
             ]
         );
     }

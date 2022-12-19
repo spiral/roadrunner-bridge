@@ -21,7 +21,7 @@ final class GRPCConfig extends InjectableConfig
         'servicesBasePath' => null,
         'services' => [],
         'interceptors' => [],
-        'generators' => []
+        'generators' => [],
     ];
 
     public function getBinaryPath(): ?string

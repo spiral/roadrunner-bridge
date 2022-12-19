@@ -33,7 +33,7 @@ final class GeneratorRegistryTest extends TestCase
         $this->assertCount(0, $registry->getGenerators());
 
         $generator = $this->createMock(GeneratorInterface::class);
-        $generator2 = new class implements GeneratorInterface {
+        $generator2 = new class () implements GeneratorInterface {
             public function run(array $files, string $targetPath, string $namespace): void
             {
             }

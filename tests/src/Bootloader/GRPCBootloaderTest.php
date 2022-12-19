@@ -98,7 +98,7 @@ final class GRPCBootloaderTest extends TestCase
             'generators' => [
                 ServiceClientGenerator::class,
                 ConfigGenerator::class,
-                BootloaderGenerator::class
+                BootloaderGenerator::class,
             ]
         ], $config);
     }
