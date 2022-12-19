@@ -8,6 +8,7 @@ use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\InjectableConfig;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
 
 final class GRPCConfig extends InjectableConfig
 {
@@ -20,6 +21,7 @@ final class GRPCConfig extends InjectableConfig
         'servicesBasePath' => null,
         'services' => [],
         'interceptors' => [],
+        'generators' => []
     ];
 
     public function getBinaryPath(): ?string
@@ -65,5 +67,13 @@ final class GRPCConfig extends InjectableConfig
     public function getInterceptors(): array
     {
         return (array)($this->config['interceptors'] ?? []);
+    }
+
+    /**
+     * @return array<Autowire|class-string<GeneratorInterface>|GeneratorInterface>
+     */
+    public function getGenerators(): array
+    {
+        return (array)($this->config['generators'] ?? []);
     }
 }

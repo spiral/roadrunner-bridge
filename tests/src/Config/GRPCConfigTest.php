@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Config;
 
+use Spiral\Core\Container\Autowire;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
 use Spiral\Tests\TestCase;
 
 final class GRPCConfigTest extends TestCase
@@ -41,7 +43,7 @@ final class GRPCConfigTest extends TestCase
         $this->assertSame([], $config->getServices());
     }
 
-    public function testGetInterceptors()
+    public function testGetInterceptors(): void
     {
         $config = new GRPCConfig([
             'interceptors' => ['foo', 'bar'],
@@ -103,5 +105,17 @@ final class GRPCConfigTest extends TestCase
         $config = new GRPCConfig();
 
         $this->assertNull($config->getServicesBasePath());
+    }
+
+    public function testGetGenerators(): void
+    {
+        $autowire = new Autowire('test');
+        $generator = $this->createMock(GeneratorInterface::class);
+
+        $config = new GRPCConfig([
+            'generators' => ['foo', $autowire, $generator],
+        ]);
+
+        $this->assertSame(['foo', $autowire, $generator], $config->getGenerators());
     }
 }

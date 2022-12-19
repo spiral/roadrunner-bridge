@@ -12,6 +12,7 @@ use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\CommandExecutor;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtocCommandBuilder;
 use Spiral\RoadRunnerBridge\GRPC\ProtoCompiler;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
@@ -28,7 +29,8 @@ final class GenerateCommand extends Command
         FilesInterface $files,
         DirectoriesInterface $dirs,
         GRPCConfig $config,
-        ProtoFilesRepositoryInterface $repository
+        ProtoFilesRepositoryInterface $repository,
+        GeneratorRegistryInterface $generatorRegistry
     ): int {
         $binaryPath = $config->getBinaryPath();
 
@@ -46,6 +48,7 @@ final class GenerateCommand extends Command
             new CommandExecutor()
         );
 
+        $compiled = [];
         foreach ($repository->getProtos() as $protoFile) {
             if (!\file_exists($protoFile)) {
                 $this->sprintf('<error>Proto file `%s` not found.</error>', $protoFile);
@@ -75,7 +78,17 @@ final class GenerateCommand extends Command
                     $files->relativePath($file, $dirs->get('root')),
                     Color::RESET
                 );
+
+                $compiled[] = $file;
             }
+        }
+
+        foreach ($generatorRegistry->getGenerators() as $generator) {
+            $generator->run(
+                $compiled,
+                $this->getPath($kernel, $config->getGeneratedPath()),
+                $this->getNamespace($kernel, $config->getNamespace())
+            );
         }
 
         return self::SUCCESS;
