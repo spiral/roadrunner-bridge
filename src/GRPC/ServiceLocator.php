@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\GRPC;
 
 use Psr\Container\ContainerInterface;
+use Spiral\Core\Exception\Container\ContainerException;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 use Spiral\Tokenizer\ClassesInterface;
 
@@ -25,7 +26,11 @@ final class ServiceLocator implements LocatorInterface
                 continue;
             }
 
-            $instance = $this->container->get($service->getName());
+            try {
+                $instance = $this->container->get($service->getName());
+            } catch (ContainerException) {
+                continue;
+            }
 
             foreach ($service->getInterfaces() as $interface) {
                 if ($interface->isSubclassOf(ServiceInterface::class)) {
