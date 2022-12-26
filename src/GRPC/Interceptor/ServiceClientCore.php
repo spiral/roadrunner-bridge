@@ -18,6 +18,7 @@ final class ServiceClientCore extends \Grpc\BaseStub implements CoreInterface
         /** @var ContextInterface $ctx */
         $ctx = $parameters['ctx'];
 
+        /** @psalm-suppress InvalidArgument */
         return $this->_simpleRequest(
             $action,
             $parameters['in'],
