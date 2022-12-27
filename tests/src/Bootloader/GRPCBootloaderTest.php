@@ -9,6 +9,12 @@ use Spiral\Config\LoaderInterface;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
+use Spiral\RoadRunnerBridge\GRPC\Generator\BootloaderGenerator;
+use Spiral\RoadRunnerBridge\GRPC\Generator\ConfigGenerator;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistry;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
+use Spiral\RoadRunnerBridge\GRPC\Generator\ServiceClientGenerator;
 use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
@@ -66,6 +72,14 @@ final class GRPCBootloaderTest extends TestCase
         $this->assertBootloaderMissed('Spiral\Bootloader\GRPC');
     }
 
+    public function testGeneratorRegistryShouldBeBoundAsSingleton(): void
+    {
+        $this->assertContainerBoundAsSingleton(
+            GeneratorRegistryInterface::class,
+            GeneratorRegistry::class
+        );
+    }
+
     public function testConfigShouldBeDefined(): void
     {
         $configurator = $this->getContainer()->get(ConfigsInterface::class);
@@ -81,6 +95,11 @@ final class GRPCBootloaderTest extends TestCase
                 $this->getDirectoryByAlias('app') . 'proto/foo.proto',
             ],
             'interceptors' => [],
+            'generators' => [
+                ServiceClientGenerator::class,
+                ConfigGenerator::class,
+                BootloaderGenerator::class,
+            ],
         ], $config);
     }
 
@@ -100,5 +119,23 @@ final class GRPCBootloaderTest extends TestCase
         $this->assertSame([
             'foo', $interceptor, $autowire,
         ], $configs->getConfig(GRPCConfig::CONFIG)['interceptors']);
+    }
+
+    public function testAddGenerator(): void
+    {
+        $configs = new ConfigManager($this->createMock(LoaderInterface::class));
+        $configs->setDefaults(GRPCConfig::CONFIG, ['generators' => []]);
+
+        $generator = m::mock(GeneratorInterface::class);
+        $autowire = new Autowire('test');
+
+        $bootloader = new GRPCBootloader($configs);
+        $bootloader->addGenerator('foo');
+        $bootloader->addGenerator($generator);
+        $bootloader->addGenerator($autowire);
+
+        $this->assertSame([
+            'foo', $generator, $autowire,
+        ], $configs->getConfig(GRPCConfig::CONFIG)['generators']);
     }
 }

@@ -36,5 +36,11 @@ abstract class ConsoleTestCase extends TestCase
         if ($fs->isDirectory($this->getDirectoryByAlias('app') . 'GRPC/EchoService')) {
             $fs->deleteDirectory($this->getDirectoryByAlias('app') . 'GRPC/EchoService');
         }
+        if ($fs->isDirectory($this->getDirectoryByAlias('app') . 'Bootloader')) {
+            $fs->deleteDirectory($this->getDirectoryByAlias('app') . 'Bootloader');
+        }
+        if ($fs->isFile($this->getDirectoryByAlias('app') . 'config/GRPCServicesConfig.php')) {
+            $fs->delete($this->getDirectoryByAlias('app') . 'config/GRPCServicesConfig.php');
+        }
     }
 }

@@ -22,6 +22,7 @@
     "php": ">=8.1",
     "psr/simple-cache": "2 - 3",
     "php-http/message-factory": "^1.0",
+    "grpc/grpc": "^1.42",
     "roadrunner-php/centrifugo": "^1.0",
     "spiral/roadrunner-grpc": "^2.0",
     "spiral/roadrunner-jobs": "^2.6",
@@ -30,7 +31,7 @@
     "spiral/roadrunner-tcp": "^2.0",
     "spiral/roadrunner-metrics": "^2.0",
     "roadrunner-php/app-logger": "^1.0",
-    "spiral/framework": "^3.2",
+    "spiral/framework": "^3.5",
     "spiral/serializer": "^3.2"
   },
   "require-dev": {

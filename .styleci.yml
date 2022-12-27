@@ -71,3 +71,6 @@ enabled:
   - trailing_comma_in_multiline_array
   - unalign_double_arrow
   - unalign_equals
+finder:
+    exclude:
+        - "tests/app/GRPC/Generator"

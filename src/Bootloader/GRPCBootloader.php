@@ -18,6 +18,12 @@ use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Dispatcher;
+use Spiral\RoadRunnerBridge\GRPC\Generator\BootloaderGenerator;
+use Spiral\RoadRunnerBridge\GRPC\Generator\ConfigGenerator;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistry;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
+use Spiral\RoadRunnerBridge\GRPC\Generator\ServiceClientGenerator;
 use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
 use Spiral\RoadRunnerBridge\GRPC\Interceptor\InvokerCore;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
@@ -36,6 +42,7 @@ final class GRPCBootloader extends Bootloader
         InvokerInterface::class => [self::class, 'initInvoker'],
         LocatorInterface::class => ServiceLocator::class,
         ProtoFilesRepositoryInterface::class => [self::class, 'initProtoFilesRepository'],
+        GeneratorRegistryInterface::class => [self::class, 'initGeneratorRegistry'],
     ];
 
     public function __construct(
@@ -62,14 +69,16 @@ final class GRPCBootloader extends Bootloader
                  * Path to protoc-gen-php-grpc library.
                  */
                 'binaryPath' => null,
-
                 'generatedPath' => null,
                 'namespace' => null,
                 'servicesBasePath' => null,
-
                 'services' => [],
-
                 'interceptors' => [],
+                'generators' => [
+                    ServiceClientGenerator::class,
+                    ConfigGenerator::class,
+                    BootloaderGenerator::class,
+                ],
             ]
         );
     }
@@ -85,6 +94,14 @@ final class GRPCBootloader extends Bootloader
         );
     }
 
+    /**
+     * @param Autowire|class-string<GeneratorInterface>|GeneratorInterface $generator
+     */
+    public function addGenerator(string|GeneratorInterface|Autowire $generator): void
+    {
+        $this->config->modify(GRPCConfig::CONFIG, new Append('generators', null, $generator));
+    }
+
     private function initInvoker(
         GRPCConfig $config,
         ContainerInterface $container,
@@ -96,13 +113,7 @@ final class GRPCBootloader extends Bootloader
         );
 
         foreach ($config->getInterceptors() as $interceptor) {
-            if (\is_string($interceptor)) {
-                $interceptor = $container->get($interceptor);
-            }
-
-            if ($interceptor instanceof Autowire) {
-                $interceptor = $interceptor->resolve($factory);
-            }
+            $interceptor = $this->resolve($interceptor, $container, $factory);
 
             \assert($interceptor instanceof CoreInterceptorInterface);
 
@@ -115,5 +126,31 @@ final class GRPCBootloader extends Bootloader
     private function initProtoFilesRepository(GRPCConfig $config): ProtoFilesRepositoryInterface
     {
         return new FileRepository($config->getServices());
+    }
+
+    private function initGeneratorRegistry(
+        GRPCConfig $config,
+        ContainerInterface $container,
+        FactoryInterface $factory
+    ): GeneratorRegistryInterface {
+        $registry = new GeneratorRegistry();
+        foreach ($config->getGenerators() as $generator) {
+            $generator = $this->resolve($generator, $container, $factory);
+
+            \assert($generator instanceof GeneratorInterface);
+
+            $registry->addGenerator($generator);
+        }
+
+        return $registry;
+    }
+
+    private function resolve(mixed $dependency, ContainerInterface $container, FactoryInterface $factory): object
+    {
+        return match (true) {
+            \is_string($dependency) => $container->get($dependency),
+            $dependency instanceof Autowire => $dependency->resolve($factory),
+            default => $dependency
+        };
     }
 }
