@@ -14,7 +14,7 @@ use Spiral\RoadRunner\Http\PSR7Worker;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
-use Spiral\RoadRunnerBridge\FailbackDispatcher;
+use Spiral\RoadRunnerBridge\FallbackDispatcher;
 use Spiral\Tests\TestCase;
 
 final class RoadRunnerBootloaderTest extends TestCase
@@ -83,6 +83,6 @@ final class RoadRunnerBootloaderTest extends TestCase
         $dispatchers = (new \ReflectionProperty($kernel, 'dispatchers'))->getValue($kernel);
         $dispatchers = \array_filter($dispatchers, static fn (mixed $disp): bool => !$disp instanceof ConsoleDispatcher);
 
-        $this->assertInstanceOf(FailbackDispatcher::class, $dispatchers[\array_key_last($dispatchers)]);
+        $this->assertInstanceOf(FallbackDispatcher::class, $dispatchers[\array_key_last($dispatchers)]);
     }
 }

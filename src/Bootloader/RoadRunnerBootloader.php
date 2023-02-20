@@ -21,7 +21,7 @@ use Spiral\RoadRunner\Http\PSR7Worker;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
-use Spiral\RoadRunnerBridge\FailbackDispatcher;
+use Spiral\RoadRunnerBridge\FallbackDispatcher;
 
 final class RoadRunnerBootloader extends Bootloader
 {
@@ -71,7 +71,7 @@ final class RoadRunnerBootloader extends Bootloader
         //
         // Register FailbackDispatcher after all dispatchers
         //
-        $kernel->bootstrapped(static function (FailbackDispatcher $dispatcher, KernelInterface $kernel): void {
+        $kernel->bootstrapped(static function (FallbackDispatcher $dispatcher, KernelInterface $kernel): void {
             $kernel->addDispatcher($dispatcher);
         });
     }

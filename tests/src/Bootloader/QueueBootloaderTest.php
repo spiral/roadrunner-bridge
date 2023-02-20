@@ -8,8 +8,6 @@ use Mockery as m;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
 use Spiral\Queue\HandlerRegistryInterface;
-use Spiral\Queue\Queue;
-use Spiral\Queue\QueueInterface;
 use Spiral\Serializer\SerializerInterface;
 use Spiral\RoadRunnerBridge\Queue\Consumer;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
@@ -112,14 +110,6 @@ final class QueueBootloaderTest extends TestCase
         $this->assertContainerBoundAsSingleton(
             ConsumerInterface::class,
             Consumer::class
-        );
-    }
-
-    public function testGetsQueueInterface(): void
-    {
-        $this->assertContainerBoundAsSingleton(
-            QueueInterface::class,
-            Queue::class
         );
     }
 
