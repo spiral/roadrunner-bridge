@@ -10,7 +10,10 @@ use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Method;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 
-class Invoker implements InvokerInterface
+/**
+ * @internal
+ */
+final class Invoker implements InvokerInterface
 {
     public function __construct(
         private readonly CoreInterface $core
