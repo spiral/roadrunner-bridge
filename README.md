@@ -1081,59 +1081,16 @@ Full example Echo GRPC service you can find [here](https://github.com/spiral/roa
 ------
 
 ### Logger
+
 Logger provides a simple way to send log messages to RoadRunner.
-
-## Configuration
-
-You can register `Spiral\RoadRunnerBridge\Logger\Handler` in `app/config/monolog.php` config:
-
-```php
-<?php
-
-declare(strict_types=1);
-
-use Spiral\RoadRunnerBridge\Logger\Handler;
-
-return [
-   //...
-
-   'handlers' => [
-       'roadrunner' => [
-           Handler::class,
-           // or
-           new Autowire(Handler::class, ['formatter' => "%message% foo"]),
-       ]
-   ]
-];
-```
 
 Also you can define a default message format in `.env`
 ```dotenv
 LOGGER_FORMAT=%message% foo
 ```
 
-Handler registration example in a custom bootloader
-```PHP
-use Spiral\Boot\Bootloader;
-use Spiral\Monolog\Bootloader\MonologBootloader;
-use Spiral\RoadRunnerBridge\Logger\Handler;
-
-final class SomeBootloader extends Bootloader
-{
-    public function init(MonologBootloader $monolog, Handler $handler): void
-    {
-        $monolog->addHandler($handler);
-    }
-}
-
-```
-
 ## Usage
 ```PHP
-<?php
-
-declare(strict_types=1);
-
 use Psr\Log\LoggerInterface;
 use Spiral\Router\Annotation\Route;
 
