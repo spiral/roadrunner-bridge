@@ -43,6 +43,7 @@ final class FallbackDispatcher implements DispatcherInterface
 
     /**
      * @param class-string<DispatcherInterface> $class
+     *
      * @throws DispatcherNotFoundException
      */
     private function throwException(string $class): void
