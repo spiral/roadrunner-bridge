@@ -5,31 +5,22 @@ declare(strict_types=1);
 namespace Spiral\Tests\Queue;
 
 use Mockery as m;
+use Spiral\Core\Container;
+use Spiral\Core\FactoryInterface;
+use Spiral\Queue\Config\QueueConfig;
 use Spiral\Queue\QueueConnectionProviderInterface;
-use Spiral\RoadRunner\Jobs\QueueInterface;
-use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
-use Spiral\RoadRunner\Jobs\Task\QueuedTaskInterface;
-use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
+use Spiral\Queue\QueueInterface;
+use Spiral\Queue\QueueManager;
 use Spiral\RoadRunnerBridge\Queue\Queue;
 use Spiral\Tests\TestCase;
 
 class QueueManagerTest extends TestCase
 {
-    private QueueConnectionProviderInterface $manager;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->registry = m::mock(PipelineRegistryInterface::class);
-        $this->getContainer()->bind(PipelineRegistryInterface::class, $this->registry);
-
-        $this->manager = $this->getContainer()->get(QueueConnectionProviderInterface::class);
-    }
-
     public function testGetsRoadRunnerQueue(): void
     {
-        $queue = $this->manager->getConnection('roadrunner');
+        $manager = $this->getContainer()->get(QueueConnectionProviderInterface::class);
+
+        $queue = $manager->getConnection('roadrunner');
 
         $core = $this->accessProtected($queue, 'core');
         $core = $this->accessProtected($core, 'core');
@@ -37,27 +28,40 @@ class QueueManagerTest extends TestCase
 
         $this->assertInstanceOf(
             Queue::class,
-            $connection
+            $connection,
         );
     }
 
     public function testPushIntoDefaultRoadRunnerPipeline()
     {
-        $this->registry->shouldReceive('getPipeline')
-            ->once()
-            ->with('memory', 'foo')
-            ->andReturn($queue = m::mock(QueueInterface::class));
+        $factory = m::mock(FactoryInterface::class);
 
-        $queuedTask = m::mock(QueuedTaskInterface::class);
-        $preparedTask = m::mock(PreparedTaskInterface::class);
-        $queuedTask->shouldReceive('getId')->once()->andReturn('task-id');
+        $factory->shouldReceive('make')->once()
+            ->with('roadrunner', [
+                'driver' => 'roadrunner',
+                'pipelines' => [],
+            ])
+            ->andReturn($driver = m::mock(QueueInterface::class));
 
-        $queue->shouldReceive('dispatch')->once()->with($preparedTask)->andReturn($queuedTask);
-        $queue->shouldReceive('create')->once()->andReturn($preparedTask);
-
-        $this->assertSame(
-            'task-id',
-            $this->manager->getConnection('roadrunner')->push('foo', ['boo' => 'bar'])
+        $manager = new QueueManager(
+            new QueueConfig([
+                'connections' => [
+                    'roadrunner' => [
+                        'driver' => 'roadrunner',
+                        'pipelines' => [],
+                    ],
+                ],
+            ]),
+            new Container(),
+            $factory
         );
+
+        $queue = $manager->getConnection('roadrunner');
+
+        $driver->shouldReceive('push')
+            ->once()
+            ->withSomeOfArgs('foo', ['boo' => 'bar'])->andReturn('task-id');
+
+        $this->assertSame('task-id', $queue->push('foo', ['boo' => 'bar']));
     }
 }

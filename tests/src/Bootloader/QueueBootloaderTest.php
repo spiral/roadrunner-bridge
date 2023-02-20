@@ -115,14 +115,6 @@ final class QueueBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsQueueInterface(): void
-    {
-        $this->assertContainerBoundAsSingleton(
-            QueueInterface::class,
-            Queue::class
-        );
-    }
-
     public function testConfigShouldBeDefined(): void
     {
         $configurator = $this->getContainer()->get(ConfigsInterface::class);

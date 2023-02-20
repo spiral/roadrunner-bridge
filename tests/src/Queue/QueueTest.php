@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Spiral\Tests\Queue;
 
 use Mockery as m;
-use Spiral\Core\Container;
+use Spiral\Core\FactoryInterface;
 use Spiral\Queue\Job\ObjectJob;
 use Spiral\Queue\Options as QueueOptions;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
@@ -19,17 +19,13 @@ use Spiral\Tests\TestCase;
 final class QueueTest extends TestCase
 {
     private Queue $queue;
-    /** @var m\LegacyMockInterface|m\MockInterface|PipelineRegistryInterface */
-    private $registry;
+    private m\LegacyMockInterface|FactoryInterface|m\MockInterface $factory;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $container = new Container();
-
-        $this->registry = m::mock(PipelineRegistryInterface::class);
-        $container->bind(PipelineRegistryInterface::class, $this->registry);
+        $this->factory = m::mock(FactoryInterface::class);
 
         $pipelines = [
             'memory' => [
@@ -42,12 +38,17 @@ final class QueueTest extends TestCase
             'user-data' => 'memory',
         ];
 
-        $this->queue = new Queue($container, $pipelines, $aliases, 'default');
+        $this->queue = new Queue($this->factory, $pipelines, $aliases, 'default');
     }
 
     public function testTaskShouldBePushedToDefaultQueue(): void
     {
-        $this->registry->shouldReceive('getPipeline')
+        $this->factory->shouldReceive('make')
+            ->once()
+            ->withSomeOfArgs(PipelineRegistryInterface::class)
+            ->andReturn($registry = m::mock(PipelineRegistryInterface::class));
+
+        $registry->shouldReceive('getPipeline')
             ->once()
             ->with('default', 'foo')
             ->andReturn($queue = m::mock(QueueInterface::class));
@@ -66,12 +67,17 @@ final class QueueTest extends TestCase
 
     public function testTaskShouldBePushedToCustomQueue(): void
     {
-        $this->registry->shouldReceive('getPipeline')
+        $this->factory->shouldReceive('make')
+            ->twice()
+            ->withSomeOfArgs(PipelineRegistryInterface::class)
+            ->andReturn($registry = m::mock(PipelineRegistryInterface::class));
+
+        $registry->shouldReceive('getPipeline')
             ->once()
             ->with('foo', 'foo')
             ->andReturn($fooQueue = m::mock(QueueInterface::class));
 
-        $this->registry->shouldReceive('getPipeline')
+        $registry->shouldReceive('getPipeline')
             ->once()
             ->with('bar', 'bar')
             ->andReturn($barQueue = m::mock(QueueInterface::class));
@@ -93,7 +99,12 @@ final class QueueTest extends TestCase
 
     public function testPushObject(): void
     {
-        $this->registry->shouldReceive('getPipeline')
+        $this->factory->shouldReceive('make')
+            ->once()
+            ->withSomeOfArgs(PipelineRegistryInterface::class)
+            ->andReturn($registry = m::mock(PipelineRegistryInterface::class));
+
+        $registry->shouldReceive('getPipeline')
             ->once()
             ->with('default', ObjectJob::class)
             ->andReturn($queue = m::mock(QueueInterface::class));
