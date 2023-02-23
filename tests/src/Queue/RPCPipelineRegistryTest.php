@@ -59,12 +59,12 @@ final class RPCPipelineRegistryTest extends TestCase
                 'with-queue-options' => [
                     'connector' => $this->localConnector,
                     'cunsume' => true,
-                    'options' => (new Options())->withDelay(5)
+                    'options' => (new Options())->withDelay(5),
                 ],
                 'with-jobs-options' => [
                     'connector' => $this->localConnector,
                     'cunsume' => true,
-                    'options' => new KafkaOptions('foo', 100, 14)
+                    'options' => new KafkaOptions('foo', 100, 14),
                 ],
             ],
             [

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Queue;
 
 use Spiral\Queue\Exception\InvalidArgumentException;
+use Spiral\RoadRunner\Jobs\Jobs;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\OptionsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
@@ -20,6 +21,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     private array $existPipelines = [];
 
     /**
+     * @param Jobs|JobsInterface $jobs
      * @param array<non-empty-string, array{connector: CreateInfoInterface, consume: bool}> $pipelines
      * @param array<non-empty-string,non-empty-string> $aliases
      * @param int $ttl Time to cache existing RoadRunner pipelines
