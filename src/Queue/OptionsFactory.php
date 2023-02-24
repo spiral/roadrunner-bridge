@@ -6,8 +6,11 @@ namespace Spiral\RoadRunnerBridge\Queue;
 
 use Spiral\Queue\ExtendedOptionsInterface;
 use Spiral\Queue\OptionsInterface;
+use Spiral\RoadRunner\Jobs\KafkaOptions;
 use Spiral\RoadRunner\Jobs\Options;
 use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
+use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
+use Spiral\RoadRunner\Jobs\Queue\Driver;
 
 /**
  * @internal
@@ -33,5 +36,18 @@ final class OptionsFactory
         }
 
         return $options;
+    }
+
+    /**
+     * Creates specified options for the concrete driver, if needed.
+     */
+    public static function fromCreateInfo(CreateInfoInterface $connector): ?JobsOptionsInterface
+    {
+        $config = $connector->toArray();
+
+        return match ($connector->getDriver()) {
+            Driver::KAFKA => new KafkaOptions($config['topic'] ?? 'default'),
+            default => null
+        };
     }
 }

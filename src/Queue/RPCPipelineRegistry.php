@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Queue;
 
 use Spiral\Queue\Exception\InvalidArgumentException;
+use Spiral\RoadRunner\Jobs\Jobs;
 use Spiral\RoadRunner\Jobs\JobsInterface;
+use Spiral\RoadRunner\Jobs\OptionsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunner\Jobs\Serializer\SerializerAwareInterface;
@@ -19,6 +21,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     private array $existPipelines = [];
 
     /**
+     * @param Jobs|JobsInterface $jobs
      * @param array<non-empty-string, array{connector: CreateInfoInterface, consume: bool}> $pipelines
      * @param array<non-empty-string,non-empty-string> $aliases
      * @param int $ttl Time to cache existing RoadRunner pipelines
@@ -61,12 +64,17 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         /** @var CreateInfoInterface $connector */
         $connector = $this->pipelines[$name]['connector'];
 
-        if (! $this->isExists($connector)) {
+        /** @var ?OptionsInterface $options */
+        $options = OptionsFactory::create($this->pipelines[$name]['options'] ?? null)
+            ?? OptionsFactory::fromCreateInfo($connector);
+        \assert($options instanceof OptionsInterface);
+
+        if (!$this->isExists($connector)) {
             $consume = (bool)($this->pipelines[$name]['consume'] ?? true);
-            return $this->create($connector, $consume);
+            return $this->create($connector, $consume, $options);
         }
 
-        return $this->connect($connector);
+        return $this->connect($connector, $options);
     }
 
     /**
@@ -87,10 +95,13 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     /**
      * Create a new RoadRunner jobs pipeline
      */
-    private function create(CreateInfoInterface $connector, bool $shouldBeConsumed = true): QueueInterface
-    {
+    private function create(
+        CreateInfoInterface $connector,
+        bool $shouldBeConsumed = true,
+        ?OptionsInterface $options = null
+    ): QueueInterface {
         $this->expiresAt = 0;
-        $queue = $this->jobs->create($connector);
+        $queue = $this->jobs->create($connector, $options);
         if ($shouldBeConsumed) {
             $queue->resume();
         }
@@ -101,8 +112,8 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     /**
      * Connect to the RoadRunner jobs pipeline
      */
-    private function connect(CreateInfoInterface $connector): QueueInterface
+    private function connect(CreateInfoInterface $connector, ?OptionsInterface $options = null): QueueInterface
     {
-        return $this->jobs->connect($connector->getName());
+        return $this->jobs->connect($connector->getName(), $options);
     }
 }
