@@ -67,7 +67,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         /** @var ?OptionsInterface $options */
         $options = OptionsFactory::create($this->pipelines[$name]['options'] ?? null)
             ?? OptionsFactory::fromCreateInfo($connector);
-        \assert($options instanceof OptionsInterface);
+        \assert($options === null || $options instanceof OptionsInterface);
 
         if (!$this->isExists($connector)) {
             $consume = (bool)($this->pipelines[$name]['consume'] ?? true);
