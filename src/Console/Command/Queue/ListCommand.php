@@ -11,21 +11,23 @@ use Symfony\Component\Console\Helper\Table;
 
 final class ListCommand extends Command
 {
-    protected const SIGNATURE = 'roadrunner:list';
-    protected const DESCRIPTION = 'List available roadrunner pipelines';
+    protected const SIGNATURE = 'rr:jobs:list';
+    protected const DESCRIPTION = 'Displays a list of available job pipelines for the RoadRunner';
 
     public function perform(JobsInterface $jobs): int
     {
         $queues = \iterator_to_array($jobs->getIterator());
 
         if ($queues === []) {
+            $this->info('No job pipelines are currently declared for the RoadRunner.');
+
             return self::SUCCESS;
         }
 
         $table = new Table($this->output);
 
         $table->setHeaders(
-            ['Name', 'Driver', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active']
+            ['Name', 'Driver', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active'],
         );
 
         foreach ($queues as $queue) {
