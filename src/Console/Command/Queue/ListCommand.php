@@ -8,6 +8,8 @@ use Spiral\Console\Command;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\Queue;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableCell;
+use Symfony\Component\Console\Helper\TableCellStyle;
 
 final class ListCommand extends Command
 {
@@ -22,26 +24,56 @@ final class ListCommand extends Command
             return self::SUCCESS;
         }
 
+        $queues = \array_map(static function (Queue $queue): array {
+            $stat = $queue->getPipelineStat();
+
+            $fontColor = $stat->getReady() ? 'green' : 'gray';
+            $defaultColor = $stat->getReady() ? 'default' : 'gray';
+            $activeFont = $stat->getReady() ? 'bold' : '';
+
+            return [
+                'name' => new TableCell($stat->getPipeline(), [
+                    'style' => new TableCellStyle(['fg' => $fontColor, 'options' => $activeFont]),
+                ]),
+                'driver' => new TableCell($stat->getDriver(), [
+                    'style' => new TableCellStyle(
+                        ['fg' => $defaultColor, 'options' => $activeFont]
+                    ),
+                ]),
+                'priority' => new TableCell((string)$stat->getPriority(), [
+                    'style' => new TableCellStyle(
+                        ['fg' => $defaultColor, 'options' => $activeFont]
+                    ),
+                ]),
+                'active_jobs' => new TableCell((string)$stat->getActive(), [
+                    'style' => new TableCellStyle(
+                        ['fg' => $stat->getActive() > 0 ? 'green' : $defaultColor, 'options' => $activeFont]
+                    ),
+                ]),
+                'delayed_jobs' => new TableCell((string)$stat->getDelayed(), [
+                    'style' => new TableCellStyle(
+                        ['fg' => $stat->getDelayed() > 0 ? 'green' : $defaultColor, 'options' => $activeFont]
+                    ),
+                ]),
+                'reserved_jobs' => new TableCell((string)$stat->getReserved(), [
+                    'style' => new TableCellStyle(
+                        ['fg' => $stat->getReserved() > 0 ? 'green' : $defaultColor, 'options' => $activeFont]
+                    ),
+                ]),
+                'is_active' => $stat->getReady() ? '<fg=green> ✓ </>' : '<fg=red> ✖ </>',
+            ];
+        }, $queues);
+
+        \ksort($queues);
+
         $table = new Table($this->output);
 
         $table->setHeaders(
-            ['Name', 'Driver', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active']
+            ['Name', 'Driver', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active',],
         );
 
-        foreach ($queues as $queue) {
-            /** @var Queue $queue */
-
-            $stat = $queue->getPipelineStat();
-
-            $table->addRow([
-                $stat->getPipeline(),
-                $stat->getDriver(),
-                $stat->getPriority(),
-                $stat->getActive(),
-                $stat->getDelayed(),
-                $stat->getReserved(),
-                $stat->getReady() ? '<fg=green> ✓ </>' : '<fg=red> ✖ </>',
-            ]);
+        foreach ($queues as $data) {
+            $table->addRow($data);
         }
 
         $table->render();
