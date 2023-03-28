@@ -9,8 +9,9 @@ use Spiral\RoadRunner\GRPC\ContextInterface;
 
 class UsersServiceClient implements UsersServiceInterface
 {
-    public function __construct(public InterceptableCore $core)
-    {
+    public function __construct(
+        public InterceptableCore $core,
+    ) {
     }
 
     public function Auth(ContextInterface $ctx, DTO\AuthRequest $in): DTO\AuthResponse

@@ -44,6 +44,9 @@ final class CentrifugoBootloaderTest extends TestCase
             CentrifugoWorkerInterface::class,
             CentrifugoWorker::class
         );
+
+        // TODO fix problem with rr worker
+        ob_end_flush();
     }
 
     public function testErrorHandlerShouldBeSingleton(): void
