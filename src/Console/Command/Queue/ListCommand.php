@@ -6,7 +6,7 @@ namespace Spiral\RoadRunnerBridge\Console\Command\Queue;
 
 use Spiral\Console\Command;
 use Spiral\RoadRunner\Jobs\JobsInterface;
-use Spiral\RoadRunner\Jobs\Queue;
+use Spiral\RoadRunner\Jobs\QueueInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Helper\TableCellStyle;
@@ -24,7 +24,7 @@ final class ListCommand extends Command
             return self::SUCCESS;
         }
 
-        $queues = \array_map(static function (Queue $queue): array {
+        $queues = \array_map(static function (QueueInterface $queue): array {
             $stat = $queue->getPipelineStat();
 
             $fontColor = $stat->getReady() ? 'green' : 'gray';
