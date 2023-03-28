@@ -16,14 +16,14 @@ final class ListCommandTest extends ConsoleTestCase
         $jobs = \Mockery::mock(JobsInterface::class);
         $this->getContainer()->bind(JobsInterface::class, $jobs);
 
-        $jobs->shouldReceive('getIterator')->once()->andReturn(
+        $jobs->shouldReceive('getIterator')->andReturn(
             new \ArrayIterator([
-                'memory' => $memory = \Mockery::mock(QueueInterface::class),
+                'memory' => $queue = \Mockery::mock(QueueInterface::class),
                 'amqp' => $amqp = \Mockery::mock(QueueInterface::class),
             ])
         );
 
-        $memory->shouldReceive('getPipelineStat')->once()->andReturn(
+        $queue->shouldReceive('getPipelineStat')->once()->andReturn(
             new Stat([
                 'pipeline' => 'test',
                 'driver' => 'memory',
@@ -54,8 +54,8 @@ final class ListCommandTest extends ConsoleTestCase
 +---------+--------+----------+-------------+--------------+---------------+-----------+
 | Name    | Driver | Priority | Active jobs | Delayed jobs | Reserved jobs | Is active |
 +---------+--------+----------+-------------+--------------+---------------+-----------+
-| test    | memory | 200      | 100         | 55           | 8             |  ✓        |
 | default | amqp   | 250      | 110         | 88           | 56            |  ✖        |
+| test    | memory | 200      | 100         | 55           | 8             |  ✓        |
 +---------+--------+----------+-------------+--------------+---------------+-----------+
 EOL,
             $this->runCommand('rr:jobs:list')
