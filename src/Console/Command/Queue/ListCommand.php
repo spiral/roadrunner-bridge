@@ -14,14 +14,16 @@ use Symfony\Component\Console\Helper\TableCellStyle;
 
 final class ListCommand extends Command
 {
-    protected const SIGNATURE = 'roadrunner:list';
-    protected const DESCRIPTION = 'List available roadrunner pipelines';
+    protected const SIGNATURE = 'rr:jobs:list';
+    protected const DESCRIPTION = 'Displays a list of available job pipelines for the RoadRunner';
 
     public function perform(JobsInterface $jobs): int
     {
         $queues = \iterator_to_array($jobs->getIterator());
 
         if ($queues === []) {
+            $this->info('No job pipelines are currently declared for the RoadRunner.');
+
             return self::SUCCESS;
         }
 

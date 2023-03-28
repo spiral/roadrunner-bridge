@@ -58,7 +58,7 @@ final class ListCommandTest extends ConsoleTestCase
 | test    | memory | 200      | 100         | 55           | 8             |  ✓        |
 +---------+--------+----------+-------------+--------------+---------------+-----------+
 EOL,
-            $this->runCommand('roadrunner:list')
+            $this->runCommand('rr:jobs:list')
         );
     }
 }

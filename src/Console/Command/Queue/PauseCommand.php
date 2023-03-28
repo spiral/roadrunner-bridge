@@ -9,8 +9,8 @@ use Spiral\RoadRunner\Jobs\JobsInterface;
 
 final class PauseCommand extends Command
 {
-    protected const SIGNATURE = 'roadrunner:pause {pipeline : Pipeline name}';
-    protected const DESCRIPTION = 'Pause consuming jobs for pipeline with given name';
+    protected const SIGNATURE = 'rr:jobs:pause {pipeline : Pipeline name}';
+    protected const DESCRIPTION = 'Pauses the consumption of jobs for the specified pipeline in the RoadRunner.';
 
     public function perform(JobsInterface $jobs): int
     {

@@ -16,7 +16,7 @@ final class ResumeCommandTest extends ConsoleTestCase
 
         $jobs->shouldReceive('resume')->once()->with('foo');
 
-        $result = $this->runCommand('roadrunner:resume', ['pipeline' => 'foo']);
+        $result = $this->runCommand('rr:jobs:consume', ['pipeline' => 'foo']);
         $this->assertStringContainsString('Pipeline [foo] has been resumed.', $result);
     }
 }

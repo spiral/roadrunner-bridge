@@ -41,6 +41,10 @@ final class CommandBootloader extends Bootloader
         $console->addCommand(Queue\PauseCommand::class);
         $console->addCommand(Queue\ResumeCommand::class);
         $console->addCommand(Queue\ListCommand::class);
+
+        $console->addCommand(Queue\DeprecatedPauseCommand::class);
+        $console->addCommand(Queue\DeprecatedResumeCommand::class);
+        $console->addCommand(Queue\DeprecatedListCommand::class);
     }
 
     private function configureCache(ConsoleBootloader $console): void
