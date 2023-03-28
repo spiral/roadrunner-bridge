@@ -16,7 +16,7 @@ final class PauseCommandTest extends ConsoleTestCase
 
         $jobs->shouldReceive('pause')->once()->with('foo');
 
-        $result = $this->runCommand('roadrunner:pause', ['pipeline' => 'foo']);
+        $result = $this->runCommand('rr:jobs:pause', ['pipeline' => 'foo']);
         $this->assertStringContainsString('Pipeline [foo] has been paused.', $result);
     }
 }

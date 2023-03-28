@@ -9,8 +9,8 @@ use Spiral\RoadRunner\Jobs\JobsInterface;
 
 final class ResumeCommand extends Command
 {
-    protected const SIGNATURE = 'roadrunner:resume {pipeline : Pipeline name}';
-    protected const DESCRIPTION = 'Resume consuming jobs for pipeline with given name';
+    protected const SIGNATURE = 'rr:jobs:consume {pipeline : Pipeline name}';
+    protected const DESCRIPTION = 'Resumes the consumption of jobs for the specified pipeline in the RoadRunner.';
 
     public function perform(JobsInterface $jobs): int
     {

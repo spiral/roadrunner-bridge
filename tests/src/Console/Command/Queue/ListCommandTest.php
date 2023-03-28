@@ -58,7 +58,7 @@ final class ListCommandTest extends ConsoleTestCase
 | default | amqp   | 250      | 110         | 88           | 56            |  ✖        |
 +---------+--------+----------+-------------+--------------+---------------+-----------+
 EOL,
-            $this->runCommand('roadrunner:list')
+            $this->runCommand('rr:jobs:list')
         );
     }
 }
