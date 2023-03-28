@@ -18,12 +18,12 @@ final class ListCommandTest extends ConsoleTestCase
 
         $jobs->shouldReceive('getIterator')->andReturn(
             new \ArrayIterator([
-                'memory' => $memory = \Mockery::mock(QueueInterface::class),
+                'memory' => $queue = \Mockery::mock(QueueInterface::class),
                 'amqp' => $amqp = \Mockery::mock(QueueInterface::class),
             ])
         );
 
-        $memory->shouldReceive('getPipelineStat')->once()->andReturn(
+        $queue->shouldReceive('getPipelineStat')->once()->andReturn(
             new Stat([
                 'pipeline' => 'test',
                 'driver' => 'memory',
