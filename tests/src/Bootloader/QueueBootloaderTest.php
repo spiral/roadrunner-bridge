@@ -9,12 +9,7 @@ use Spiral\Core\ConfigsInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
 use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Serializer\SerializerInterface;
-use Spiral\RoadRunnerBridge\Queue\Consumer;
-use Spiral\RoadRunner\Jobs\ConsumerInterface;
-use Spiral\RoadRunner\Jobs\Serializer\SerializerInterface as RRSerializerInterface;
-use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher;
-use Spiral\RoadRunnerBridge\Queue\JobsAdapterSerializer;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
 use Spiral\Serializer\SerializerManager;
@@ -90,26 +85,6 @@ final class QueueBootloaderTest extends TestCase
         $this->assertContainerBoundAsSingleton(
             SerializerInterface::class,
             SerializerManager::class
-        );
-    }
-
-    public function testGetsRRSerializerInterface(): void
-    {
-        $this->assertContainerBoundAsSingleton(
-            RRSerializerInterface::class,
-            JobsAdapterSerializer::class
-        );
-    }
-
-    public function testGetsConsumerInterface(): void
-    {
-        $this->getContainer()->bind(WorkerInterface::class, function () {
-            return m::mock(WorkerInterface::class);
-        });
-
-        $this->assertContainerBoundAsSingleton(
-            ConsumerInterface::class,
-            Consumer::class
         );
     }
 

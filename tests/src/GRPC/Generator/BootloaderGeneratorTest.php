@@ -13,9 +13,11 @@ final class BootloaderGeneratorTest extends TestCase
 {
     public function testRun(): void
     {
-        $bootloader = \dirname(__DIR__, 3) . '/app/GRPC/Generator/Bootloader/ServiceBootloader.php';
-        $expected = \dirname(__DIR__, 3) . '/app/GRPC/Generator/Bootloader/ExpectedBootloader.php';
-        $interface = \dirname(__DIR__, 3) . '/app/GRPC/Generator/UsersServiceInterface.php';
+        $appPath = \dirname(__DIR__, 3) . '/app/GRPC/Generator';
+
+        $bootloader = $appPath . '/Bootloader/ServiceBootloader.php';
+        $expected = $appPath . '/Bootloader/ExpectedBootloader.php';
+        $interface = $appPath . '/UsersServiceInterface.php';
 
         $files = $this->createMock(FilesInterface::class);
         $files
@@ -28,15 +30,15 @@ final class BootloaderGeneratorTest extends TestCase
             ->expects($this->exactly(2))
             ->method('read')
             ->with($interface)
-            ->willReturn((new Files())->read($interface));
+            ->willReturn(\str_replace("\r\n", "\n", (new Files())->read($interface)));
 
         $files
             ->expects($this->once())
             ->method('write')
-            ->with($bootloader, (new Files())->read($expected), null, true);
+            ->with($bootloader, \str_replace("\r\n", "\n", (new Files())->read($expected)), null, true);
 
         $generator = new BootloaderGenerator($files);
 
-        $generator->run([$interface], \dirname(__DIR__, 3) . '/app/GRPC/Generator', 'GRPC');
+        $generator->run([$interface], $appPath, 'GRPC');
     }
 }
