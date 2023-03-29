@@ -15,6 +15,7 @@ use Spiral\RoadRunnerBridge\Config\QueueConfig;
 
 /**
  * @internal
+ *
  * @psalm-import-type TPipeline from \Spiral\RoadRunnerBridge\Config\QueueConfig
  */
 final class RPCPipelineRegistry implements PipelineRegistryInterface
@@ -67,7 +68,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         $connector = $this->getConnector($name);
 
         /**
-         * @var OptionsInterface|Null $options
+         * @var OptionsInterface|null $options
          */
         $options = OptionsFactory::create($this->pipelines[$name]['options'] ?? null)
             ?? OptionsFactory::fromCreateInfo($connector);
@@ -98,9 +99,10 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
 
     /**
      * Create a new RoadRunner jobs pipeline
+     *
      * @throws JobsException
      */
-    private function create(CreateInfoInterface $connector, ?OptionsInterface $options = null,): QueueInterface
+    private function create(CreateInfoInterface $connector, ?OptionsInterface $options = null): QueueInterface
     {
         $this->expiresAt = 0;
         return $this->jobs->create($connector, $options);
@@ -116,8 +118,10 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
 
     /**
      * @param non-empty-string $name
-     * @return CreateInfoInterface
+     *
      * @throws InvalidArgumentException
+     *
+     * @return CreateInfoInterface
      */
     public function getConnector(string $name): CreateInfoInterface
     {

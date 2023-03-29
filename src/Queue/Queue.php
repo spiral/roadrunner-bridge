@@ -77,7 +77,7 @@ final class Queue implements QueueInterface
 
     /**
      * @param non-empty-string $name
-     * @param OptionsInterface|JobsOptionsInterface|null $options
+     * @param JobsOptionsInterface|OptionsInterface|null $options
      */
     private function createTask(
         RRQueueInterface $queue,
