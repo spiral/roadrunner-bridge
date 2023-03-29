@@ -25,12 +25,12 @@
     "grpc/grpc": "^1.42",
     "roadrunner-php/centrifugo": "^1.0",
     "spiral/roadrunner-grpc": "^2.0",
-    "spiral/roadrunner-jobs": "dev-master as 4.0",
+    "spiral/roadrunner-jobs": "^4.0",
     "spiral/roadrunner-kv": "^2.2||^3.0",
     "spiral/roadrunner-tcp": "^2.0",
     "spiral/roadrunner-metrics": "^2.0",
     "roadrunner-php/app-logger": "^1.0",
-    "spiral/framework": "dev-master as 3.7",
+    "spiral/framework": "^3.7",
     "spiral/serializer": "^3.7"
   },
   "require-dev": {
