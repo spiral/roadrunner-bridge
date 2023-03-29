@@ -6,10 +6,8 @@ namespace Spiral\RoadRunnerBridge\Bootloader;
 
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Console\Bootloader\ConsoleBootloader;
-use Spiral\Cache\CacheStorageProviderInterface;
 use Spiral\Core\Container;
 use Spiral\RoadRunner\Jobs\JobsInterface;
-use Spiral\RoadRunnerBridge\Console\Command\Cache;
 use Spiral\RoadRunnerBridge\Console\Command\GRPC;
 use Spiral\RoadRunnerBridge\Console\Command\Queue;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
