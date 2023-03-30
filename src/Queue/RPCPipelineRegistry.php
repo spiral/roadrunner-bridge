@@ -51,7 +51,9 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
 
             $connector = $this->getConnector($name);
 
-            $this->jobs->create($connector)->resume();
+            if (!$this->isExists($connector)) {
+                $this->jobs->create($connector)->resume();
+            }
         }
     }
 
@@ -119,9 +121,9 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     /**
      * @param non-empty-string $name
      *
+     * @return CreateInfoInterface
      * @throws InvalidArgumentException
      *
-     * @return CreateInfoInterface
      */
     public function getConnector(string $name): CreateInfoInterface
     {
