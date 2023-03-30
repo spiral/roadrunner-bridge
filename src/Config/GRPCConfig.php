@@ -30,7 +30,7 @@ final class GRPCConfig extends InjectableConfig
     }
 
     /**
-     * Path, where generated DTO files put.
+     * Path, where generated DTO files should be stored.
      */
     public function getGeneratedPath(): ?string
     {

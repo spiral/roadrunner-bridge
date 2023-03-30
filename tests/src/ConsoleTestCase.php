@@ -33,14 +33,16 @@ abstract class ConsoleTestCase extends TestCase
     public function deleteGRPCService(): void
     {
         $fs = new Files();
-        if ($fs->isDirectory($this->getDirectoryByAlias('app') . 'GRPC/EchoService')) {
-            $fs->deleteDirectory($this->getDirectoryByAlias('app') . 'GRPC/EchoService');
+        $appPath = $this->getDirectoryByAlias('app');
+
+        if ($fs->isDirectory($appPath . 'GRPC/EchoService')) {
+            $fs->deleteDirectory($appPath . 'GRPC/EchoService');
         }
-        if ($fs->isDirectory($this->getDirectoryByAlias('app') . 'Bootloader')) {
-            $fs->deleteDirectory($this->getDirectoryByAlias('app') . 'Bootloader');
+        if ($fs->isDirectory($appPath . 'Bootloader')) {
+            $fs->deleteDirectory($appPath . 'Bootloader');
         }
-        if ($fs->isFile($this->getDirectoryByAlias('app') . 'config/GRPCServicesConfig.php')) {
-            $fs->delete($this->getDirectoryByAlias('app') . 'config/GRPCServicesConfig.php');
+        if ($fs->isFile($appPath . 'Config/GRPCServicesConfig.php')) {
+            $fs->delete($appPath . 'Config/GRPCServicesConfig.php');
         }
     }
 }

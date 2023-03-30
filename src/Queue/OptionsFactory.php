@@ -46,7 +46,7 @@ final class OptionsFactory
         $config = $connector->toArray();
 
         return match ($connector->getDriver()) {
-            Driver::KAFKA => new KafkaOptions($config['topic'] ?? 'default'),
+            Driver::Kafka => new KafkaOptions($config['topic'] ?? 'default'),
             default => null
         };
     }

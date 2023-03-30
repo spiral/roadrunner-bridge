@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Console\Command\Queue;
 
-use Spiral\RoadRunner\Jobs\DTO\V1\Stat;
+use RoadRunner\Jobs\DTO\V1\Stat;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\Tests\ConsoleTestCase;

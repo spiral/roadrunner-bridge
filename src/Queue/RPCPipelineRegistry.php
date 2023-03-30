@@ -5,73 +5,78 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Queue;
 
 use Spiral\Queue\Exception\InvalidArgumentException;
+use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Jobs;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\OptionsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
-use Spiral\RoadRunner\Jobs\Serializer\SerializerAwareInterface;
+use Spiral\RoadRunnerBridge\Config\QueueConfig;
 
 /**
  * @internal
+ *
+ * @psalm-import-type TPipeline from \Spiral\RoadRunnerBridge\Config\QueueConfig
  */
 final class RPCPipelineRegistry implements PipelineRegistryInterface
 {
     private int $expiresAt = 0;
     private array $existPipelines = [];
+    /** @var array<non-empty-string,TPipeline> */
+    private readonly array $pipelines;
 
     /**
      * @param Jobs|JobsInterface $jobs
-     * @param array<non-empty-string, array{connector: CreateInfoInterface, consume: bool}> $pipelines
-     * @param array<non-empty-string,non-empty-string> $aliases
      * @param int $ttl Time to cache existing RoadRunner pipelines
      */
     public function __construct(
-        private JobsInterface $jobs,
-        private readonly JobsAdapterSerializer $serializer,
-        private readonly array $pipelines,
-        private readonly array $aliases,
-        private readonly int $ttl = 60
+        private readonly JobsInterface $jobs,
+        QueueConfig $config,
+        private readonly int $ttl = 60,
     ) {
+        $this->pipelines = $config->getPipelines();
     }
 
-    public function getPipeline(string $name, string $jobType): QueueInterface
+    /**
+     * @throws JobsException
+     * @throws InvalidArgumentException
+     */
+    public function declareConsumerPipelines(): void
     {
-        if (isset($this->aliases[$name])) {
-            $name = $this->aliases[$name];
-        }
+        foreach ($this->pipelines as $name => $pipeline) {
+            $consume = (bool)($pipeline['consume'] ?? false);
+            if (!$consume) {
+                continue;
+            }
 
-        if (! isset($this->pipelines[$name])) {
+            $connector = $this->getConnector($name);
+
+            $this->jobs->create($connector)->resume();
+        }
+    }
+
+    /**
+     * @throws JobsException
+     * @throws InvalidArgumentException
+     */
+    public function getPipeline(string $name): QueueInterface
+    {
+        if (!isset($this->pipelines[$name])) {
             return $this->jobs->connect($name);
         }
 
-        if (! isset($this->pipelines[$name]['connector'])) {
-            throw new InvalidArgumentException(
-                \sprintf('You must specify connector for given pipeline `%s`.', $name)
-            );
-        }
+        $connector = $this->getConnector($name);
 
-        if (!$this->pipelines[$name]['connector'] instanceof CreateInfoInterface) {
-            throw new InvalidArgumentException(
-                \sprintf('Connector should implement %s interface.', CreateInfoInterface::class)
-            );
-        }
-
-        if ($this->jobs instanceof SerializerAwareInterface) {
-            $this->jobs = $this->jobs->withSerializer($this->serializer->changeSerializer($jobType));
-        }
-
-        /** @var CreateInfoInterface $connector */
-        $connector = $this->pipelines[$name]['connector'];
-
-        /** @var ?OptionsInterface $options */
+        /**
+         * @var OptionsInterface|null $options
+         */
         $options = OptionsFactory::create($this->pipelines[$name]['options'] ?? null)
             ?? OptionsFactory::fromCreateInfo($connector);
+
         \assert($options === null || $options instanceof OptionsInterface);
 
         if (!$this->isExists($connector)) {
-            $consume = (bool)($this->pipelines[$name]['consume'] ?? true);
-            return $this->create($connector, $consume, $options);
+            return $this->create($connector, $options);
         }
 
         return $this->connect($connector, $options);
@@ -84,7 +89,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     {
         if ($this->expiresAt < \time()) {
             $this->existPipelines = \array_keys(
-                \iterator_to_array($this->jobs->getIterator())
+                \iterator_to_array($this->jobs->getIterator()),
             );
             $this->expiresAt = \time() + $this->ttl;
         }
@@ -94,19 +99,13 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
 
     /**
      * Create a new RoadRunner jobs pipeline
+     *
+     * @throws JobsException
      */
-    private function create(
-        CreateInfoInterface $connector,
-        bool $shouldBeConsumed = true,
-        ?OptionsInterface $options = null
-    ): QueueInterface {
+    private function create(CreateInfoInterface $connector, ?OptionsInterface $options = null): QueueInterface
+    {
         $this->expiresAt = 0;
-        $queue = $this->jobs->create($connector, $options);
-        if ($shouldBeConsumed) {
-            $queue->resume();
-        }
-
-        return $queue;
+        return $this->jobs->create($connector, $options);
     }
 
     /**
@@ -115,5 +114,30 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     private function connect(CreateInfoInterface $connector, ?OptionsInterface $options = null): QueueInterface
     {
         return $this->jobs->connect($connector->getName(), $options);
+    }
+
+    /**
+     * @param non-empty-string $name
+     *
+     * @throws InvalidArgumentException
+     *
+     * @return CreateInfoInterface
+     */
+    public function getConnector(string $name): CreateInfoInterface
+    {
+        // Connector is required for pipeline declaration
+        if (!isset($this->pipelines[$name]['connector'])) {
+            throw new InvalidArgumentException(
+                \sprintf('You must specify connector for given pipeline `%s`.', $name)
+            );
+        }
+
+        if (!$this->pipelines[$name]['connector'] instanceof CreateInfoInterface) {
+            throw new InvalidArgumentException(
+                \sprintf('Connector should implement %s interface.', CreateInfoInterface::class)
+            );
+        }
+
+        return $this->pipelines[$name]['connector'];
     }
 }

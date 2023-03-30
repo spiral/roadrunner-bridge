@@ -49,7 +49,7 @@ final class OptionsFactoryTest extends TestCase
 
     public function fromCreateInfoDataProvider(): \Traversable
     {
-        yield [null, new MemoryCreateInfo('')];
-        yield [new KafkaOptions('foo'), new KafkaCreateInfo('', 'foo')];
+        yield [null, new MemoryCreateInfo('bar')];
+        yield [new KafkaOptions('default'), new KafkaCreateInfo('foo', 10)];
     }
 }

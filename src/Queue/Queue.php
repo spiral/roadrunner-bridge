@@ -4,32 +4,36 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Queue;
 
-use Spiral\Core\FactoryInterface;
 use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\Queue\OptionsInterface;
 use Spiral\Queue\QueueInterface;
 use Spiral\Queue\QueueTrait;
+use Spiral\Queue\SerializerRegistryInterface;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
-use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface as RRQueueInterface;
+use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
 
+/**
+ * @psalm-import-type TPipeline from \Spiral\RoadRunnerBridge\Config\QueueConfig
+ */
 final class Queue implements QueueInterface
 {
     use QueueTrait;
+
+    public const SERIALIZED_CLASS_HEADER_KEY = 'payload_class';
+
     /** @var array<non-empty-string, RRQueueInterface> */
     private array $queues = [];
 
     /**
-     * @param array<non-empty-string, array{connector: CreateInfoInterface, consume: bool}> $pipelines
-     * @param array<non-empty-string,non-empty-string> $aliases
      * @param non-empty-string|null $default
      */
     public function __construct(
-        private readonly FactoryInterface $factory,
-        private readonly array $pipelines = [],
-        private readonly array $aliases = [],
-        private readonly ?string $default = null
+        private readonly SerializerRegistryInterface $serializer,
+        private readonly PipelineRegistryInterface $registry,
+        private readonly ?string $pipeline = null,
+        private readonly ?string $default = null,
     ) {
     }
 
@@ -39,34 +43,61 @@ final class Queue implements QueueInterface
      */
     public function push(
         string $name,
-        array $payload = [],
-        OptionsInterface|JobsOptionsInterface $options = null
+        mixed $payload = '',
+        OptionsInterface|JobsOptionsInterface $options = null,
     ): string {
+        $defaultPipeline = $this->pipeline ?? $this->default;
+
         $queue = $this->initQueue(
-            $name,
-            $options instanceof OptionsInterface ? $options->getQueue() ?? $this->default : $this->default
+            $options instanceof OptionsInterface
+                ? $options->getQueue() ?? $defaultPipeline
+                : $defaultPipeline,
         );
 
-        $preparedTask = $queue->create($name, $payload, OptionsFactory::create($options));
+        $preparedTask = $this->createTask($queue, $name, $payload, $options);
 
         return $queue->dispatch($preparedTask)->getId();
     }
 
-    private function initQueue(string $jobType, ?string $pipeline): RRQueueInterface
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function initQueue(?string $pipeline): RRQueueInterface
     {
-        if (! $pipeline) {
-            throw new InvalidArgumentException('You must define default RoadRunner queue pipeline.');
+        if (!$pipeline) {
+            throw new InvalidArgumentException('You must define RoadRunner queue pipeline.');
         }
 
         if (isset($this->queues[$pipeline])) {
             return $this->queues[$pipeline];
         }
 
-        $registry = $this->factory->make(PipelineRegistryInterface::class, [
-            'pipelines' => $this->pipelines,
-            'aliases' => $this->aliases,
-        ]);
+        return $this->queues[$pipeline] = $this->registry->getPipeline($pipeline);
+    }
 
-        return $this->queues[$pipeline] = $registry->getPipeline($pipeline, $jobType);
+    /**
+     * @param non-empty-string $name
+     * @param JobsOptionsInterface|OptionsInterface|null $options
+     */
+    private function createTask(
+        RRQueueInterface $queue,
+        string $name,
+        mixed $payload,
+        OptionsInterface|JobsOptionsInterface|null $options,
+    ): PreparedTaskInterface {
+        $preparedTask = $queue->create(
+            $name,
+            $this->serializer->getSerializer($name)->serialize($payload),
+            OptionsFactory::create($options),
+        );
+
+        if (\is_object($payload)) {
+            $preparedTask = $preparedTask->withHeader(
+                self::SERIALIZED_CLASS_HEADER_KEY,
+                \get_class($payload),
+            );
+        }
+
+        return $preparedTask;
     }
 }

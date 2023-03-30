@@ -19,18 +19,26 @@ final class CacheBootloader extends Bootloader
         RoadRunnerBootloader::class,
     ];
 
+    protected const SINGLETONS = [
+        FactoryInterface::class => [self::class, 'initStorageFactory'],
+    ];
+
+    protected const BINDINGS = [
+        StorageInterface::class => [self::class, 'initDefaultStorage'],
+    ];
+
+    private function initStorageFactory(RPCInterface $rpc): FactoryInterface
+    {
+        return new Factory($rpc, new DefaultSerializer());
+    }
+
+    private function initDefaultStorage(FactoryInterface $factory, string $driver): StorageInterface
+    {
+        return $factory->select($driver);
+    }
+
     public function init(Container $container, BaseCacheBootloader $cacheBootloader): void
     {
-        $container->bindSingleton(
-            FactoryInterface::class,
-            static fn (RPCInterface $rpc) => new Factory($rpc, new DefaultSerializer())
-        );
-
-        $container->bind(
-            StorageInterface::class,
-            static fn (FactoryInterface $factory, string $driver) => $factory->select($driver)
-        );
-
         $cacheBootloader->registerTypeAlias(StorageInterface::class, 'roadrunner');
     }
 }
