@@ -11,7 +11,6 @@ use Spiral\Boot\AbstractKernel;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface as GlobalEnvironmentInterface;
 use Spiral\Boot\KernelInterface;
-use Spiral\Core\Container;
 use Spiral\Goridge\Relay;
 use Spiral\Goridge\RPC\RPC;
 use Spiral\Goridge\RPC\RPCInterface;
@@ -25,52 +24,48 @@ use Spiral\RoadRunnerBridge\FallbackDispatcher;
 
 final class RoadRunnerBootloader extends Bootloader
 {
-    public function init(Container $container, AbstractKernel $kernel): void
+    protected const SINGLETONS = [
+        EnvironmentInterface::class => [self::class, 'initEnvironment'],
+        Environment::class => EnvironmentInterface::class,
+
+        RPC::class => RPCInterface::class,
+        RPCInterface::class => [self::class, 'initRPC'],
+
+        Worker::class => WorkerInterface::class,
+        WorkerInterface::class => [self::class, 'initWorker'],
+
+        PSR7Worker::class => PSR7WorkerInterface::class,
+        PSR7WorkerInterface::class => [self::class, 'initPSR7Worker'],
+    ];
+
+    private function initEnvironment(GlobalEnvironmentInterface $env): EnvironmentInterface
     {
-        //
-        // Register RoadRunner Environment
-        //
-        $container->bindSingleton(EnvironmentInterface::class, Environment::class);
-        $container->bindSingleton(
-            Environment::class,
-            static fn (GlobalEnvironmentInterface $env): EnvironmentInterface => new Environment($env->getAll())
-        );
+        return new Environment($env->getAll());
+    }
 
-        //
-        // Register RPC
-        //
-        $container->bindSingleton(RPCInterface::class, RPC::class);
-        $container->bindSingleton(
-            RPC::class,
-            static fn (EnvironmentInterface $env): RPCInterface => new RPC(Relay::create($env->getRPCAddress()))
-        );
+    private function initRPC(EnvironmentInterface $env): RPCInterface
+    {
+        return new RPC(Relay::create($env->getRPCAddress()));
+    }
 
-        //
-        // Register Worker
-        //
-        $container->bindSingleton(WorkerInterface::class, Worker::class);
-        $container->bindSingleton(
-            Worker::class,
-            static fn (EnvironmentInterface $env): WorkerInterface => Worker::createFromEnvironment($env)
-        );
+    private function initWorker(EnvironmentInterface $env): WorkerInterface
+    {
+        return Worker::createFromEnvironment($env);
+    }
 
-        //
-        // Register PSR Worker
-        //
-        $container->bindSingleton(PSR7WorkerInterface::class, PSR7Worker::class);
+    private function initPSR7Worker(
+        WorkerInterface $worker,
+        ServerRequestFactoryInterface $requests,
+        StreamFactoryInterface $streams,
+        UploadedFileFactoryInterface $uploads,
+    ): PSR7WorkerInterface {
+        return new PSR7Worker($worker, $requests, $streams, $uploads);
+    }
 
-        $container->bindSingleton(PSR7Worker::class, static function (
-            WorkerInterface $worker,
-            ServerRequestFactoryInterface $requests,
-            StreamFactoryInterface $streams,
-            UploadedFileFactoryInterface $uploads
-        ): PSR7WorkerInterface {
-            return new PSR7Worker($worker, $requests, $streams, $uploads);
-        });
-
-        //
-        // Register FailbackDispatcher after all dispatchers
-        //
+    public function init(AbstractKernel $kernel): void
+    {
+        // Register Fallback Dispatcher after all dispatchers
+        // It will be called if no other dispatcher can handle RoadRunner request
         $kernel->bootstrapped(static function (FallbackDispatcher $dispatcher, KernelInterface $kernel): void {
             $kernel->addDispatcher($dispatcher);
         });
