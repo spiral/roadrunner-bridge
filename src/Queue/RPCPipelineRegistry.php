@@ -121,9 +121,9 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     /**
      * @param non-empty-string $name
      *
-     * @return CreateInfoInterface
      * @throws InvalidArgumentException
      *
+     * @return CreateInfoInterface
      */
     public function getConnector(string $name): CreateInfoInterface
     {
