@@ -23,6 +23,8 @@ final class RPCPipelineRegistryTest extends TestCase
     private CreateInfoInterface|m\LegacyMockInterface|m\MockInterface $memoryConnector;
     private CreateInfoInterface|m\LegacyMockInterface|m\MockInterface $localConnector;
     private RPCPipelineRegistry $registry;
+    private m\LegacyMockInterface|m\MockInterface|CreateInfoInterface $amqpConnector;
+    private JobsInterface|m\MockInterface|m\LegacyMockInterface $jobs;
 
     protected function setUp(): void
     {
@@ -36,6 +38,10 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->localConnector->shouldReceive('toArray')->andReturn([]);
         $this->localConnector->shouldReceive('getDriver')->andReturn(Driver::SQS);
 
+        $this->amqpConnector = m::mock(CreateInfoInterface::class);
+        $this->amqpConnector->shouldReceive('toArray')->andReturn([]);
+        $this->amqpConnector->shouldReceive('getDriver')->andReturn(Driver::AMQP);
+
         $this->registry = new RPCPipelineRegistry(
             $this->jobs = m::mock(JobsInterface::class),
             new QueueConfig([
@@ -45,6 +51,10 @@ final class RPCPipelineRegistryTest extends TestCase
                 ],
                 'local' => [
                     'connector' => $this->localConnector,
+                    'consume' => true,
+                ],
+                'amqp' => [
+                    'connector' => $this->amqpConnector,
                     'consume' => true,
                 ],
                 'without-connector' => [
@@ -71,17 +81,30 @@ final class RPCPipelineRegistryTest extends TestCase
 
     public function testDeclareConsumersPipeline(): void
     {
-        $this->jobs->shouldReceive('create')
-            ->once()
-            ->with($this->memoryConnector)
-            ->andReturn($queue = m::mock(QueueInterface::class));
+        $this->amqpConnector->shouldReceive('getName')->andReturn('amqp');
+        $this->memoryConnector->shouldReceive('getName')->andReturn('memory');
+        $this->localConnector->shouldReceive('getName')->andReturn('sqs');
 
-        $queue->shouldReceive('resume')->once();
+        $this->jobs->shouldReceive('getIterator')->once()->andReturn(
+            new \ArrayIterator([
+                'amqp' => '',
+            ]),
+        );
 
         $this->jobs->shouldReceive('create')
             ->once()
             ->with($this->localConnector)
             ->andReturn($queue = m::mock(QueueInterface::class));
+        $queue->shouldReceive('resume')->once();
+
+        $this->jobs->shouldReceive('create')
+            ->once()
+            ->with($this->memoryConnector)
+            ->andReturn($queue = m::mock(QueueInterface::class));
+
+        $this->jobs->shouldNotReceive('create')
+            ->with($this->amqpConnector);
+
         $queue->shouldReceive('resume')->once();
 
         $this->registry->declareConsumerPipelines();
@@ -97,8 +120,8 @@ final class RPCPipelineRegistryTest extends TestCase
             ->with('local', null)
             ->andReturn($queue = m::mock(QueueInterface::class));
 
-        $this->assertInstanceOf(
-            QueueInterface::class,
+        $this->assertSame(
+            $queue,
             $this->registry->getPipeline('memory'),
         );
     }
