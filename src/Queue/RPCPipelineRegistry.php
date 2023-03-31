@@ -43,6 +43,8 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      */
     public function declareConsumerPipelines(): void
     {
+        $this->expiresAt = 0;
+
         foreach ($this->pipelines as $name => $pipeline) {
             $consume = (bool)($pipeline['consume'] ?? false);
             if (!$consume) {
@@ -93,6 +95,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
             $this->existPipelines = \array_keys(
                 \iterator_to_array($this->jobs->getIterator()),
             );
+
             $this->expiresAt = \time() + $this->ttl;
         }
 

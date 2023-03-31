@@ -23,6 +23,7 @@ final class RPCPipelineRegistryTest extends TestCase
     private CreateInfoInterface|m\LegacyMockInterface|m\MockInterface $memoryConnector;
     private CreateInfoInterface|m\LegacyMockInterface|m\MockInterface $localConnector;
     private RPCPipelineRegistry $registry;
+    private m\LegacyMockInterface|m\MockInterface|CreateInfoInterface $amqpConnector;
 
     protected function setUp(): void
     {
@@ -31,10 +32,17 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->memoryConnector = m::mock(CreateInfoInterface::class);
         $this->memoryConnector->shouldReceive('toArray')->andReturn([]);
         $this->memoryConnector->shouldReceive('getDriver')->andReturn(Driver::Memory);
+        $this->memoryConnector->shouldReceive('getName')->andReturn('memory');
 
         $this->localConnector = m::mock(CreateInfoInterface::class);
         $this->localConnector->shouldReceive('toArray')->andReturn([]);
         $this->localConnector->shouldReceive('getDriver')->andReturn(Driver::SQS);
+        $this->localConnector->shouldReceive('getName')->andReturn('sqs');
+
+        $this->amqpConnector = m::mock(CreateInfoInterface::class);
+        $this->amqpConnector->shouldReceive('toArray')->andReturn([]);
+        $this->amqpConnector->shouldReceive('getDriver')->andReturn(Driver::AMQP);
+        $this->amqpConnector->shouldReceive('getName')->andReturn('amqp');
 
         $this->registry = new RPCPipelineRegistry(
             $this->jobs = m::mock(JobsInterface::class),
@@ -45,6 +53,10 @@ final class RPCPipelineRegistryTest extends TestCase
                 ],
                 'local' => [
                     'connector' => $this->localConnector,
+                    'consume' => true,
+                ],
+                'amqp' => [
+                    'connector' => $this->amqpConnector,
                     'consume' => true,
                 ],
                 'without-connector' => [
@@ -65,23 +77,32 @@ final class RPCPipelineRegistryTest extends TestCase
                     'options' => new KafkaOptions('foo', 100, 14),
                 ],
             ]),
-            60
+            0
         );
     }
 
     public function testDeclareConsumersPipeline(): void
     {
-        $this->jobs->shouldReceive('create')
-            ->once()
-            ->with($this->memoryConnector)
-            ->andReturn($queue = m::mock(QueueInterface::class));
-
-        $queue->shouldReceive('resume')->once();
+        $this->jobs->shouldReceive('getIterator')->once()->andReturn(
+            new \ArrayIterator([
+                'amqp' => '',
+            ]),
+        );
 
         $this->jobs->shouldReceive('create')
             ->once()
             ->with($this->localConnector)
             ->andReturn($queue = m::mock(QueueInterface::class));
+        $queue->shouldReceive('resume')->once();
+
+        $this->jobs->shouldReceive('create')
+            ->once()
+            ->with($this->memoryConnector)
+            ->andReturn($queue = m::mock(QueueInterface::class));
+
+        $this->jobs->shouldNotReceive('create')
+            ->with($this->amqpConnector);
+
         $queue->shouldReceive('resume')->once();
 
         $this->registry->declareConsumerPipelines();
