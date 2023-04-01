@@ -16,7 +16,8 @@ use Symfony\Component\Console\Helper\TableCellStyle;
 
 #[AsCommand(
     name: 'rr:jobs:list',
-    description: 'Displays a list of available job pipelines for the RoadRunner.')
+    description: 'Displays a list of available job pipelines for the RoadRunner.'
+)
 ]
 final class ListCommand extends Command
 {

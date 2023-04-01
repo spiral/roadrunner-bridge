@@ -13,7 +13,8 @@ use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 
 #[AsCommand(
     name: 'rr:jobs:consume',
-    description: 'Resumes the consumption of jobs for the specified pipeline in the RoadRunner.')
+    description: 'Resumes the consumption of jobs for the specified pipeline in the RoadRunner.'
+)
 ]
 final class ResumeCommand extends Command
 {
