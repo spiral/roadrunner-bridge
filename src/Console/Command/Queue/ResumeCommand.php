@@ -4,25 +4,42 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Console\Command\Queue;
 
+use Spiral\Console\Attribute\Argument;
+use Spiral\Console\Attribute\AsCommand;
+use Spiral\Console\Attribute\Question;
 use Spiral\Console\Command;
-use Spiral\RoadRunner\Jobs\JobsInterface;
+use Spiral\RoadRunner\Jobs\Exception\JobsException;
+use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 
+#[AsCommand(
+    name: 'rr:jobs:consume',
+    description: 'Resumes the consumption of jobs for the specified pipeline in the RoadRunner.'
+)
+]
 final class ResumeCommand extends Command
 {
-    protected const SIGNATURE = 'rr:jobs:consume {pipeline : Pipeline name}';
-    protected const DESCRIPTION = 'Resumes the consumption of jobs for the specified pipeline in the RoadRunner.';
+    #[Argument(description: 'Pipeline name')]
+    #[Question('Provide pipeline name to resume')]
+    public string $pipeline;
 
-    public function perform(JobsInterface $jobs): int
+    /**
+     * @throws JobsException
+     */
+    public function perform(PipelineRegistryInterface $registry): int
     {
-        $name = $this->argument('pipeline');
-
         if ($this->isVerbose()) {
-            $this->writeln(\sprintf('<info>Pausing pipeline [%s]</info>', $name));
+            $this->info(\sprintf('Trying to start consuming pipeline [%s]...', $this->pipeline));
         }
 
-        $jobs->resume($name);
+        $queue = $registry->getPipeline($this->pipeline);
 
-        $this->writeln(\sprintf('<info>Pipeline [%s] has been resumed.</info>', $name));
+        if ($queue->isPaused()) {
+            $this->info(\sprintf('Pipeline [%s] has been started consuming tasks.', $this->pipeline));
+            $queue->resume();
+        } else {
+            $this->warning(\sprintf('Pipeline [%s] is not paused.', $this->pipeline));
+            return self::FAILURE;
+        }
 
         return self::SUCCESS;
     }

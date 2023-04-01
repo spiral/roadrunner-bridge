@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Console\Command\Queue;
 
+use Spiral\Console\Attribute\AsCommand;
 use Spiral\Console\Command;
+use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\Queue;
 use Spiral\RoadRunner\Jobs\QueueInterface;
@@ -12,11 +14,16 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Helper\TableCellStyle;
 
+#[AsCommand(
+    name: 'rr:jobs:list',
+    description: 'Displays a list of available job pipelines for the RoadRunner.'
+)
+]
 final class ListCommand extends Command
 {
-    protected const SIGNATURE = 'rr:jobs:list';
-    protected const DESCRIPTION = 'Displays a list of available job pipelines for the RoadRunner';
-
+    /**
+     * @throws JobsException
+     */
     public function perform(JobsInterface $jobs): int
     {
         $queues = \iterator_to_array($jobs->getIterator());
