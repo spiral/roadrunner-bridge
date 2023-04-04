@@ -128,6 +128,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     private function create(CreateInfoInterface $connector, ?OptionsInterface $options = null): QueueInterface
     {
         $this->expiresAt = 0;
+        /** @psalm-suppress TooManyArguments */
         return $this->jobs->create($connector, $options);
     }
 
@@ -136,6 +137,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      */
     private function connect(CreateInfoInterface $connector, ?OptionsInterface $options = null): QueueInterface
     {
+        /** @psalm-suppress TooManyArguments */
         return $this->jobs->connect($connector->getName(), $options);
     }
 
