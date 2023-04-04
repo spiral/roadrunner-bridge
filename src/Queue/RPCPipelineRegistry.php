@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Queue;
 
+use Psr\Log\LoggerInterface;
 use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Jobs;
@@ -12,6 +13,7 @@ use Spiral\RoadRunner\Jobs\OptionsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunnerBridge\Config\QueueConfig;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 /**
  * @internal
@@ -30,7 +32,9 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      * @param int $ttl Time to cache existing RoadRunner pipelines
      */
     public function __construct(
+        private readonly LoggerInterface $logger,
         private readonly JobsInterface $jobs,
+        private readonly RoadRunnerMode $mode,
         QueueConfig $config,
         private readonly int $ttl = 60,
     ) {
@@ -43,6 +47,10 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      */
     public function declareConsumerPipelines(): void
     {
+        if ($this->mode !== RoadRunnerMode::Jobs) {
+            return;
+        }
+
         $this->expiresAt = 0;
 
         foreach ($this->pipelines as $name => $pipeline) {
@@ -54,7 +62,17 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
             $connector = $this->getConnector($name);
 
             if (!$this->isExists($connector)) {
-                $this->jobs->create($connector)->resume();
+                try {
+                    $this->jobs->create($connector)->resume();
+                } catch (JobsException $e) {
+                    $this->logger->error(
+                        \sprintf(
+                            'Unable to declare consumer pipeline "%s". Reason: %s',
+                            $name,
+                            $e->getMessage(),
+                        ),
+                    );
+                }
             }
         }
     }
@@ -124,9 +142,8 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     /**
      * @param non-empty-string $name
      *
-     * @throws InvalidArgumentException
-     *
      * @return CreateInfoInterface
+     * @throws InvalidArgumentException
      */
     public function getConnector(string $name): CreateInfoInterface
     {
