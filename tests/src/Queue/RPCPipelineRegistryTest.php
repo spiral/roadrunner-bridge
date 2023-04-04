@@ -29,7 +29,6 @@ final class RPCPipelineRegistryTest extends TestCase
     private JobsInterface|m\MockInterface|m\LegacyMockInterface $jobs;
     private LoggerInterface|m\LegacyMockInterface|m\MockInterface $logger;
 
-
     public function makeJob(RoadRunnerMode $mode = RoadRunnerMode::Jobs): void
     {
         $this->memoryConnector = m::mock(CreateInfoInterface::class);
