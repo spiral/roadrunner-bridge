@@ -6,6 +6,7 @@ namespace Spiral\Tests\Queue;
 
 use Hamcrest\Matchers;
 use Mockery as m;
+use Psr\Log\LoggerInterface;
 use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\Queue\Options;
 use Spiral\RoadRunner\Jobs\JobsInterface;
@@ -16,6 +17,7 @@ use Spiral\RoadRunner\Jobs\Queue\Driver;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunnerBridge\Config\QueueConfig;
 use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
+use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\TestCase;
 
 final class RPCPipelineRegistryTest extends TestCase
@@ -25,11 +27,10 @@ final class RPCPipelineRegistryTest extends TestCase
     private RPCPipelineRegistry $registry;
     private m\LegacyMockInterface|m\MockInterface|CreateInfoInterface $amqpConnector;
     private JobsInterface|m\MockInterface|m\LegacyMockInterface $jobs;
+    private LoggerInterface|m\LegacyMockInterface|m\MockInterface $logger;
 
-    protected function setUp(): void
+    public function makeJob(RoadRunnerMode $mode = RoadRunnerMode::Jobs): void
     {
-        parent::setUp();
-
         $this->memoryConnector = m::mock(CreateInfoInterface::class);
         $this->memoryConnector->shouldReceive('toArray')->andReturn([]);
         $this->memoryConnector->shouldReceive('getDriver')->andReturn(Driver::Memory);
@@ -43,7 +44,9 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->amqpConnector->shouldReceive('getDriver')->andReturn(Driver::AMQP);
 
         $this->registry = new RPCPipelineRegistry(
+            $this->logger = m::mock(LoggerInterface::class),
             $this->jobs = m::mock(JobsInterface::class),
+            $mode,
             new QueueConfig([
                 'memory' => [
                     'connector' => $this->memoryConnector,
@@ -81,6 +84,7 @@ final class RPCPipelineRegistryTest extends TestCase
 
     public function testDeclareConsumersPipeline(): void
     {
+        $this->makeJob();
         $this->amqpConnector->shouldReceive('getName')->andReturn('amqp');
         $this->memoryConnector->shouldReceive('getName')->andReturn('memory');
         $this->localConnector->shouldReceive('getName')->andReturn('sqs');
@@ -110,8 +114,16 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->registry->declareConsumerPipelines();
     }
 
+    public function testConsumerPipelinesShouldNotBeDeclaredNotInJobsMode(): void
+    {
+        $this->makeJob(RoadRunnerMode::Tcp);
+        $this->jobs->shouldNotReceive('getIterator');
+        $this->registry->declareConsumerPipelines();
+    }
+
     public function testGetsExistsPipelineByNameShouldReturnQueue(): void
     {
+        $this->makeJob();
         $this->memoryConnector->shouldReceive('getName')->andReturn('local');
 
         $this->jobs->shouldReceive('getIterator')->once()->andReturn(new \ArrayIterator(['local' => '']));
@@ -128,6 +140,7 @@ final class RPCPipelineRegistryTest extends TestCase
 
     public function testDefaultQueueOptionsShouldBePassedAsJobsOptions(): void
     {
+        $this->makeJob();
         $this->localConnector->shouldReceive('getName')->andReturn('with-queue-options');
 
         $this->jobs->shouldReceive('getIterator')->once()->andReturn(new \ArrayIterator(['with-queue-options' => '']));
@@ -138,12 +151,13 @@ final class RPCPipelineRegistryTest extends TestCase
 
         $this->assertInstanceOf(
             QueueInterface::class,
-            $this->registry->getPipeline('with-queue-options', 'some'),
+            $this->registry->getPipeline('with-queue-options'),
         );
     }
 
     public function testDefaultJobsOptionsShouldBePassed(): void
     {
+        $this->makeJob();
         $this->localConnector->shouldReceive('getName')->andReturn('with-jobs-options');
 
         $this->jobs->shouldReceive('getIterator')->once()->andReturn(new \ArrayIterator(['with-jobs-options' => '']));
@@ -154,12 +168,13 @@ final class RPCPipelineRegistryTest extends TestCase
 
         $this->assertInstanceOf(
             QueueInterface::class,
-            $this->registry->getPipeline('with-jobs-options', 'some'),
+            $this->registry->getPipeline('with-jobs-options'),
         );
     }
 
     public function testGetsNonExistsPipelineByNameWithoutConsumingShouldCreateItAndReturnQueue(): void
     {
+        $this->makeJob();
         $this->localConnector->shouldReceive('getName')->once()->andReturn('local');
 
         $this->jobs->shouldReceive('getIterator')->once()->andReturn(new \ArrayIterator(['memory']));
@@ -170,12 +185,13 @@ final class RPCPipelineRegistryTest extends TestCase
 
         $this->assertInstanceOf(
             QueueInterface::class,
-            $this->registry->getPipeline('local', 'some'),
+            $this->registry->getPipeline('local'),
         );
     }
 
     public function testGetsNonExistsPipelineShouldReturnQueue(): void
     {
+        $this->makeJob();
         $this->jobs->shouldReceive('connect')
             ->once()
             ->with('test')
@@ -186,19 +202,21 @@ final class RPCPipelineRegistryTest extends TestCase
 
     public function testGetsPipelineWithoutConnectorShouldThrowAnException(): void
     {
+        $this->makeJob();
         $this->expectException(InvalidArgumentException::class);
         $this->expectErrorMessage('You must specify connector for given pipeline `without-connector`.');
 
-        $this->registry->getPipeline('without-connector', 'some');
+        $this->registry->getPipeline('without-connector');
     }
 
     public function testGetsPipelineWithWrongConnectorShouldThrowAnException(): void
     {
+        $this->makeJob();
         $this->expectException(InvalidArgumentException::class);
         $this->expectErrorMessage(
             'Connector should implement Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface interface.',
         );
 
-        $this->registry->getPipeline('with-wrong-connector', 'some');
+        $this->registry->getPipeline('with-wrong-connector');
     }
 }
