@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Tcp\Response;
 
-use Spiral\RoadRunner\Tcp\TcpWorkerInterface;
+use Spiral\RoadRunner\Tcp\TcpResponse;
 
 class ContinueRead implements ResponseInterface
 {
-    public function getAction(): string
+    public function getAction(): TcpResponse
     {
-        return TcpWorkerInterface::TCP_READ;
+        return TcpResponse::Read;
     }
 
     public function getBody(): string

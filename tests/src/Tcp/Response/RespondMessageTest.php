@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Tcp\Response;
 
-use Spiral\RoadRunner\Tcp\TcpWorkerInterface;
+use Spiral\RoadRunner\Tcp\TcpResponse;
 use Spiral\RoadRunnerBridge\Tcp\Response\RespondMessage;
 use Spiral\Tests\TestCase;
 
@@ -14,7 +14,7 @@ final class RespondMessageTest extends TestCase
     {
         $response = new RespondMessage('test');
 
-        $this->assertSame(TcpWorkerInterface::TCP_RESPOND, $response->getAction());
+        $this->assertSame(TcpResponse::Respond, $response->getAction());
         $this->assertSame('test', $response->getBody());
     }
 
@@ -22,7 +22,7 @@ final class RespondMessageTest extends TestCase
     {
         $response = new RespondMessage('test', true);
 
-        $this->assertSame(TcpWorkerInterface::TCP_RESPOND_CLOSE, $response->getAction());
+        $this->assertSame(TcpResponse::RespondClose, $response->getAction());
         $this->assertSame('test', $response->getBody());
     }
 }

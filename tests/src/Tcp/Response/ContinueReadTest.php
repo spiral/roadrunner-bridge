@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Tcp\Response;
 
-use Spiral\RoadRunner\Tcp\TcpWorkerInterface;
+use Spiral\RoadRunner\Tcp\TcpResponse;
 use Spiral\RoadRunnerBridge\Tcp\Response\ContinueRead;
 use Spiral\Tests\TestCase;
 
@@ -14,7 +14,7 @@ final class ContinueReadTest extends TestCase
     {
         $response = new ContinueRead();
 
-        $this->assertSame(TcpWorkerInterface::TCP_READ, $response->getAction());
+        $this->assertSame(TcpResponse::Read, $response->getAction());
         $this->assertSame('', $response->getBody());
     }
 }

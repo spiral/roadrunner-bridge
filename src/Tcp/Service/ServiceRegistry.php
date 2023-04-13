@@ -39,14 +39,13 @@ final class ServiceRegistry implements RegistryInterface
             throw new NotFoundException($server);
         }
 
-        switch (true) {
-            case $this->services[$server] instanceof ServiceInterface:
-                return $this->services[$server];
-            case $this->services[$server] instanceof Autowire:
-                return $this->services[$server]->resolve($this->container->get(FactoryInterface::class));
-            default:
-                return $this->container->get($this->services[$server]);
-        }
+        return match (true) {
+            $this->services[$server] instanceof ServiceInterface => $this->services[$server],
+            $this->services[$server] instanceof Autowire => $this->services[$server]->resolve(
+                $this->container->get(FactoryInterface::class)
+            ),
+            default => $this->container->get($this->services[$server]),
+        };
     }
 
     /**
