@@ -6,8 +6,16 @@ namespace Spiral\RoadRunnerBridge\Centrifugo;
 
 use Psr\Container\ContainerInterface;
 use RoadRunner\Centrifugo\CentrifugoWorker;
+use RoadRunner\Centrifugo\Exception\InvalidRequestTypeException;
+use RoadRunner\Centrifugo\Request\Connect;
+use RoadRunner\Centrifugo\Request\Invalid;
+use RoadRunner\Centrifugo\Request\Publish;
+use RoadRunner\Centrifugo\Request\Refresh;
 use RoadRunner\Centrifugo\Request\RequestInterface;
 use RoadRunner\Centrifugo\Request\RequestType;
+use RoadRunner\Centrifugo\Request\RPC;
+use RoadRunner\Centrifugo\Request\SubRefresh;
+use RoadRunner\Centrifugo\Request\Subscribe;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Core\InterceptableCore;

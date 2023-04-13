@@ -9,7 +9,8 @@ use Spiral\App\Tcp\TestInterceptor;
 use Spiral\App\Tcp\TestService;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\RoadRunner\Payload;
-use Spiral\RoadRunner\Tcp\TcpWorkerInterface;
+use Spiral\RoadRunner\Tcp\TcpEvent;
+use Spiral\RoadRunner\Tcp\TcpResponse;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
@@ -45,7 +46,7 @@ final class DispatcherTest extends TestCase
                 \json_encode([
                     'remote_addr' => '127.0.0.1',
                     'server' => 'tcp-server',
-                    'event' => TcpWorkerInterface::EVENT_DATA,
+                    'event' => TcpEvent::Data->value,
                     'uuid' => 'test-uuid',
                 ])
             )
@@ -79,19 +80,19 @@ final class DispatcherTest extends TestCase
                 \json_encode([
                     'remote_addr' => '127.0.0.1',
                     'server' => 'tcp-server',
-                    'event' => TcpWorkerInterface::EVENT_DATA,
+                    'event' => TcpEvent::Data->value,
                     'uuid' => 'test-uuid',
                 ])
             )
         );
         $worker->shouldReceive('respond')->times(5)->withArgs(function (Payload $payload) {
-            if ($payload->header === TcpWorkerInterface::TCP_READ) {
+            if ($payload->header === TcpResponse::Read->value) {
                 return true;
             }
 
             $body = \json_decode($payload->body, true, 512, JSON_THROW_ON_ERROR);
 
-            return \count($body) === 5 || $payload->header === TcpWorkerInterface::TCP_READ;
+            return \count($body) === 5 || $payload->header === TcpResponse::Read->value;
         });
 
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
@@ -118,7 +119,7 @@ final class DispatcherTest extends TestCase
                 \json_encode([
                     'remote_addr' => '127.0.0.1',
                     'server' => 'tcp-server',
-                    'event' => TcpWorkerInterface::EVENT_DATA,
+                    'event' => TcpEvent::Data->value,
                     'uuid' => 'test-uuid',
                 ])
             )

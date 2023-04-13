@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Tcp\Response;
 
-use Spiral\RoadRunner\Tcp\TcpWorkerInterface;
+use Spiral\RoadRunner\Tcp\TcpResponse;
 
 class RespondMessage implements ResponseInterface
 {
     public function __construct(
         private readonly string $body,
-        private readonly bool $close = false
+        private readonly bool $close = false,
     ) {
     }
 
-    public function getAction(): string
+    public function getAction(): TcpResponse
     {
         if ($this->close) {
-            return TcpWorkerInterface::TCP_RESPOND_CLOSE;
+            return TcpResponse::RespondClose;
         }
 
-        return TcpWorkerInterface::TCP_RESPOND;
+        return TcpResponse::Respond;
     }
 
     public function getBody(): string

@@ -12,13 +12,14 @@ use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
 use Spiral\RoadRunnerBridge\Tcp\Interceptor\RegistryInterface;
 use Spiral\RoadRunnerBridge\Tcp\Response\CloseConnection;
+use Spiral\RoadRunnerBridge\Tcp\Response\ResponseInterface;
 
 final class Server
 {
     public function __construct(
         private readonly TcpConfig $config,
         private readonly RegistryInterface $registry,
-        private readonly TcpServerHandler $handler
+        private readonly TcpServerHandler $handler,
     ) {
     }
 
@@ -30,13 +31,14 @@ final class Server
         while ($request = $tcpWorker->waitRequest()) {
             try {
                 $core = $this->createHandler($request->server);
+                /** @var ResponseInterface $response */
                 $response = $core->callAction($request->server, 'handle', ['request' => $request]);
             } catch (\Throwable $e) {
-                $worker->error($this->config->isDebugMode() ? (string) $e : $e->getMessage());
+                $worker->error($this->config->isDebugMode() ? (string)$e : $e->getMessage());
                 $response = new CloseConnection();
             } finally {
                 $tcpWorker->getWorker()->respond(
-                    new Payload($response->getBody(), $response->getAction())
+                    new Payload($response->getBody(), $response->getAction()->value),
                 );
 
                 if ($finalize !== null) {
