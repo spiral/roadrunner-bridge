@@ -45,7 +45,7 @@ final class FallbackDispatcher implements DispatcherInterface
      *
      * @throws DispatcherNotFoundException
      */
-    private function throwException(string $class): void
+    private function throwException(string $class): never
     {
         throw new DispatcherNotFoundException(\sprintf(self::PLUGIN_ERROR, $this->mode->name, $class));
     }

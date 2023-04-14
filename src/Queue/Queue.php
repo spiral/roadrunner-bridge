@@ -81,7 +81,6 @@ final class Queue implements QueueInterface
 
     /**
      * @param non-empty-string $name
-     * @param JobsOptionsInterface|OptionsInterface|null $options
      */
     private function createTask(
         RRQueueInterface $queue,
@@ -98,7 +97,7 @@ final class Queue implements QueueInterface
         if (\is_object($payload)) {
             $preparedTask = $preparedTask->withHeader(
                 self::SERIALIZED_CLASS_HEADER_KEY,
-                \get_class($payload),
+                $payload::class,
             );
         }
 

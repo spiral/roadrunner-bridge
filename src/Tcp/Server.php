@@ -23,6 +23,9 @@ final class Server
     ) {
     }
 
+    /**
+     * @throws \JsonException
+     */
     public function serve(WorkerInterface $worker = null, callable $finalize = null): void
     {
         $worker ??= Worker::create();
