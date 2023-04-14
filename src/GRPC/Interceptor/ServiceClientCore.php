@@ -9,7 +9,7 @@ use Spiral\RoadRunner\GRPC\ContextInterface;
 
 final class ServiceClientCore extends \Grpc\BaseStub implements CoreInterface
 {
-    public function callAction(string $controller, string $action, array $parameters = []): mixed
+    public function callAction(string $controller, string $action, array $parameters = []): array
     {
         \assert($parameters['ctx'] instanceof ContextInterface);
 

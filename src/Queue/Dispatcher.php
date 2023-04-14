@@ -85,9 +85,9 @@ final class Dispatcher implements DispatcherInterface
         }
         if (
             ($options instanceof OptionsInterface || $options instanceof JobsOptionsInterface) &&
-            $options->getDelay() !== null
+            ($delay = $options->getDelay()) !== null
         ) {
-            $task = $task->withDelay($options->getDelay());
+            $task = $task->withDelay($delay);
         }
 
         $task->fail($e, true);

@@ -19,10 +19,10 @@ final class InterceptorRegistry implements RegistryInterface
     private const INTERCEPTORS_FOR_ALL_SERVICES = '*';
 
     /** @var array<string, CoreInterceptorInterface[]> */
-    private array $interceptors;
+    private array $interceptors = [];
 
     /**
-     * @param array<non-empty-string, list<TInterceptor>> $interceptors
+     * @param array<non-empty-string, TInterceptor|TInterceptor[]> $interceptors
      */
     public function __construct(
         array $interceptors,
@@ -53,11 +53,14 @@ final class InterceptorRegistry implements RegistryInterface
             ));
         }
 
-        $this->interceptors[$type][] = match (true) {
+        /** @var CoreInterceptorInterface $object */
+        $object = match (true) {
             $interceptor instanceof CoreInterceptorInterface => $interceptor,
             $interceptor instanceof Autowire => $interceptor->resolve($this->factory),
             default => $this->container->get($interceptor)
         };
+
+        $this->interceptors[$type][] = $object;
     }
 
     /**

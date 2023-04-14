@@ -33,6 +33,9 @@ final class CacheBootloader extends Bootloader
         return new Factory($rpc, $serializer);
     }
 
+    /**
+     * @param non-empty-string $driver
+     */
     private function initDefaultStorage(FactoryInterface $factory, string $driver): StorageInterface
     {
         return $factory->select($driver);

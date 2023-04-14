@@ -7,20 +7,20 @@ namespace Spiral\RoadRunnerBridge\Bootloader;
 use Psr\Container\ContainerInterface;
 use RoadRunner\Centrifugo\CentrifugoApiInterface;
 use RoadRunner\Centrifugo\CentrifugoWorker;
+use RoadRunner\Centrifugo\CentrifugoWorkerInterface;
 use RoadRunner\Centrifugo\RPCCentrifugoApi;
+use Spiral\Boot\AbstractKernel;
+use Spiral\Boot\Bootloader\Bootloader;
+use Spiral\Broadcasting\Bootloader\BroadcastingBootloader;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Broadcast;
 use Spiral\RoadRunnerBridge\Centrifugo\Dispatcher;
 use Spiral\RoadRunnerBridge\Centrifugo\ErrorHandlerInterface;
+use Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
 use Spiral\RoadRunnerBridge\Centrifugo\LogErrorHandler;
 use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\ServiceRegistry;
-use RoadRunner\Centrifugo\CentrifugoWorkerInterface;
-use Spiral\Boot\AbstractKernel;
-use Spiral\Boot\Bootloader\Bootloader;
-use Spiral\Broadcasting\Bootloader\BroadcastingBootloader;
-use Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
 use Spiral\RoadRunnerBridge\Config\CentrifugoConfig;
 
 final class CentrifugoBootloader extends Bootloader
@@ -34,7 +34,7 @@ final class CentrifugoBootloader extends Bootloader
     ];
 
     public function __construct(
-        private readonly ConfiguratorInterface $config
+        private readonly ConfiguratorInterface $config,
     ) {
     }
 
@@ -45,7 +45,7 @@ final class CentrifugoBootloader extends Bootloader
             [
                 'services' => [],
                 'interceptors' => [],
-            ]
+            ],
         );
     }
 
@@ -66,7 +66,7 @@ final class CentrifugoBootloader extends Bootloader
     private function initInterceptorRegistry(
         CentrifugoConfig $config,
         ContainerInterface $container,
-        FactoryInterface $factory
+        FactoryInterface $factory,
     ): Interceptor\RegistryInterface {
         return new Interceptor\InterceptorRegistry($config->getInterceptors(), $container, $factory);
     }
@@ -74,8 +74,8 @@ final class CentrifugoBootloader extends Bootloader
     private function initServiceRegistry(
         CentrifugoConfig $config,
         ContainerInterface $container,
-        FactoryInterface $factory
-    ) {
+        FactoryInterface $factory,
+    ): RegistryInterface {
         return new ServiceRegistry($config->getServices(), $container, $factory);
     }
 }

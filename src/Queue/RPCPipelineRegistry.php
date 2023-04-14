@@ -54,7 +54,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         $this->expiresAt = 0;
 
         foreach ($this->pipelines as $name => $pipeline) {
-            $consume = (bool)($pipeline['consume'] ?? false);
+            $consume = $pipeline['consume'] ?? false;
             if (!$consume) {
                 continue;
             }
@@ -145,8 +145,6 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      * @param non-empty-string $name
      *
      * @throws InvalidArgumentException
-     *
-     * @return CreateInfoInterface
      */
     public function getConnector(string $name): CreateInfoInterface
     {

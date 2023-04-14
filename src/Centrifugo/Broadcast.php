@@ -16,11 +16,11 @@ final class Broadcast extends AbstractBroadcast
 
     public function publish(iterable|\Stringable|string $topics, iterable|string $messages): void
     {
+        /** @var non-empty-string[] $topics */
         $topics = $this->formatTopics($this->toArray($topics));
 
         /** @var string $message */
         foreach ($this->toArray($messages) as $message) {
-            \assert(\is_string($message), 'Message argument must be a type of string');
             $this->api->broadcast($topics, $message);
         }
     }

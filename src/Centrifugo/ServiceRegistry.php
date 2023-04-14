@@ -49,6 +49,9 @@ final class ServiceRegistry implements RegistryInterface
         return isset($this->services[$requestType->value]);
     }
 
+    /**
+     * @psalm-suppress LessSpecificReturnStatement
+     */
     private function createService(Autowire|ServiceInterface|string $service): ServiceInterface
     {
         return match (true) {

@@ -6,20 +6,24 @@ namespace Spiral\RoadRunnerBridge\Tcp\Service;
 
 use Spiral\Core\Container\Autowire;
 
+/**
+ * @psalm-type TService = Autowire|ServiceInterface|class-string<ServiceInterface>
+ */
 interface RegistryInterface
 {
     /**
-     * @psalm-param non-empty-string $server
+     * @param non-empty-string $server
      */
     public function getService(string $server): ServiceInterface;
 
     /**
-     * @psalm-param non-empty-string $server
+     * @param non-empty-string $server
+     * @param TService $service
      */
     public function register(string $server, Autowire|ServiceInterface|string $service): void;
 
     /**
-     * @psalm-param non-empty-string $server
+     * @param non-empty-string $server
      */
     public function hasService(string $server): bool;
 }

@@ -24,7 +24,7 @@ final class Dispatcher implements DispatcherInterface
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly FinalizerInterface $finalizer,
-        private readonly RoadRunnerMode $mode
+        private readonly RoadRunnerMode $mode,
     ) {
     }
 
@@ -37,7 +37,11 @@ final class Dispatcher implements DispatcherInterface
     {
         /** @var CentrifugoWorker $worker */
         $worker = $this->container->get(CentrifugoWorker::class);
-        /** @var ScopeInterface $scope */
+        /**
+         * @var ScopeInterface $scope
+         *
+         * @psalm-suppress DeprecatedInterface
+         */
         $scope = $this->container->get(ScopeInterface::class);
         /** @var Interceptor\RegistryInterface $registry */
         $registry = $this->container->get(Interceptor\RegistryInterface::class);
@@ -52,7 +56,7 @@ final class Dispatcher implements DispatcherInterface
                 $service = $this->getService($handler, $registry, $type);
                 $scope->runScope([
                     RequestInterface::class => $request,
-                ], static fn () => $service->callAction($request::class, 'handle', [
+                ], static fn (): mixed => $service->callAction($request::class, 'handle', [
                     'type' => $type,
                     'request' => $request,
                 ]));
@@ -67,7 +71,7 @@ final class Dispatcher implements DispatcherInterface
     public function getService(
         RequestHandler $handler,
         Interceptor\RegistryInterface $registry,
-        RequestType $type
+        RequestType $type,
     ): InterceptableCore {
         if (isset($this->services[$type->value])) {
             return $this->services[$type->value];

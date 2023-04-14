@@ -17,8 +17,7 @@ use Symfony\Component\Console\Helper\TableCellStyle;
 #[AsCommand(
     name: 'rr:jobs:list',
     description: 'Displays a list of available job pipelines for the RoadRunner.'
-)
-]
+)]
 final class ListCommand extends Command
 {
     /**
@@ -37,10 +36,12 @@ final class ListCommand extends Command
         $queues = \array_map(static function (QueueInterface $queue): array {
             \assert($queue instanceof Queue);
             $stat = $queue->getPipelineStat();
+            \assert($stat !== null);
 
-            $fontColor = $stat->getReady() ? 'green' : 'gray';
-            $defaultColor = $stat->getReady() ? 'default' : 'gray';
-            $activeFont = $stat->getReady() ? 'bold' : '';
+            $isReady = $stat->getReady();
+            $fontColor = $isReady ? 'green' : 'gray';
+            $defaultColor = $isReady ? 'default' : 'gray';
+            $activeFont = $isReady ? 'bold' : '';
 
             return [
                 'name' => new TableCell($stat->getPipeline(), [
@@ -76,7 +77,7 @@ final class ListCommand extends Command
         }, $queues);
 
         \ksort($queues);
-
+        \assert($this->output !== null);
         $table = new Table($this->output);
 
         $table->setHeaders(

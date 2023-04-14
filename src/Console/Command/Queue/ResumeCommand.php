@@ -14,8 +14,7 @@ use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 #[AsCommand(
     name: 'rr:jobs:consume',
     description: 'Resumes the consumption of jobs for the specified pipeline in the RoadRunner.'
-)
-]
+)]
 final class ResumeCommand extends Command
 {
     #[Argument(description: 'Pipeline name')]
@@ -27,6 +26,8 @@ final class ResumeCommand extends Command
      */
     public function perform(PipelineRegistryInterface $registry): int
     {
+        \assert($this->pipeline !== '');
+
         if ($this->isVerbose()) {
             $this->info(\sprintf('Trying to start consuming pipeline [%s]...', $this->pipeline));
         }
