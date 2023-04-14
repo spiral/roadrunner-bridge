@@ -37,7 +37,7 @@ final class InterceptorRegistry implements RegistryInterface
     /**
      * @param non-empty-string $server
      */
-    final public function register(string $server, Autowire|CoreInterceptorInterface|string $interceptor): void
+    public function register(string $server, Autowire|CoreInterceptorInterface|string $interceptor): void
     {
         $this->interceptors[$server][] = $interceptor;
     }

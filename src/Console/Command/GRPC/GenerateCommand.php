@@ -99,7 +99,9 @@ final class GenerateCommand extends Command
 
     /**
      * Get or detect base source code path. By default fallbacks to kernel location.
+     *
      * @param non-empty-string|null $generatedPath
+     *
      * @return non-empty-string
      */
     protected function getPath(KernelInterface $kernel, ?string $generatedPath): string
@@ -121,7 +123,9 @@ final class GenerateCommand extends Command
 
     /**
      * Get or detect base namespace. By default fallbacks to kernel namespace.
+     *
      * @return non-empty-string
+     *
      * @psalm-suppress LessSpecificReturnStatement
      */
     protected function getNamespace(KernelInterface $kernel, ?string $protoNamespace): string

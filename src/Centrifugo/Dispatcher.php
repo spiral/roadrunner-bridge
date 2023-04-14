@@ -39,6 +39,7 @@ final class Dispatcher implements DispatcherInterface
         $worker = $this->container->get(CentrifugoWorker::class);
         /**
          * @var ScopeInterface $scope
+         *
          * @psalm-suppress DeprecatedInterface
          */
         $scope = $this->container->get(ScopeInterface::class);

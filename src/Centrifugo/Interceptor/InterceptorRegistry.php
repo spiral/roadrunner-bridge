@@ -22,7 +22,7 @@ final class InterceptorRegistry implements RegistryInterface
     private array $interceptors = [];
 
     /**
-     * @param array<non-empty-string, TInterceptor[]|TInterceptor> $interceptors
+     * @param array<non-empty-string, TInterceptor|TInterceptor[]> $interceptors
      */
     public function __construct(
         array $interceptors,

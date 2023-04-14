@@ -39,9 +39,11 @@ final class Queue implements QueueInterface
 
     /**
      * @param non-empty-string $name
-     * @return non-empty-string
+     *
      * @throws InvalidArgumentException
      * @throws JobsException
+     *
+     * @return non-empty-string
      *
      * @psalm-suppress MoreSpecificImplementedParamType
      */

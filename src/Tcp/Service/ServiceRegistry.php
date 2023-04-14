@@ -32,7 +32,7 @@ final class ServiceRegistry implements RegistryInterface
      * @param non-empty-string $server
      * @param TService $service
      */
-    final public function register(string $server, Autowire|ServiceInterface|string $service): void
+    public function register(string $server, Autowire|ServiceInterface|string $service): void
     {
         $this->services[$server] = $service;
     }
