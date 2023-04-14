@@ -37,9 +37,11 @@ final class Server
                 $worker->error($this->config->isDebugMode() ? (string)$e : $e->getMessage());
                 $response = new CloseConnection();
             } finally {
-                $tcpWorker->getWorker()->respond(
-                    new Payload($response->getBody(), $response->getAction()->value),
-                );
+                if (isset($response) && $response instanceof ResponseInterface) {
+                    $tcpWorker->getWorker()->respond(
+                        new Payload($response->getBody(), $response->getAction()->value),
+                    );
+                }
 
                 if ($finalize !== null) {
                     isset($e) ? $finalize($e) : $finalize();
@@ -48,6 +50,9 @@ final class Server
         }
     }
 
+    /**
+     * @param non-empty-string $server
+     */
     private function createHandler(string $server): InterceptableCore
     {
         $core = new InterceptableCore($this->handler);

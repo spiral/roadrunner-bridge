@@ -11,16 +11,20 @@ use Spiral\Core\CoreInterface;
 final class RequestHandler implements CoreInterface
 {
     public function __construct(
-        private readonly RegistryInterface $registry
+        private readonly RegistryInterface $registry,
     ) {
     }
 
-    public function callAction(string $controller, string $action, array $parameters = []): mixed
+    public function callAction(string $controller, string $action, array $parameters = []): bool
     {
         \assert($parameters['request'] instanceof RequestInterface);
         \assert($parameters['type'] instanceof RequestType);
 
         $service = $this->registry->getService($parameters['type']);
+
+        if ($service === null) {
+            return false;
+        }
 
         $service->handle($parameters['request']);
 

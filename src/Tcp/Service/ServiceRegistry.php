@@ -9,9 +9,15 @@ use Spiral\Core\Container\Autowire;
 use Spiral\Core\FactoryInterface;
 use Spiral\RoadRunnerBridge\Tcp\Service\Exception\NotFoundException;
 
+/**
+ * @psalm-import-type TService from RegistryInterface
+ */
 final class ServiceRegistry implements RegistryInterface
 {
-    private array $services;
+    /**
+     * @var array<non-empty-string, TService>
+     */
+    private array $services = [];
 
     public function __construct(
         array $services,
@@ -23,15 +29,16 @@ final class ServiceRegistry implements RegistryInterface
     }
 
     /**
-     * @psalm-param non-empty-string $server
+     * @param non-empty-string $server
+     * @param TService $service
      */
-    public function register(string $server, Autowire|ServiceInterface|string $service): void
+    final public function register(string $server, Autowire|ServiceInterface|string $service): void
     {
         $this->services[$server] = $service;
     }
 
     /**
-     * @psalm-param non-empty-string $server
+     * @param non-empty-string $server
      */
     public function getService(string $server): ServiceInterface
     {
@@ -39,17 +46,21 @@ final class ServiceRegistry implements RegistryInterface
             throw new NotFoundException($server);
         }
 
-        return match (true) {
+        $service = match (true) {
             $this->services[$server] instanceof ServiceInterface => $this->services[$server],
             $this->services[$server] instanceof Autowire => $this->services[$server]->resolve(
                 $this->container->get(FactoryInterface::class)
             ),
             default => $this->container->get($this->services[$server]),
         };
+
+        \assert($service instanceof ServiceInterface);
+
+        return $service;
     }
 
     /**
-     * @psalm-param non-empty-string $server
+     * @param non-empty-string $server
      */
     public function hasService(string $server): bool
     {

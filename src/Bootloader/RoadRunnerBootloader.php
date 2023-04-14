@@ -44,6 +44,9 @@ final class RoadRunnerBootloader extends Bootloader
         return new Environment($env->getAll());
     }
 
+    /**
+     * @psalm-suppress ArgumentTypeCoercion
+     */
     private function initRPC(EnvironmentInterface $env): RPCInterface
     {
         return new RPC(Relay::create($env->getRPCAddress()));

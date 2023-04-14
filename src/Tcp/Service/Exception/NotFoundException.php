@@ -7,7 +7,7 @@ namespace Spiral\RoadRunnerBridge\Tcp\Service\Exception;
 final class NotFoundException extends \RuntimeException
 {
     /**
-     * @psalm-param non-empty-string $server
+     * @param non-empty-string $server
      */
     public function __construct(string $server)
     {

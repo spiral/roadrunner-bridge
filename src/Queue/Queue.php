@@ -38,8 +38,12 @@ final class Queue implements QueueInterface
     }
 
     /**
-     * @throws JobsException
+     * @param non-empty-string $name
+     * @return non-empty-string
      * @throws InvalidArgumentException
+     * @throws JobsException
+     *
+     * @psalm-suppress MoreSpecificImplementedParamType
      */
     public function push(
         string $name,

@@ -40,6 +40,8 @@ final class GenerateCommand extends Command
             return self::FAILURE;
         }
 
+        \assert($binaryPath !== null);
+
         $compiler = new ProtoCompiler(
             $this->getPath($kernel, $config->getGeneratedPath()),
             $this->getNamespace($kernel, $config->getNamespace()),
@@ -84,6 +86,7 @@ final class GenerateCommand extends Command
         }
 
         foreach ($generatorRegistry->getGenerators() as $generator) {
+            /** @psalm-suppress ArgumentTypeCoercion */
             $generator->run(
                 $compiled,
                 $this->getPath($kernel, $config->getGeneratedPath()),
@@ -96,6 +99,8 @@ final class GenerateCommand extends Command
 
     /**
      * Get or detect base source code path. By default fallbacks to kernel location.
+     * @param non-empty-string|null $generatedPath
+     * @return non-empty-string
      */
     protected function getPath(KernelInterface $kernel, ?string $generatedPath): string
     {
@@ -110,11 +115,14 @@ final class GenerateCommand extends Command
 
         $r = new \ReflectionObject($kernel);
 
+        /** @psalm-suppress LessSpecificReturnStatement */
         return \dirname($r->getFileName());
     }
 
     /**
      * Get or detect base namespace. By default fallbacks to kernel namespace.
+     * @return non-empty-string
+     * @psalm-suppress LessSpecificReturnStatement
      */
     protected function getNamespace(KernelInterface $kernel, ?string $protoNamespace): string
     {

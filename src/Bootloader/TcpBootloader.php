@@ -38,7 +38,7 @@ final class TcpBootloader extends Bootloader
         $this->initTcpConfig($environment);
     }
 
-    public function boot(KernelInterface $kernel, FactoryInterface $factory)
+    public function boot(KernelInterface $kernel, FactoryInterface $factory): void
     {
         $kernel->addDispatcher($factory->make(Dispatcher::class));
     }

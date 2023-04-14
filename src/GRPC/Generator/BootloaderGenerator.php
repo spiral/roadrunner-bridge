@@ -58,13 +58,16 @@ final class BootloaderGenerator implements GeneratorInterface
 
             $interfaceFile = FileDeclaration::fromCode($this->files->read($service));
             $interface = $interfaceFile->getInterfaces()->getIterator()->current();
+            $interfaceName = $interface->getName();
+
+            \assert($interfaceName !== null);
 
             $result[] = \sprintf(
                 '%s::class => [\'host\' => $env->get(\'%s_HOST\', \'127.0.0.1:%d\')],',
-                \str_replace('Interface', 'Client', $interface->getName()),
+                \str_replace('Interface', 'Client', $interfaceName),
                 \strtoupper(\trim(implode(
                     '_',
-                    \preg_split('/(?=[A-Z])/', \str_replace('Interface', '', $interface->getName()))
+                    \preg_split('/(?=[A-Z])/', \str_replace('Interface', '', $interfaceName))
                 ), '_')),
                 $port
             );
@@ -116,7 +119,10 @@ EOL,
         $interfaceNamespace = $interfaceFile->getNamespaces()->getIterator()->current();
         /** @var PhpNamespace $namespace */
         $namespace = $bootloader->getNamespaces()->getIterator()->current();
-        $clientClassName = \str_replace('Interface', 'Client', $interface->getName());
+        $clientClassName = \str_replace('Interface', 'Client', (string) $interface->getName());
+
+        $interfaceName = $interface->getName();
+        \assert($interfaceName !== null);
 
         $servicesMethod->addBody(
             \sprintf(
@@ -136,8 +142,8 @@ $container->bindSingleton(
     }
 );
 EOL,
-                $interface->getName(),
-                $interface->getName(),
+                $interfaceName,
+                $interfaceName,
                 $clientClassName,
                 $clientClassName
             )

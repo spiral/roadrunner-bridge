@@ -54,7 +54,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         $this->expiresAt = 0;
 
         foreach ($this->pipelines as $name => $pipeline) {
-            $consume = (bool)($pipeline['consume'] ?? false);
+            $consume = $pipeline['consume'] ?? false;
             if (!$consume) {
                 continue;
             }

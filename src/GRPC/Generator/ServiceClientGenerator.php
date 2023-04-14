@@ -17,7 +17,7 @@ use Spiral\RoadRunner\GRPC\ContextInterface;
 final class ServiceClientGenerator implements GeneratorInterface
 {
     public function __construct(
-        private readonly FilesInterface $files
+        private readonly FilesInterface $files,
     ) {
     }
 
@@ -37,12 +37,13 @@ final class ServiceClientGenerator implements GeneratorInterface
             $interfaceNamespace = $interfaceFile->getNamespaces()->getIterator()->current();
 
             $clientFile = new FileDeclaration();
+            /** @psalm-suppress PossiblyNullArgument */
             $clientNamespace = $clientFile->addNamespace($interfaceNamespace->getName());
             $clientNamespace->addUse($interfaceNamespace->getName() . '\\' . $interface->getName());
             $clientNamespace->addUse(ContextInterface::class);
             $clientNamespace->addUse(InterceptableCore::class);
 
-            $client = $clientNamespace->addClass(\str_replace('Interface', 'Client', $interface->getName()));
+            $client = $clientNamespace->addClass(\str_replace('Interface', 'Client', (string)$interface->getName()));
             $client->addImplement($interfaceNamespace->getName() . '\\' . $interface->getName());
 
             $constructor = $client->addMethod('__construct');
@@ -61,7 +62,11 @@ final class ServiceClientGenerator implements GeneratorInterface
 
     private function addMethodBody(Method $method, ClassDeclaration $client, InterfaceDeclaration $interface): void
     {
-        $clientMethod = $client->addMethod($method->getName());
+        $methodName = $method->getName();
+
+        \assert($methodName !== null);
+
+        $clientMethod = $client->addMethod($methodName);
         $clientMethod->setParameters($method->getParameters());
         $clientMethod->setReturnType($method->getReturnType());
 
@@ -76,10 +81,10 @@ final class ServiceClientGenerator implements GeneratorInterface
 
 return $response;
 EOL,
-                $interface->getName(),
-                $method->getName(),
-                $clientMethod->getReturnType()
-            )
+                (string)$interface->getName(),
+                (string)$method->getName(),
+                (string)$clientMethod->getReturnType(),
+            ),
         );
     }
 }
