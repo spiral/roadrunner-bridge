@@ -32,7 +32,8 @@
         "spiral/roadrunner-metrics": "^3.0",
         "roadrunner-php/app-logger": "^1.0",
         "spiral/framework": "^3.7",
-        "spiral/serializer": "^3.7"
+        "spiral/serializer": "^3.7",
+        "spiral/scaffolder": "^3.7"
     },
     "require-dev": {
         "spiral/testing": "^2.2",
