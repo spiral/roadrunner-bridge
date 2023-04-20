@@ -14,7 +14,7 @@ final class CentrifugoHandlerCommandTest extends AbstractCommandTest
 
         $this->getConsole()->run('create:centrifugo-handler', [
             'name' => 'sample',
-            '--comment' => 'Sample Handler'
+            '--comment' => 'Sample Handler',
         ]);
 
         clearstatcache();
@@ -38,7 +38,7 @@ final class CentrifugoHandlerCommandTest extends AbstractCommandTest
 
         $this->getConsole()->run('create:centrifugo-handler', [
             'name' => 'sample',
-            '--namespace' => 'Spiral\\App\\Scaffolder\\Endpoint\\Centrifugo\\Other'
+            '--namespace' => 'Spiral\\App\\Scaffolder\\Endpoint\\Centrifugo\\Other',
         ]);
 
         clearstatcache();

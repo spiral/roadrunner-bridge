@@ -19,7 +19,7 @@ final class ScaffolderBootloader extends Bootloader
 {
     public const DEPENDENCIES = [
         ConsoleBootloader::class,
-        BaseScaffolderBootloader::class
+        BaseScaffolderBootloader::class,
     ];
 
     public function __construct(

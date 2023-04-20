@@ -20,9 +20,9 @@ class CentrifugoHandlerDeclaration extends AbstractDeclaration
         $this->class->addMethod('__construct')
             ->setPublic()
             ->addPromotedParameter('api')
+            ->setPrivate()
             ->setReadOnly()
             ->setType(CentrifugoApiInterface::class)
-            ->setPrivate()
         ;
 
         $this->class->addMethod('handle')->setPublic()->setReturnType('void');

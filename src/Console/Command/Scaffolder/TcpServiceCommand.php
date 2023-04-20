@@ -15,7 +15,7 @@ use Spiral\Scaffolder\Command\AbstractCommand;
 final class TcpServiceCommand extends AbstractCommand
 {
     #[Argument(description: 'TCP service name')]
-    #[Question(question: 'What would you like to name the Tcp service?')]
+    #[Question(question: 'What would you like to name the TCP service?')]
     private string $name;
 
     #[Option(shortcut: 'c', description: 'Optional comment to add as class header')]

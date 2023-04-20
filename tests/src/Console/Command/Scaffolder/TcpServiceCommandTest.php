@@ -14,7 +14,7 @@ final class TcpServiceCommandTest extends AbstractCommandTest
 
         $this->getConsole()->run('create:tcp-service', [
             'name' => 'sample',
-            '--comment' => 'Sample Service'
+            '--comment' => 'Sample Service',
         ]);
 
         clearstatcache();
@@ -39,7 +39,7 @@ final class TcpServiceCommandTest extends AbstractCommandTest
 
         $this->getConsole()->run('create:tcp-service', [
             'name' => 'sample',
-            '--namespace' => 'Spiral\\App\\Scaffolder\\Endpoint\\Tcp\\Other'
+            '--namespace' => 'Spiral\\App\\Scaffolder\\Endpoint\\Tcp\\Other',
         ]);
 
         clearstatcache();
