@@ -44,10 +44,6 @@ final class PayloadDeserializer
         return $serializer->unserialize($payload);
     }
 
-
-    /**
-     * @return class-string|null
-     */
     private function getClassFromHeader(ReceivedTaskInterface $task): ?string
     {
         if ($task->hasHeader(Queue::SERIALIZED_CLASS_HEADER_KEY)) {
@@ -90,13 +86,13 @@ final class PayloadDeserializer
                 }
 
                 return null;
-            }
+            } else if($parameter->getType() instanceof \ReflectionNamedType) {
+                if ($parameter->getType()->isBuiltin()) {
+                    return null;
+                }
 
-            if ($parameter->getType()->isBuiltin()) {
-                return null;
+                return $parameter->getType()->getName();
             }
-
-            return $parameter->getType()->getName();
         }
 
         return null;
