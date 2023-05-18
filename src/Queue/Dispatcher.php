@@ -13,7 +13,6 @@ use Spiral\Queue\Exception\RetryException;
 use Spiral\Queue\ExtendedOptionsInterface;
 use Spiral\Queue\Interceptor\Consume\Handler;
 use Spiral\Queue\OptionsInterface;
-use Spiral\Queue\SerializerRegistryInterface;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
@@ -45,8 +44,8 @@ final class Dispatcher implements DispatcherInterface
         /** @var ConsumerInterface $consumer */
         $consumer = $this->container->get(ConsumerInterface::class);
 
-        /** @var SerializerRegistryInterface $serializer */
-        $serializer = $this->container->get(SerializerRegistryInterface::class);
+        /** @var PayloadDeserializer $deserializer */
+        $deserializer = $this->container->get(PayloadDeserializer::class);
 
         /** @var Handler $handler */
         $handler = $this->container->get(Handler::class);
@@ -58,7 +57,7 @@ final class Dispatcher implements DispatcherInterface
                     driver: 'roadrunner',
                     queue: $task->getQueue(),
                     id: $task->getId(),
-                    payload: $this->deserializePayload($serializer, $task),
+                    payload: $deserializer->deserializePayload($task),
                     headers: $task->getHeaders(),
                 );
 
@@ -73,6 +72,9 @@ final class Dispatcher implements DispatcherInterface
         }
     }
 
+    /**
+     * @throws JobsException
+     */
     public function retry(RetryException $e, ReceivedTaskInterface $task): void
     {
         $options = $e->getOptions();
@@ -91,21 +93,5 @@ final class Dispatcher implements DispatcherInterface
         }
 
         $task->fail($e, true);
-    }
-
-    private function deserializePayload(SerializerRegistryInterface $serializer, ReceivedTaskInterface $task): mixed
-    {
-        $payload = $task->getPayload();
-
-        $serializer = $serializer->getSerializer($task->getName());
-
-        if (
-            $task->hasHeader(Queue::SERIALIZED_CLASS_HEADER_KEY)
-            && \class_exists($class = $task->getHeaderLine(Queue::SERIALIZED_CLASS_HEADER_KEY))
-        ) {
-            return $serializer->unserialize($payload, $class);
-        }
-
-        return $serializer->unserialize($payload);
     }
 }
