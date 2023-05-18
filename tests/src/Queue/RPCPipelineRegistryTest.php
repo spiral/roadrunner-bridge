@@ -204,7 +204,7 @@ final class RPCPipelineRegistryTest extends TestCase
     {
         $this->makeJob();
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('You must specify connector for given pipeline `without-connector`.');
+        $this->expectExceptionMessage('You must specify connector for given pipeline `without-connector`.');
 
         $this->registry->getPipeline('without-connector');
     }
@@ -213,7 +213,7 @@ final class RPCPipelineRegistryTest extends TestCase
     {
         $this->makeJob();
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage(
+        $this->expectExceptionMessage(
             'Connector should implement Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface interface.',
         );
 

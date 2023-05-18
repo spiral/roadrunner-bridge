@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\Tests\Queue;
 
 use Mockery as m;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spiral\Queue\HandlerInterface;
 use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Queue\SerializerRegistryInterface;
@@ -61,12 +62,10 @@ final class PayloadDeserializerTest extends TestCase
         $serializer->shouldReceive('unserialize')->once()->with($payload, PayloadClass::class)
             ->andReturn($unserialized = 'unserialized-payload');
 
-        $this->assertSame($unserialized, $this->deserializer->deserializePayload($task));
+        $this->assertSame($unserialized, $this->deserializer->deserialize($task));
     }
 
-    /**
-     * @dataProvider getWrongDataFromHeadersDataProvider
-     */
+    #[DataProvider('getWrongDataFromHeadersDataProvider')]
     public function testGetWrongDataFromHeaders(mixed $header): void
     {
         $task = m::mock(ReceivedTaskInterface::class);
@@ -95,12 +94,10 @@ final class PayloadDeserializerTest extends TestCase
         $serializer->shouldReceive('unserialize')->once()->with($payload)
             ->andReturn($unserialized = 'unserialized-payload');
 
-        $this->assertSame($unserialized, $this->deserializer->deserializePayload($task));
+        $this->assertSame($unserialized, $this->deserializer->deserialize($task));
     }
 
-    /**
-     * @dataProvider getHandlersDataProvider
-     */
+    #[DataProvider('getHandlersDataProvider')]
     public function testGetClassFromHandler(HandlerInterface $handler): void
     {
         $task = m::mock(ReceivedTaskInterface::class);
@@ -124,12 +121,10 @@ final class PayloadDeserializerTest extends TestCase
         $serializer->shouldReceive('unserialize')->once()->with($payload, PayloadClass::class)
             ->andReturn($unserialized = 'unserialized-payload');
 
-        $this->assertSame($unserialized, $this->deserializer->deserializePayload($task));
+        $this->assertSame($unserialized, $this->deserializer->deserialize($task));
     }
 
-    /**
-     * @dataProvider getInvalidHandlersDataProvider
-     */
+    #[DataProvider('getInvalidHandlersDataProvider')]
     public function testGetClassFromInvalidHandler(HandlerInterface $handler): void
     {
         $task = m::mock(ReceivedTaskInterface::class);
@@ -153,16 +148,16 @@ final class PayloadDeserializerTest extends TestCase
         $serializer->shouldReceive('unserialize')->once()->with($payload)
             ->andReturn($unserialized = 'unserialized-payload');
 
-        $this->assertSame($unserialized, $this->deserializer->deserializePayload($task));
+        $this->assertSame($unserialized, $this->deserializer->deserialize($task));
     }
 
-    public function getHandlersDataProvider(): \Traversable
+    public static function getHandlersDataProvider(): \Traversable
     {
         yield 'PayloadClassJobHandler' => [new PayloadClassJobHandler()];
         yield 'UnionTypeJobHandlers' => [new UnionTypeJobHandler()];
     }
 
-    public function getInvalidHandlersDataProvider(): \Traversable
+    public static function getInvalidHandlersDataProvider(): \Traversable
     {
         yield 'JobHandlerWithoutMethod' => [new JobHandlerWithoutMethod()];
         yield 'JobHandlerWithoutClass' => [new JobHandlerWithoutClass()];
@@ -171,7 +166,7 @@ final class PayloadDeserializerTest extends TestCase
         yield 'JobHandlerWithoutType' => [new JobHandlerWithoutType()];
     }
 
-    public function getWrongDataFromHeadersDataProvider(): \Traversable
+    public static function getWrongDataFromHeadersDataProvider(): \Traversable
     {
         yield 'string' => ['string'];
         yield 'empty-string' => [''];

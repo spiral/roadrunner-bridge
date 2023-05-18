@@ -45,7 +45,7 @@ final class Dispatcher implements DispatcherInterface
         $consumer = $this->container->get(ConsumerInterface::class);
 
         /** @var PayloadDeserializer $deserializer */
-        $deserializer = $this->container->get(PayloadDeserializer::class);
+        $deserializer = $this->container->get(PayloadDeserializerInterface::class);
 
         /** @var Handler $handler */
         $handler = $this->container->get(Handler::class);
@@ -57,7 +57,7 @@ final class Dispatcher implements DispatcherInterface
                     driver: 'roadrunner',
                     queue: $task->getQueue(),
                     id: $task->getId(),
-                    payload: $deserializer->deserializePayload($task),
+                    payload: $deserializer->deserialize($task),
                     headers: $task->getHeaders(),
                 );
 

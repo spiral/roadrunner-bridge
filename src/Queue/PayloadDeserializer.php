@@ -22,7 +22,7 @@ final class PayloadDeserializer
      * @throws JobsException
      * @throws \ReflectionException
      */
-    public function deserializePayload(ReceivedTaskInterface $task): mixed
+    public function deserialize(ReceivedTaskInterface $task): mixed
     {
         $payload = $task->getPayload();
 
