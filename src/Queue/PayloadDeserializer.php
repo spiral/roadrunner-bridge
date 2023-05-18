@@ -53,10 +53,10 @@ final class PayloadDeserializer
         return null;
     }
 
-
     /**
-     * @return class-string|null
      * @throws \ReflectionException
+     *
+     * @return class-string|null
      */
     private function detectTypeFromJobHandler(HandlerInterface $handler): ?string
     {

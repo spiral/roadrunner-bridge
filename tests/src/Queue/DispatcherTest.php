@@ -6,17 +6,13 @@ namespace Spiral\Tests\Queue;
 
 use Mockery as m;
 use Spiral\Boot\FinalizerInterface;
-use Spiral\Queue\Failed\FailedJobHandlerInterface;
 use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Queue\JobHandler;
-use Spiral\Queue\SerializerRegistryInterface;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher;
 use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
-use Spiral\RoadRunnerBridge\Queue\Queue;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
-use Spiral\Serializer\SerializerInterface;
 use Spiral\Tests\TestCase;
 
 final class DispatcherTest extends TestCase
