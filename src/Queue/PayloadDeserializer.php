@@ -54,9 +54,9 @@ final class PayloadDeserializer
     }
 
     /**
-     * @return class-string|null
      * @throws \ReflectionException
      *
+     * @return class-string|null
      */
     private function detectTypeFromJobHandler(HandlerInterface $handler): ?string
     {
@@ -76,6 +76,14 @@ final class PayloadDeserializer
                 return null;
             }
 
+            if ($parameter->getType() instanceof \ReflectionNamedType) {
+                if ($parameter->getType()->isBuiltin()) {
+                    return null;
+                }
+
+                return $parameter->getType()->getName();
+            }
+
             if ($parameter->getType() instanceof \ReflectionUnionType) {
                 foreach ($parameter->getType()->getTypes() as $type) {
                     if ($type->isBuiltin()) {
@@ -86,12 +94,6 @@ final class PayloadDeserializer
                 }
 
                 return null;
-            } elseif ($parameter->getType() instanceof \ReflectionNamedType) {
-                if ($parameter->getType()->isBuiltin()) {
-                    return null;
-                }
-
-                return $parameter->getType()->getName();
             }
         }
 
