@@ -36,7 +36,7 @@
         "spiral/scaffolder": "^3.7"
     },
     "require-dev": {
-        "spiral/testing": "^2.2",
+        "spiral/testing": "^2.3",
         "vimeo/psalm": "^5.0",
         "spiral/nyholm-bridge": "^1.2"
     },

@@ -5,53 +5,82 @@ declare(strict_types=1);
 namespace Spiral\Tests\Console\Command\Scaffolder;
 
 use Spiral\Files\FilesInterface;
+use Spiral\Tests\TestCase;
 
-final class TcpServiceCommandTest extends AbstractCommandTest
+final class TcpServiceCommandTest extends TestCase
 {
     public function testScaffold(): void
     {
-        $this->className = $class = '\\Spiral\\App\\Scaffolder\\Endpoint\\Tcp\\Service\\SampleService';
+        $this->assertScaffolderCommandSame(
+            command: 'create:tcp-service',
+            args: [
+                'name' => 'sample',
+                '--comment' => 'Sample Service'
+            ],
+            expected: <<<'PHP'
+<?php
 
-        $this->getConsole()->run('create:tcp-service', [
-            'name' => 'sample',
-            '--comment' => 'Sample Service',
-        ]);
+declare(strict_types=1);
 
-        clearstatcache();
-        $this->assertTrue(\class_exists($class));
+namespace Spiral\Testing\Endpoint\Tcp\Service;
 
-        $reflection = new \ReflectionClass($class);
-        $content = $this->getContainer()->get(FilesInterface::class)->read($reflection->getFileName());
+use Spiral\RoadRunner\Tcp\Request;
+use Spiral\RoadRunnerBridge\Tcp\Response\RespondMessage;
+use Spiral\RoadRunnerBridge\Tcp\Response\ResponseInterface;
+use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
 
-        $this->assertStringContainsString('strict_types=1', $content);
-        $this->assertStringContainsString('Sample Service', $reflection->getDocComment());
-        $this->assertStringContainsString('final class SampleService implements ServiceInterface', $content);
-        $this->assertStringContainsString('Spiral\App\Scaffolder\Endpoint\Tcp\Service', $content);
-        $this->assertTrue($reflection->hasMethod('handle'));
-        $this->assertStringContainsString('public function handle(Request $request): ResponseInterface', $content);
-        $this->assertStringContainsString('return new RespondMessage(\'some message\', true);', $content);
-        $this->assertTrue($reflection->isFinal());
+/**
+ * Sample Service
+ */
+final class SampleService implements ServiceInterface
+{
+    public function handle(Request $request): ResponseInterface
+    {
+        return new RespondMessage('some message', true);
+    }
+}
+
+PHP,
+            expectedFilename: 'app/src/Endpoint/Tcp/Service/SampleService.php',
+            expectedOutputStrings: [
+                "Declaration of 'SampleService' has been successfully written into 'app/src/Endpoint/Tcp/Service/SampleService.php",
+            ],
+        );
     }
 
     public function testScaffoldWithCustomNamespace(): void
     {
-        $this->className = $class = '\\Spiral\\App\\Scaffolder\\Endpoint\\Tcp\\Other\\SampleService';
+        $this->assertScaffolderCommandSame(
+            command: 'create:tcp-service',
+            args: [
+                'name' => 'sample',
+                '--namespace' => 'Spiral\\Testing\\Endpoint\\Tcp\\Other'
+            ],
+            expected: <<<'PHP'
+<?php
 
-        $this->getConsole()->run('create:tcp-service', [
-            'name' => 'sample',
-            '--namespace' => 'Spiral\\App\\Scaffolder\\Endpoint\\Tcp\\Other',
-        ]);
+declare(strict_types=1);
 
-        clearstatcache();
-        $this->assertTrue(\class_exists($class));
+namespace Spiral\Testing\Endpoint\Tcp\Other;
 
-        $reflection = new \ReflectionClass($class);
-        $content = $this->getContainer()->get(FilesInterface::class)->read($reflection->getFileName());
+use Spiral\RoadRunner\Tcp\Request;
+use Spiral\RoadRunnerBridge\Tcp\Response\RespondMessage;
+use Spiral\RoadRunnerBridge\Tcp\Response\ResponseInterface;
+use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
 
-        $this->assertStringContainsString(
-            'Endpoint/Tcp/Other/SampleService.php',
-            \str_replace('\\', '/', $reflection->getFileName())
+final class SampleService implements ServiceInterface
+{
+    public function handle(Request $request): ResponseInterface
+    {
+        return new RespondMessage('some message', true);
+    }
+}
+
+PHP,
+            expectedFilename: 'app/src/Endpoint/Tcp/Other/SampleService.php',
+            expectedOutputStrings: [
+                "Declaration of 'SampleService' has been successfully written into 'app/src/Endpoint/Tcp/Other/SampleService.php",
+            ],
         );
-        $this->assertStringContainsString('namespace Spiral\App\Scaffolder\Endpoint\Tcp\Other', $content);
     }
 }
