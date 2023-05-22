@@ -14,7 +14,7 @@ final class CentrifugoHandlerCommandTest extends TestCase
             command: 'create:centrifugo-handler',
             args: [
                 'name' => 'sample',
-                '--comment' => 'Sample Handler'
+                '--comment' => 'Sample Handler',
             ],
             expected: <<<'PHP'
 <?php
@@ -54,7 +54,7 @@ PHP,
             command: 'create:centrifugo-handler',
             args: [
                 'name' => 'sample',
-                '--namespace' => 'Spiral\\Testing\\Endpoint\\Centrifugo\\Other'
+                '--namespace' => 'Spiral\\Testing\\Endpoint\\Centrifugo\\Other',
             ],
             expected: <<<'PHP'
 <?php

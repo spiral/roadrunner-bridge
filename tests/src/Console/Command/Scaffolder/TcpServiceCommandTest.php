@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Console\Command\Scaffolder;
 
-use Spiral\Files\FilesInterface;
 use Spiral\Tests\TestCase;
 
 final class TcpServiceCommandTest extends TestCase
@@ -15,7 +14,7 @@ final class TcpServiceCommandTest extends TestCase
             command: 'create:tcp-service',
             args: [
                 'name' => 'sample',
-                '--comment' => 'Sample Service'
+                '--comment' => 'Sample Service',
             ],
             expected: <<<'PHP'
 <?php
@@ -54,7 +53,7 @@ PHP,
             command: 'create:tcp-service',
             args: [
                 'name' => 'sample',
-                '--namespace' => 'Spiral\\Testing\\Endpoint\\Tcp\\Other'
+                '--namespace' => 'Spiral\\Testing\\Endpoint\\Tcp\\Other',
             ],
             expected: <<<'PHP'
 <?php
