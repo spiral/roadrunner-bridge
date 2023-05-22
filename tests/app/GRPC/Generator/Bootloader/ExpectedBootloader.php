@@ -17,7 +17,7 @@ use Spiral\RoadRunnerBridge\GRPC\Interceptor\ServiceClientCore;
 class ServiceBootloader extends Bootloader
 {
     public function __construct(
-        public ConfiguratorInterface $config,
+        private readonly ConfiguratorInterface $config,
     ) {
     }
 

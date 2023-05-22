@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Queue;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spiral\Queue\Options;
 use Spiral\RoadRunner\Jobs\KafkaOptions;
 use Spiral\RoadRunner\Jobs\Options as JobsOptions;
@@ -16,23 +17,19 @@ use Spiral\RoadRunnerBridge\Queue\OptionsFactory;
 
 final class OptionsFactoryTest extends TestCase
 {
-    /**
-     * @dataProvider createDataProvider
-     */
+    #[DataProvider('createDataProvider')]
     public function testCreate(?JobsOptionsInterface $expected, mixed $from): void
     {
         $this->assertEquals($expected, OptionsFactory::create($from));
     }
 
-    /**
-     * @dataProvider fromCreateInfoDataProvider
-     */
+    #[DataProvider('fromCreateInfoDataProvider')]
     public function testFromCreateInfo(mixed $expected, CreateInfoInterface $createInfo): void
     {
         $this->assertEquals($expected, OptionsFactory::fromCreateInfo($createInfo));
     }
 
-    public function createDataProvider(): \Traversable
+    public static function createDataProvider(): \Traversable
     {
         yield [null, null];
         yield [new JobsOptions(), new Options()];
@@ -47,7 +44,7 @@ final class OptionsFactoryTest extends TestCase
         ];
     }
 
-    public function fromCreateInfoDataProvider(): \Traversable
+    public static function fromCreateInfoDataProvider(): \Traversable
     {
         yield [null, new MemoryCreateInfo('bar')];
         yield [new KafkaOptions('default'), new KafkaCreateInfo('foo', 10)];

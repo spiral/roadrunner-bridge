@@ -37,6 +37,7 @@
     },
     "require-dev": {
         "spiral/testing": "^2.3",
+        "phpunit/phpunit": "^10.1",
         "vimeo/psalm": "^5.0",
         "spiral/nyholm-bridge": "^1.2"
     },
