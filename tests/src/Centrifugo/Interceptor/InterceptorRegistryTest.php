@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Centrifugo\Interceptor;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spiral\App\Centrifugo\OtherInterceptor;
 use Spiral\App\Centrifugo\TestInterceptor;
 use Spiral\Core\Container\Autowire;
@@ -72,9 +73,7 @@ final class InterceptorRegistryTest extends TestCase
         $this->assertEquals([new TestInterceptor(), new OtherInterceptor()], $registry->getInterceptors('publish'));
     }
 
-    /**
-     * @dataProvider interceptorsDataProvider
-     */
+    #[DataProvider('interceptorsDataProvider')]
     public function testRegister(Autowire|CoreInterceptorInterface|string $interceptor): void
     {
         $this->getContainer()->bind('alias', new TestInterceptor());
@@ -99,7 +98,7 @@ final class InterceptorRegistryTest extends TestCase
         $registry->register('foo', new TestInterceptor());
     }
 
-    public function interceptorsDataProvider(): \Traversable
+    public static function interceptorsDataProvider(): \Traversable
     {
         yield [new Autowire(TestInterceptor::class)];
         yield [new TestInterceptor()];

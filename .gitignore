@@ -12,7 +12,8 @@ composer.phar
 Thumbs.db
 
 # Other
-.phpunit.result.cache
+.phpunit.cache
+build
 .php_cs.cache
 clover.xml
 .env

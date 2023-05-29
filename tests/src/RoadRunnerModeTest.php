@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spiral\RoadRunner\Environment;
 use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
@@ -16,9 +17,7 @@ final class RoadRunnerModeTest extends TestCase
         $this->getContainer()->removeBinding(RoadRunnerMode::class);
     }
 
-    /**
-     * @dataProvider roadRunnerModes
-     */
+    #[DataProvider('roadRunnerModes')]
     public function testDetectMode(string $mode, RoadRunnerMode $expected): void
     {
         $this->getContainer()->bind(EnvironmentInterface::class, static fn () => new Environment([
@@ -28,7 +27,7 @@ final class RoadRunnerModeTest extends TestCase
         $this->assertSame($expected, $this->getContainer()->get(RoadRunnerMode::class));
     }
 
-    public function roadRunnerModes()
+    public static function roadRunnerModes(): array
     {
         return [
             'http' => ['http', RoadRunnerMode::Http],

@@ -32,10 +32,12 @@
         "spiral/roadrunner-metrics": "^3.0",
         "roadrunner-php/app-logger": "^1.0",
         "spiral/framework": "^3.7",
-        "spiral/serializer": "^3.7"
+        "spiral/serializer": "^3.7",
+        "spiral/scaffolder": "^3.7"
     },
     "require-dev": {
-        "spiral/testing": "^2.2",
+        "spiral/testing": "^2.3",
+        "phpunit/phpunit": "^10.1",
         "vimeo/psalm": "^5.0",
         "spiral/nyholm-bridge": "^1.2"
     },

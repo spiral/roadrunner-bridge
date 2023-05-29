@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Spiral\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spiral\RoadRunnerBridge\Exception\DispatcherNotFoundException;
 use Spiral\RoadRunnerBridge\FallbackDispatcher;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 final class FallbackDispatcherTest extends TestCase
 {
-    /**
-     * @dataProvider canServeDataProvider
-     */
+    #[DataProvider('canServeDataProvider')]
     public function testCanServe(RoadRunnerMode $mode, bool $expected): void
     {
         $dispatcher = new FallbackDispatcher($mode);
@@ -20,9 +19,7 @@ final class FallbackDispatcherTest extends TestCase
         $this->assertSame($expected, $dispatcher->canServe());
     }
 
-    /**
-     * @dataProvider exceptionDataProvider
-     */
+    #[DataProvider('exceptionDataProvider')]
     public function testException(RoadRunnerMode $mode, string $message): void
     {
         $this->expectException(DispatcherNotFoundException::class);
@@ -31,7 +28,7 @@ final class FallbackDispatcherTest extends TestCase
         (new FallbackDispatcher($mode))->serve();
     }
 
-    public function canServeDataProvider(): \Traversable
+    public static function canServeDataProvider(): \Traversable
     {
         yield [RoadRunnerMode::Http, true];
         yield [RoadRunnerMode::Temporal, true];
@@ -41,7 +38,7 @@ final class FallbackDispatcherTest extends TestCase
         yield [RoadRunnerMode::Unknown, false];
     }
 
-    public function exceptionDataProvider(): \Traversable
+    public static function exceptionDataProvider(): \Traversable
     {
         yield 'http' => [
             RoadRunnerMode::Http,

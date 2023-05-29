@@ -10,7 +10,7 @@ use Spiral\RoadRunner\GRPC\ContextInterface;
 class UsersServiceClient implements UsersServiceInterface
 {
     public function __construct(
-        public InterceptableCore $core,
+        private readonly InterceptableCore $core,
     ) {
     }
 
