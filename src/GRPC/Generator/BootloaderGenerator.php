@@ -97,7 +97,8 @@ EOL,
     private function updateInitServicesMethod(FileDeclaration $file, array $files): void
     {
         $method = $file->getClass(self::BOOTLOADER_NAME)->getMethod('initServices');
-
+        $method->setBody('');
+        
         foreach ($files as $service) {
             if (!\str_ends_with($service, 'Interface.php')) {
                 continue;
