@@ -11,10 +11,10 @@ use Spiral\Tests\ConsoleTestCase;
 
 final class ListCommandTest extends ConsoleTestCase
 {
-    public function testGetsListOfAvailablePipelines()
+    public function testGetsListOfAvailablePipelines(): void
     {
         $jobs = \Mockery::mock(JobsInterface::class);
-        $this->getContainer()->bind(JobsInterface::class, $jobs);
+        $this->getContainer()->bindSingleton(JobsInterface::class, $jobs, true);
 
         $jobs->shouldReceive('getIterator')->andReturn(
             new \ArrayIterator([
