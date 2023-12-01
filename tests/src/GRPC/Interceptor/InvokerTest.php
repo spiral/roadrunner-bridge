@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC\Interceptor;
 
-use Spiral\App\GRPC\PingService;
+use Mockery as m;
+use Service\PingService;
 use Spiral\Core\CoreInterface;
+use Service\Message;
 use Spiral\RoadRunner\GRPC\ContextInterface;
 use Spiral\RoadRunner\GRPC\Method;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
 use Spiral\Tests\TestCase;
-use Mockery as m;
 
 final class InvokerTest extends TestCase
 {
@@ -22,16 +23,24 @@ final class InvokerTest extends TestCase
         $service = m::mock(ServiceInterface::class);
         $method = Method::parse(new \ReflectionMethod(PingService::class, 'Ping'));
 
+        $input = (new Message(['msg' => 'hello']))->serializeToString();
+        $output = (new Message(['msg' => 'world']))->serializeToString();
+
+        $ctx = m::mock(ContextInterface::class);
         $core
             ->shouldReceive('callAction')
             ->once()
-            ->with($service::class, 'Ping', [
-                'service' => $service,
-                'method' => $method,
-                'ctx' => $ctx = m::mock(ContextInterface::class),
-                'input' => $input = 'test',
-            ])->andReturn('hello');
+            ->withArgs(function (string $class, string $method, array $params) use ($ctx, $service, $input) {
+                $this->assertSame($class, $service::class);
+                $this->assertSame('Ping', $method);
+                $this->assertInstanceOf(ContextInterface::class, $params['ctx']);
+                $this->assertSame($input, $params['input']);
+                $this->assertInstanceOf(Message::class, $params['message']);
+                $this->assertSame('hello', $params['message']->getMsg());
 
-        $this->assertSame('hello', $invoker->invoke($service, $method, $ctx, $input));
+                return true;
+            })->andReturn($output);
+
+        $this->assertSame($output, $invoker->invoke($service, $method, $ctx, $input));
     }
 }

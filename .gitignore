@@ -18,3 +18,5 @@ build
 clover.xml
 .env
 builds
+
+.phpunit.result.cache

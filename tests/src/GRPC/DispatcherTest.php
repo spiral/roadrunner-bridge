@@ -32,7 +32,7 @@ final class DispatcherTest extends ConsoleTestCase
         $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
-    public function testServe()
+    public function testServe(): void
     {
         $worker = $this->mockContainer(WorkerInterface::class, Worker::class);
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Grpc);
@@ -48,7 +48,8 @@ final class DispatcherTest extends ConsoleTestCase
         );
 
         $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
-            return $payload->body === (new Message())->setMsg('PONG')->serializeToString();
+            $this->assertSame($payload->body, (new Message())->setMsg('PONG')->serializeToString());
+            return true;
         });
 
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
