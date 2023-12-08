@@ -30,7 +30,7 @@ final class InvokerTest extends TestCase
         $core
             ->shouldReceive('callAction')
             ->once()
-            ->withArgs(function (string $class, string $method, array $params) use ($ctx, $service, $input) {
+            ->withArgs(function (string $class, string $method, array $params) use ($service, $input) {
                 $this->assertSame($class, $service::class);
                 $this->assertSame('Ping', $method);
                 $this->assertInstanceOf(ContextInterface::class, $params['ctx']);
