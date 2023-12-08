@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Centrifugo;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\App\Centrifugo\TestService;
 use Spiral\Core\Container\Autowire;
@@ -44,9 +45,7 @@ final class ServiceRegistryTest extends TestCase
         $this->assertInstanceOf(TestService::class, $this->getService());
     }
 
-    /**
-     * @dataProvider servicesDataProvider
-     */
+    #[DataProvider('servicesDataProvider')]
     public function testRegister(Autowire|ServiceInterface|string $service): void
     {
         $this->getContainer()->bind('alias', new TestService());
@@ -60,7 +59,7 @@ final class ServiceRegistryTest extends TestCase
         $this->assertEquals(new TestService(), $registry->getService(RequestType::Publish));
     }
 
-    public function servicesDataProvider(): \Traversable
+    public static function servicesDataProvider(): \Traversable
     {
         yield [new Autowire(TestService::class)];
         yield [new TestService()];

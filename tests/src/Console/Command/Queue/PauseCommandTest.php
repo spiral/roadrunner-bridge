@@ -9,10 +9,10 @@ use Spiral\Tests\ConsoleTestCase;
 
 final class PauseCommandTest extends ConsoleTestCase
 {
-    public function testPausePipeline()
+    public function testPausePipeline(): void
     {
         $jobs = \Mockery::mock(JobsInterface::class);
-        $this->getContainer()->bind(JobsInterface::class, $jobs);
+        $this->getContainer()->bindSingleton(JobsInterface::class, $jobs, true);
 
         $jobs->shouldReceive('pause')->once()->with('foo');
 

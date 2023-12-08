@@ -38,6 +38,7 @@ protected const LOAD = [
     RoadRunnerBridge\TcpBootloader::class, // Optional, if it needs to work with TCP plugin
     RoadRunnerBridge\MetricsBootloader::class, // Optional, if it needs to work with metrics plugin
     RoadRunnerBridge\LoggerBootloader::class, // Optional, if it needs to work with app-logger plugin
+    RoadRunnerBridge\ScaffolderBootloader::class, // Optional, to generate Centrifugo handlers and TCP services via Scaffolder
     RoadRunnerBridge\CommandBootloader::class,
     // ...
 ];
@@ -165,6 +166,19 @@ class TestService implements ServiceInterface
     }
 }
 ```
+
+The service can be generated using the **Scaffolder** component. Make sure that bootloader
+`Spiral\RoadRunnerBridge\Bootloader\ScaffolderBootloader` is added in your application and run:
+
+```bash
+php app.php create:tcp-service Test
+```
+
+This will generate service **TestService** in the folder **Endpoint/Tcp/Service/TestService.php**.
+
+> **Note**
+> Namespace (and generation path) can be configured.
+> Read more about [Scaffolder component](https://spiral.dev/docs/basics-scaffolding).
 
 ----
 
