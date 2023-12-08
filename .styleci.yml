@@ -74,3 +74,4 @@ enabled:
 finder:
     exclude:
         - "tests/app/GRPC/Generator"
+        - "tests/generated"

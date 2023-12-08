@@ -36,6 +36,7 @@ final class Invoker implements InvokerInterface
 
     /**
      * Converts the input from the GRPC service method to the Message object.
+     *
      * @throws InvokeException
      */
     private function makeInput(Method $method, ?string $body): Message
@@ -61,6 +62,7 @@ final class Invoker implements InvokerInterface
      * Checks that the input of the GRPC service method contains the Message object.
      *
      * @param class-string $class
+     *
      * @throws \InvalidArgumentException
      */
     private function assertInputType(Method $method, string $class): bool
