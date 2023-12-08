@@ -13,7 +13,7 @@ use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\RoadRunnerBridge\Queue\PayloadDeserializer;
 use Spiral\RoadRunnerBridge\Queue\Queue;
 use Spiral\Serializer\SerializerInterface;
-use Spiral\Tests\Queue\Fixtures\JobHandlerUnionTypeWithoutClass;
+use Spiral\Tests\Queue\Fixtures\JobHandlerUnionTypeWithString;
 use Spiral\Tests\Queue\Fixtures\JobHandlerWithoutClass;
 use Spiral\Tests\Queue\Fixtures\JobHandlerWithoutMethod;
 use Spiral\Tests\Queue\Fixtures\JobHandlerWithoutPayload;
@@ -151,6 +151,29 @@ final class PayloadDeserializerTest extends TestCase
         $this->assertSame($unserialized, $this->deserializer->deserialize($task));
     }
 
+    public function testUsePayloadAsStringInCasIfStringExpected(): void
+    {
+        $task = m::mock(ReceivedTaskInterface::class);
+
+        $task->shouldReceive('hasHeader')
+            ->once()
+            ->with(Queue::SERIALIZED_CLASS_HEADER_KEY)
+            ->andReturnFalse();
+
+        $this->serializer->shouldReceive('getSerializer')->once()->with('foo-task')
+            ->andReturn($serializer = m::mock(SerializerInterface::class));
+
+        $task->shouldReceive('getName')->once()->andReturn($name = 'foo-task');
+        $task->shouldReceive('getPayload')->once()->andReturn($payload = '{"foo":"bar"}');
+
+        $this->registry->shouldReceive('getHandler')
+            ->once()
+            ->with($name)
+            ->andReturn(new JobHandlerUnionTypeWithString());
+
+        $this->assertSame($payload, $this->deserializer->deserialize($task));
+    }
+
     public static function getHandlersDataProvider(): \Traversable
     {
         yield 'PayloadClassJobHandler' => [new PayloadClassJobHandler()];
@@ -161,7 +184,6 @@ final class PayloadDeserializerTest extends TestCase
     {
         yield 'JobHandlerWithoutMethod' => [new JobHandlerWithoutMethod()];
         yield 'JobHandlerWithoutClass' => [new JobHandlerWithoutClass()];
-        yield 'JobHandlerUnionTypeWithoutClass' => [new JobHandlerUnionTypeWithoutClass()];
         yield 'JobHandlerWithoutPayload' => [new JobHandlerWithoutPayload()];
         yield 'JobHandlerWithoutType' => [new JobHandlerWithoutType()];
     }

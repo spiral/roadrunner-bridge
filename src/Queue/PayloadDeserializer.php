@@ -12,6 +12,12 @@ use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 
 final class PayloadDeserializer
 {
+    /**
+     * Cache for detected types.
+     * @var array<class-string, class-string|string|null>
+     */
+    private array $handlerTypes = [];
+
     public function __construct(
         private readonly HandlerRegistryInterface $registry,
         private readonly SerializerRegistryInterface $serializer,
@@ -34,8 +40,12 @@ final class PayloadDeserializer
         }
 
         $class = $this->detectTypeFromJobHandler(
-            $this->registry->getHandler($name)
+            $this->registry->getHandler($name),
         );
+
+        if ($class === 'string') {
+            return $payload;
+        }
 
         if ($class !== null && \class_exists($class)) {
             return $serializer->unserialize($payload, $class);
@@ -54,15 +64,19 @@ final class PayloadDeserializer
     }
 
     /**
-     * @throws \ReflectionException
-     *
      * @return class-string|null
+     * @throws \ReflectionException
      */
     private function detectTypeFromJobHandler(HandlerInterface $handler): ?string
     {
         $handler = new \ReflectionClass($handler);
+
+        if (isset($this->handlerTypes[$handler->getName()])) {
+            return $this->handlerTypes[$handler->getName()];
+        }
+
         if (!$handler->hasMethod('invoke')) {
-            return null;
+            return $this->handlerTypes[$handler->getName()] = null;
         }
 
         $handlerMethod = $handler->getMethod('invoke');
@@ -72,28 +86,31 @@ final class PayloadDeserializer
                 continue;
             }
 
-            if ($parameter->getType() === null) {
-                return null;
+            $type = $this->detectType($parameter->getType());
+            if ($type !== null) {
+                return $this->handlerTypes[$handler->getName()] = $type;
+            }
+        }
+
+        return $this->handlerTypes[$handler->getName()] = null;
+    }
+
+    public function detectType(\ReflectionType|null $type)
+    {
+        if ($type instanceof \ReflectionNamedType) {
+            if ($type->isBuiltin()) {
+                return $type->getName() === 'string' ? 'string' : null;
             }
 
-            if ($parameter->getType() instanceof \ReflectionNamedType) {
-                if ($parameter->getType()->isBuiltin()) {
-                    return null;
+            return $type->getName();
+        }
+
+        if ($type instanceof \ReflectionUnionType) {
+            foreach ($type->getTypes() as $t) {
+                $class = $this->detectType($t);
+                if ($class !== null) {
+                    return $class;
                 }
-
-                return $parameter->getType()->getName();
-            }
-
-            if ($parameter->getType() instanceof \ReflectionUnionType) {
-                foreach ($parameter->getType()->getTypes() as $type) {
-                    if ($type->isBuiltin()) {
-                        continue;
-                    }
-
-                    return $type->getName();
-                }
-
-                return null;
             }
         }
 

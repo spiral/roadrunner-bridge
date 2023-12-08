@@ -6,7 +6,7 @@ namespace Spiral\Tests\Queue\Fixtures;
 
 use Spiral\Queue\HandlerInterface;
 
-final class JobHandlerUnionTypeWithoutClass implements HandlerInterface
+final class JobHandlerUnionTypeWithString implements HandlerInterface
 {
     public function invoke(string $name, string $id, array|string|int $payload): void
     {
