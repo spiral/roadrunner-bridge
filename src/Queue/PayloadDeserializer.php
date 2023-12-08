@@ -14,6 +14,7 @@ final class PayloadDeserializer
 {
     /**
      * Cache for detected types.
+     *
      * @var array<class-string, class-string|string|null>
      */
     private array $handlerTypes = [];
@@ -64,8 +65,9 @@ final class PayloadDeserializer
     }
 
     /**
-     * @return class-string|null
      * @throws \ReflectionException
+     *
+     * @return class-string|null
      */
     private function detectTypeFromJobHandler(HandlerInterface $handler): ?string
     {
