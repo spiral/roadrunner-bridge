@@ -32,6 +32,7 @@ final class InvokerCore implements CoreInterface
             ? $parameters['message']
             : $parameters['input'];
 
+        /** @psalm-suppress PossiblyInvalidArgument */
         return $this->invoker->invoke(
             $parameters['service'],
             $parameters['method'],
