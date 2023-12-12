@@ -8,6 +8,8 @@ use Mockery as m;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
 use Spiral\Queue\HandlerRegistryInterface;
+use Spiral\RoadRunnerBridge\Queue\PayloadDeserializer;
+use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
 use Spiral\Serializer\SerializerInterface;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
@@ -85,6 +87,14 @@ final class QueueBootloaderTest extends TestCase
         $this->assertContainerBoundAsSingleton(
             SerializerInterface::class,
             SerializerManager::class
+        );
+    }
+
+    public function testGetsPayloadDeserializerInterface(): void
+    {
+        $this->assertContainerBoundAsSingleton(
+            PayloadDeserializerInterface::class,
+            PayloadDeserializer::class
         );
     }
 

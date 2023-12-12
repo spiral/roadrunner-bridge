@@ -14,6 +14,8 @@ use Spiral\RoadRunner\Jobs\Jobs;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunnerBridge\Config\QueueConfig;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher;
+use Spiral\RoadRunnerBridge\Queue\PayloadDeserializer;
+use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\Queue\Queue;
 use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
@@ -31,6 +33,7 @@ final class QueueBootloader extends Bootloader
         JobsInterface::class => Jobs::class,
         QueueConfig::class => [self::class, 'initConfig'],
         PipelineRegistryInterface::class => RPCPipelineRegistry::class,
+        PayloadDeserializerInterface::class => PayloadDeserializer::class,
     ];
 
     public function init(
