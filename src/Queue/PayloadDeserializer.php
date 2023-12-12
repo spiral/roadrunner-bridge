@@ -62,9 +62,9 @@ final class PayloadDeserializer implements PayloadDeserializerInterface
     /**
      * Detects the type of for payload argument of the given handler's method.
      *
-     * @return class-string|string|null
      * @throws \ReflectionException
      *
+     * @return class-string|string|null
      */
     private function detectTypeFromJobHandler(HandlerInterface $handler): ?string
     {
