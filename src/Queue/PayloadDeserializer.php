@@ -7,7 +7,6 @@ namespace Spiral\RoadRunnerBridge\Queue;
 use Spiral\Queue\HandlerInterface;
 use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Queue\SerializerRegistryInterface;
-use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 
 final class PayloadDeserializer implements PayloadDeserializerInterface
@@ -25,10 +24,6 @@ final class PayloadDeserializer implements PayloadDeserializerInterface
     ) {
     }
 
-    /**
-     * @throws JobsException
-     * @throws \ReflectionException
-     */
     public function deserialize(ReceivedTaskInterface $task): mixed
     {
         $payload = $task->getPayload();
@@ -65,9 +60,11 @@ final class PayloadDeserializer implements PayloadDeserializerInterface
     }
 
     /**
+     * Detects the type of for payload argument of the given handler's method.
+     *
+     * @return class-string|string|null
      * @throws \ReflectionException
      *
-     * @return class-string|null
      */
     private function detectTypeFromJobHandler(HandlerInterface $handler): ?string
     {
@@ -97,7 +94,12 @@ final class PayloadDeserializer implements PayloadDeserializerInterface
         return $this->handlerTypes[$handler->getName()] = null;
     }
 
-    public function detectType(\ReflectionType|null $type)
+    /**
+     * Detects the type of the given parameter.
+     *
+     * @throws \ReflectionException
+     */
+    private function detectType(\ReflectionType|null $type): ?string
     {
         if ($type instanceof \ReflectionNamedType) {
             if ($type->isBuiltin()) {
