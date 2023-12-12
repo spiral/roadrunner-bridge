@@ -10,7 +10,7 @@ use Spiral\Queue\SerializerRegistryInterface;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 
-final class PayloadDeserializer
+final class PayloadDeserializer implements PayloadDeserializerInterface
 {
     /**
      * Cache for detected types.
