@@ -43,7 +43,6 @@ final class Invoker implements InvokerInterface
     {
         try {
             $class = $method->inputType;
-            \assert($this->assertInputType($method, $class));
 
             /** @psalm-suppress UnsafeInstantiation */
             $in = new $class();
@@ -56,28 +55,5 @@ final class Invoker implements InvokerInterface
         } catch (\Throwable $e) {
             throw InvokeException::create($e->getMessage(), StatusCode::INTERNAL, $e);
         }
-    }
-
-    /**
-     * Checks that the input of the GRPC service method contains the Message object.
-     *
-     * @param class-string $class
-     *
-     * @throws \InvalidArgumentException
-     */
-    private function assertInputType(Method $method, string $class): bool
-    {
-        if (!\is_subclass_of($class, Message::class)) {
-            throw new \InvalidArgumentException(
-                \sprintf(
-                    'Method %s input type must be an instance of %s, but the input is type of %s',
-                    $method->name,
-                    Message::class,
-                    $class,
-                ),
-            );
-        }
-
-        return true;
     }
 }
