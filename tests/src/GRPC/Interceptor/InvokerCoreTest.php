@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC\Interceptor;
 
-use Spiral\App\GRPC\PingService;
+use Service\PingService;
 use Spiral\RoadRunner\GRPC\ContextInterface;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunnerBridge\GRPC\Interceptor\InvokerCore;
