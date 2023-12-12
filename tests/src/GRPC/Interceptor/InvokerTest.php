@@ -9,6 +9,7 @@ use Service\PingService;
 use Spiral\Core\CoreInterface;
 use Service\Message;
 use Spiral\RoadRunner\GRPC\ContextInterface;
+use Spiral\RoadRunner\GRPC\Exception\InvokeException;
 use Spiral\RoadRunner\GRPC\Method;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
@@ -41,6 +42,22 @@ final class InvokerTest extends TestCase
                 return true;
             })->andReturn($output);
 
+        $this->assertSame($output, $invoker->invoke($service, $method, $ctx, $input));
+    }
+
+    public function testInvokeWithBrokenText(): void
+    {
+        $this->expectException(InvokeException::class);
+
+        $invoker = new Invoker(m::mock(CoreInterface::class));
+
+        $service = m::mock(ServiceInterface::class);
+        $method = Method::parse(new \ReflectionMethod(PingService::class, 'Ping'));
+
+        $input = 'input';
+        $output = 'output';
+
+        $ctx = m::mock(ContextInterface::class);
         $this->assertSame($output, $invoker->invoke($service, $method, $ctx, $input));
     }
 }
