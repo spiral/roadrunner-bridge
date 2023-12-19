@@ -25,17 +25,20 @@ use Spiral\RoadRunnerBridge\Config\CentrifugoConfig;
 
 final class CentrifugoBootloader extends Bootloader
 {
-    protected const SINGLETONS = [
-        RegistryInterface::class => [self::class, 'initServiceRegistry'],
-        Interceptor\RegistryInterface::class => [self::class, 'initInterceptorRegistry'],
-        CentrifugoWorkerInterface::class => CentrifugoWorker::class,
-        ErrorHandlerInterface::class => LogErrorHandler::class,
-        CentrifugoApiInterface::class => RPCCentrifugoApi::class,
-    ];
-
     public function __construct(
         private readonly ConfiguratorInterface $config,
     ) {
+    }
+
+    public function defineSingletons(): array
+    {
+        return [
+            RegistryInterface::class => [self::class, 'initServiceRegistry'],
+            Interceptor\RegistryInterface::class => [self::class, 'initInterceptorRegistry'],
+            CentrifugoWorkerInterface::class => CentrifugoWorker::class,
+            ErrorHandlerInterface::class => LogErrorHandler::class,
+            CentrifugoApiInterface::class => RPCCentrifugoApi::class,
+        ];
     }
 
     private function initConfig(): void
@@ -49,17 +52,14 @@ final class CentrifugoBootloader extends Bootloader
         );
     }
 
-    public function init(
-        BroadcastingBootloader $broadcasting,
-    ): void {
+    public function init(BroadcastingBootloader $broadcasting): void
+    {
         $this->initConfig();
         $broadcasting->registerDriverAlias(Broadcast::class, 'centrifugo');
     }
 
-    public function boot(
-        AbstractKernel $kernel,
-        Dispatcher $dispatcher,
-    ): void {
+    public function boot(AbstractKernel $kernel, Dispatcher $dispatcher): void
+    {
         $kernel->addDispatcher($dispatcher);
     }
 

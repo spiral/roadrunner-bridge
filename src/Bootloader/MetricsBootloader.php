@@ -11,16 +11,17 @@ use Spiral\RoadRunner\Metrics\MetricsInterface;
 
 final class MetricsBootloader extends Bootloader
 {
-    protected const DEPENDENCIES = [
-        RoadRunnerBootloader::class,
-    ];
-
-    protected const SINGLETONS = [
-        MetricsInterface::class => [self::class, 'initMetrics'],
-    ];
-
-    protected function initMetrics(RPCInterface $rpc): MetricsInterface
+    public function defineDependencies(): array
     {
-        return new Metrics($rpc);
+        return [
+            RoadRunnerBootloader::class,
+        ];
+    }
+
+    public function defineSingletons(): array
+    {
+        return [
+            MetricsInterface::class => static fn(RPCInterface $rpc): MetricsInterface => new Metrics($rpc),
+        ];
     }
 }

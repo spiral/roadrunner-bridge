@@ -10,11 +10,11 @@ use Spiral\Broadcasting\Driver\AbstractBroadcast;
 final class Broadcast extends AbstractBroadcast
 {
     public function __construct(
-        private readonly CentrifugoApiInterface $api
+        private readonly CentrifugoApiInterface $api,
     ) {
     }
 
-    public function publish(iterable|\Stringable|string $topics, iterable|string $messages): void
+    public function publish(iterable|\Stringable|string $topics, iterable|\Stringable|string $messages): void
     {
         /** @var non-empty-string[] $topics */
         $topics = $this->formatTopics($this->toArray($topics));

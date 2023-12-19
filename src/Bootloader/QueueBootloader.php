@@ -23,24 +23,34 @@ use Spiral\Serializer\Bootloader\SerializerBootloader;
 
 final class QueueBootloader extends Bootloader
 {
-    protected const DEPENDENCIES = [
-        RoadRunnerBootloader::class,
-        SerializerBootloader::class,
-    ];
+    public function defineDependencies(): array
+    {
+        return [
+            RoadRunnerBootloader::class,
+            SerializerBootloader::class,
+        ];
+    }
 
-    protected const SINGLETONS = [
-        ConsumerInterface::class => Consumer::class,
-        JobsInterface::class => Jobs::class,
-        QueueConfig::class => [self::class, 'initConfig'],
-        PipelineRegistryInterface::class => RPCPipelineRegistry::class,
-        PayloadDeserializerInterface::class => PayloadDeserializer::class,
-    ];
+    public function defineSingletons(): array
+    {
+        return [
+            ConsumerInterface::class => Consumer::class,
+            JobsInterface::class => Jobs::class,
+            PipelineRegistryInterface::class => RPCPipelineRegistry::class,
+            PayloadDeserializerInterface::class => PayloadDeserializer::class,
 
-    public function init(
-        BaseQueueBootloader $bootloader,
-        KernelInterface $kernel,
-        Dispatcher $jobs,
-    ): void {
+            QueueConfig::class => static function (ConfigsInterface $configs): QueueConfig {
+                $config = $configs->getConfig('queue');
+
+                return new QueueConfig(
+                    $config['pipelines'] ?? [],
+                );
+            },
+        ];
+    }
+
+    public function init(BaseQueueBootloader $bootloader, KernelInterface $kernel, Dispatcher $jobs): void
+    {
         $bootloader->registerDriverAlias(Queue::class, 'roadrunner');
         $kernel->addDispatcher($jobs);
     }
@@ -48,14 +58,5 @@ final class QueueBootloader extends Bootloader
     public function boot(PipelineRegistryInterface $registry): void
     {
         $registry->declareConsumerPipelines();
-    }
-
-    private function initConfig(ConfigsInterface $configs): QueueConfig
-    {
-        $config = $configs->getConfig('queue');
-
-        return new QueueConfig(
-            $config['pipelines'] ?? []
-        );
     }
 }

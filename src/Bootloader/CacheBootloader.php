@@ -15,31 +15,37 @@ use Spiral\RoadRunner\KeyValue\StorageInterface;
 
 final class CacheBootloader extends Bootloader
 {
-    protected const DEPENDENCIES = [
-        RoadRunnerBootloader::class,
-    ];
-
-    protected const SINGLETONS = [
-        FactoryInterface::class => [self::class, 'initStorageFactory'],
-        SerializerInterface::class => DefaultSerializer::class,
-    ];
-
-    protected const BINDINGS = [
-        StorageInterface::class => [self::class, 'initDefaultStorage'],
-    ];
-
-    private function initStorageFactory(RPCInterface $rpc, SerializerInterface $serializer): FactoryInterface
+    public function defineDependencies(): array
     {
-        return new Factory($rpc, $serializer);
+        return [
+            RoadRunnerBootloader::class,
+        ];
     }
 
-    /**
-     * @param non-empty-string $driver
-     */
-    private function initDefaultStorage(FactoryInterface $factory, string $driver): StorageInterface
+    public function defineSingletons(): array
     {
-        return $factory->select($driver);
+        return [
+            FactoryInterface::class => static fn(
+                RPCInterface $rpc,
+                SerializerInterface $serializer,
+            ): FactoryInterface => new Factory($rpc, $serializer),
+
+            SerializerInterface::class => DefaultSerializer::class,
+        ];
     }
+
+    public function defineBindings(): array
+    {
+        return [
+            StorageInterface::class =>
+            /** @param non-empty-string $driver */
+            static fn(
+                FactoryInterface $factory,
+                string $driver,
+            ): StorageInterface => $factory->select($driver),
+        ];
+    }
+
 
     public function init(BaseCacheBootloader $cacheBootloader): void
     {

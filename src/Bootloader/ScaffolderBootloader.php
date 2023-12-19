@@ -17,14 +17,17 @@ use Spiral\Scaffolder\Bootloader\ScaffolderBootloader as BaseScaffolderBootloade
 
 final class ScaffolderBootloader extends Bootloader
 {
-    public const DEPENDENCIES = [
-        ConsoleBootloader::class,
-        BaseScaffolderBootloader::class,
-    ];
-
     public function __construct(
-        private readonly ContainerInterface $container
+        private readonly ContainerInterface $container,
     ) {
+    }
+
+    public function defineDependencies(): array
+    {
+        return [
+            ConsoleBootloader::class,
+            BaseScaffolderBootloader::class,
+        ];
     }
 
     public function init(BaseScaffolderBootloader $scaffolder, ConsoleBootloader $console): void
