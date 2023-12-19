@@ -75,6 +75,10 @@
             "url": "https://github.com/sponsors/roadrunner-server"
         }
     ],
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "psalm": "vendor/bin/psalm --no-cache --config=psalm.xml ./src"
+    },
     "config": {
         "sort-packages": true,
         "allow-plugins": {

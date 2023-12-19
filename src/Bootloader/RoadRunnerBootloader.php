@@ -22,7 +22,7 @@ final class RoadRunnerBootloader extends Bootloader
     public function defineSingletons(): array
     {
         return [
-            EnvironmentInterface::class => static fn(
+            EnvironmentInterface::class => static fn (
                 GlobalEnvironmentInterface $env,
             ): EnvironmentInterface => new Environment($env->getAll()),
 
@@ -31,11 +31,11 @@ final class RoadRunnerBootloader extends Bootloader
             RPC::class => RPCInterface::class,
             RPCInterface::class =>
             /** @psalm-suppress ArgumentTypeCoercion */
-                static fn(
+                static fn (
                     EnvironmentInterface $env,
                 ): RPCInterface => new RPC(Relay::create($env->getRPCAddress())),
 
-            WorkerInterface::class => static fn(
+            WorkerInterface::class => static fn (
                 EnvironmentInterface $env,
             ): WorkerInterface => Worker::createFromEnvironment($env),
 

@@ -25,7 +25,7 @@ final class CacheBootloader extends Bootloader
     public function defineSingletons(): array
     {
         return [
-            FactoryInterface::class => static fn(
+            FactoryInterface::class => static fn (
                 RPCInterface $rpc,
                 SerializerInterface $serializer,
             ): FactoryInterface => new Factory($rpc, $serializer),
@@ -39,13 +39,12 @@ final class CacheBootloader extends Bootloader
         return [
             StorageInterface::class =>
             /** @param non-empty-string $driver */
-            static fn(
+            static fn (
                 FactoryInterface $factory,
                 string $driver,
             ): StorageInterface => $factory->select($driver),
         ];
     }
-
 
     public function init(BaseCacheBootloader $cacheBootloader): void
     {

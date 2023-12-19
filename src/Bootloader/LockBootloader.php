@@ -10,7 +10,7 @@ use Spiral\Boot\Bootloader\Bootloader;
 
 final class LockBootloader extends Bootloader
 {
-    public function defineBindings(): array
+    public function defineDependencies(): array
     {
         return [
             RoadRunnerBootloader::class,

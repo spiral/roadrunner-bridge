@@ -21,7 +21,7 @@ final class MetricsBootloader extends Bootloader
     public function defineSingletons(): array
     {
         return [
-            MetricsInterface::class => static fn(RPCInterface $rpc): MetricsInterface => new Metrics($rpc),
+            MetricsInterface::class => static fn (RPCInterface $rpc): MetricsInterface => new Metrics($rpc),
         ];
     }
 }

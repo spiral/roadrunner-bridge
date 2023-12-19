@@ -34,7 +34,7 @@ final class HttpBootloader extends Bootloader
             ErrorHandlerInterface::class => LogErrorHandler::class,
             PSR7Worker::class => PSR7WorkerInterface::class,
 
-            PSR7WorkerInterface::class => static fn(
+            PSR7WorkerInterface::class => static fn (
                 WorkerInterface $worker,
                 ServerRequestFactoryInterface $requests,
                 StreamFactoryInterface $streams,
