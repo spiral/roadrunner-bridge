@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
+use RoadRunner\Lock\Lock;
+use RoadRunner\Lock\LockInterface;
 use Spiral\Boot\Bootloader\Bootloader;
-use Spiral\Goridge\RPC\RPCInterface;
-use Spiral\RoadRunner\Metrics\Metrics;
-use Spiral\RoadRunner\Metrics\MetricsInterface;
 
-final class MetricsBootloader extends Bootloader
+final class LockBootloader extends Bootloader
 {
     public function defineDependencies(): array
     {
@@ -21,7 +20,7 @@ final class MetricsBootloader extends Bootloader
     public function defineSingletons(): array
     {
         return [
-            MetricsInterface::class => static fn (RPCInterface $rpc): MetricsInterface => new Metrics($rpc),
+            LockInterface::class => Lock::class,
         ];
     }
 }

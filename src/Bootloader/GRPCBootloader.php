@@ -33,21 +33,27 @@ use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
 
 final class GRPCBootloader extends Bootloader
 {
-    protected const DEPENDENCIES = [
-        RoadRunnerBootloader::class,
-    ];
-
-    protected const SINGLETONS = [
-        Server::class => Server::class,
-        InvokerInterface::class => [self::class, 'initInvoker'],
-        LocatorInterface::class => ServiceLocator::class,
-        ProtoFilesRepositoryInterface::class => [self::class, 'initProtoFilesRepository'],
-        GeneratorRegistryInterface::class => [self::class, 'initGeneratorRegistry'],
-    ];
-
     public function __construct(
-        private readonly ConfiguratorInterface $config
+        private readonly ConfiguratorInterface $config,
     ) {
+    }
+
+    public function defineDependencies(): array
+    {
+        return [
+            RoadRunnerBootloader::class,
+        ];
+    }
+
+    public function defineSingletons(): array
+    {
+        return [
+            Server::class => Server::class,
+            InvokerInterface::class => [self::class, 'initInvoker'],
+            LocatorInterface::class => ServiceLocator::class,
+            ProtoFilesRepositoryInterface::class => [self::class, 'initProtoFilesRepository'],
+            GeneratorRegistryInterface::class => [self::class, 'initGeneratorRegistry'],
+        ];
     }
 
     public function init(): void
@@ -79,7 +85,7 @@ final class GRPCBootloader extends Bootloader
                     ConfigGenerator::class,
                     BootloaderGenerator::class,
                 ],
-            ]
+            ],
         );
     }
 
@@ -90,7 +96,7 @@ final class GRPCBootloader extends Bootloader
     {
         $this->config->modify(
             GRPCConfig::CONFIG,
-            new Append('interceptors', null, $interceptor)
+            new Append('interceptors', null, $interceptor),
         );
     }
 
@@ -106,10 +112,10 @@ final class GRPCBootloader extends Bootloader
         GRPCConfig $config,
         ContainerInterface $container,
         FactoryInterface $factory,
-        BaseInvoker $invoker
+        BaseInvoker $invoker,
     ): InvokerInterface {
         $core = new InterceptableCore(
-            new InvokerCore($invoker)
+            new InvokerCore($invoker),
         );
 
         foreach ($config->getInterceptors() as $interceptor) {
@@ -131,7 +137,7 @@ final class GRPCBootloader extends Bootloader
     private function initGeneratorRegistry(
         GRPCConfig $config,
         ContainerInterface $container,
-        FactoryInterface $factory
+        FactoryInterface $factory,
     ): GeneratorRegistryInterface {
         $registry = new GeneratorRegistry();
         foreach ($config->getGenerators() as $generator) {

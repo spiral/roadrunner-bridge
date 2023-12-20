@@ -18,19 +18,25 @@ use Spiral\RoadRunnerBridge\Tcp\Service;
 
 final class TcpBootloader extends Bootloader
 {
-    protected const DEPENDENCIES = [
-        RoadRunnerBootloader::class,
-    ];
-
-    protected const SINGLETONS = [
-        Service\RegistryInterface::class => [self::class, 'initServiceRegistry'],
-        Interceptor\RegistryInterface::class => [self::class, 'initInterceptorRegistry'],
-        Server::class => Server::class,
-    ];
-
     public function __construct(
-        private readonly ConfiguratorInterface $config
+        private readonly ConfiguratorInterface $config,
     ) {
+    }
+
+    public function defineDependencies(): array
+    {
+        return [
+            RoadRunnerBootloader::class,
+        ];
+    }
+
+    public function defineSingletons(): array
+    {
+        return [
+            Service\RegistryInterface::class => [self::class, 'initServiceRegistry'],
+            Interceptor\RegistryInterface::class => [self::class, 'initInterceptorRegistry'],
+            Server::class => Server::class,
+        ];
     }
 
     public function init(EnvironmentInterface $environment): void
@@ -51,20 +57,20 @@ final class TcpBootloader extends Bootloader
                 'services' => [],
                 'interceptors' => [],
                 'debug' => $environment->get('TCP_DEBUG', false),
-            ]
+            ],
         );
     }
 
     private function initInterceptorRegistry(
         TcpConfig $config,
-        ContainerInterface $container
+        ContainerInterface $container,
     ): Interceptor\RegistryInterface {
         return new Interceptor\InterceptorRegistry($config->getInterceptors(), $container);
     }
 
     private function initServiceRegistry(
         TcpConfig $config,
-        ContainerInterface $container
+        ContainerInterface $container,
     ): Service\RegistryInterface {
         return new Service\ServiceRegistry($config->getServices(), $container);
     }

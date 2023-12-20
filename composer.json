@@ -5,8 +5,11 @@
     "license": "MIT",
     "homepage": "https://spiral.dev",
     "support": {
-        "issues": "https://github.com/spiral/framework/issues",
-        "source": "https://github.com/spiral/roadrunner-bridge"
+        "issues": "https://github.com/spiral/roadrunner-bridge/issues",
+        "source": "https://github.com/spiral/roadrunner-bridge",
+        "docs": "https://spiral.dev/docs",
+        "forum": "https://forum.spiral.dev",
+        "chat": "https://discord.gg/V6EK4he"
     },
     "authors": [
         {
@@ -14,8 +17,16 @@
             "email": "wolfy-j@spiralscout.com"
         },
         {
-            "name": "Pavel Buchnev (butschster)",
+            "name": "Pavel Butchnev (butschster)",
             "email": "pavel.buchnev@spiralscout.com"
+        },
+        {
+            "name": "Aleksei Gagarin (roxblnfk)",
+            "email": "alexey.gagarin@spiralscout.com"
+        },
+        {
+            "name": "Maksim Smakouz (msmakouz)",
+            "email": "maksim.smakouz@spiralscout.com"
         }
     ],
     "require": {
@@ -23,7 +34,6 @@
         "psr/simple-cache": "^3.0",
         "psr/http-factory": "^1.0.2",
         "grpc/grpc": "^1.42",
-        "roadrunner-php/centrifugo": "^2.0",
         "spiral/roadrunner-http": "^3.0",
         "spiral/roadrunner-grpc": "^3.2",
         "spiral/roadrunner-jobs": "^4.0",
@@ -31,15 +41,20 @@
         "spiral/roadrunner-tcp": "^3.0",
         "spiral/roadrunner-metrics": "^3.0",
         "roadrunner-php/app-logger": "^1.0",
-        "spiral/framework": "^3.7",
+        "roadrunner-php/centrifugo": "^2.0",
+        "roadrunner-php/lock": "^1.0",
         "spiral/serializer": "^3.7",
         "spiral/scaffolder": "^3.7"
     },
     "require-dev": {
+        "spiral/framework": "^3.7",
         "spiral/testing": "^2.6.1",
         "phpunit/phpunit": "^10.1",
         "vimeo/psalm": "^5.0",
         "spiral/nyholm-bridge": "^1.2"
+    },
+    "suggest": {
+        "ext-protobuf": "For better performance, install the protobuf C extension."
     },
     "autoload": {
         "psr-4": {
@@ -53,6 +68,16 @@
             "Spiral\\App\\": "tests/app",
             "Spiral\\Tests\\": "tests/src"
         }
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/roadrunner-server"
+        }
+    ],
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "psalm": "vendor/bin/psalm --no-cache --config=psalm.xml ./src"
     },
     "config": {
         "sort-packages": true,

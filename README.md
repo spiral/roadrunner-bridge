@@ -38,6 +38,7 @@ protected const LOAD = [
     RoadRunnerBridge\TcpBootloader::class, // Optional, if it needs to work with TCP plugin
     RoadRunnerBridge\MetricsBootloader::class, // Optional, if it needs to work with metrics plugin
     RoadRunnerBridge\LoggerBootloader::class, // Optional, if it needs to work with app-logger plugin
+    RoadRunnerBridge\LockBootloader::class, // Optional, if it needs to work with lock plugin
     RoadRunnerBridge\ScaffolderBootloader::class, // Optional, to generate Centrifugo handlers and TCP services via Scaffolder
     RoadRunnerBridge\CommandBootloader::class,
     // ...

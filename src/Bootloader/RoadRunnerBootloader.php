@@ -19,16 +19,29 @@ use Spiral\RoadRunnerBridge\FallbackDispatcher;
 
 final class RoadRunnerBootloader extends Bootloader
 {
-    protected const SINGLETONS = [
-        EnvironmentInterface::class => [self::class, 'initEnvironment'],
-        Environment::class => EnvironmentInterface::class,
+    public function defineSingletons(): array
+    {
+        return [
+            EnvironmentInterface::class => static fn (
+                GlobalEnvironmentInterface $env,
+            ): EnvironmentInterface => new Environment($env->getAll()),
 
-        RPC::class => RPCInterface::class,
-        RPCInterface::class => [self::class, 'initRPC'],
+            Environment::class => EnvironmentInterface::class,
 
-        Worker::class => WorkerInterface::class,
-        WorkerInterface::class => [self::class, 'initWorker'],
-    ];
+            RPC::class => RPCInterface::class,
+            RPCInterface::class =>
+            /** @psalm-suppress ArgumentTypeCoercion */
+                static fn (
+                    EnvironmentInterface $env,
+                ): RPCInterface => new RPC(Relay::create($env->getRPCAddress())),
+
+            WorkerInterface::class => static fn (
+                EnvironmentInterface $env,
+            ): WorkerInterface => Worker::createFromEnvironment($env),
+
+            Worker::class => WorkerInterface::class,
+        ];
+    }
 
     public function init(AbstractKernel $kernel): void
     {
@@ -37,23 +50,5 @@ final class RoadRunnerBootloader extends Bootloader
         $kernel->bootstrapped(static function (FallbackDispatcher $dispatcher, KernelInterface $kernel): void {
             $kernel->addDispatcher($dispatcher);
         });
-    }
-
-    private function initEnvironment(GlobalEnvironmentInterface $env): EnvironmentInterface
-    {
-        return new Environment($env->getAll());
-    }
-
-    /**
-     * @psalm-suppress ArgumentTypeCoercion
-     */
-    private function initRPC(EnvironmentInterface $env): RPCInterface
-    {
-        return new RPC(Relay::create($env->getRPCAddress()));
-    }
-
-    private function initWorker(EnvironmentInterface $env): WorkerInterface
-    {
-        return Worker::createFromEnvironment($env);
     }
 }
