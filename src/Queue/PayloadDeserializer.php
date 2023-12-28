@@ -35,9 +35,10 @@ final class PayloadDeserializer implements PayloadDeserializerInterface
             return $serializer->unserialize($payload, $class);
         }
 
-        $class = $this->detectTypeFromJobHandler(
-            $this->registry->getHandler($name),
-        );
+        try {
+            $class = $this->detectTypeFromJobHandler($this->registry->getHandler($name));
+        } catch (\Throwable) {
+        }
 
         if ($class === 'string') {
             return $payload;

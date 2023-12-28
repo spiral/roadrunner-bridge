@@ -6,6 +6,7 @@ namespace Spiral\Tests\Queue;
 
 use Mockery as m;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Spiral\Queue\Exception\JobException;
 use Spiral\Queue\HandlerInterface;
 use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Queue\SerializerRegistryInterface;
@@ -119,6 +120,32 @@ final class PayloadDeserializerTest extends TestCase
             ->andReturn($handler);
 
         $serializer->shouldReceive('unserialize')->once()->with($payload, PayloadClass::class)
+            ->andReturn($unserialized = 'unserialized-payload');
+
+        $this->assertSame($unserialized, $this->deserializer->deserialize($task));
+    }
+
+    public function testGetClassFromHandlerShouldIgnoreMissedHandler(): void
+    {
+        $task = m::mock(ReceivedTaskInterface::class);
+
+        $task->shouldReceive('hasHeader')
+            ->once()
+            ->with(Queue::SERIALIZED_CLASS_HEADER_KEY)
+            ->andReturnFalse();
+
+        $task->shouldReceive('getName')->once()->andReturn($name = 'foo-task');
+        $task->shouldReceive('getPayload')->once()->andReturn($payload = '{"foo":"bar"}');
+
+        $this->serializer->shouldReceive('getSerializer')->once()->with($name)
+            ->andReturn($serializer = m::mock(SerializerInterface::class));
+
+        $this->registry->shouldReceive('getHandler')
+            ->once()
+            ->with($name)
+            ->andThrow(JobException::class);
+
+        $serializer->shouldReceive('unserialize')->once()->with($payload)
             ->andReturn($unserialized = 'unserialized-payload');
 
         $this->assertSame($unserialized, $this->deserializer->deserialize($task));
