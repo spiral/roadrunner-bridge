@@ -22,7 +22,7 @@ final class ServiceLocator implements LocatorInterface
         $result = [];
 
         foreach ($this->classes->getClasses(ServiceInterface::class) as $service) {
-            if (! $service->isInstantiable()) {
+            if (!$service->isInstantiable()) {
                 continue;
             }
 
