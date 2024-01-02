@@ -42,9 +42,13 @@ final class Handler extends AbstractProcessingHandler
 
     protected function write(array|LogRecord $record): void
     {
+        /** @psalm-suppress InvalidArgument */
         $message = $record['formatted'];
+        \assert(\is_string($message) || $message instanceof \Stringable);
 
         $level = $record['level'] instanceof Level ? $record['level']->value : $record['level'];
+
+        /** @psalm-suppress DeprecatedConstant */
         match ($level) {
             Logger::ERROR, Logger::CRITICAL => $this->logger->error($message),
             Logger::WARNING, Logger::ALERT, Logger::EMERGENCY => $this->logger->warning($message),
