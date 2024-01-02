@@ -8,7 +8,9 @@ use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\HandlerInterface;
+use Monolog\Level;
 use Monolog\Logger;
+use Monolog\LogRecord;
 use RoadRunner\Logger\Logger as RoadRunnerLogger;
 
 final class Handler extends AbstractProcessingHandler
@@ -29,7 +31,7 @@ final class Handler extends AbstractProcessingHandler
         $this->setFormatter($formatter);
     }
 
-    public function handle(array $record): bool
+    public function handle(array|LogRecord $record): bool
     {
         if ($this->fallbackHandler !== null) {
             return $this->fallbackHandler->handle($record);
@@ -38,11 +40,12 @@ final class Handler extends AbstractProcessingHandler
         return parent::handle($record);
     }
 
-    protected function write(array $record): void
+    protected function write(array|LogRecord $record): void
     {
         $message = $record['formatted'];
 
-        match ($record['level']) {
+        $level = $record['level'] instanceof Level ? $record['level']->value : $record['level'];
+        match ($level) {
             Logger::ERROR, Logger::CRITICAL => $this->logger->error($message),
             Logger::WARNING, Logger::ALERT, Logger::EMERGENCY => $this->logger->warning($message),
             Logger::INFO, Logger::NOTICE => $this->logger->info($message),
