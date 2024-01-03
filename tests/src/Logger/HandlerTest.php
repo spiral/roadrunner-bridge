@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Logger;
 
+use Monolog\LogRecord;
 use RoadRunner\Logger\Logger;
 use Spiral\Goridge\RPC\RPCInterface;
 use Monolog\Handler\HandlerInterface;
@@ -54,7 +55,7 @@ final class HandlerTest extends TestCase
             ),
         ]);
 
-        $fallback->shouldReceive('handle')->withArgs(function (array $record) {
+        $fallback->shouldReceive('handle')->withArgs(function (array|LogRecord $record) {
             return $record['message'] === 'Error message';
         })->andReturn(true);
 
