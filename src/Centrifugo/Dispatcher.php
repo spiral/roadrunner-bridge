@@ -8,12 +8,15 @@ use Psr\Container\ContainerInterface;
 use RoadRunner\Centrifugo\CentrifugoWorker;
 use RoadRunner\Centrifugo\Request\RequestInterface;
 use RoadRunner\Centrifugo\Request\RequestType;
+use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Core\InterceptableCore;
 use Spiral\Core\ScopeInterface;
+use Spiral\Framework\ScopeName;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
+#[DispatcherScope(scope: ScopeName::Centrifugo)]
 final class Dispatcher implements DispatcherInterface
 {
     /**
@@ -24,13 +27,12 @@ final class Dispatcher implements DispatcherInterface
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly FinalizerInterface $finalizer,
-        private readonly RoadRunnerMode $mode,
     ) {
     }
 
-    public function canServe(): bool
+    public static function canServe(RoadRunnerMode $mode): bool
     {
-        return \PHP_SAPI === 'cli' && $this->mode === RoadRunnerMode::Centrifuge;
+        return \PHP_SAPI === 'cli' && $mode === RoadRunnerMode::Centrifuge;
     }
 
     public function serve(): void
