@@ -58,9 +58,9 @@ final class CentrifugoBootloader extends Bootloader
         $broadcasting->registerDriverAlias(Broadcast::class, 'centrifugo');
     }
 
-    public function boot(AbstractKernel $kernel, Dispatcher $dispatcher): void
+    public function boot(AbstractKernel $kernel): void
     {
-        $kernel->addDispatcher($dispatcher);
+        $kernel->addDispatcher(Dispatcher::class);
     }
 
     private function initInterceptorRegistry(

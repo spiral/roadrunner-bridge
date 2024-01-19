@@ -49,10 +49,10 @@ final class QueueBootloader extends Bootloader
         ];
     }
 
-    public function init(BaseQueueBootloader $bootloader, KernelInterface $kernel, Dispatcher $jobs): void
+    public function init(BaseQueueBootloader $bootloader, KernelInterface $kernel): void
     {
         $bootloader->registerDriverAlias(Queue::class, 'roadrunner');
-        $kernel->addDispatcher($jobs);
+        $kernel->addDispatcher(Dispatcher::class);
     }
 
     public function boot(PipelineRegistryInterface $registry): void

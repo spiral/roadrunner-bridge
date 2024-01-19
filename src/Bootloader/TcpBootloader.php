@@ -9,7 +9,6 @@ use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface;
 use Spiral\Boot\KernelInterface;
 use Spiral\Config\ConfiguratorInterface;
-use Spiral\Core\FactoryInterface;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
 use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
 use Spiral\RoadRunnerBridge\Tcp\Interceptor;
@@ -44,9 +43,9 @@ final class TcpBootloader extends Bootloader
         $this->initTcpConfig($environment);
     }
 
-    public function boot(KernelInterface $kernel, FactoryInterface $factory): void
+    public function boot(KernelInterface $kernel): void
     {
-        $kernel->addDispatcher($factory->make(Dispatcher::class));
+        $kernel->addDispatcher(Dispatcher::class);
     }
 
     private function initTcpConfig(EnvironmentInterface $environment): void

@@ -61,9 +61,9 @@ final class GRPCBootloader extends Bootloader
         $this->initGrpcConfig();
     }
 
-    public function boot(KernelInterface $kernel, FactoryInterface $factory): void
+    public function boot(KernelInterface $kernel): void
     {
-        $kernel->addDispatcher($factory->make(Dispatcher::class));
+        $kernel->addDispatcher(Dispatcher::class);
     }
 
     private function initGrpcConfig(): void
