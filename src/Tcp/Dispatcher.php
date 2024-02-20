@@ -9,11 +9,11 @@ use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
-use Spiral\Framework\ScopeName;
+use Spiral\Framework\Spiral;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
-#[DispatcherScope(scope: ScopeName::Tcp)]
+#[DispatcherScope(scope: Spiral::Tcp)]
 final class Dispatcher implements DispatcherInterface
 {
     public function __construct(

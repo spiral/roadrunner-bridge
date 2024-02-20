@@ -13,10 +13,10 @@ use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Core\InterceptableCore;
 use Spiral\Core\ScopeInterface;
-use Spiral\Framework\ScopeName;
+use Spiral\Framework\Spiral;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
-#[DispatcherScope(scope: ScopeName::Centrifugo)]
+#[DispatcherScope(scope: Spiral::Centrifugo)]
 final class Dispatcher implements DispatcherInterface
 {
     /**
