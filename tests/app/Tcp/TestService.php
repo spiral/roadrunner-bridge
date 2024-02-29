@@ -13,6 +13,6 @@ class TestService implements ServiceInterface
 {
     public function handle(Request $request): ResponseInterface
     {
-        return new RespondMessage($request->body, true);
+        return new RespondMessage($request->getBody(), true);
     }
 }

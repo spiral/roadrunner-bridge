@@ -44,6 +44,7 @@ final class HttpBootloader extends Bootloader
 
     public function boot(KernelInterface $kernel): void
     {
+        /** @psalm-suppress InvalidArgument */
         $kernel->addDispatcher(Dispatcher::class);
     }
 }

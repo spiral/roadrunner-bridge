@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Tcp;
 
 use Spiral\Core\InterceptableCore;
+use Spiral\Core\Scope;
+use Spiral\Core\ScopeInterface;
 use Spiral\RoadRunner\Payload;
+use Spiral\RoadRunner\Tcp\RequestInterface;
 use Spiral\RoadRunner\Tcp\TcpWorker;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
@@ -20,6 +23,7 @@ final class Server
         private readonly TcpConfig $config,
         private readonly RegistryInterface $registry,
         private readonly TcpServerHandler $handler,
+        private readonly ScopeInterface $scope,
     ) {
     }
 
@@ -33,9 +37,15 @@ final class Server
 
         while ($request = $tcpWorker->waitRequest()) {
             try {
-                $core = $this->createHandler($request->server);
-                /** @var ResponseInterface $response */
-                $response = $core->callAction($request->server, 'handle', ['request' => $request]);
+                $core = $this->createHandler($request->getServer());
+                /**
+                 * @var ResponseInterface $response
+                 * @psalm-suppress InvalidArgument
+                 */
+                $response = $this->scope->runScope(
+                    new Scope('tcp.packet', [RequestInterface::class => $request]),
+                    static fn (): mixed => $core->callAction($request->getServer(), 'handle', ['request' => $request])
+                );
             } catch (\Throwable $e) {
                 $worker->error($this->config->isDebugMode() ? (string)$e : $e->getMessage());
                 $response = new CloseConnection();

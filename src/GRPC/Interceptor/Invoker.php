@@ -6,12 +6,16 @@ namespace Spiral\RoadRunnerBridge\GRPC\Interceptor;
 
 use Google\Protobuf\Internal\Message;
 use Spiral\Core\CoreInterface;
+use Spiral\Core\Scope;
+use Spiral\Core\ScopeInterface;
 use Spiral\RoadRunner\GRPC\ContextInterface;
 use Spiral\RoadRunner\GRPC\Exception\InvokeException;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Method;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 use Spiral\RoadRunner\GRPC\StatusCode;
+use Spiral\RoadRunnerBridge\GRPC\UnaryCall;
+use Spiral\RoadRunnerBridge\GRPC\UnaryCallInterface;
 
 /**
  * @internal
@@ -20,18 +24,25 @@ final class Invoker implements InvokerInterface
 {
     public function __construct(
         private readonly CoreInterface $core,
+        private readonly ScopeInterface $scope,
     ) {
     }
 
     public function invoke(ServiceInterface $service, Method $method, ContextInterface $ctx, ?string $input): string
     {
-        return $this->core->callAction($service::class, $method->name, [
-            'service' => $service,
-            'method' => $method,
-            'ctx' => $ctx,
-            'input' => $input,
-            'message' => $this->makeInput($method, $input),
-        ]);
+        $message = $this->makeInput($method, $input);
+
+        /** @psalm-suppress InvalidArgument */
+        return $this->scope->runScope(
+            new Scope('grpc.request', [UnaryCallInterface::class => new UnaryCall($ctx, $method, $message)]),
+            fn (): string => $this->core->callAction($service::class, $method->name, [
+                'service' => $service,
+                'method' => $method,
+                'ctx' => $ctx,
+                'input' => $input,
+                'message' => $message,
+            ])
+        );
     }
 
     /**

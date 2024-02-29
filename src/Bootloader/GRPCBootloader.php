@@ -13,6 +13,7 @@ use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\InterceptableCore;
+use Spiral\Core\ScopeInterface;
 use Spiral\RoadRunner\GRPC\Invoker as BaseInvoker;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
@@ -63,6 +64,7 @@ final class GRPCBootloader extends Bootloader
 
     public function boot(KernelInterface $kernel): void
     {
+        /** @psalm-suppress InvalidArgument */
         $kernel->addDispatcher(Dispatcher::class);
     }
 
@@ -113,6 +115,7 @@ final class GRPCBootloader extends Bootloader
         ContainerInterface $container,
         FactoryInterface $factory,
         BaseInvoker $invoker,
+        ScopeInterface $scope,
     ): InvokerInterface {
         $core = new InterceptableCore(
             new InvokerCore($invoker),
@@ -126,7 +129,7 @@ final class GRPCBootloader extends Bootloader
             $core->addInterceptor($interceptor);
         }
 
-        return new Invoker($core);
+        return new Invoker($core, $scope);
     }
 
     private function initProtoFilesRepository(GRPCConfig $config): ProtoFilesRepositoryInterface

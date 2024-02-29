@@ -45,6 +45,7 @@ final class TcpBootloader extends Bootloader
 
     public function boot(KernelInterface $kernel): void
     {
+        /** @psalm-suppress InvalidArgument */
         $kernel->addDispatcher(Dispatcher::class);
     }
 

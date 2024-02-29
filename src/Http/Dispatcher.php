@@ -12,12 +12,11 @@ use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Exceptions\ExceptionHandlerInterface;
 use Spiral\Exceptions\Verbosity;
-use Spiral\Framework\Spiral;
 use Spiral\Http\Http;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
-#[DispatcherScope(scope: Spiral::Http)]
+#[DispatcherScope(scope: 'http')]
 final class Dispatcher implements DispatcherInterface
 {
     public function __construct(
