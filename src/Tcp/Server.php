@@ -40,6 +40,7 @@ final class Server
                 $core = $this->createHandler($request->getServer());
                 /**
                  * @var ResponseInterface $response
+                 *
                  * @psalm-suppress InvalidArgument
                  */
                 $response = $this->scope->runScope(
