@@ -9,6 +9,7 @@ use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface;
 use Spiral\Boot\KernelInterface;
 use Spiral\Config\ConfiguratorInterface;
+use Spiral\Core\Attribute\Proxy;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
 use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
 use Spiral\RoadRunnerBridge\Tcp\Interceptor;
@@ -70,7 +71,7 @@ final class TcpBootloader extends Bootloader
 
     private function initServiceRegistry(
         TcpConfig $config,
-        ContainerInterface $container,
+        #[Proxy] ContainerInterface $container,
     ): Service\RegistryInterface {
         return new Service\ServiceRegistry($config->getServices(), $container);
     }

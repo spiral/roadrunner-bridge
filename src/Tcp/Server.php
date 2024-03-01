@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\Tcp;
 
+use Psr\Container\ContainerInterface;
+use Spiral\Core\Attribute\Proxy;
 use Spiral\Core\InterceptableCore;
 use Spiral\Core\Scope;
 use Spiral\Core\ScopeInterface;
@@ -23,7 +25,7 @@ final class Server
         private readonly TcpConfig $config,
         private readonly RegistryInterface $registry,
         private readonly TcpServerHandler $handler,
-        private readonly ScopeInterface $scope,
+        #[Proxy] private readonly ContainerInterface $container,
     ) {
     }
 
@@ -34,6 +36,7 @@ final class Server
     {
         $worker ??= Worker::create();
         $tcpWorker = new TcpWorker($worker);
+        $scope = $this->container->get(ScopeInterface::class);
 
         while ($request = $tcpWorker->waitRequest()) {
             try {
@@ -43,7 +46,7 @@ final class Server
                  *
                  * @psalm-suppress InvalidArgument
                  */
-                $response = $this->scope->runScope(
+                $response = $scope->runScope(
                     new Scope('tcp.packet', [RequestInterface::class => $request]),
                     static fn (): mixed => $core->callAction($request->getServer(), 'handle', ['request' => $request])
                 );
