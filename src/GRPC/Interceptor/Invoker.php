@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\GRPC\Interceptor;
 
 use Google\Protobuf\Internal\Message;
+use Psr\Container\ContainerInterface;
 use Spiral\Core\CoreInterface;
 use Spiral\Core\Scope;
 use Spiral\Core\ScopeInterface;
@@ -24,16 +25,17 @@ final class Invoker implements InvokerInterface
 {
     public function __construct(
         private readonly CoreInterface $core,
-        private readonly ScopeInterface $scope,
+        private readonly ContainerInterface $container,
     ) {
     }
 
     public function invoke(ServiceInterface $service, Method $method, ContextInterface $ctx, ?string $input): string
     {
         $message = $this->makeInput($method, $input);
+        $scope = $this->container->get(ScopeInterface::class);
 
         /** @psalm-suppress InvalidArgument */
-        return $this->scope->runScope(
+        return $scope->runScope(
             new Scope('grpc.request', [UnaryCallInterface::class => new UnaryCall($ctx, $method, $message)]),
             fn (): string => $this->core->callAction($service::class, $method->name, [
                 'service' => $service,
