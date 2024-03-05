@@ -65,7 +65,7 @@ final class Dispatcher implements DispatcherInterface
                         payload: $deserializer->deserialize($task),
                         headers: $task->getHeaders(),
                     )]),
-                    static function (TaskInterface $queueTask) use ($handler, $deserializer, $task): void {
+                    static function (TaskInterface $queueTask) use ($handler, $task): void {
                         $handler->handle(
                             name: $queueTask->getName(),
                             driver: 'roadrunner',
