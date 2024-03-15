@@ -47,7 +47,7 @@
         "spiral/scaffolder": "^3.12"
     },
     "require-dev": {
-        "spiral/framework": "^3.12",
+        "spiral/framework": "dev-feature/scopes as 3.13.0",
         "spiral/testing": "^2.7",
         "phpunit/phpunit": "^10.1",
         "vimeo/psalm": "^5.0",
