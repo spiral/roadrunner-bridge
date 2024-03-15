@@ -8,12 +8,15 @@ use Psr\Container\ContainerInterface;
 use RoadRunner\Centrifugo\CentrifugoWorker;
 use RoadRunner\Centrifugo\Request\RequestInterface;
 use RoadRunner\Centrifugo\Request\RequestType;
+use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Core\InterceptableCore;
+use Spiral\Core\Scope;
 use Spiral\Core\ScopeInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
+#[DispatcherScope(scope: 'centrifugo')]
 final class Dispatcher implements DispatcherInterface
 {
     /**
@@ -24,24 +27,19 @@ final class Dispatcher implements DispatcherInterface
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly FinalizerInterface $finalizer,
-        private readonly RoadRunnerMode $mode,
     ) {
     }
 
-    public function canServe(): bool
+    public static function canServe(RoadRunnerMode $mode): bool
     {
-        return \PHP_SAPI === 'cli' && $this->mode === RoadRunnerMode::Centrifuge;
+        return \PHP_SAPI === 'cli' && $mode === RoadRunnerMode::Centrifuge;
     }
 
     public function serve(): void
     {
         /** @var CentrifugoWorker $worker */
         $worker = $this->container->get(CentrifugoWorker::class);
-        /**
-         * @var ScopeInterface $scope
-         *
-         * @psalm-suppress DeprecatedInterface
-         */
+        /** @var ScopeInterface $scope */
         $scope = $this->container->get(ScopeInterface::class);
         /** @var Interceptor\RegistryInterface $registry */
         $registry = $this->container->get(Interceptor\RegistryInterface::class);
@@ -54,12 +52,14 @@ final class Dispatcher implements DispatcherInterface
             try {
                 $type = RequestType::createFrom($request);
                 $service = $this->getService($handler, $registry, $type);
-                $scope->runScope([
-                    RequestInterface::class => $request,
-                ], static fn (): mixed => $service->callAction($request::class, 'handle', [
-                    'type' => $type,
-                    'request' => $request,
-                ]));
+                /** @psalm-suppress InvalidArgument */
+                $scope->runScope(
+                    new Scope('centrifugo.request', [RequestInterface::class => $request]),
+                    static fn (): mixed => $service->callAction($request::class, 'handle', [
+                        'type' => $type,
+                        'request' => $request,
+                    ])
+                );
             } catch (\Throwable $e) {
                 $errorHandler->handle($request, $e);
             }

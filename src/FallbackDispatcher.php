@@ -22,9 +22,9 @@ final class FallbackDispatcher implements DispatcherInterface
     ) {
     }
 
-    public function canServe(): bool
+    public static function canServe(RoadRunnerMode $mode): bool
     {
-        return \PHP_SAPI === 'cli' && $this->mode !== RoadRunnerMode::Unknown;
+        return \PHP_SAPI === 'cli' && $mode !== RoadRunnerMode::Unknown;
     }
 
     public function serve(): void

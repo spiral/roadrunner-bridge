@@ -7,8 +7,11 @@ namespace Spiral\RoadRunnerBridge\Queue;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
+use Spiral\Core\Scope;
+use Spiral\Core\ScopeInterface;
 use Spiral\Queue\Exception\RetryException;
 use Spiral\Queue\ExtendedOptionsInterface;
 use Spiral\Queue\Interceptor\Consume\Handler;
@@ -20,18 +23,19 @@ use Spiral\RoadRunner\Jobs\Task\ProvidesHeadersInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
+#[DispatcherScope(scope: 'queue')]
 final class Dispatcher implements DispatcherInterface
 {
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly FinalizerInterface $finalizer,
-        private readonly RoadRunnerMode $mode,
+        private readonly ScopeInterface $scope,
     ) {
     }
 
-    public function canServe(): bool
+    public static function canServe(RoadRunnerMode $mode): bool
     {
-        return \PHP_SAPI === 'cli' && $this->mode === RoadRunnerMode::Jobs;
+        return \PHP_SAPI === 'cli' && $mode === RoadRunnerMode::Jobs;
     }
 
     /**
@@ -52,16 +56,28 @@ final class Dispatcher implements DispatcherInterface
 
         while ($task = $consumer->waitTask()) {
             try {
-                $handler->handle(
-                    name: $task->getName(),
-                    driver: 'roadrunner',
-                    queue: $task->getQueue(),
-                    id: $task->getId(),
-                    payload: $deserializer->deserialize($task),
-                    headers: $task->getHeaders(),
-                );
+                /** @psalm-suppress InvalidArgument */
+                $this->scope->runScope(
+                    new Scope('queue.task', [TaskInterface::class => new Task(
+                        id: $task->getId(),
+                        queue: $task->getQueue(),
+                        name: $task->getName(),
+                        payload: $deserializer->deserialize($task),
+                        headers: $task->getHeaders(),
+                    )]),
+                    static function (TaskInterface $queueTask) use ($handler, $task): void {
+                        $handler->handle(
+                            name: $queueTask->getName(),
+                            driver: 'roadrunner',
+                            queue: $queueTask->getQueue(),
+                            id: $queueTask->getId(),
+                            payload: $queueTask->getPayload(),
+                            headers: $queueTask->getHeaders(),
+                        );
 
-                $task->complete();
+                        $task->complete();
+                    },
+                );
             } catch (RetryException $e) {
                 $this->retry($e, $task);
             } catch (\Throwable $e) {

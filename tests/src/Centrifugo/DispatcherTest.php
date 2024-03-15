@@ -9,6 +9,7 @@ use RoadRunner\Centrifugo\CentrifugoWorker;
 use RoadRunner\Centrifugo\CentrifugoWorkerInterface;
 use RoadRunner\Centrifugo\Request\Publish;
 use RoadRunner\Centrifugo\Request\RequestType;
+use Spiral\App\Centrifugo\ScopedTestService;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Dispatcher;
@@ -17,6 +18,7 @@ use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\ServiceInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\ServiceRegistry;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
+use Spiral\Testing\Attribute\Config;
 use Spiral\Tests\TestCase;
 
 final class DispatcherTest extends TestCase
@@ -102,5 +104,32 @@ final class DispatcherTest extends TestCase
         $worker->shouldReceive('waitRequest')->once()->with()->andReturnNull();
 
         $this->serveDispatcher(Dispatcher::class);
+    }
+
+    #[Config('centrifugo.services', ['publish' => ScopedTestService::class])]
+    public function testCentrifugoScope(): void
+    {
+        $this->assertEquals([], ScopedTestService::$scopes);
+
+        $worker = $this->mockContainer(CentrifugoWorker::class, CentrifugoWorkerInterface::class);
+        $this->getContainer()
+            ->getBinder('centrifugo.request')
+            ->bindSingleton(ScopedTestService::class, ScopedTestService::class);
+
+        $request = new Publish($this->createMock(WorkerInterface::class), '', '', '', '', '', '', [], [], []);
+
+        $this->mockContainer(ErrorHandlerInterface::class);
+
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Centrifuge);
+
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
+        $finalizer->shouldReceive('finalize')->once();
+
+        $worker->shouldReceive('waitRequest')->once()->andReturn($request);
+        $worker->shouldReceive('waitRequest')->once()->with()->andReturnNull();
+
+        $this->getApp()->serve();
+
+        $this->assertEquals(['centrifugo.request', 'centrifugo', 'root'], ScopedTestService::$scopes);
     }
 }

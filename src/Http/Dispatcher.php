@@ -7,6 +7,7 @@ namespace Spiral\RoadRunnerBridge\Http;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Exceptions\ExceptionHandlerInterface;
@@ -15,19 +16,19 @@ use Spiral\Http\Http;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
+#[DispatcherScope(scope: 'http')]
 final class Dispatcher implements DispatcherInterface
 {
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly ErrorHandlerInterface $errorHandler,
         private readonly FinalizerInterface $finalizer,
-        private readonly RoadRunnerMode $mode
     ) {
     }
 
-    public function canServe(): bool
+    public static function canServe(RoadRunnerMode $mode): bool
     {
-        return \PHP_SAPI === 'cli' && $this->mode === RoadRunnerMode::Http;
+        return \PHP_SAPI === 'cli' && $mode === RoadRunnerMode::Http;
     }
 
     public function serve(): void

@@ -14,7 +14,7 @@ use Spiral\Core\FactoryInterface;
  */
 final class ServiceRegistry implements RegistryInterface
 {
-    /** @var ServiceInterface[] */
+    /** @var array<non-empty-string, TService> */
     private array $services = [];
 
     /**
@@ -32,13 +32,17 @@ final class ServiceRegistry implements RegistryInterface
 
     public function register(RequestType $requestType, Autowire|ServiceInterface|string $service): void
     {
-        $this->services[$requestType->value] = $this->createService($service);
+        $this->services[$requestType->value] = $service;
     }
 
     public function getService(RequestType $requestType): ?ServiceInterface
     {
         if (!$this->hasService($requestType)) {
             return null;
+        }
+
+        if (!$this->services[$requestType->value] instanceof ServiceInterface) {
+            $this->services[$requestType->value] = $this->createService($this->services[$requestType->value]);
         }
 
         return $this->services[$requestType->value];

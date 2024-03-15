@@ -70,7 +70,7 @@ final class Queue implements QueueInterface
      */
     private function initQueue(?string $pipeline): RRQueueInterface
     {
-        if (!$pipeline) {
+        if ($pipeline === null || $pipeline === '') {
             throw new InvalidArgumentException('You must define RoadRunner queue pipeline.');
         }
 

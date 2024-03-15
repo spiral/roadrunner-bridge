@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Tcp;
 
+use Spiral\App\Tcp\ScopedTestService;
 use Spiral\App\Tcp\ServiceWithException;
 use Spiral\App\Tcp\TestInterceptor;
 use Spiral\App\Tcp\TestService;
@@ -14,6 +15,7 @@ use Spiral\RoadRunner\Tcp\TcpResponse;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
+use Spiral\Testing\Attribute\Config;
 use Spiral\Tests\TestCase;
 
 final class DispatcherTest extends TestCase
@@ -30,12 +32,12 @@ final class DispatcherTest extends TestCase
         $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
+    #[Config('tcp.services', ['tcp-server' => TestService::class])]
     public function testServe(): void
     {
         $worker = $this->mockContainer(WorkerInterface::class);
 
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Tcp);
-        $this->updateConfig('tcp.services', ['tcp-server' => TestService::class]);
 
         $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
@@ -63,13 +65,13 @@ final class DispatcherTest extends TestCase
         $this->serveDispatcher(Dispatcher::class);
     }
 
+    #[Config('tcp.services', ['tcp-server' => TestService::class])]
+    #[Config('tcp.interceptors', ['tcp-server' => TestInterceptor::class])]
     public function testServeWithInterceptor(): void
     {
         $worker = $this->mockContainer(WorkerInterface::class);
 
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Tcp);
-        $this->updateConfig('tcp.services', ['tcp-server' => TestService::class]);
-        $this->updateConfig('tcp.interceptors', ['tcp-server' => TestInterceptor::class]);
 
         $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->times(5)->with(false);
@@ -103,12 +105,12 @@ final class DispatcherTest extends TestCase
         $this->serveDispatcher(Dispatcher::class);
     }
 
+    #[Config('tcp.services', ['tcp-server' => ServiceWithException::class])]
     public function testServeWithHandleExceptionAndClose(): void
     {
         $worker = $this->mockContainer(WorkerInterface::class);
 
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Tcp);
-        $this->updateConfig('tcp.services', ['tcp-server' => ServiceWithException::class]);
 
         $finalizer = $this->mockContainer(FinalizerInterface::class);
         $finalizer->shouldReceive('finalize')->once()->with(false);
@@ -137,5 +139,45 @@ final class DispatcherTest extends TestCase
         });
 
         $this->serveDispatcher(Dispatcher::class);
+    }
+
+    #[Config('tcp.services', ['tcp-server' => ScopedTestService::class])]
+    public function testTcpScope(): void
+    {
+        $this->assertEquals([], ScopedTestService::$scopes);
+
+        $worker = $this->mockContainer(WorkerInterface::class);
+        $this->getContainer()
+            ->getBinder('tcp.packet')
+            ->bindSingleton(ScopedTestService::class, ScopedTestService::class);
+
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Tcp);
+
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
+        $finalizer->shouldReceive('finalize')->once()->with(false);
+
+        $worker->shouldReceive('waitPayload')->once()->andReturn(
+            new Payload(
+                'test',
+                \json_encode([
+                    'remote_addr' => '127.0.0.1',
+                    'server' => 'tcp-server',
+                    'event' => TcpEvent::Data->value,
+                    'uuid' => 'test-uuid',
+                ])
+            )
+        );
+        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+            return $payload->body === 'test';
+        });
+
+        $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
+        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+            return $payload->header === 'CLOSE';
+        });
+
+        $this->getApp()->serve();
+
+        $this->assertEquals(['tcp.packet', 'tcp', 'root'], ScopedTestService::$scopes);
     }
 }

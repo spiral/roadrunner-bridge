@@ -38,17 +38,17 @@
         "spiral/roadrunner-grpc": "^3.2",
         "spiral/roadrunner-jobs": "^4.0",
         "spiral/roadrunner-kv": "^4.0",
-        "spiral/roadrunner-tcp": "^3.0",
+        "spiral/roadrunner-tcp": "^3.1 || ^4.0",
         "spiral/roadrunner-metrics": "^3.0",
         "roadrunner-php/app-logger": "^1.0",
         "roadrunner-php/centrifugo": "^2.0",
         "roadrunner-php/lock": "^1.0",
-        "spiral/serializer": "^3.7",
-        "spiral/scaffolder": "^3.7"
+        "spiral/serializer": "^3.12",
+        "spiral/scaffolder": "^3.12"
     },
     "require-dev": {
-        "spiral/framework": "^3.7",
-        "spiral/testing": "^2.6.1",
+        "spiral/framework": "dev-feature/scopes as 3.13.0",
+        "spiral/testing": "^2.7",
         "phpunit/phpunit": "^10.1",
         "vimeo/psalm": "^5.0",
         "spiral/nyholm-bridge": "^1.2"

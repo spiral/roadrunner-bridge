@@ -19,7 +19,7 @@ final class InvokerTest extends TestCase
 {
     public function testInvoke(): void
     {
-        $invoker = new Invoker($core = m::mock(CoreInterface::class));
+        $invoker = new Invoker($core = m::mock(CoreInterface::class), $this->getContainer());
 
         $service = m::mock(ServiceInterface::class);
         $method = Method::parse(new \ReflectionMethod(PingService::class, 'Ping'));
@@ -49,7 +49,7 @@ final class InvokerTest extends TestCase
     {
         $this->expectException(InvokeException::class);
 
-        $invoker = new Invoker(m::mock(CoreInterface::class));
+        $invoker = new Invoker(m::mock(CoreInterface::class), $this->getContainer());
 
         $service = m::mock(ServiceInterface::class);
         $method = Method::parse(new \ReflectionMethod(PingService::class, 'Ping'));
