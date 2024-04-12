@@ -38,7 +38,7 @@
         "spiral/roadrunner-grpc": "^3.2",
         "spiral/roadrunner-jobs": "^4.0",
         "spiral/roadrunner-kv": "^4.0",
-        "spiral/roadrunner-tcp": "^3.0",
+        "spiral/roadrunner-tcp": "^3.1 || ^4.0",
         "spiral/roadrunner-metrics": "^3.0",
         "roadrunner-php/app-logger": "^1.0",
         "roadrunner-php/centrifugo": "^2.0",

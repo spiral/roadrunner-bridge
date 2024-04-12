@@ -33,9 +33,9 @@ final class Server
 
         while ($request = $tcpWorker->waitRequest()) {
             try {
-                $core = $this->createHandler($request->server);
+                $core = $this->createHandler($request->getServer());
                 /** @var ResponseInterface $response */
-                $response = $core->callAction($request->server, 'handle', ['request' => $request]);
+                $response = $core->callAction($request->getServer(), 'handle', ['request' => $request]);
             } catch (\Throwable $e) {
                 $worker->error($this->config->isDebugMode() ? (string)$e : $e->getMessage());
                 $response = new CloseConnection();
