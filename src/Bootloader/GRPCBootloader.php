@@ -30,13 +30,13 @@ use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
+use Spiral\Tokenizer\TokenizerListenerRegistryInterface;
 
 final class GRPCBootloader extends Bootloader
 {
     public function __construct(
         private readonly ConfiguratorInterface $config,
-    ) {
-    }
+    ) {}
 
     public function defineDependencies(): array
     {
@@ -56,9 +56,12 @@ final class GRPCBootloader extends Bootloader
         ];
     }
 
-    public function init(): void
-    {
+    public function init(
+        TokenizerListenerRegistryInterface $registry,
+        ServiceLocator $locator,
+    ): void {
         $this->initGrpcConfig();
+        $registry->addListener($locator);
     }
 
     public function boot(KernelInterface $kernel, FactoryInterface $factory): void
