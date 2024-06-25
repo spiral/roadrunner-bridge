@@ -49,6 +49,8 @@ final class Server
                 if ($finalize !== null) {
                     isset($e) ? $finalize($e) : $finalize();
                 }
+
+                unset($e);
             }
         }
     }
