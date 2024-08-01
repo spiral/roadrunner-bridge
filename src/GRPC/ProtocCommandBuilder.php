@@ -45,8 +45,9 @@ final class ProtocCommandBuilder
     private function buildDirs(string $protoDir): string
     {
         $dirs = \array_filter([
-            $this->config->getServicesBasePath(),
+            // The current directory must be first in the import path list to avoid proto-file name conflicts.
             $protoDir,
+            $this->config->getServicesBasePath(),
         ]);
 
         if ($dirs === []) {
