@@ -65,7 +65,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
                 try {
                     $this->jobs->create($connector)->resume();
                 } catch (JobsException $e) {
-                    $this->logger->error(
+                    $this->logger->warning(
                         \sprintf(
                             'Unable to declare consumer pipeline "%s". Reason: %s',
                             $name,
