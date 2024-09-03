@@ -10,7 +10,7 @@ use Spiral\Core\Attribute\Scope;
 use Spiral\Core\Internal\Introspector;
 use Spiral\RoadRunnerBridge\Centrifugo\ServiceInterface;
 
-#[Scope('centrifugo.request')]
+#[Scope('centrifugo-request')]
 final class ScopedTestService implements ServiceInterface
 {
     public static array $scopes = [];
