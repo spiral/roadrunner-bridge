@@ -15,6 +15,9 @@
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
+        <DeprecatedClass errorLevel="suppress"/>
+        <DeprecatedInterface errorLevel="suppress"/>
+        <DeprecatedMethod errorLevel="suppress"/>
         <PropertyNotSetInConstructor>
             <errorLevel type="suppress">
                 <directory name="src/Console/Command"/>

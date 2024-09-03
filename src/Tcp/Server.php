@@ -39,6 +39,7 @@ final class Server
         $scope = $this->container->get(ScopeInterface::class);
 
         while ($request = $tcpWorker->waitRequest()) {
+            $e = null;
             try {
                 $core = $this->createHandler($request->getServer());
                 /**
@@ -61,10 +62,8 @@ final class Server
                 }
 
                 if ($finalize !== null) {
-                    isset($e) ? $finalize($e) : $finalize();
+                    $e === null ? $finalize() : $finalize($e);
                 }
-
-                unset($e);
             }
         }
     }
