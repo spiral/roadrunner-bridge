@@ -60,7 +60,7 @@ final class Dispatcher implements DispatcherInterface
             try {
                 /** @psalm-suppress InvalidArgument */
                 $this->scope->runScope(
-                    new Scope('queue.task', [TaskInterface::class => new Task(
+                    new Scope('queue-task', [TaskInterface::class => new Task(
                         id: $task->getId(),
                         queue: $task->getQueue(),
                         name: $task->getName(),

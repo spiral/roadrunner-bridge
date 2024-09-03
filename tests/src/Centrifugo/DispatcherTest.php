@@ -113,7 +113,7 @@ final class DispatcherTest extends TestCase
 
         $worker = $this->mockContainer(CentrifugoWorker::class, CentrifugoWorkerInterface::class);
         $this->getContainer()
-            ->getBinder('centrifugo.request')
+            ->getBinder('centrifugo-request')
             ->bindSingleton(ScopedTestService::class, ScopedTestService::class);
 
         $request = new Publish($this->createMock(WorkerInterface::class), '', '', '', '', '', '', [], [], []);
@@ -130,6 +130,6 @@ final class DispatcherTest extends TestCase
 
         $this->getApp()->serve();
 
-        $this->assertEquals(['centrifugo.request', 'centrifugo', 'root'], ScopedTestService::$scopes);
+        $this->assertEquals(['centrifugo-request', 'centrifugo', 'root'], ScopedTestService::$scopes);
     }
 }

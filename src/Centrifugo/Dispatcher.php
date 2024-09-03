@@ -54,7 +54,7 @@ final class Dispatcher implements DispatcherInterface
                 $service = $this->getService($handler, $registry, $type);
                 /** @psalm-suppress InvalidArgument */
                 $scope->runScope(
-                    new Scope('centrifugo.request', [RequestInterface::class => $request]),
+                    new Scope('centrifugo-request', [RequestInterface::class => $request]),
                     static fn (): mixed => $service->callAction($request::class, 'handle', [
                         'type' => $type,
                         'request' => $request,

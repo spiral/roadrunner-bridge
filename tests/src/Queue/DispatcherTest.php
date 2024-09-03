@@ -128,7 +128,7 @@ final class DispatcherTest extends TestCase
 
         $this->getApp()->serve();
 
-        $this->assertEquals(['queue.task', 'queue', 'root'], ScopedJob::$scopes);
+        $this->assertEquals(['queue-task', 'queue', 'root'], ScopedJob::$scopes);
         $this->assertEquals(new Task(
             id: 'foo-id',
             queue: 'default',
