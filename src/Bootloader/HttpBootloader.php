@@ -10,7 +10,6 @@ use Psr\Http\Message\UploadedFileFactoryInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\KernelInterface;
 use Spiral\Bootloader\Http\HttpBootloader as BaseHttpBootloader;
-use Spiral\Core\FactoryInterface;
 use Spiral\RoadRunner\Http\PSR7Worker;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunner\WorkerInterface;
@@ -43,8 +42,9 @@ final class HttpBootloader extends Bootloader
         ];
     }
 
-    public function boot(KernelInterface $kernel, FactoryInterface $factory): void
+    public function boot(KernelInterface $kernel): void
     {
-        $kernel->addDispatcher($factory->make(Dispatcher::class));
+        /** @psalm-suppress InvalidArgument */
+        $kernel->addDispatcher(Dispatcher::class);
     }
 }

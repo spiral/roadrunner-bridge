@@ -14,9 +14,7 @@ final class FallbackDispatcherTest extends TestCase
     #[DataProvider('canServeDataProvider')]
     public function testCanServe(RoadRunnerMode $mode, bool $expected): void
     {
-        $dispatcher = new FallbackDispatcher($mode);
-
-        $this->assertSame($expected, $dispatcher->canServe());
+        $this->assertSame($expected, FallbackDispatcher::canServe($mode));
     }
 
     #[DataProvider('exceptionDataProvider')]

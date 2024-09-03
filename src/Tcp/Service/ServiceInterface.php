@@ -11,7 +11,7 @@ use Spiral\RoadRunnerBridge\Tcp\Response\ResponseInterface;
 interface ServiceInterface
 {
     /**
-     * @param Request $request. Will be changed to {@see RequestInterface} in the v4.0.
+     * @param Request $request Will be changed to {@see RequestInterface} in the v4.0.
      */
     public function handle(Request $request): ResponseInterface;
 }

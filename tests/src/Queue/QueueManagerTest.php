@@ -23,7 +23,7 @@ class QueueManagerTest extends TestCase
         $queue = $manager->getConnection('roadrunner');
 
         $core = $this->accessProtected($queue, 'core');
-        $core = $this->accessProtected($core, 'core');
+        $core = $this->accessProtected($core, 'handler');
         $connection = $this->accessProtected($core, 'connection');
 
         $this->assertInstanceOf(

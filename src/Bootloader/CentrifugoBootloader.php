@@ -13,6 +13,7 @@ use Spiral\Boot\AbstractKernel;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Broadcasting\Bootloader\BroadcastingBootloader;
 use Spiral\Config\ConfiguratorInterface;
+use Spiral\Core\Attribute\Proxy;
 use Spiral\Core\FactoryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Broadcast;
 use Spiral\RoadRunnerBridge\Centrifugo\Dispatcher;
@@ -58,9 +59,9 @@ final class CentrifugoBootloader extends Bootloader
         $broadcasting->registerDriverAlias(Broadcast::class, 'centrifugo');
     }
 
-    public function boot(AbstractKernel $kernel, Dispatcher $dispatcher): void
+    public function boot(AbstractKernel $kernel): void
     {
-        $kernel->addDispatcher($dispatcher);
+        $kernel->addDispatcher(Dispatcher::class);
     }
 
     private function initInterceptorRegistry(
@@ -73,8 +74,8 @@ final class CentrifugoBootloader extends Bootloader
 
     private function initServiceRegistry(
         CentrifugoConfig $config,
-        ContainerInterface $container,
-        FactoryInterface $factory,
+        #[Proxy] ContainerInterface $container,
+        #[Proxy] FactoryInterface $factory,
     ): RegistryInterface {
         return new ServiceRegistry($config->getServices(), $container, $factory);
     }

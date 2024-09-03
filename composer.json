@@ -43,14 +43,14 @@
         "roadrunner-php/app-logger": "^1.0",
         "roadrunner-php/centrifugo": "^2.0",
         "roadrunner-php/lock": "^1.0",
-        "spiral/serializer": "^3.7",
-        "spiral/scaffolder": "^3.7"
+        "spiral/serializer": "^3.13",
+        "spiral/scaffolder": "^3.13"
     },
     "require-dev": {
-        "spiral/framework": "^3.7",
-        "spiral/testing": "^2.6.1",
+        "spiral/framework": "^3.14",
+        "spiral/testing": "^2.8",
         "phpunit/phpunit": "^10.1",
-        "vimeo/psalm": "^5.0",
+        "vimeo/psalm": "^5.24",
         "spiral/nyholm-bridge": "^1.2"
     },
     "suggest": {

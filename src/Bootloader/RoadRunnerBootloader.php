@@ -47,8 +47,9 @@ final class RoadRunnerBootloader extends Bootloader
     {
         // Register Fallback Dispatcher after all dispatchers
         // It will be called if no other dispatcher can handle RoadRunner request
-        $kernel->bootstrapped(static function (FallbackDispatcher $dispatcher, KernelInterface $kernel): void {
-            $kernel->addDispatcher($dispatcher);
+        $kernel->bootstrapped(static function (KernelInterface $kernel): void {
+            /** @psalm-suppress InvalidArgument */
+            $kernel->addDispatcher(FallbackDispatcher::class);
         });
     }
 }

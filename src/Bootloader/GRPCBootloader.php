@@ -9,6 +9,7 @@ use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\KernelInterface;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\Patch\Append;
+use Spiral\Core\Attribute\Proxy;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\FactoryInterface;
@@ -61,9 +62,10 @@ final class GRPCBootloader extends Bootloader
         $this->initGrpcConfig();
     }
 
-    public function boot(KernelInterface $kernel, FactoryInterface $factory): void
+    public function boot(KernelInterface $kernel): void
     {
-        $kernel->addDispatcher($factory->make(Dispatcher::class));
+        /** @psalm-suppress InvalidArgument */
+        $kernel->addDispatcher(Dispatcher::class);
     }
 
     private function initGrpcConfig(): void
@@ -110,7 +112,7 @@ final class GRPCBootloader extends Bootloader
 
     private function initInvoker(
         GRPCConfig $config,
-        ContainerInterface $container,
+        #[Proxy] ContainerInterface $container,
         FactoryInterface $factory,
         BaseInvoker $invoker,
     ): InvokerInterface {
@@ -126,7 +128,7 @@ final class GRPCBootloader extends Bootloader
             $core->addInterceptor($interceptor);
         }
 
-        return new Invoker($core);
+        return new Invoker($core, $container);
     }
 
     private function initProtoFilesRepository(GRPCConfig $config): ProtoFilesRepositoryInterface
