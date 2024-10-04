@@ -50,8 +50,8 @@ final class Handler extends AbstractProcessingHandler
 
         /** @psalm-suppress DeprecatedConstant */
         match ($level) {
-            Logger::ERROR, Logger::CRITICAL => $this->logger->error($message),
-            Logger::WARNING, Logger::ALERT, Logger::EMERGENCY => $this->logger->warning($message),
+            Logger::ERROR, Logger::CRITICAL, Logger::ALERT, Logger::EMERGENCY => $this->logger->error($message),
+            Logger::WARNING => $this->logger->warning($message),
             Logger::INFO, Logger::NOTICE => $this->logger->info($message),
             Logger::DEBUG => $this->logger->debug($message),
         };
