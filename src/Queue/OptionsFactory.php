@@ -21,7 +21,7 @@ final class OptionsFactory
     {
         return match (true) {
             $options instanceof OptionsInterface => self::fromQueueOptions($options),
-            default => $options
+            default => $options,
         };
     }
 
@@ -47,7 +47,7 @@ final class OptionsFactory
 
         return match ($connector->getDriver()) {
             Driver::Kafka => new KafkaOptions($config['topic'] ?? 'default'),
-            default => null
+            default => null,
         };
     }
 }

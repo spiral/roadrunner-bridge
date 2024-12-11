@@ -11,8 +11,7 @@ class RespondMessage implements ResponseInterface
     public function __construct(
         private readonly string $body,
         private readonly bool $close = false,
-    ) {
-    }
+    ) {}
 
     public function getAction(): TcpResponse
     {

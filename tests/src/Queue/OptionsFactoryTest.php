@@ -17,18 +17,6 @@ use Spiral\RoadRunnerBridge\Queue\OptionsFactory;
 
 final class OptionsFactoryTest extends TestCase
 {
-    #[DataProvider('createDataProvider')]
-    public function testCreate(?JobsOptionsInterface $expected, mixed $from): void
-    {
-        $this->assertEquals($expected, OptionsFactory::create($from));
-    }
-
-    #[DataProvider('fromCreateInfoDataProvider')]
-    public function testFromCreateInfo(mixed $expected, CreateInfoInterface $createInfo): void
-    {
-        $this->assertEquals($expected, OptionsFactory::fromCreateInfo($createInfo));
-    }
-
     public static function createDataProvider(): \Traversable
     {
         yield [null, null];
@@ -48,5 +36,17 @@ final class OptionsFactoryTest extends TestCase
     {
         yield [null, new MemoryCreateInfo('bar')];
         yield [new KafkaOptions('default'), new KafkaCreateInfo('foo', 10)];
+    }
+
+    #[DataProvider('createDataProvider')]
+    public function testCreate(?JobsOptionsInterface $expected, mixed $from): void
+    {
+        $this->assertEquals($expected, OptionsFactory::create($from));
+    }
+
+    #[DataProvider('fromCreateInfoDataProvider')]
+    public function testFromCreateInfo(mixed $expected, CreateInfoInterface $createInfo): void
+    {
+        $this->assertEquals($expected, OptionsFactory::fromCreateInfo($createInfo));
     }
 }

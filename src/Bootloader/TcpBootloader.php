@@ -20,8 +20,7 @@ final class TcpBootloader extends Bootloader
 {
     public function __construct(
         private readonly ConfiguratorInterface $config,
-    ) {
-    }
+    ) {}
 
     public function defineDependencies(): array
     {

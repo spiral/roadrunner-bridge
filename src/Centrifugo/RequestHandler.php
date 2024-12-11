@@ -12,8 +12,7 @@ final class RequestHandler implements CoreInterface
 {
     public function __construct(
         private readonly RegistryInterface $registry,
-    ) {
-    }
+    ) {}
 
     public function callAction(string $controller, string $action, array $parameters = []): bool
     {

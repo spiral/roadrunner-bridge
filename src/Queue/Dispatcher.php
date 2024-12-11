@@ -34,8 +34,7 @@ final class Dispatcher implements DispatcherInterface
         private readonly FinalizerInterface $finalizer,
         private readonly ScopeInterface $scope,
         private readonly ExceptionReporterInterface $reporter,
-    ) {
-    }
+    ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool
     {

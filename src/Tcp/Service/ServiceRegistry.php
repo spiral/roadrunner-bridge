@@ -21,7 +21,7 @@ final class ServiceRegistry implements RegistryInterface
 
     public function __construct(
         array $services,
-        private readonly ContainerInterface $container
+        private readonly ContainerInterface $container,
     ) {
         foreach ($services as $server => $service) {
             $this->register($server, $service);
@@ -49,7 +49,7 @@ final class ServiceRegistry implements RegistryInterface
         $service = match (true) {
             $this->services[$server] instanceof ServiceInterface => $this->services[$server],
             $this->services[$server] instanceof Autowire => $this->services[$server]->resolve(
-                $this->container->get(FactoryInterface::class)
+                $this->container->get(FactoryInterface::class),
             ),
             default => $this->container->get($this->services[$server]),
         };

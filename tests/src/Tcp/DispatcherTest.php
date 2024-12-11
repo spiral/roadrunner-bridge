@@ -50,15 +50,15 @@ final class DispatcherTest extends TestCase
                     'server' => 'tcp-server',
                     'event' => TcpEvent::Data->value,
                     'uuid' => 'test-uuid',
-                ])
-            )
+                ]),
+            ),
         );
-        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+        $worker->shouldReceive('respond')->once()->withArgs(static function (Payload $payload) {
             return $payload->body === 'test';
         });
 
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
-        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+        $worker->shouldReceive('respond')->once()->withArgs(static function (Payload $payload) {
             return $payload->header === 'CLOSE';
         });
 
@@ -84,10 +84,10 @@ final class DispatcherTest extends TestCase
                     'server' => 'tcp-server',
                     'event' => TcpEvent::Data->value,
                     'uuid' => 'test-uuid',
-                ])
-            )
+                ]),
+            ),
         );
-        $worker->shouldReceive('respond')->times(5)->withArgs(function (Payload $payload) {
+        $worker->shouldReceive('respond')->times(5)->withArgs(static function (Payload $payload) {
             if ($payload->header === TcpResponse::Read->value) {
                 return true;
             }
@@ -98,7 +98,7 @@ final class DispatcherTest extends TestCase
         });
 
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
-        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+        $worker->shouldReceive('respond')->once()->withArgs(static function (Payload $payload) {
             return $payload->header === 'CLOSE';
         });
 
@@ -123,18 +123,18 @@ final class DispatcherTest extends TestCase
                     'server' => 'tcp-server',
                     'event' => TcpEvent::Data->value,
                     'uuid' => 'test-uuid',
-                ])
-            )
+                ]),
+            ),
         );
-        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+        $worker->shouldReceive('respond')->once()->withArgs(static function (Payload $payload) {
             return $payload->header === 'CLOSE';
         });
-        $worker->shouldReceive('error')->once()->withArgs(function (string $error) {
+        $worker->shouldReceive('error')->once()->withArgs(static function (string $error) {
             return $error === 'some error';
         });
 
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
-        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+        $worker->shouldReceive('respond')->once()->withArgs(static function (Payload $payload) {
             return $payload->header === 'CLOSE';
         });
 
@@ -164,15 +164,15 @@ final class DispatcherTest extends TestCase
                     'server' => 'tcp-server',
                     'event' => TcpEvent::Data->value,
                     'uuid' => 'test-uuid',
-                ])
-            )
+                ]),
+            ),
         );
-        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+        $worker->shouldReceive('respond')->once()->withArgs(static function (Payload $payload) {
             return $payload->body === 'test';
         });
 
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
-        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
+        $worker->shouldReceive('respond')->once()->withArgs(static function (Payload $payload) {
             return $payload->header === 'CLOSE';
         });
 

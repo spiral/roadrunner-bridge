@@ -26,7 +26,7 @@ final class UnaryCallTest extends TestCase
         $call = new UnaryCall(
             $this->createMock(ContextInterface::class),
             $method,
-            new Message()
+            new Message(),
         );
 
         $this->assertSame($method, $call->getMethod());
@@ -38,13 +38,11 @@ final class UnaryCallTest extends TestCase
         $call = new UnaryCall(
             $this->createMock(ContextInterface::class),
             Method::parse(new \ReflectionMethod($this, 'methodForTests')),
-            $message
+            $message,
         );
 
         $this->assertSame($message, $call->getMessage());
     }
 
-    public function methodForTests(ContextInterface $ctx, Message $in): Message
-    {
-    }
+    public function methodForTests(ContextInterface $ctx, Message $in): Message {}
 }

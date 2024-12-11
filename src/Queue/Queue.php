@@ -34,23 +34,21 @@ final class Queue implements QueueInterface
         private readonly PipelineRegistryInterface $registry,
         private readonly ?string $pipeline = null,
         private readonly ?string $default = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param non-empty-string $name
      *
+     * @return non-empty-string
      * @throws InvalidArgumentException
      * @throws JobsException
-     *
-     * @return non-empty-string
      *
      * @psalm-suppress MoreSpecificImplementedParamType
      */
     public function push(
         string $name,
         mixed $payload = '',
-        OptionsInterface|JobsOptionsInterface $options = null,
+        OptionsInterface|JobsOptionsInterface|null $options = null,
     ): string {
         $defaultPipeline = $this->pipeline ?? $this->default;
 

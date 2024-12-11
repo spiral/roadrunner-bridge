@@ -32,7 +32,7 @@ class QueueManagerTest extends TestCase
         );
     }
 
-    public function testPushIntoDefaultRoadRunnerPipeline()
+    public function testPushIntoDefaultRoadRunnerPipeline(): void
     {
         $factory = m::mock(FactoryInterface::class);
 
@@ -53,7 +53,7 @@ class QueueManagerTest extends TestCase
                 ],
             ]),
             new Container(),
-            $factory
+            $factory,
         );
 
         $queue = $manager->getConnection('roadrunner');

@@ -17,9 +17,9 @@ final class HttpBootloaderTest extends TestCase
 
         $this->assertCount(
             1,
-            array_filter($dispatchers, function ($dispatcher) {
+            \array_filter($dispatchers, static function ($dispatcher) {
                 return $dispatcher === Dispatcher::class;
-            })
+            }),
         );
     }
 
@@ -27,7 +27,7 @@ final class HttpBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             ErrorHandlerInterface::class,
-            LogErrorHandler::class
+            LogErrorHandler::class,
         );
     }
 

@@ -43,8 +43,22 @@ final class Invoker implements InvokerInterface
                     $ctx,
                     $message,
                 ]),
-            ))
+            )),
         );
+    }
+
+    /**
+     * Converts the result from the GRPC service method to the string.
+     *
+     * @throws InvokeException
+     */
+    private static function resultToString(Message $result): string
+    {
+        try {
+            return $result->serializeToString();
+        } catch (\Throwable $e) {
+            throw InvokeException::create($e->getMessage(), StatusCode::INTERNAL, $e);
+        }
     }
 
     /**
@@ -65,20 +79,6 @@ final class Invoker implements InvokerInterface
             }
 
             return $in;
-        } catch (\Throwable $e) {
-            throw InvokeException::create($e->getMessage(), StatusCode::INTERNAL, $e);
-        }
-    }
-
-    /**
-     * Converts the result from the GRPC service method to the string.
-     *
-     * @throws InvokeException
-     */
-    private static function resultToString(Message $result): string
-    {
-        try {
-            return $result->serializeToString();
         } catch (\Throwable $e) {
             throw InvokeException::create($e->getMessage(), StatusCode::INTERNAL, $e);
         }

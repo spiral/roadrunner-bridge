@@ -8,6 +8,22 @@ use Spiral\Files\Files;
 
 abstract class ConsoleTestCase extends TestCase
 {
+    public function deleteGRPCService(): void
+    {
+        $fs = new Files();
+        $appPath = $this->getDirectoryByAlias('app');
+
+        if ($fs->isDirectory($appPath . 'GRPC/EchoService')) {
+            $fs->deleteDirectory($appPath . 'GRPC/EchoService');
+        }
+        if ($fs->isDirectory($appPath . 'Bootloader')) {
+            $fs->deleteDirectory($appPath . 'Bootloader');
+        }
+        if ($fs->isFile($appPath . 'Config/GRPCServicesConfig.php')) {
+            $fs->delete($appPath . 'Config/GRPCServicesConfig.php');
+        }
+    }
+
     protected function generateGRPCService(): string
     {
         $appPath = $this->getDirectoryByAlias('app');
@@ -30,21 +46,5 @@ abstract class ConsoleTestCase extends TestCase
         }
 
         return $result;
-    }
-
-    public function deleteGRPCService(): void
-    {
-        $fs = new Files();
-        $appPath = $this->getDirectoryByAlias('app');
-
-        if ($fs->isDirectory($appPath . 'GRPC/EchoService')) {
-            $fs->deleteDirectory($appPath . 'GRPC/EchoService');
-        }
-        if ($fs->isDirectory($appPath . 'Bootloader')) {
-            $fs->deleteDirectory($appPath . 'Bootloader');
-        }
-        if ($fs->isFile($appPath . 'Config/GRPCServicesConfig.php')) {
-            $fs->delete($appPath . 'Config/GRPCServicesConfig.php');
-        }
     }
 }

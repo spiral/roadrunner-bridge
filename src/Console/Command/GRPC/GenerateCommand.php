@@ -30,7 +30,7 @@ final class GenerateCommand extends Command
         DirectoriesInterface $dirs,
         GRPCConfig $config,
         ProtoFilesRepositoryInterface $repository,
-        GeneratorRegistryInterface $generatorRegistry
+        GeneratorRegistryInterface $generatorRegistry,
     ): int {
         $binaryPath = $config->getBinaryPath();
 
@@ -53,7 +53,7 @@ final class GenerateCommand extends Command
             $this->getNamespace($kernel, $config->getNamespace()),
             $files,
             new ProtocCommandBuilder($files, $config, $binaryPath),
-            new CommandExecutor()
+            new CommandExecutor(),
         );
 
         $compiled = [];
@@ -85,7 +85,7 @@ final class GenerateCommand extends Command
                     "<fg=green>•</fg=green> %s%s%s\n",
                     Color::LIGHT_WHITE,
                     $files->relativePath($file, $dirs->get('root')),
-                    Color::RESET
+                    Color::RESET,
                 );
 
                 $compiled[] = $file;
@@ -97,7 +97,7 @@ final class GenerateCommand extends Command
             $generator->run(
                 $compiled,
                 $this->getPath($kernel, $config->getGeneratedPath()),
-                $this->getNamespace($kernel, $config->getNamespace())
+                $this->getNamespace($kernel, $config->getNamespace()),
             );
         }
 

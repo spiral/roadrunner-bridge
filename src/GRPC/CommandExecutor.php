@@ -16,7 +16,7 @@ final class CommandExecutor
         \exec(
             $command,
             $output,
-            $exitCode
+            $exitCode,
         );
 
         if ($exitCode !== 0) {

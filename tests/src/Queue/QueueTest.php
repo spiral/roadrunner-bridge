@@ -21,16 +21,6 @@ final class QueueTest extends TestCase
     private PipelineRegistryInterface|m\MockInterface $registry;
     private SerializerRegistryInterface|m\MockInterface $serializerRegistry;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->registry = m::mock(PipelineRegistryInterface::class);
-        $this->serializerRegistry = m::mock(SerializerRegistryInterface::class);
-
-        $this->queue = new Queue($this->serializerRegistry, $this->registry, 'default');
-    }
-
     public function testTaskShouldBePushedToDefaultQueue(): void
     {
         $this->registry->shouldReceive('getPipeline')
@@ -95,5 +85,15 @@ final class QueueTest extends TestCase
 
         $this->assertSame('task-id1', $this->queue->push('foo', ['foo' => 'bar'], QueueOptions::onQueue('foo')));
         $this->assertSame('task-id2', $this->queue->push('bar', ['foo' => 'bar'], QueueOptions::onQueue('bar')));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->registry = m::mock(PipelineRegistryInterface::class);
+        $this->serializerRegistry = m::mock(SerializerRegistryInterface::class);
+
+        $this->queue = new Queue($this->serializerRegistry, $this->registry, 'default');
     }
 }

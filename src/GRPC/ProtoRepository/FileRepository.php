@@ -10,9 +10,8 @@ namespace Spiral\RoadRunnerBridge\GRPC\ProtoRepository;
 final class FileRepository implements ProtoFilesRepositoryInterface
 {
     public function __construct(
-        private readonly array $protoFiles
-    ) {
-    }
+        private readonly array $protoFiles,
+    ) {}
 
     public function getProtos(): iterable
     {

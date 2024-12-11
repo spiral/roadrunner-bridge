@@ -11,7 +11,7 @@ use Spiral\Tests\ConsoleTestCase;
 
 final class ResumeCommandTest extends ConsoleTestCase
 {
-    public function testResumePipeline()
+    public function testResumePipeline(): void
     {
         $registry = $this->mockContainer(PipelineRegistryInterface::class);
 
@@ -26,7 +26,7 @@ final class ResumeCommandTest extends ConsoleTestCase
         $this->assertStringContainsString('Pipeline [foo] has been started consuming tasks.', $result);
     }
 
-    public function testResumeIsConsumingPipeline()
+    public function testResumeIsConsumingPipeline(): void
     {
         $registry = $this->mockContainer(PipelineRegistryInterface::class);
 

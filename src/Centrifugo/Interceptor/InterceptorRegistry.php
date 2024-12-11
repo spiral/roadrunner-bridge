@@ -50,16 +50,16 @@ final class InterceptorRegistry implements RegistryInterface
             throw new ConfigurationException(\sprintf(
                 'The $type value must be one of the `%s`, `%s` values.',
                 self::INTERCEPTORS_FOR_ALL_SERVICES,
-                \implode('`, `', array_map(static fn (\UnitEnum $case) => $case->value, RequestType::cases()))
+                \implode('`, `', \array_map(static fn(\UnitEnum $case) => $case->value, RequestType::cases())),
             ));
         }
 
         /** @var CoreInterceptorInterface $object */
         $object = match (true) {
             $interceptor instanceof CoreInterceptorInterface,
-                $interceptor instanceof InterceptorInterface => $interceptor,
+            $interceptor instanceof InterceptorInterface => $interceptor,
             $interceptor instanceof Autowire => $interceptor->resolve($this->factory),
-            default => $this->container->get($interceptor)
+            default => $this->container->get($interceptor),
         };
 
         $this->interceptors[$type][] = $object;
@@ -69,7 +69,7 @@ final class InterceptorRegistry implements RegistryInterface
     {
         return \array_merge(
             $this->interceptors[self::INTERCEPTORS_FOR_ALL_SERVICES] ?? [],
-            $this->interceptors[$type] ?? []
+            $this->interceptors[$type] ?? [],
         );
     }
 }

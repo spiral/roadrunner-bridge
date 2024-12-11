@@ -32,7 +32,7 @@ final class GRPCConfig extends InjectableConfig
         // Map Client options
         return match (true) {
             !isset($this->config['client']) => new GrpcClientConfig(),
-            is_array($this->config['client']) => new GrpcClientConfig(
+            \is_array($this->config['client']) => new GrpcClientConfig(
                 interceptors: $this->config['client']['interceptors'] ?? [],
                 services: $this->config['client']['services'] ?? [],
             ),
@@ -76,7 +76,7 @@ final class GRPCConfig extends InjectableConfig
      */
     public function getServices(): array
     {
-        return (array)($this->config['services'] ?? []);
+        return (array) ($this->config['services'] ?? []);
     }
 
     /**
@@ -84,7 +84,7 @@ final class GRPCConfig extends InjectableConfig
      */
     public function getInterceptors(): array
     {
-        return (array)($this->config['interceptors'] ?? []);
+        return (array) ($this->config['interceptors'] ?? []);
     }
 
     /**
@@ -92,6 +92,6 @@ final class GRPCConfig extends InjectableConfig
      */
     public function getGenerators(): array
     {
-        return (array)($this->config['generators'] ?? []);
+        return (array) ($this->config['generators'] ?? []);
     }
 }

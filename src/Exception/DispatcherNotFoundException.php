@@ -6,6 +6,4 @@ namespace Spiral\RoadRunnerBridge\Exception;
 
 use Spiral\Boot\Exception\BootException;
 
-class DispatcherNotFoundException extends BootException
-{
-}
+class DispatcherNotFoundException extends BootException {}

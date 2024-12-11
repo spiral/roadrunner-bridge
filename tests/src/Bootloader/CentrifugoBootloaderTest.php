@@ -26,7 +26,7 @@ final class CentrifugoBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             RegistryInterface::class,
-            ServiceRegistry::class
+            ServiceRegistry::class,
         );
     }
 
@@ -34,7 +34,7 @@ final class CentrifugoBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             Interceptor\RegistryInterface::class,
-            Interceptor\InterceptorRegistry::class
+            Interceptor\InterceptorRegistry::class,
         );
     }
 
@@ -42,18 +42,18 @@ final class CentrifugoBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             CentrifugoWorkerInterface::class,
-            CentrifugoWorker::class
+            CentrifugoWorker::class,
         );
 
         // TODO fix problem with rr worker
-        ob_end_flush();
+        \ob_end_flush();
     }
 
     public function testErrorHandlerShouldBeSingleton(): void
     {
         $this->assertContainerBoundAsSingleton(
             ErrorHandlerInterface::class,
-            LogErrorHandler::class
+            LogErrorHandler::class,
         );
     }
 
@@ -61,7 +61,7 @@ final class CentrifugoBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             CentrifugoApiInterface::class,
-            RPCCentrifugoApi::class
+            RPCCentrifugoApi::class,
         );
     }
 

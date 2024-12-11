@@ -18,12 +18,12 @@ final class TcpBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             Interceptor\RegistryInterface::class,
-            Interceptor\InterceptorRegistry::class
+            Interceptor\InterceptorRegistry::class,
         );
 
         $this->assertContainerBoundAsSingleton(
             Service\RegistryInterface::class,
-            Service\ServiceRegistry::class
+            Service\ServiceRegistry::class,
         );
     }
 
@@ -31,7 +31,7 @@ final class TcpBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             Server::class,
-            Server::class
+            Server::class,
         );
     }
 

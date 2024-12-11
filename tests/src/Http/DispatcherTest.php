@@ -90,9 +90,7 @@ final class DispatcherTest extends TestCase
 
         $worker->shouldReceive('respond')
             ->once()
-            ->withArgs(function (ResponseInterface $r) use ($response) {
-                return $r === $response;
-            });
+            ->withArgs(static fn(ResponseInterface $r) => $r === $response);
 
         $this->serveDispatcher(Dispatcher::class);
     }

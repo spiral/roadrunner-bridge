@@ -48,7 +48,7 @@ final class DispatcherTest extends TestCase
         $registry = new ServiceRegistry(
             [RequestType::Publish->value => $service],
             $this->getContainer(),
-            $this->getContainer()
+            $this->getContainer(),
         );
 
         $errorHandler = $this->createMock(ErrorHandlerInterface::class);
@@ -84,7 +84,7 @@ final class DispatcherTest extends TestCase
         $registry = new ServiceRegistry(
             [RequestType::Publish->value => $service],
             $this->getContainer(),
-            $this->getContainer()
+            $this->getContainer(),
         );
 
         $errorHandler = $this->createMock(ErrorHandlerInterface::class);

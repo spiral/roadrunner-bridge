@@ -6,6 +6,4 @@ namespace Spiral\RoadRunnerBridge\Exception;
 
 use Spiral\Boot\Exception\BootException;
 
-class ServiceRegistrationException extends BootException
-{
-}
+class ServiceRegistrationException extends BootException {}

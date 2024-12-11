@@ -16,6 +16,14 @@ use Spiral\Tests\TestCase;
 
 final class InterceptorRegistryTest extends TestCase
 {
+    public static function interceptorsDataProvider(): \Traversable
+    {
+        yield [new Autowire(TestInterceptor::class)];
+        yield [new TestInterceptor()];
+        yield [TestInterceptor::class];
+        yield ['alias'];
+    }
+
     public function testGetInterceptorFromObject(): void
     {
         $this->updateConfig('centrifugo.interceptors', ['publish' => new TestInterceptor()]);
@@ -32,7 +40,7 @@ final class InterceptorRegistryTest extends TestCase
 
     public function testGetInterceptorFromAlias(): void
     {
-        $this->getContainer()->bind('alias', static fn () => new TestInterceptor());
+        $this->getContainer()->bind('alias', static fn() => new TestInterceptor());
 
         $this->updateConfig('centrifugo.interceptors', ['publish' => 'alias']);
 
@@ -93,17 +101,9 @@ final class InterceptorRegistryTest extends TestCase
 
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage(
-            'The $type value must be one of the `*`, `connect`, `refresh`, `sub_refresh`, `publish`, `subscribe`, `rpc`, `invalid` values.'
+            'The $type value must be one of the `*`, `connect`, `refresh`, `sub_refresh`, `publish`, `subscribe`, `rpc`, `invalid` values.',
         );
         $registry->register('foo', new TestInterceptor());
-    }
-
-    public static function interceptorsDataProvider(): \Traversable
-    {
-        yield [new Autowire(TestInterceptor::class)];
-        yield [new TestInterceptor()];
-        yield [TestInterceptor::class];
-        yield ['alias'];
     }
 
     private function getInterceptor(): CoreInterceptorInterface

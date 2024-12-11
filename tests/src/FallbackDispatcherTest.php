@@ -11,21 +11,6 @@ use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 final class FallbackDispatcherTest extends TestCase
 {
-    #[DataProvider('canServeDataProvider')]
-    public function testCanServe(RoadRunnerMode $mode, bool $expected): void
-    {
-        $this->assertSame($expected, FallbackDispatcher::canServe($mode));
-    }
-
-    #[DataProvider('exceptionDataProvider')]
-    public function testException(RoadRunnerMode $mode, string $message): void
-    {
-        $this->expectException(DispatcherNotFoundException::class);
-        $this->expectExceptionMessage($message);
-
-        (new FallbackDispatcher($mode))->serve();
-    }
-
     public static function canServeDataProvider(): \Traversable
     {
         yield [RoadRunnerMode::Http, true];
@@ -58,5 +43,20 @@ final class FallbackDispatcherTest extends TestCase
             RoadRunnerMode::Temporal,
             'To use Temporal with RoadRunner, please install `spiral/temporal-bridge` package.',
         ];
+    }
+
+    #[DataProvider('canServeDataProvider')]
+    public function testCanServe(RoadRunnerMode $mode, bool $expected): void
+    {
+        $this->assertSame($expected, FallbackDispatcher::canServe($mode));
+    }
+
+    #[DataProvider('exceptionDataProvider')]
+    public function testException(RoadRunnerMode $mode, string $message): void
+    {
+        $this->expectException(DispatcherNotFoundException::class);
+        $this->expectExceptionMessage($message);
+
+        (new FallbackDispatcher($mode))->serve();
     }
 }

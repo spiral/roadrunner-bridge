@@ -11,8 +11,7 @@ final class Broadcast extends AbstractBroadcast
 {
     public function __construct(
         private readonly CentrifugoApiInterface $api,
-    ) {
-    }
+    ) {}
 
     public function publish(iterable|\Stringable|string $topics, iterable|\Stringable|string $messages): void
     {

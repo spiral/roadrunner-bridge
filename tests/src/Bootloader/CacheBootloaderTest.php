@@ -16,7 +16,7 @@ final class CacheBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             FactoryInterface::class,
-            Factory::class
+            Factory::class,
         );
     }
 
@@ -24,14 +24,14 @@ final class CacheBootloaderTest extends TestCase
     {
         $this->assertInstanceOf(
             \Spiral\RoadRunner\KeyValue\Cache::class,
-            $cache = $this->getContainer()->make(StorageInterface::class, ['driver' => 'memory'])
+            $cache = $this->getContainer()->make(StorageInterface::class, ['driver' => 'memory']),
         );
 
         $this->assertSame('memory', $cache->getName());
 
         $this->assertInstanceOf(
             \Spiral\RoadRunner\KeyValue\Cache::class,
-            $cache = $this->getContainer()->make(StorageInterface::class, ['driver' => 'test'])
+            $cache = $this->getContainer()->make(StorageInterface::class, ['driver' => 'test']),
         );
 
         $this->assertSame('test', $cache->getName());

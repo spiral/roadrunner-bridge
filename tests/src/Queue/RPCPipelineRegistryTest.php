@@ -78,7 +78,7 @@ final class RPCPipelineRegistryTest extends TestCase
                     'options' => new KafkaOptions('foo', 100, 14),
                 ],
             ]),
-            60
+            60,
         );
     }
 

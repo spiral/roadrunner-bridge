@@ -8,7 +8,7 @@ use Spiral\Tests\ConsoleTestCase;
 
 final class GenerateCommandTest extends ConsoleTestCase
 {
-    public function testGenerateServices()
+    public function testGenerateServices(): void
     {
         $result = $this->generateGRPCService();
 
@@ -22,20 +22,20 @@ final class GenerateCommandTest extends ConsoleTestCase
         $path = $this->getDirectoryByAlias('app') . 'proto/service.proto';
         $this->assertStringContainsString(
             \sprintf('Compiling `%s`:', \realpath($path) ?: $path),
-            $result
+            $result,
         );
 
         foreach ($files as $file) {
             $this->assertFileExists($this->getDirectoryByAlias('app') . $file);
             $this->assertStringContainsString(
                 $file,
-                $result
+                $result,
             );
         }
 
         $this->assertMatchesRegularExpression(
             '#Proto file `.+proto[\\\\/]foo\\.proto` not found.#',
-            $result
+            $result,
         );
     }
 

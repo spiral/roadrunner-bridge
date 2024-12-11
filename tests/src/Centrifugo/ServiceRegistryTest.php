@@ -15,6 +15,14 @@ use Spiral\Tests\TestCase;
 
 final class ServiceRegistryTest extends TestCase
 {
+    public static function servicesDataProvider(): \Traversable
+    {
+        yield [new Autowire(TestService::class)];
+        yield [new TestService()];
+        yield [TestService::class];
+        yield ['alias'];
+    }
+
     public function testGetServiceFromObject(): void
     {
         $this->updateConfig('centrifugo.services', [RequestType::Publish->value => new TestService()]);
@@ -31,7 +39,7 @@ final class ServiceRegistryTest extends TestCase
 
     public function testGetServiceFromAlias(): void
     {
-        $this->getContainer()->bind('alias', static fn () => new TestService());
+        $this->getContainer()->bind('alias', static fn() => new TestService());
 
         $this->updateConfig('centrifugo.services', [RequestType::Publish->value => 'alias']);
 
@@ -57,14 +65,6 @@ final class ServiceRegistryTest extends TestCase
         $registry->register(RequestType::Publish, $service);
 
         $this->assertEquals(new TestService(), $registry->getService(RequestType::Publish));
-    }
-
-    public static function servicesDataProvider(): \Traversable
-    {
-        yield [new Autowire(TestService::class)];
-        yield [new TestService()];
-        yield [TestService::class];
-        yield ['alias'];
     }
 
     private function getService(): ServiceInterface
