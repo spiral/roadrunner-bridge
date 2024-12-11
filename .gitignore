@@ -3,7 +3,7 @@
 *.iml
 
 # Composer
-vendor/
+/vendor
 composer.lock
 composer.phar
 
@@ -12,11 +12,9 @@ composer.phar
 Thumbs.db
 
 # Other
-.phpunit.cache
-build
-.php_cs.cache
-clover.xml
-.env
-builds
+/runtime
 
 .phpunit.result.cache
+
+# Binaries
+protoc*
