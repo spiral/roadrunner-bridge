@@ -31,7 +31,7 @@ final class GRPCBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             Server::class,
-            Server::class
+            Server::class,
         );
     }
 
@@ -39,7 +39,7 @@ final class GRPCBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             InvokerInterface::class,
-            Invoker::class
+            Invoker::class,
         );
     }
 
@@ -47,7 +47,7 @@ final class GRPCBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             LocatorInterface::class,
-            ServiceLocator::class
+            ServiceLocator::class,
         );
     }
 
@@ -55,7 +55,7 @@ final class GRPCBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             ProtoFilesRepositoryInterface::class,
-            FileRepository::class
+            FileRepository::class,
         );
     }
 
@@ -73,7 +73,7 @@ final class GRPCBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             GeneratorRegistryInterface::class,
-            GeneratorRegistry::class
+            GeneratorRegistry::class,
         );
     }
 

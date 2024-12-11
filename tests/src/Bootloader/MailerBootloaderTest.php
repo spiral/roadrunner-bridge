@@ -16,13 +16,6 @@ final class MailerBootloaderTest extends TestCase
     /** @var \Mockery\LegacyMockInterface|\Mockery\MockInterface|QueueConnectionProviderInterface */
     private $queueProvider;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->queueProvider = $this->mockContainer(QueueConnectionProviderInterface::class);
-    }
-
     public function testMailerInterfaceBinding(): void
     {
         $this->queueProvider->shouldReceive('getConnection')
@@ -31,12 +24,19 @@ final class MailerBootloaderTest extends TestCase
 
         $this->assertInstanceOf(
             MailQueue::class,
-            $this->getContainer()->get(MailerInterface::class)
+            $this->getContainer()->get(MailerInterface::class),
         );
     }
 
     public function testJobRegistryShouldNotBeBound(): void
     {
         $this->assertFalse($this->getContainer()->has('Spiral\Jobs\JobRegistry'));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->queueProvider = $this->mockContainer(QueueConnectionProviderInterface::class);
     }
 }

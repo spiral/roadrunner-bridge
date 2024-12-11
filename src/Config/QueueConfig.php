@@ -18,9 +18,8 @@ use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 final class QueueConfig
 {
     public function __construct(
-        private readonly array $pipelines
-    ) {
-    }
+        private readonly array $pipelines,
+    ) {}
 
     /**
      * @return array<non-empty-string, TPipeline> $pipelines

@@ -19,7 +19,7 @@ final class ProtocCommandBuilderTest extends TestCase
             new GRPCConfig([
                 'servicesBasePath' => 'path4',
             ]),
-            'path3'
+            'path3',
         );
 
         $files->shouldReceive('ensureDirectory')
@@ -51,7 +51,7 @@ final class ProtocCommandBuilderTest extends TestCase
             new GRPCConfig([
                 'servicesBasePath' => null,
             ]),
-            'path3'
+            'path3',
         );
 
         $files->shouldReceive('getFiles')->with('path1')
@@ -66,7 +66,7 @@ final class ProtocCommandBuilderTest extends TestCase
 
         $this->assertSame(
             "protoc --plugin=path3 --php_out='path2' --php-grpc_out='path2' -I='path1' 'message.proto' 'service.proto' 2>&1",
-            $builder->build('path1', 'path2')
+            $builder->build('path1', 'path2'),
         );
     }
 }

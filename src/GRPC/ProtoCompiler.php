@@ -21,7 +21,7 @@ final class ProtoCompiler
         string $baseNamespace,
         private readonly FilesInterface $files,
         private readonly ProtocCommandBuilder $commandBuilder,
-        private readonly CommandExecutor $executor
+        private readonly CommandExecutor $executor,
     ) {
         $this->baseNamespace = \str_replace('\\', '/', \rtrim($baseNamespace, '\\'));
     }
@@ -35,7 +35,7 @@ final class ProtoCompiler
         $tmpDir = \realpath($this->tmpDir()) ?: $this->tmpDir();
 
         $output = $this->executor->execute(
-            $this->commandBuilder->build(\dirname($protoFile), $tmpDir)
+            $this->commandBuilder->build(\dirname($protoFile), $tmpDir),
         );
 
         if ($output !== '') {

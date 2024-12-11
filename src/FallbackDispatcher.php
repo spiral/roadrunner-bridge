@@ -19,8 +19,7 @@ final class FallbackDispatcher implements DispatcherInterface
 
     public function __construct(
         private readonly RoadRunnerMode $mode,
-    ) {
-    }
+    ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool
     {

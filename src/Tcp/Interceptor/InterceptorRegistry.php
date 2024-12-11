@@ -48,7 +48,7 @@ final class InterceptorRegistry implements RegistryInterface
             $interceptor = match (true) {
                 $value instanceof CoreInterceptorInterface, $value instanceof InterceptorInterface => $value,
                 $value instanceof Autowire => $value->resolve($this->container->get(FactoryInterface::class)),
-                default => $this->container->get($value)
+                default => $this->container->get($value),
             };
 
             \assert($interceptor instanceof CoreInterceptorInterface);

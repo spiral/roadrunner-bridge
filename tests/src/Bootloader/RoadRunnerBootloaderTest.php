@@ -58,7 +58,7 @@ final class RoadRunnerBootloaderTest extends TestCase
         );
 
         // TODO fix problem with rr worker
-        ob_end_flush();
+        \ob_end_flush();
     }
 
     public function testGetsPSR7WorkerInterface(): void
@@ -74,14 +74,14 @@ final class RoadRunnerBootloaderTest extends TestCase
         );
 
         // TODO fix problem with rr worker
-        ob_end_flush();
+        \ob_end_flush();
     }
 
     public function testFailbackDispatcherShouldBeLast(): void
     {
         $kernel = $this->getContainer()->get(KernelInterface::class);
         $dispatchers = (new \ReflectionProperty($kernel, 'dispatchers'))->getValue($kernel);
-        $dispatchers = \array_filter($dispatchers, static fn (string $disp): bool => $disp !== ConsoleDispatcher::class);
+        $dispatchers = \array_filter($dispatchers, static fn(string $disp): bool => $disp !== ConsoleDispatcher::class);
 
         $this->assertSame(FallbackDispatcher::class, $dispatchers[\array_key_last($dispatchers)]);
     }

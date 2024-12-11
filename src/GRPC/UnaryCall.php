@@ -17,8 +17,7 @@ final class UnaryCall implements UnaryCallInterface
         private readonly ContextInterface $context,
         private readonly Method $method,
         private readonly Message $message,
-    ) {
-    }
+    ) {}
 
     public function getContext(): ContextInterface
     {

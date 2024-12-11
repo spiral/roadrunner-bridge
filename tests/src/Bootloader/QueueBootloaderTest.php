@@ -19,25 +19,16 @@ use Spiral\Tests\TestCase;
 
 final class QueueBootloaderTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->getContainer()->bind(ExceptionReporterInterface::class, function () {
-            return m::mock(ExceptionReporterInterface::class);
-        });
-    }
-
     public function testGetsHandlerRegistryInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             HandlerRegistryInterface::class,
-            \Spiral\Queue\QueueRegistry::class
+            \Spiral\Queue\QueueRegistry::class,
         );
 
         $this->assertContainerBoundAsSingleton(
             \Spiral\Queue\QueueRegistry::class,
-            \Spiral\Queue\QueueRegistry::class
+            \Spiral\Queue\QueueRegistry::class,
         );
     }
 
@@ -48,14 +39,14 @@ final class QueueBootloaderTest extends TestCase
             $registry1 = $this->getContainer()->make(PipelineRegistryInterface::class, [
                 'pipelines' => ['foo' => 'bar'],
                 'aliases' => ['bas' => 'bar'],
-            ])
+            ]),
         );
         $this->assertInstanceOf(
             RPCPipelineRegistry::class,
             $registry2 = $this->getContainer()->make(PipelineRegistryInterface::class, [
                 'pipelines' => ['foo' => 'bar'],
                 'aliases' => ['bas' => 'bar'],
-            ])
+            ]),
         );
 
         $this->assertNotSame($registry1, $registry2);
@@ -65,7 +56,7 @@ final class QueueBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             \Spiral\Queue\Failed\FailedJobHandlerInterface::class,
-            \Spiral\Queue\Failed\LogFailedJobHandler::class
+            \Spiral\Queue\Failed\LogFailedJobHandler::class,
         );
     }
 
@@ -73,7 +64,7 @@ final class QueueBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             \Spiral\Queue\QueueManager::class,
-            \Spiral\Queue\QueueManager::class
+            \Spiral\Queue\QueueManager::class,
         );
     }
 
@@ -86,7 +77,7 @@ final class QueueBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             SerializerInterface::class,
-            SerializerManager::class
+            SerializerManager::class,
         );
     }
 
@@ -94,7 +85,7 @@ final class QueueBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             PayloadDeserializerInterface::class,
-            PayloadDeserializer::class
+            PayloadDeserializer::class,
         );
     }
 
@@ -104,5 +95,14 @@ final class QueueBootloaderTest extends TestCase
         $config = $configurator->getConfig('queue');
 
         $this->assertIsArray($config);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->getContainer()->bind(ExceptionReporterInterface::class, static function () {
+            return m::mock(ExceptionReporterInterface::class);
+        });
     }
 }

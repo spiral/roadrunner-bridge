@@ -31,6 +31,7 @@ final class Server
 {
     private readonly PipelineBuilderInterface $pipelineBuilder;
     private readonly HandlerInterface $handler;
+
     /** @var array<non-empty-string, HandlerInterface> */
     private array $pipelines = [];
 
@@ -50,7 +51,7 @@ final class Server
     /**
      * @throws \JsonException
      */
-    public function serve(WorkerInterface $worker = null): void
+    public function serve(?WorkerInterface $worker = null): void
     {
         $worker ??= Worker::create();
         $tcpWorker = new TcpWorker($worker);
@@ -68,12 +69,12 @@ final class Server
                  */
                 $response = $scope->runScope(
                     new Scope('tcp-request', [RequestInterface::class => $request]),
-                    static fn (): mixed => $pipeline->handle(new CallContext(
+                    static fn(): mixed => $pipeline->handle(new CallContext(
                         /** @see \Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface::handle() */
                         Target::fromPair($services->getService($server), 'handle'),
                         ['request' => $request],
                         ['server' => $server],
-                    ))
+                    )),
                 );
             } catch (\Throwable $e) {
                 $worker->error($this->config->isDebugMode() ? (string) $e : $e->getMessage());

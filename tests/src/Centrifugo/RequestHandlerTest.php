@@ -34,7 +34,7 @@ final class RequestHandlerTest extends TestCase
         (new RequestHandler($registry))->callAction(
             '',
             '',
-            ['request' => $request, 'type' => RequestType::Publish]
+            ['request' => $request, 'type' => RequestType::Publish],
         );
     }
 }

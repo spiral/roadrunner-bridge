@@ -12,23 +12,6 @@ use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 final class RoadRunnerModeTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->getContainer()->removeBinding(RoadRunnerMode::class);
-        $this->getContainer()->bindInjector(RoadRunnerMode::class, EnumInjector::class);
-    }
-
-    #[DataProvider('roadRunnerModes')]
-    public function testDetectMode(string $mode, RoadRunnerMode $expected): void
-    {
-        $this->getContainer()->bindSingleton(EnvironmentInterface::class, static fn () => new Environment([
-            'RR_MODE' => $mode,
-        ]), true);
-
-        $this->assertSame($expected, $this->getContainer()->get(RoadRunnerMode::class));
-    }
-
     public static function roadRunnerModes(): array
     {
         return [
@@ -39,5 +22,22 @@ final class RoadRunnerModeTest extends TestCase
             'jobs' => ['jobs', RoadRunnerMode::Jobs],
             'test' => ['test', RoadRunnerMode::Unknown],
         ];
+    }
+
+    #[DataProvider('roadRunnerModes')]
+    public function testDetectMode(string $mode, RoadRunnerMode $expected): void
+    {
+        $this->getContainer()->bindSingleton(EnvironmentInterface::class, static fn() => new Environment([
+            'RR_MODE' => $mode,
+        ]), true);
+
+        $this->assertSame($expected, $this->getContainer()->get(RoadRunnerMode::class));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->getContainer()->removeBinding(RoadRunnerMode::class);
+        $this->getContainer()->bindInjector(RoadRunnerMode::class, EnumInjector::class);
     }
 }

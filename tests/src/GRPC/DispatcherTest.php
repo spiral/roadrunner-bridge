@@ -15,12 +15,6 @@ use Spiral\Tests\ConsoleTestCase;
 
 final class DispatcherTest extends ConsoleTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->generateGRPCService();
-    }
-
     public function testCanServeShouldReturnFalseWithWrongEnvironment(): void
     {
         $this->assertDispatcherCannotBeServed(Dispatcher::class);
@@ -43,8 +37,8 @@ final class DispatcherTest extends ConsoleTestCase
         $worker->shouldReceive('waitPayload')->once()->andReturn(
             new Payload(
                 (new PingResponse())->serializeToString(),
-                json_encode(['service' => 'service.Echo', 'method' => 'Ping', 'context' => []])
-            )
+                \json_encode(['service' => 'service.Echo', 'method' => 'Ping', 'context' => []]),
+            ),
         );
 
         $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
@@ -55,6 +49,12 @@ final class DispatcherTest extends ConsoleTestCase
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
 
         $this->serveDispatcher(Dispatcher::class);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->generateGRPCService();
     }
 
     protected function tearDown(): void

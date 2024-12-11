@@ -73,6 +73,25 @@ final class GRPCBootloader extends Bootloader
         $kernel->addDispatcher(Dispatcher::class);
     }
 
+    /**
+     * @param Autowire|class-string<CoreInterceptorInterface>|CoreInterceptorInterface $interceptor
+     */
+    public function addInterceptor(string|CoreInterceptorInterface|Autowire $interceptor): void
+    {
+        $this->config->modify(
+            GRPCConfig::CONFIG,
+            new Append('interceptors', null, $interceptor),
+        );
+    }
+
+    /**
+     * @param Autowire|class-string<GeneratorInterface>|GeneratorInterface $generator
+     */
+    public function addGenerator(string|GeneratorInterface|Autowire $generator): void
+    {
+        $this->config->modify(GRPCConfig::CONFIG, new Append('generators', null, $generator));
+    }
+
     private function initGrpcConfig(): void
     {
         $this->config->setDefaults(
@@ -93,25 +112,6 @@ final class GRPCBootloader extends Bootloader
                 ],
             ],
         );
-    }
-
-    /**
-     * @param Autowire|class-string<CoreInterceptorInterface>|CoreInterceptorInterface $interceptor
-     */
-    public function addInterceptor(string|CoreInterceptorInterface|Autowire $interceptor): void
-    {
-        $this->config->modify(
-            GRPCConfig::CONFIG,
-            new Append('interceptors', null, $interceptor),
-        );
-    }
-
-    /**
-     * @param Autowire|class-string<GeneratorInterface>|GeneratorInterface $generator
-     */
-    public function addGenerator(string|GeneratorInterface|Autowire $generator): void
-    {
-        $this->config->modify(GRPCConfig::CONFIG, new Append('generators', null, $generator));
     }
 
     /**
@@ -172,7 +172,7 @@ final class GRPCBootloader extends Bootloader
         return match (true) {
             \is_string($dependency) => $container->get($dependency),
             $dependency instanceof Autowire => $dependency->resolve($factory),
-            default => $dependency
+            default => $dependency,
         };
     }
 }

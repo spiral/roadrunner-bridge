@@ -40,6 +40,6 @@ final class TcpConfig extends InjectableConfig
 
     public function isDebugMode(): bool
     {
-        return (bool)$this->config['debug'];
+        return (bool) $this->config['debug'];
     }
 }

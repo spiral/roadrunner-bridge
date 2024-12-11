@@ -19,8 +19,7 @@ final class ScaffolderBootloader extends Bootloader
 {
     public function __construct(
         private readonly ContainerInterface $container,
-    ) {
-    }
+    ) {}
 
     public function defineDependencies(): array
     {

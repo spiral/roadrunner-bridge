@@ -15,9 +15,8 @@ final class ProtocCommandBuilder
     public function __construct(
         private readonly FilesInterface $files,
         private readonly GRPCConfig $config,
-        private readonly string $protocBinaryPath
-    ) {
-    }
+        private readonly string $protocBinaryPath,
+    ) {}
 
     public function build(string $protoDir, string $tmpDir): string
     {
@@ -27,7 +26,7 @@ final class ProtocCommandBuilder
             \escapeshellarg($tmpDir),
             \escapeshellarg($tmpDir),
             $this->buildDirs($protoDir),
-            \implode(' ', \array_map('escapeshellarg', $this->getProtoFiles($protoDir)))
+            \implode(' ', \array_map('escapeshellarg', $this->getProtoFiles($protoDir))),
         );
     }
 
@@ -38,7 +37,7 @@ final class ProtocCommandBuilder
     {
         $filtered = \array_filter(
             $this->files->getFiles($protoDir),
-            static fn (string $file) => \str_ends_with($file, '.proto')
+            static fn(string $file) => \str_ends_with($file, '.proto'),
         );
         return \array_map(static fn(string $path): string => \realpath($path) ?: $path, $filtered);
     }

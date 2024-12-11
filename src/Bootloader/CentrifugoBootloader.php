@@ -28,8 +28,7 @@ final class CentrifugoBootloader extends Bootloader
 {
     public function __construct(
         private readonly ConfiguratorInterface $config,
-    ) {
-    }
+    ) {}
 
     public function defineSingletons(): array
     {
@@ -42,17 +41,6 @@ final class CentrifugoBootloader extends Bootloader
         ];
     }
 
-    private function initConfig(): void
-    {
-        $this->config->setDefaults(
-            CentrifugoConfig::CONFIG,
-            [
-                'services' => [],
-                'interceptors' => [],
-            ],
-        );
-    }
-
     public function init(BroadcastingBootloader $broadcasting): void
     {
         $this->initConfig();
@@ -62,6 +50,17 @@ final class CentrifugoBootloader extends Bootloader
     public function boot(AbstractKernel $kernel): void
     {
         $kernel->addDispatcher(Dispatcher::class);
+    }
+
+    private function initConfig(): void
+    {
+        $this->config->setDefaults(
+            CentrifugoConfig::CONFIG,
+            [
+                'services' => [],
+                'interceptors' => [],
+            ],
+        );
     }
 
     private function initInterceptorRegistry(

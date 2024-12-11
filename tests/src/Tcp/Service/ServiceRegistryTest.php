@@ -29,7 +29,7 @@ final class ServiceRegistryTest extends TestCase
 
     public function testGetServerFromAlias(): void
     {
-        $this->getContainer()->bind('alias', static fn () => new TestService());
+        $this->getContainer()->bind('alias', static fn() => new TestService());
 
         $this->updateConfig('tcp.services', ['test' => 'alias']);
 

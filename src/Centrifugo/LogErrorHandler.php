@@ -10,9 +10,8 @@ use Spiral\Exceptions\ExceptionReporterInterface;
 final class LogErrorHandler implements ErrorHandlerInterface
 {
     public function __construct(
-        private readonly ExceptionReporterInterface $reporter
-    ) {
-    }
+        private readonly ExceptionReporterInterface $reporter,
+    ) {}
 
     public function handle(RequestInterface $request, \Throwable $e): void
     {

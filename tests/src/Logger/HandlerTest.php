@@ -27,7 +27,7 @@ final class HandlerTest extends TestCase
             new Handler(
                 new Logger($rpc),
                 null,
-                '%message% foo'
+                '%message% foo',
             ),
         ]);
 
@@ -51,11 +51,11 @@ final class HandlerTest extends TestCase
             new Handler(
                 new Logger($rpc),
                 $fallback = m::mock(HandlerInterface::class),
-                '%message% foo'
+                '%message% foo',
             ),
         ]);
 
-        $fallback->shouldReceive('handle')->withArgs(function (array|LogRecord $record) {
+        $fallback->shouldReceive('handle')->withArgs(static function (array|LogRecord $record) {
             return $record['message'] === 'Error message';
         })->andReturn(true);
 

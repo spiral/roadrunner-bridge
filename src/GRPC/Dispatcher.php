@@ -24,8 +24,7 @@ final class Dispatcher implements DispatcherInterface
     public function __construct(
         #[Proxy] private readonly ContainerInterface $container,
         private readonly FinalizerInterface $finalizer,
-    ) {
-    }
+    ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool
     {
@@ -56,7 +55,7 @@ final class Dispatcher implements DispatcherInterface
 
         $server->serve(
             $worker,
-            function (\Throwable $e = null): void {
+            function (?\Throwable $e = null): void {
                 if ($e !== null) {
                     $this->handleException($e);
                 }

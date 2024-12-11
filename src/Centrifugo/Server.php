@@ -24,6 +24,7 @@ final class Server
 {
     private readonly PipelineBuilderInterface $pipelineBuilder;
     private readonly HandlerInterface $handler;
+
     /** @var array<non-empty-string, HandlerInterface> */
     private array $pipelines = [];
 
@@ -72,7 +73,7 @@ final class Server
         }
     }
 
-    public function getHandler(RequestType $type,): HandlerInterface
+    public function getHandler(RequestType $type): HandlerInterface
     {
         /** @psalm-suppress PossiblyInvalidArgument */
         return $this->pipelines[$type->value] ??= $this->pipelineBuilder

@@ -44,6 +44,11 @@ abstract class TestCase extends \Spiral\Testing\TestCase
         return __DIR__ . '/../';
     }
 
+    public function getEnvironment(): EnvironmentInterface
+    {
+        return $this->getContainer()->get(EnvironmentInterface::class);
+    }
+
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -57,10 +62,5 @@ abstract class TestCase extends \Spiral\Testing\TestCase
         $property = $reflection->getProperty($prop);
 
         return $property->getValue($obj);
-    }
-
-    public function getEnvironment(): EnvironmentInterface
-    {
-        return $this->getContainer()->get(EnvironmentInterface::class);
     }
 }

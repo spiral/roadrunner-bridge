@@ -7,6 +7,7 @@
     resolveFromConfigFile="true"
     findUnusedBaselineEntry="false"
     findUnusedCode="false"
+    errorBaseline="psalm-baseline.xml"
 >
     <projectFiles>
         <directory name="src"/>
@@ -15,9 +16,8 @@
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
-        <DeprecatedInterface>
-            <errorLevel type="suppress"/>
-        </DeprecatedInterface>
+        <DeprecatedInterface errorLevel="suppress"/>
+        <MissingClassConstType errorLevel="suppress"/>
         <PropertyNotSetInConstructor>
             <errorLevel type="suppress">
                 <directory name="src/Console/Command"/>

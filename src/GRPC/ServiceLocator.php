@@ -28,7 +28,6 @@ final class ServiceLocator implements LocatorInterface, TokenizationListenerInte
 
     /**
      * @param \ReflectionClass<ServiceInterface> $class
-     * @return void
      */
     public function listen(\ReflectionClass $class): void
     {
@@ -65,14 +64,12 @@ final class ServiceLocator implements LocatorInterface, TokenizationListenerInte
                     $class->getName(),
                     $className,
                     $this->registry[$className]->getName(),
-                )
+                ),
             );
 
             $this->registry[$className] = $class;
         }
     }
 
-    public function finalize(): void
-    {
-    }
+    public function finalize(): void {}
 }

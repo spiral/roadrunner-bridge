@@ -30,14 +30,26 @@ final class PayloadDeserializerTest extends TestCase
     private HandlerRegistryInterface|\Mockery\MockInterface $registry;
     private SerializerRegistryInterface|\Mockery\MockInterface $serializer;
 
-    protected function setUp(): void
+    public static function getHandlersDataProvider(): \Traversable
     {
-        parent::setUp();
+        yield 'PayloadClassJobHandler' => [new PayloadClassJobHandler()];
+        yield 'UnionTypeJobHandlers' => [new UnionTypeJobHandler()];
+    }
 
-        $this->deserializer = new PayloadDeserializer(
-            $this->registry = m::mock(HandlerRegistryInterface::class),
-            $this->serializer = m::mock(SerializerRegistryInterface::class),
-        );
+    public static function getInvalidHandlersDataProvider(): \Traversable
+    {
+        yield 'JobHandlerWithoutMethod' => [new JobHandlerWithoutMethod()];
+        yield 'JobHandlerWithoutClass' => [new JobHandlerWithoutClass()];
+        yield 'JobHandlerWithoutPayload' => [new JobHandlerWithoutPayload()];
+        yield 'JobHandlerWithoutType' => [new JobHandlerWithoutType()];
+    }
+
+    public static function getWrongDataFromHeadersDataProvider(): \Traversable
+    {
+        yield 'string' => ['string'];
+        yield 'empty-string' => [''];
+        yield 'non-existing-class' => ['Foo'];
+        yield 'int' => [1];
     }
 
     public function testGetClassFromHeaders(): void
@@ -201,25 +213,13 @@ final class PayloadDeserializerTest extends TestCase
         $this->assertSame($payload, $this->deserializer->deserialize($task));
     }
 
-    public static function getHandlersDataProvider(): \Traversable
+    protected function setUp(): void
     {
-        yield 'PayloadClassJobHandler' => [new PayloadClassJobHandler()];
-        yield 'UnionTypeJobHandlers' => [new UnionTypeJobHandler()];
-    }
+        parent::setUp();
 
-    public static function getInvalidHandlersDataProvider(): \Traversable
-    {
-        yield 'JobHandlerWithoutMethod' => [new JobHandlerWithoutMethod()];
-        yield 'JobHandlerWithoutClass' => [new JobHandlerWithoutClass()];
-        yield 'JobHandlerWithoutPayload' => [new JobHandlerWithoutPayload()];
-        yield 'JobHandlerWithoutType' => [new JobHandlerWithoutType()];
-    }
-
-    public static function getWrongDataFromHeadersDataProvider(): \Traversable
-    {
-        yield 'string' => ['string'];
-        yield 'empty-string' => [''];
-        yield 'non-existing-class' => ['Foo'];
-        yield 'int' => [1];
+        $this->deserializer = new PayloadDeserializer(
+            $this->registry = m::mock(HandlerRegistryInterface::class),
+            $this->serializer = m::mock(SerializerRegistryInterface::class),
+        );
     }
 }

@@ -23,8 +23,7 @@ final class Dispatcher implements DispatcherInterface
         private readonly ContainerInterface $container,
         private readonly ErrorHandlerInterface $errorHandler,
         private readonly FinalizerInterface $finalizer,
-    ) {
-    }
+    ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool
     {
@@ -60,7 +59,7 @@ final class Dispatcher implements DispatcherInterface
         try {
             $this->errorHandler->handle($e);
         } catch (\Throwable) {
-            \file_put_contents('php://stderr', (string)$e);
+            \file_put_contents('php://stderr', (string) $e);
         }
 
         /** @var ResponseFactoryInterface $responseFactory */
@@ -69,7 +68,7 @@ final class Dispatcher implements DispatcherInterface
 
         // Reporting system (non handled) exception directly to the client
         $response->getBody()->write(
-            $handler->render($e, Verbosity::VERBOSE)
+            $handler->render($e, Verbosity::VERBOSE),
         );
 
         return $response;

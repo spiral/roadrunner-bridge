@@ -20,7 +20,7 @@ final class ListCommandTest extends ConsoleTestCase
             new \ArrayIterator([
                 'memory' => $queue = \Mockery::mock(QueueInterface::class),
                 'amqp' => $amqp = \Mockery::mock(QueueInterface::class),
-            ])
+            ]),
         );
 
         $queue->shouldReceive('getPipelineStat')->once()->andReturn(
@@ -33,7 +33,7 @@ final class ListCommandTest extends ConsoleTestCase
                 'delayed' => 55,
                 'priority' => 200,
                 'reserved' => 8,
-            ])
+            ]),
         );
 
         $amqp->shouldReceive('getPipelineStat')->once()->andReturn(
@@ -46,7 +46,7 @@ final class ListCommandTest extends ConsoleTestCase
                 'delayed' => 88,
                 'priority' => 250,
                 'reserved' => 56,
-            ])
+            ]),
         );
 
         $this->assertStringContainsString(
@@ -58,7 +58,7 @@ final class ListCommandTest extends ConsoleTestCase
 | test    | memory | 200      | 100         | 55           | 8             |  ✓        |
 +---------+--------+----------+-------------+--------------+---------------+-----------+
 EOL,
-            $this->runCommand('rr:jobs:list')
+            $this->runCommand('rr:jobs:list'),
         );
     }
 }

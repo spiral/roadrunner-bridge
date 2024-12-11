@@ -8,7 +8,5 @@ use Spiral\Queue\HandlerInterface;
 
 final class JobHandlerWithoutMethod implements HandlerInterface
 {
-    public function handle(string $name, string $id, array $payload): void
-    {
-    }
+    public function handle(string $name, string $id, array $payload): void {}
 }

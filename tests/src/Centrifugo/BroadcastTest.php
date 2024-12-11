@@ -13,6 +13,20 @@ use Spiral\Tests\TestCase;
 
 final class BroadcastTest extends TestCase
 {
+    public static function topicsDataProvider(): \Traversable
+    {
+        yield ['foo', ['foo']];
+        yield [['foo', 'other'], ['foo', 'other']];
+        yield [new \ArrayIterator(['foo', 'other']), ['foo', 'other']];
+        yield [new StringableTopic('some-topic'), ['some-topic']];
+    }
+
+    public static function messagesDataProvider(): \Traversable
+    {
+        yield [['one', 'two']];
+        yield [new \ArrayIterator(['one', 'two'])];
+    }
+
     #[DataProvider('topicsDataProvider')]
     public function testPublish(iterable|\Stringable|string $topics, array $expectedTopics): void
     {
@@ -48,19 +62,5 @@ final class BroadcastTest extends TestCase
         $broadcast = new Broadcast($centrifugoApi);
 
         $broadcast->publish('foo', $messages);
-    }
-
-    public static function topicsDataProvider(): \Traversable
-    {
-        yield ['foo', ['foo']];
-        yield [['foo', 'other'], ['foo', 'other']];
-        yield [new \ArrayIterator(['foo', 'other']), ['foo', 'other']];
-        yield [new StringableTopic('some-topic'), ['some-topic']];
-    }
-
-    public static function messagesDataProvider(): \Traversable
-    {
-        yield [['one', 'two']];
-        yield [new \ArrayIterator(['one', 'two'])];
     }
 }

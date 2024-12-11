@@ -9,7 +9,7 @@ use Spiral\Tests\ConsoleTestCase;
 
 final class ListCommandTest extends ConsoleTestCase
 {
-    public function testListEmpty()
+    public function testListEmpty(): void
     {
         $locator = $this->mockContainer(LocatorInterface::class);
         $locator->shouldReceive('getServices')->andReturn([]);
@@ -18,11 +18,11 @@ final class ListCommandTest extends ConsoleTestCase
 
         $this->assertStringContainsString(
             'No GRPC services',
-            $result
+            $result,
         );
     }
 
-    public function testListAvailableServices()
+    public function testListAvailableServices(): void
     {
         $this->generateGRPCService();
 
@@ -30,17 +30,17 @@ final class ListCommandTest extends ConsoleTestCase
 
         $this->assertStringContainsString(
             'service.Ping',
-            $result
+            $result,
         );
 
         $this->assertStringContainsString(
             'Spiral\App\GRPC\Ping\PingService',
-            $result
+            $result,
         );
 
         $this->assertStringContainsString(
             'PingService.php',
-            $result
+            $result,
         );
     }
 
