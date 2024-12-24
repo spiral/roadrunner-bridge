@@ -9,8 +9,6 @@ use RoadRunner\Centrifugo\CentrifugoWorker;
 use RoadRunner\Centrifugo\CentrifugoWorkerInterface;
 use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
-use Spiral\Core\CompatiblePipelineBuilder;
-use Spiral\Interceptors\PipelineBuilderInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 #[DispatcherScope(scope: 'centrifugo')]
@@ -18,10 +16,7 @@ final class Dispatcher implements DispatcherInterface
 {
     public function __construct(
         private readonly ContainerInterface $container,
-        ?PipelineBuilderInterface $pipelineBuilder = null,
-    ) {
-        $this->pipelineBuilder = $pipelineBuilder ?? $container->get(CompatiblePipelineBuilder::class);
-    }
+    ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool
     {
