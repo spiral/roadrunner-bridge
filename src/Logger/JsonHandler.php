@@ -35,11 +35,12 @@ final class JsonHandler extends AbstractProcessingHandler
 
     protected function write(array|LogRecord $record): void
     {
-        \assert(\is_array($record) && !empty($record));
+        if (\is_array($record) && empty($record)) {
+            throw new \InvalidArgumentException('LogRecord should not be empty if is array');
+        }
         \assert($record['datetime'] instanceof \DateTimeInterface);
 
         $level = $record['level'] instanceof Level ? $record['level']->value : $record['level'];
-
         $level =  match ($level) {
             Level::Error->value, Level::Critical->value => 'error',
             Level::Warning->value, Level::Alert->value, Level::Emergency->value => 'warning',
