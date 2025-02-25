@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Logger;
 
 use DateTimeInterface;
-use Monolog\Formatter\FormatterInterface;
-use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
@@ -17,23 +15,12 @@ use RoadRunner\Logger\Logger as RoadRunnerLogger;
  */
 final class Handler extends AbstractProcessingHandler
 {
-    public const FORMAT = "%message% %context% %extra%\n";
-    private readonly RoadRunnerLogsMode $loggerMode;
-
     public function __construct(
         private readonly RoadRunnerLogger $logger,
-        string|FormatterInterface $formatter = self::FORMAT,
         private readonly string $loggerPrefix = '',
-        ?RoadRunnerLogsMode $loggerMode = null,
+        private readonly RoadRunnerLogsMode $loggerMode,
     ) {
         parent::__construct();
-        $this->loggerMode = $loggerMode ?? RoadRunnerLogsMode::Production;
-
-        if (\is_string($formatter)) {
-            $formatter = new LineFormatter($formatter);
-        }
-
-        $this->setFormatter($formatter);
     }
 
     protected function write(array|LogRecord $record): void

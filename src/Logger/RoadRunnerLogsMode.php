@@ -4,10 +4,12 @@ namespace Spiral\RoadRunnerBridge\Logger;
 
 use Spiral\Boot\EnvironmentInterface;
 use Spiral\Boot\Injector\InjectableEnumInterface;
+use Spiral\Boot\Injector\ProvideFrom;
 
 /**
  * @see https://docs.roadrunner.dev/docs/logging-and-observability/logger#modes
  */
+#[ProvideFrom(method: 'detect')]
 enum RoadRunnerLogsMode: string implements InjectableEnumInterface
 {
     case Production = 'production';

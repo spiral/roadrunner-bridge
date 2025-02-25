@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
 use Monolog\Handler\ErrorLogHandler;
-use Monolog\Handler\HandlerInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface;
 use RoadRunner\Logger\Logger;
@@ -31,7 +30,6 @@ final class LoggerBootloader extends Bootloader
     ): void {
         $bootloader->addHandler('roadrunner', $mode === RoadRunnerMode::Unknown ? new ErrorLogHandler() : new Handler(
             logger: $logger,
-            formatter: $env->get('LOGGER_FORMAT', Handler::FORMAT),
             loggerPrefix: $env->get('RR_LOGGER_PREFIX', ''),
             loggerMode: $loggerMode,
         ));
