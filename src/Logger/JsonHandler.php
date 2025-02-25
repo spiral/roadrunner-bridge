@@ -50,7 +50,7 @@ final class JsonHandler extends AbstractProcessingHandler
         };
 
         $ts = $this->loggerMode === RoadRunnerLogsMode::Development
-            ? $record['datetime']->format('Y-m-d\TH:i:sO')
+            ? $record['datetime']->format(\DateTimeInterface::RFC3339)
             : $record['datetime']->format('Uu000');
 
         $data = [

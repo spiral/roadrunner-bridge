@@ -10,6 +10,7 @@ use Spiral\Boot\EnvironmentInterface;
 use RoadRunner\Logger\Logger;
 use Spiral\Monolog\Bootloader\MonologBootloader;
 use Spiral\RoadRunnerBridge\Logger\Handler;
+use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 final class LoggerBootloader extends Bootloader
@@ -35,6 +36,8 @@ final class LoggerBootloader extends Bootloader
                     logger: $logger,
                     fallbackHandler: $fallbackHandler,
                     formatter: $env->get('LOGGER_FORMAT', Handler::FORMAT),
+                    loggerPrefix: $env->get('RR_LOGGER_PREFIX', ''),
+                    loggerMode: RoadRunnerLogsMode::tryFrom($env->get('RR_LOGGER_MODE')),
                 );
             },
         ];
