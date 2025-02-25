@@ -10,15 +10,12 @@ use Monolog\Level;
 use Monolog\LogRecord;
 use RoadRunner\Logger\Logger as RoadRunnerLogger;
 
-/**
- * @internal
- */
 final class Handler extends AbstractProcessingHandler
 {
     public function __construct(
         private readonly RoadRunnerLogger $logger,
         private readonly string $loggerPrefix = '',
-        private readonly RoadRunnerLogsMode $loggerMode,
+        private readonly RoadRunnerLogsMode $loggerMode = RoadRunnerLogsMode::Production,
     ) {
         parent::__construct();
     }
