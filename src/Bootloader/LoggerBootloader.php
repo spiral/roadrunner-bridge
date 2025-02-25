@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
 use Monolog\Handler\ErrorLogHandler;
+use Monolog\Handler\HandlerInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface;
 use RoadRunner\Logger\Logger;
@@ -22,29 +23,17 @@ final class LoggerBootloader extends Bootloader
         ];
     }
 
-    public function defineSingletons(): array
-    {
-        return [
-            Handler::class => static function (
-                Logger $logger,
-                RoadRunnerMode $mode,
-                EnvironmentInterface $env,
-            ): Handler {
-                $fallbackHandler = $mode === RoadRunnerMode::Unknown ? new ErrorLogHandler() : null;
-
-                return new Handler(
-                    logger: $logger,
-                    fallbackHandler: $fallbackHandler,
-                    formatter: $env->get('LOGGER_FORMAT', Handler::FORMAT),
-                    loggerPrefix: $env->get('RR_LOGGER_PREFIX', ''),
-                    loggerMode: RoadRunnerLogsMode::tryFrom($env->get('RR_LOGGER_MODE')),
-                );
-            },
-        ];
-    }
-
-    public function init(MonologBootloader $bootloader, Handler $handler): void
-    {
-        $bootloader->addHandler('roadrunner', $handler);
+    public function init(MonologBootloader $bootloader,
+        Logger $logger,
+        RoadRunnerMode $mode,
+        EnvironmentInterface $env,
+        RoadRunnerLogsMode $loggerMode,
+    ): void {
+        $bootloader->addHandler('roadrunner', $mode === RoadRunnerMode::Unknown ? new ErrorLogHandler() : new Handler(
+            logger: $logger,
+            formatter: $env->get('LOGGER_FORMAT', Handler::FORMAT),
+            loggerPrefix: $env->get('RR_LOGGER_PREFIX', ''),
+            loggerMode: $loggerMode,
+        ));
     }
 }

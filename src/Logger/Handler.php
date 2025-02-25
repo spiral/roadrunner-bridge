@@ -8,19 +8,20 @@ use DateTimeInterface;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
-use Monolog\Handler\HandlerInterface;
 use Monolog\Level;
 use Monolog\LogRecord;
 use RoadRunner\Logger\Logger as RoadRunnerLogger;
 
+/**
+ * @internal
+ */
 final class Handler extends AbstractProcessingHandler
 {
     public const FORMAT = "%message% %context% %extra%\n";
-    private readonly RoadRunnerLogsMode $loggerMode,
+    private readonly RoadRunnerLogsMode $loggerMode;
 
     public function __construct(
         private readonly RoadRunnerLogger $logger,
-        private readonly ?HandlerInterface $fallbackHandler = null,
         string|FormatterInterface $formatter = self::FORMAT,
         private readonly string $loggerPrefix = '',
         ?RoadRunnerLogsMode $loggerMode = null,
@@ -33,15 +34,6 @@ final class Handler extends AbstractProcessingHandler
         }
 
         $this->setFormatter($formatter);
-    }
-
-    public function handle(array|LogRecord $record): bool
-    {
-        if ($this->fallbackHandler !== null) {
-            return $this->fallbackHandler->handle($record);
-        }
-
-        return parent::handle($record);
     }
 
     protected function write(array|LogRecord $record): void

@@ -42,6 +42,7 @@
         "roadrunner-php/app-logger": "^1.0",
         "roadrunner-php/centrifugo": "^2.0",
         "roadrunner-php/lock": "^1.0",
+        "spiral/boot": "^3.14",
         "spiral/grpc-client": "^1.0",
         "spiral/hmvc": "^3.14",
         "spiral/roadrunner-grpc": "^3.3",
