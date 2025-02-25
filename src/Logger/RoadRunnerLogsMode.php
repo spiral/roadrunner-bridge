@@ -17,7 +17,7 @@ enum RoadRunnerLogsMode: string implements InjectableEnumInterface
 
     public static function detect(EnvironmentInterface $environment): self
     {
-        $value = $environment->get('RR_LOGGER_MODE');
+        $value = $environment->get('RR_LOGGER_MODE', '');
 
         return RoadRunnerLogsMode::tryFrom($value) ?? RoadRunnerLogsMode::Production;
     }
