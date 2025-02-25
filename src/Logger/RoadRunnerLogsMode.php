@@ -2,8 +2,11 @@
 
 namespace Spiral\RoadRunnerBridge\Logger;
 
-enum RoadRunnerLogsMode
+/**
+ * @see https://docs.roadrunner.dev/docs/logging-and-observability/logger#modes
+ */
+enum RoadRunnerLogsMode: string
 {
-    case Production;
-    case Development;
+    case Production = 'production';
+    case Development = 'development';
 }
