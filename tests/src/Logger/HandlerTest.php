@@ -21,27 +21,23 @@ final class HandlerTest extends TestCase
         if ($logPrefix !== null && $logsMode !== null) {
             return new Handler(
                 new Logger($rpc),
-                '%message% foo',
                 $logPrefix,
                 $logsMode,
             );
         } elseif ($logPrefix !== null) {
             return new Handler(
                 new Logger($rpc),
-                '%message% foo',
                 loggerPrefix: $logPrefix,
             );
         } elseif ($logsMode !== null) {
             return new Handler(
                 new Logger($rpc),
-                '%message% foo',
                 loggerMode: $logsMode,
             );
         }
 
         return new Handler(
             new Logger($rpc),
-            '%message% foo',
         );
 
     }

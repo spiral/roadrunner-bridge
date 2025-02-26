@@ -22,15 +22,17 @@ final class LoggerBootloader extends Bootloader
         ];
     }
 
-    public function init(MonologBootloader $bootloader,
+    public function init(
+        MonologBootloader $bootloader,
         Logger $logger,
         RoadRunnerMode $mode,
         EnvironmentInterface $env,
         RoadRunnerLogsMode $loggerMode,
     ): void {
+        print_r($mode);
         $bootloader->addHandler('roadrunner', $mode === RoadRunnerMode::Unknown ? new ErrorLogHandler() : new Handler(
             logger: $logger,
-            loggerPrefix: $env->get('RR_LOGGER_PREFIX', ''),
+            loggerPrefix: $env->get('RR_LOGGER_PREFIX', '') ?? '',
             loggerMode: $loggerMode,
         ));
     }
