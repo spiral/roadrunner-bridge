@@ -1,4 +1,4 @@
-# RoadRunner v2 bridge to Spiral Framework
+# RoadRunner bridge to Spiral Framework
 
 [![PHP Version Require](https://poser.pugx.org/spiral/roadrunner-bridge/require/php)](https://packagist.org/packages/spiral/roadrunner-bridge)
 [![Latest Stable Version](https://poser.pugx.org/spiral/roadrunner-bridge/v/stable)](https://packagist.org/packages/spiral/roadrunner-bridge)
@@ -6,7 +6,6 @@
 [![psalm](https://github.com/spiral/roadrunner-bridge/actions/workflows/psalm.yml/badge.svg)](https://github.com/spiral/roadrunner-bridge/actions)
 [![Codecov](https://codecov.io/gh/spiral/roadrunner-bridge/branch/master/graph/badge.svg)](https://codecov.io/gh/spiral/roadrunner-bridge/)
 [![Total Downloads](https://poser.pugx.org/spiral/roadrunner-bridge/downloads)](https://packagist.org/packages/spiral/roadrunner-bridge)
-[![StyleCI](https://github.styleci.io/repos/447581540/shield)](https://github.styleci.io/repos/447581540)
 <a href="https://discord.gg/8bZsjYhVVk"><img src="https://img.shields.io/badge/discord-chat-magenta.svg"></a>
 
 ## Requirements
@@ -14,7 +13,7 @@
 Make sure that your server is configured with following PHP version and extensions:
 
 - PHP 8.1+
-- Spiral Framework 3.7+
+- Spiral Framework 3.14+
 
 ## Installation
 
