@@ -7,9 +7,6 @@
     <DeprecatedClass>
       <code><![CDATA[CompatiblePipelineBuilder::class]]></code>
     </DeprecatedClass>
-    <DeprecatedInterface>
-      <code><![CDATA[Autowire|class-string<CoreInterceptorInterface>|CoreInterceptorInterface]]></code>
-    </DeprecatedInterface>
     <DocblockTypeContradiction>
       <code><![CDATA[$container->get(CompatiblePipelineBuilder::class)]]></code>
     </DocblockTypeContradiction>
@@ -23,19 +20,7 @@
       <code><![CDATA[new AutowireHandler($container, false)]]></code>
     </TooManyArguments>
   </file>
-  <file src="src/Centrifugo/Dispatcher.php">
-    <DeprecatedClass>
-      <code><![CDATA[CompatiblePipelineBuilder::class]]></code>
-    </DeprecatedClass>
-    <UndefinedThisPropertyAssignment>
-      <code><![CDATA[$this->pipelineBuilder]]></code>
-    </UndefinedThisPropertyAssignment>
-  </file>
   <file src="src/Centrifugo/Interceptor/InterceptorRegistry.php">
-    <DeprecatedInterface>
-      <code><![CDATA[$object]]></code>
-      <code><![CDATA[array]]></code>
-    </DeprecatedInterface>
     <LessSpecificReturnStatement>
       <code><![CDATA[\array_merge(
             $this->interceptors[self::INTERCEPTORS_FOR_ALL_SERVICES] ?? [],
@@ -46,17 +31,6 @@
       <code><![CDATA[array]]></code>
     </MoreSpecificReturnType>
   </file>
-  <file src="src/Centrifugo/Interceptor/RegistryInterface.php">
-    <DeprecatedInterface>
-      <code><![CDATA[TInterceptor|TLegacyInterceptor]]></code>
-      <code><![CDATA[list<TInterceptor|TLegacyInterceptor>]]></code>
-    </DeprecatedInterface>
-  </file>
-  <file src="src/Centrifugo/RequestHandler.php">
-    <DeprecatedInterface>
-      <code><![CDATA[RequestHandler]]></code>
-    </DeprecatedInterface>
-  </file>
   <file src="src/Centrifugo/Server.php">
     <DeprecatedClass>
       <code><![CDATA[CompatiblePipelineBuilder::class]]></code>
@@ -64,16 +38,6 @@
     <PossiblyNullArgument>
       <code><![CDATA[$services->getService($type)]]></code>
     </PossiblyNullArgument>
-  </file>
-  <file src="src/Config/GRPCConfig.php">
-    <DeprecatedInterface>
-      <code><![CDATA[array<Autowire|class-string<InterceptorInterface>|class-string<CoreInterceptorInterface>>]]></code>
-    </DeprecatedInterface>
-  </file>
-  <file src="src/Config/TcpConfig.php">
-    <DeprecatedInterface>
-      <code><![CDATA[array<non-empty-string, list<TInterceptor|TLegacyInterceptor>>]]></code>
-    </DeprecatedInterface>
   </file>
   <file src="src/Console/Command/GRPC/GenerateCommand.php">
     <PossiblyNullArgument>
@@ -107,18 +71,17 @@
       <code><![CDATA[$interface->isSubclassOf($className)]]></code>
     </RedundantCondition>
   </file>
+  <file src="src/Logger/Handler.php">
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$record['level']]]></code>
+    </PossiblyInvalidArgument>
+  </file>
   <file src="src/Queue/Dispatcher.php">
     <DeprecatedMethod>
       <code><![CDATA[complete]]></code>
       <code><![CDATA[fail]]></code>
       <code><![CDATA[fail]]></code>
     </DeprecatedMethod>
-  </file>
-  <file src="src/Tcp/Interceptor/RegistryInterface.php">
-    <DeprecatedInterface>
-      <code><![CDATA[TInterceptor|TLegacyInterceptor]]></code>
-      <code><![CDATA[array<CoreInterceptorInterface|InterceptorInterface>]]></code>
-    </DeprecatedInterface>
   </file>
   <file src="src/Tcp/Server.php">
     <DeprecatedClass>

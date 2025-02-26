@@ -29,10 +29,12 @@ final class LoggerBootloader extends Bootloader
         EnvironmentInterface $env,
         RoadRunnerLogsMode $loggerMode,
     ): void {
-        $bootloader->addHandler('roadrunner', $mode === RoadRunnerMode::Unknown ? new ErrorLogHandler() : new Handler(
-            logger: $logger,
-            loggerPrefix: $env->get('RR_LOGGER_PREFIX') ?? '',
-            loggerMode: $loggerMode,
-        ));
+        $bootloader->addHandler('roadrunner', $mode === RoadRunnerMode::Unknown
+            ? new ErrorLogHandler()
+            : new Handler(
+                logger: $logger,
+                loggerPrefix: (string) $env->get('RR_LOGGER_PREFIX'),
+                loggerMode: $loggerMode,
+            ));
     }
 }

@@ -24,9 +24,6 @@ final class Handler extends AbstractProcessingHandler
         if (\is_array($record) && empty($record)) {
             throw new \InvalidArgumentException('LogRecord should not be empty if is array');
         }
-        if ($record['level'] instanceof \DateTimeInterface) {
-            throw new \InvalidArgumentException('LogRecord should not be a DateTime object');
-        }
         \assert($record['datetime'] instanceof \DateTimeInterface);
 
         $level = $record['level'] instanceof Level
