@@ -31,7 +31,7 @@ final class LoggerBootloader extends Bootloader
     ): void {
         $bootloader->addHandler('roadrunner', $mode === RoadRunnerMode::Unknown ? new ErrorLogHandler() : new Handler(
             logger: $logger,
-            loggerPrefix: $env->get('RR_LOGGER_PREFIX', '') ?? '',
+            loggerPrefix: $env->get('RR_LOGGER_PREFIX') ?? '',
             loggerMode: $loggerMode,
         ));
     }

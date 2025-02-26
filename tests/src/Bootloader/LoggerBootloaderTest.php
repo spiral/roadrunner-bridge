@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Bootloader;
 
+use Monolog\Handler\ErrorLogHandler;
 use RoadRunner\Logger\Logger;
 use Spiral\Boot\EnvironmentInterface;
+use Spiral\Boot\FinalizerInterface;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\Monolog\Bootloader\MonologBootloader;
@@ -21,24 +23,11 @@ use Spiral\Tests\TestCase;
  */
 final class LoggerBootloaderTest extends TestCase
 {
-    public function testHandlerIsRegisteredInMonolog(): void
+    public function testRegisterErrorLogHandlerRunWithoutRR(): void
     {
-        $env = $this->createMock(EnvironmentInterface::class);
-        (new LoggerBootloader())
-            ->init(
-                new MonologBootloader(
-                    $this->createMock(ConfiguratorInterface::class),
-                    $env,
-                ),
-                new Logger($this->createMock(RPCInterface::class)),
-                RoadRunnerMode::Grpc,
-                $env,
-                RoadRunnerLogsMode::Production,
-            );
-
         $config = $this->getConfig(MonologConfig::CONFIG);
 
         $this->assertArrayHasKey('roadrunner', $config['handlers']);
-        $this->assertInstanceOf(Handler::class, $config['handlers']['roadrunner'][0]);
+        $this->assertInstanceOf(ErrorLogHandler::class, $config['handlers']['roadrunner'][0]);
     }
 }
