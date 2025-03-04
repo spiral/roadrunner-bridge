@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Logger;
 
+use Monolog\Level;
 use Monolog\Logger as Monolog;
+use Monolog\LogRecord;
 use RoadRunner\Logger\Logger;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\RoadRunnerBridge\Logger\Handler;
@@ -16,32 +18,6 @@ use Spiral\Tests\TestCase;
  */
 final class HandlerTest extends TestCase
 {
-    public static function handlerFactory(RPCInterface $rpc, ?string $logPrefix = null, ?RoadRunnerLogsMode $logsMode = null): Handler
-    {
-        if ($logPrefix !== null && $logsMode !== null) {
-            return new Handler(
-                new Logger($rpc),
-                $logPrefix,
-                $logsMode,
-            );
-        } elseif ($logPrefix !== null) {
-            return new Handler(
-                new Logger($rpc),
-                loggerPrefix: $logPrefix,
-            );
-        } elseif ($logsMode !== null) {
-            return new Handler(
-                new Logger($rpc),
-                loggerMode: $logsMode,
-            );
-        }
-
-        return new Handler(
-            new Logger($rpc),
-        );
-
-    }
-
     public static function toRRWithOutFallbackDataProvider(): iterable
     {
         yield 'Channel name is default, log level is error' => [
@@ -79,7 +55,7 @@ final class HandlerTest extends TestCase
      *
      * @dataProvider toRRWithOutFallbackDataProvider
      */
-    public function testLoggerShouldSendDataToRR(string $channelName, string $logLevel, ?string $logPrefix = null): void
+    public function testLoggerShouldSendDataToRR(string $channelName, string $logLevel, string $logPrefix = ''): void
     {
         $rpc = $this->createMock(RPCInterface::class);
 
@@ -91,7 +67,12 @@ final class HandlerTest extends TestCase
 
         $monolog = new Monolog($channelName);
 
-        $monolog->setHandlers([self::HandlerFactory($rpc, $logPrefix)]);
+        $monolog->setHandlers([
+            new Handler(
+                logger: new Logger($rpc),
+                loggerPrefix: $logPrefix,
+            ),
+        ]);
 
         $rpc
             ->expects(self::once())
@@ -142,7 +123,12 @@ final class HandlerTest extends TestCase
 
         $monolog = new Monolog($channelName);
 
-        $monolog->setHandlers([self::handlerFactory($rpc, logsMode: RoadRunnerLogsMode::Development)]);
+        $monolog->setHandlers([
+            new Handler(
+                logger: new Logger($rpc),
+                loggerMode: RoadRunnerLogsMode::Development,
+            ),
+        ]);
 
         $rpc
             ->expects(self::once())
@@ -186,7 +172,6 @@ final class HandlerTest extends TestCase
     public function testLoggerShouldSendMessageWithContextToRR(string $channelName = 'default', string $logLevel = 'error'): void
     {
         $rpc = $this->createMock(RPCInterface::class);
-
         $rpc
             ->expects(self::once())
             ->method('withServicePrefix')
@@ -195,7 +180,12 @@ final class HandlerTest extends TestCase
 
         $monolog = new Monolog($channelName);
 
-        $monolog->setHandlers([self::handlerFactory($rpc, logsMode: RoadRunnerLogsMode::Development)]);
+        $monolog->setHandlers([
+            new Handler(
+                logger: new Logger($rpc),
+                loggerMode: RoadRunnerLogsMode::Development,
+            ),
+        ]);
 
         $rpc
             ->expects(self::once())
@@ -229,5 +219,96 @@ final class HandlerTest extends TestCase
 
         self::assertTrue(\method_exists($monolog, $logLevel));
         \call_user_func([$monolog, $logLevel], 'Log message', ['foo' => 'bar']);
+    }
+
+    /**
+     * @dataProvider dataLevelFilter
+     */
+    public function testLevelFilter(Level $level, LogRecord $record, int $expectsCount = 0): void
+    {
+        $rpc = $this->createMock(RPCInterface::class);
+        $rpc
+            ->expects(self::once())
+            ->method('withServicePrefix')
+            ->with('app')
+            ->willReturnSelf();
+        $rpc
+            ->expects(self::exactly($expectsCount))
+            ->method('call');
+
+        $handler = new Handler(new Logger($rpc), level: $level);
+        $handler->handle($record);
+    }
+
+    public static function dataLevelFilter(): iterable
+    {
+        $dt = new \DateTimeImmutable();
+
+        yield [
+            Level::Debug,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+            1,
+        ];
+        yield [
+            Level::Notice,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+        yield [
+            Level::Warning,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+        yield [
+            Level::Error,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+        yield [
+            Level::Critical,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+        yield [
+            Level::Alert,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+        yield [
+            Level::Emergency,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+
+
+        yield [
+            Level::Debug,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+            1,
+        ];
+        yield [
+            Level::Notice,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+             1,
+        ];
+        yield [
+            Level::Warning,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+             1,
+        ];
+        yield [
+            Level::Error,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+             1,
+        ];
+        yield [
+            Level::Critical,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+             1,
+        ];
+        yield [
+            Level::Alert,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+             1,
+        ];
+        yield [
+            Level::Emergency,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+            1,
+        ];
     }
 }
