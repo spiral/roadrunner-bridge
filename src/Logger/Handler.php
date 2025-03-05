@@ -6,17 +6,23 @@ namespace Spiral\RoadRunnerBridge\Logger;
 
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Level;
+use Monolog\Logger;
 use Monolog\LogRecord;
 use RoadRunner\Logger\Logger as RoadRunnerLogger;
 
 final class Handler extends AbstractProcessingHandler
 {
+    /**
+     * @psalm-suppress ArgumentTypeCoercion
+     */
     public function __construct(
         private readonly RoadRunnerLogger $logger,
         private readonly string $loggerPrefix = '',
         private readonly RoadRunnerLogsMode $loggerMode = RoadRunnerLogsMode::Production,
+        int|string|Level $level = Level::Debug,
+        bool $bubble = true,
     ) {
-        parent::__construct();
+        parent::__construct(Logger::toMonologLevel($level), $bubble);
     }
 
     protected function write(array|LogRecord $record): void
@@ -26,16 +32,11 @@ final class Handler extends AbstractProcessingHandler
         }
         \assert($record['datetime'] instanceof \DateTimeInterface);
 
-        $level = $record['level'] instanceof Level
-            ? $record['level']
-            : Level::tryFrom($record['level']);
-
-        $level = match ($level) {
-            Level::Error, Level::Critical => 'error',
-            Level::Warning, Level::Alert, Level::Emergency => 'warning',
+        $level = match (Logger::toMonologLevel($record['level'])) {
+            Level::Error, Level::Critical, Level::Alert, Level::Emergency => 'error',
+            Level::Warning => 'warning',
             Level::Info, Level::Notice => 'info',
             Level::Debug => 'debug',
-            default => throw new \LogicException('Unknown log level: ' . $record['level']),
         };
 
         $ts = $this->loggerMode === RoadRunnerLogsMode::Development

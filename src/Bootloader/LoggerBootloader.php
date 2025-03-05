@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Bootloader;
 
 use Monolog\Handler\ErrorLogHandler;
+use Monolog\Logger as Monologger;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface;
 use RoadRunner\Logger\Logger;
@@ -35,6 +36,7 @@ final class LoggerBootloader extends Bootloader
                 logger: $logger,
                 loggerPrefix: (string) $env->get('RR_LOGGER_PREFIX'),
                 loggerMode: $loggerMode,
+                level: Monologger::toMonologLevel($env->get('MONOLOG_DEFAULT_LEVEL', 'INFO')),
             ));
     }
 }
