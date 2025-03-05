@@ -50,6 +50,78 @@ final class HandlerTest extends TestCase
         ];
     }
 
+    public static function dataLevelFilter(): iterable
+    {
+        $dt = new \DateTimeImmutable();
+
+        yield [
+            Level::Debug,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+            1,
+        ];
+        yield [
+            Level::Notice,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+        yield [
+            Level::Warning,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+        yield [
+            Level::Error,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+        yield [
+            Level::Critical,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+        yield [
+            Level::Alert,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+        yield [
+            Level::Emergency,
+            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
+        ];
+
+
+        yield [
+            Level::Debug,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+            1,
+        ];
+        yield [
+            Level::Notice,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+            1,
+        ];
+        yield [
+            Level::Warning,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+            1,
+        ];
+        yield [
+            Level::Error,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+            1,
+        ];
+        yield [
+            Level::Critical,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+            1,
+        ];
+        yield [
+            Level::Alert,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+            1,
+        ];
+        yield [
+            Level::Emergency,
+            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
+            1,
+        ];
+    }
+
     /**
      * @covers ::write
      *
@@ -238,77 +310,5 @@ final class HandlerTest extends TestCase
 
         $handler = new Handler(new Logger($rpc), level: $level);
         $handler->handle($record);
-    }
-
-    public static function dataLevelFilter(): iterable
-    {
-        $dt = new \DateTimeImmutable();
-
-        yield [
-            Level::Debug,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-            1,
-        ];
-        yield [
-            Level::Notice,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-        yield [
-            Level::Warning,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-        yield [
-            Level::Error,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-        yield [
-            Level::Critical,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-        yield [
-            Level::Alert,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-        yield [
-            Level::Emergency,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-
-
-        yield [
-            Level::Debug,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-            1,
-        ];
-        yield [
-            Level::Notice,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-             1,
-        ];
-        yield [
-            Level::Warning,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-             1,
-        ];
-        yield [
-            Level::Error,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-             1,
-        ];
-        yield [
-            Level::Critical,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-             1,
-        ];
-        yield [
-            Level::Alert,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-             1,
-        ];
-        yield [
-            Level::Emergency,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-            1,
-        ];
     }
 }
