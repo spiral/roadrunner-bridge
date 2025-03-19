@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Centrifugo;
+namespace Spiral\RoadRunnerBridge\Centrifugo\Internal;
 
 use Psr\Container\ContainerInterface;
 use RoadRunner\Centrifugo\CentrifugoWorker;
@@ -11,6 +11,9 @@ use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
+/**
+ * @internal
+ */
 #[DispatcherScope(scope: 'centrifugo')]
 final class Dispatcher implements DispatcherInterface
 {

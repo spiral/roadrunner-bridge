@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
+namespace Spiral\RoadRunnerBridge\Centrifugo\Internal;
 
 use Psr\Container\ContainerInterface;
 use RoadRunner\Centrifugo\Request\RequestType;
@@ -11,10 +11,12 @@ use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Interceptors\InterceptorInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Exception\ConfigurationException;
+use Spiral\RoadRunnerBridge\Centrifugo\Interceptor\RegistryInterface;
 
 /**
  * @psalm-import-type TInterceptor from RegistryInterface
  * @psalm-import-type TLegacyInterceptor from RegistryInterface
+ * @internal
  */
 final class InterceptorRegistry implements RegistryInterface
 {

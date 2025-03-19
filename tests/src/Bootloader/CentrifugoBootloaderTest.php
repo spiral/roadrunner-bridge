@@ -10,13 +10,13 @@ use RoadRunner\Centrifugo\CentrifugoWorkerInterface;
 use RoadRunner\Centrifugo\RPCCentrifugoApi;
 use Spiral\Broadcasting\Config\BroadcastConfig;
 use Spiral\Core\ConfigsInterface;
-use Spiral\RoadRunnerBridge\Centrifugo\Broadcast;
-use Spiral\RoadRunnerBridge\Centrifugo\Dispatcher;
 use Spiral\RoadRunnerBridge\Centrifugo\ErrorHandlerInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
-use Spiral\RoadRunnerBridge\Centrifugo\LogErrorHandler;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\Broadcast;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\Dispatcher;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\LogErrorHandler;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\ServiceRegistry;
 use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
-use Spiral\RoadRunnerBridge\Centrifugo\ServiceRegistry;
 use Spiral\RoadRunnerBridge\Config\CentrifugoConfig;
 use Spiral\Tests\TestCase;
 
@@ -34,7 +34,7 @@ final class CentrifugoBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             Interceptor\RegistryInterface::class,
-            Interceptor\InterceptorRegistry::class,
+            \Spiral\RoadRunnerBridge\Centrifugo\Internal\InterceptorRegistry::class,
         );
     }
 

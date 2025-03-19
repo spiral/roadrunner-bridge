@@ -15,13 +15,13 @@ use Spiral\Broadcasting\Bootloader\BroadcastingBootloader;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Core\Attribute\Proxy;
 use Spiral\Core\FactoryInterface;
-use Spiral\RoadRunnerBridge\Centrifugo\Broadcast;
-use Spiral\RoadRunnerBridge\Centrifugo\Dispatcher;
 use Spiral\RoadRunnerBridge\Centrifugo\ErrorHandlerInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
-use Spiral\RoadRunnerBridge\Centrifugo\LogErrorHandler;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\Broadcast;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\Dispatcher;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\LogErrorHandler;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\ServiceRegistry;
 use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
-use Spiral\RoadRunnerBridge\Centrifugo\ServiceRegistry;
 use Spiral\RoadRunnerBridge\Config\CentrifugoConfig;
 
 final class CentrifugoBootloader extends Bootloader
@@ -68,7 +68,7 @@ final class CentrifugoBootloader extends Bootloader
         ContainerInterface $container,
         FactoryInterface $factory,
     ): Interceptor\RegistryInterface {
-        return new Interceptor\InterceptorRegistry($config->getInterceptors(), $container, $factory);
+        return new \Spiral\RoadRunnerBridge\Centrifugo\Internal\InterceptorRegistry($config->getInterceptors(), $container, $factory);
     }
 
     private function initServiceRegistry(

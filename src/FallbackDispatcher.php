@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge;
 
 use Spiral\Boot\DispatcherInterface;
-use Spiral\RoadRunnerBridge\Centrifugo\Dispatcher as Centrifugo;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\Dispatcher as Centrifugo;
 use Spiral\RoadRunnerBridge\Exception\DispatcherNotFoundException;
 use Spiral\RoadRunnerBridge\GRPC\Dispatcher as GRPC;
 use Spiral\RoadRunnerBridge\Http\Dispatcher as Http;
