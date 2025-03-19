@@ -8,7 +8,7 @@ use Spiral\Boot\DispatcherInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Internal\Dispatcher as Centrifugo;
 use Spiral\RoadRunnerBridge\Exception\DispatcherNotFoundException;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Dispatcher as GRPC;
-use Spiral\RoadRunnerBridge\Http\Dispatcher as Http;
+use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher as Http;
 use Spiral\RoadRunnerBridge\Queue\Dispatcher as Queue;
 use Spiral\RoadRunnerBridge\Tcp\Dispatcher as Tcp;
 

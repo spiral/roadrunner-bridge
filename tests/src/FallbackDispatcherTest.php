@@ -25,7 +25,7 @@ final class FallbackDispatcherTest extends TestCase
     {
         yield 'http' => [
             RoadRunnerMode::Http,
-            'To use RoadRunner in `Http` mode, please register dispatcher `Spiral\RoadRunnerBridge\Http\Dispatcher`.',
+            'To use RoadRunner in `Http` mode, please register dispatcher `Spiral\RoadRunnerBridge\Http\Internal\Dispatcher`.',
         ];
         yield 'jobs' => [
             RoadRunnerMode::Jobs,

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Bootloader;
 
-use Spiral\RoadRunnerBridge\Http\Dispatcher;
-use Spiral\RoadRunnerBridge\Http\ErrorHandlerInterface;
-use Spiral\RoadRunnerBridge\Http\LogErrorHandler;
+use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher;
 use Spiral\Tests\TestCase;
 
 final class HttpBootloaderTest extends TestCase
@@ -20,14 +18,6 @@ final class HttpBootloaderTest extends TestCase
             \array_filter($dispatchers, static function ($dispatcher) {
                 return $dispatcher === Dispatcher::class;
             }),
-        );
-    }
-
-    public function testGetsErrorHandlerInterface(): void
-    {
-        $this->assertContainerBoundAsSingleton(
-            ErrorHandlerInterface::class,
-            LogErrorHandler::class,
         );
     }
 
