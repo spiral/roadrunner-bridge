@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\GRPC\Interceptor;
+namespace Spiral\RoadRunnerBridge\GRPC\Internal;
 
 use Google\Protobuf\Internal\Message;
 use Spiral\Core\Attribute\Proxy;
@@ -17,7 +17,6 @@ use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Method;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 use Spiral\RoadRunner\GRPC\StatusCode;
-use Spiral\RoadRunnerBridge\GRPC\UnaryCall;
 use Spiral\RoadRunnerBridge\GRPC\UnaryCallInterface;
 
 /**

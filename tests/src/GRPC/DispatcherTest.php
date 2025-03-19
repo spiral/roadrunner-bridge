@@ -9,7 +9,7 @@ use Spiral\Boot\FinalizerInterface;
 use Spiral\RoadRunner\Payload;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
-use Spiral\RoadRunnerBridge\GRPC\Dispatcher;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Dispatcher;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\ConsoleTestCase;
 

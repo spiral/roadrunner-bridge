@@ -49,7 +49,7 @@ final class ListCommandTest extends ConsoleTestCase
             ]),
         );
 
-        $this->assertStringContainsString(
+        $this->assertStringContainsStringIgnoringLineEndings(
             <<<EOL
 +---------+--------+----------+-------------+--------------+---------------+-----------+
 | Name    | Driver | Priority | Active jobs | Delayed jobs | Reserved jobs | Is active |

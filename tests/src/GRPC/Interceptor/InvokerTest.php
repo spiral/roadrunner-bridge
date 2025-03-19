@@ -14,7 +14,7 @@ use Spiral\RoadRunner\GRPC\ContextInterface;
 use Spiral\RoadRunner\GRPC\Exception\InvokeException;
 use Spiral\RoadRunner\GRPC\Method;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
-use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Invoker;
 use Spiral\Tests\TestCase;
 
 final class InvokerTest extends TestCase

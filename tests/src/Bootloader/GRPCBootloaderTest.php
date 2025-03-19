@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Bootloader;
 
+use Mockery as m;
 use Spiral\Config\ConfigManager;
 use Spiral\Config\LoaderInterface;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
-use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
-use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistry;
-use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
-use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunnerBridge\Bootloader\GRPCBootloader;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
-use Spiral\RoadRunnerBridge\GRPC\Dispatcher;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistry;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Dispatcher;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Invoker;
+use Spiral\RoadRunnerBridge\GRPC\Internal\ServiceLocator;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
-use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
 use Spiral\Tests\TestCase;
-use Mockery as m;
 
 final class GRPCBootloaderTest extends TestCase
 {

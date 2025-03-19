@@ -6,10 +6,13 @@ namespace Spiral\RoadRunnerBridge\GRPC;
 
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 
+/**
+ * The gRPC service locator.
+ */
 interface LocatorInterface
 {
     /**
-     * Return list of available GRPC services in the form of [interface => object].
+     * Return list of available gRPC services in the form of [interface => object].
      *
      * @return array<class-string<ServiceInterface>, \ReflectionClass<ServiceInterface>>
      */

@@ -22,15 +22,15 @@ use Spiral\Interceptors\PipelineBuilderInterface;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
-use Spiral\RoadRunnerBridge\GRPC\Dispatcher;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistry;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
-use Spiral\RoadRunnerBridge\GRPC\Interceptor\Invoker;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Dispatcher;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Invoker;
+use Spiral\RoadRunnerBridge\GRPC\Internal\ServiceLocator;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
-use Spiral\RoadRunnerBridge\GRPC\ServiceLocator;
 use Spiral\Tokenizer\TokenizerListenerRegistryInterface;
 
 final class GRPCBootloader extends Bootloader

@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\GRPC;
+namespace Spiral\RoadRunnerBridge\GRPC\Internal;
 
 use Google\Protobuf\Internal\Message;
 use Spiral\RoadRunner\GRPC\ContextInterface;
 use Spiral\RoadRunner\GRPC\Method;
+use Spiral\RoadRunnerBridge\GRPC\UnaryCallInterface;
 
 /**
  * @internal
