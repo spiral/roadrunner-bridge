@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Tcp;
+namespace Spiral\RoadRunnerBridge\Tcp\Internal;
 
 use Psr\Container\ContainerInterface;
 use Spiral\Attribute\DispatcherScope;

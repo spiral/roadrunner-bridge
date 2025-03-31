@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Tcp\Service;
+namespace Spiral\RoadRunnerBridge\Tcp\Internal;
 
 use Psr\Container\ContainerInterface;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\FactoryInterface;
 use Spiral\RoadRunnerBridge\Tcp\Service\Exception\NotFoundException;
+use Spiral\RoadRunnerBridge\Tcp\Service\RegistryInterface;
+use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
 
 /**
  * @psalm-import-type TService from RegistryInterface

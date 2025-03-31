@@ -14,7 +14,7 @@ use Spiral\RoadRunner\Tcp\TcpEvent;
 use Spiral\RoadRunner\Tcp\TcpResponse;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
-use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
+use Spiral\RoadRunnerBridge\Tcp\Internal\Dispatcher;
 use Spiral\Testing\Attribute\Config;
 use Spiral\Tests\TestCase;
 

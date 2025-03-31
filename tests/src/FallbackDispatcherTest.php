@@ -37,7 +37,7 @@ final class FallbackDispatcherTest extends TestCase
         ];
         yield 'tcp' => [
             RoadRunnerMode::Tcp,
-            'To use RoadRunner in `Tcp` mode, please register dispatcher `Spiral\RoadRunnerBridge\Tcp\Dispatcher`.',
+            'To use RoadRunner in `Tcp` mode, please register dispatcher `Spiral\RoadRunnerBridge\Tcp\Internal\Dispatcher`.',
         ];
         yield 'temporal' => [
             RoadRunnerMode::Temporal,

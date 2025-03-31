@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Queue\Internal;
 
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
@@ -34,10 +33,12 @@ use Spiral\RoadRunnerBridge\RoadRunnerMode;
 final class Dispatcher implements DispatcherInterface
 {
     public function __construct(
-        private readonly ContainerInterface $container,
         private readonly FinalizerInterface $finalizer,
         private readonly ScopeInterface $scope,
         private readonly ExceptionReporterInterface $reporter,
+        private readonly ConsumerInterface $consumer,
+        private readonly PayloadDeserializerInterface $deserializer,
+        private readonly Handler $handler,
     ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool
@@ -52,16 +53,9 @@ final class Dispatcher implements DispatcherInterface
      */
     public function serve(): void
     {
-        /** @var ConsumerInterface $consumer */
-        $consumer = $this->container->get(ConsumerInterface::class);
+        $handler = $this->handler;
 
-        /** @var PayloadDeserializerInterface $deserializer */
-        $deserializer = $this->container->get(PayloadDeserializerInterface::class);
-
-        /** @var Handler $handler */
-        $handler = $this->container->get(Handler::class);
-
-        while ($task = $consumer->waitTask()) {
+        while ($task = $this->consumer->waitTask()) {
             try {
                 /** @psalm-suppress InvalidArgument */
                 $this->scope->runScope(
@@ -69,7 +63,7 @@ final class Dispatcher implements DispatcherInterface
                         id: $task->getId(),
                         queue: $task->getQueue(),
                         name: $task->getName(),
-                        payload: $deserializer->deserialize($task),
+                        payload: $this->deserializer->deserialize($task),
                         headers: $task->getHeaders(),
                     )]),
                     static function (TaskInterface $queueTask) use ($handler, $task): void {

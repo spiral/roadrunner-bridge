@@ -11,9 +11,10 @@ use Spiral\Boot\KernelInterface;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Core\Attribute\Proxy;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
-use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
 use Spiral\RoadRunnerBridge\Tcp\Interceptor;
-use Spiral\RoadRunnerBridge\Tcp\Server;
+use Spiral\RoadRunnerBridge\Tcp\Internal\Dispatcher;
+use Spiral\RoadRunnerBridge\Tcp\Internal\InterceptorRegistry;
+use Spiral\RoadRunnerBridge\Tcp\Internal\Server;
 use Spiral\RoadRunnerBridge\Tcp\Service;
 
 final class TcpBootloader extends Bootloader
@@ -64,14 +65,14 @@ final class TcpBootloader extends Bootloader
     private function initInterceptorRegistry(
         TcpConfig $config,
         ContainerInterface $container,
-    ): Interceptor\RegistryInterface {
-        return new Interceptor\InterceptorRegistry($config->getInterceptors(), $container);
+    ): InterceptorRegistry {
+        return new InterceptorRegistry($config->getInterceptors(), $container);
     }
 
     private function initServiceRegistry(
         TcpConfig $config,
         #[Proxy] ContainerInterface $container,
     ): Service\RegistryInterface {
-        return new Service\ServiceRegistry($config->getServices(), $container);
+        return new \Spiral\RoadRunnerBridge\Tcp\Internal\ServiceRegistry($config->getServices(), $container);
     }
 }
