@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Queue;
+namespace Spiral\RoadRunnerBridge\Queue\Internal;
 
 use Psr\Log\LoggerInterface;
 use Spiral\Queue\Exception\InvalidArgumentException;
@@ -13,6 +13,7 @@ use Spiral\RoadRunner\Jobs\OptionsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunnerBridge\Config\QueueConfig;
+use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 /**

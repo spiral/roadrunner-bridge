@@ -16,7 +16,7 @@ use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\Queue\Driver;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunnerBridge\Config\QueueConfig;
-use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
+use Spiral\RoadRunnerBridge\Queue\Internal\RPCPipelineRegistry;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\TestCase;
 

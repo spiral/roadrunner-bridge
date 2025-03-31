@@ -12,7 +12,7 @@ use Spiral\Queue\JobHandler;
 use Spiral\Queue\Task;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
-use Spiral\RoadRunnerBridge\Queue\Dispatcher;
+use Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher;
 use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Testing\Attribute\Config;

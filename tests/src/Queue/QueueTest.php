@@ -10,8 +10,8 @@ use Spiral\Queue\SerializerRegistryInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
 use Spiral\RoadRunner\Jobs\Task\QueuedTaskInterface;
+use Spiral\RoadRunnerBridge\Queue\Internal\Queue;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
-use Spiral\RoadRunnerBridge\Queue\Queue;
 use Spiral\Serializer\SerializerInterface;
 use Spiral\Tests\TestCase;
 

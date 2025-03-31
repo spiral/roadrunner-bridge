@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Queue;
+namespace Spiral\RoadRunnerBridge\Queue\Internal;
 
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -24,8 +24,12 @@ use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\Task\ProvidesHeadersInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
+use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
+/**
+ * @internal
+ */
 #[DispatcherScope(scope: 'queue')]
 final class Dispatcher implements DispatcherInterface
 {
@@ -51,7 +55,7 @@ final class Dispatcher implements DispatcherInterface
         /** @var ConsumerInterface $consumer */
         $consumer = $this->container->get(ConsumerInterface::class);
 
-        /** @var PayloadDeserializer $deserializer */
+        /** @var PayloadDeserializerInterface $deserializer */
         $deserializer = $this->container->get(PayloadDeserializerInterface::class);
 
         /** @var Handler $handler */

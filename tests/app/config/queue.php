@@ -69,7 +69,7 @@ return [
 
     'driverAliases' => [
         'sync' => \Spiral\Queue\Driver\SyncDriver::class,
-        'roadrunner' => \Spiral\RoadRunnerBridge\Queue\Queue::class,
+        'roadrunner' => \Spiral\RoadRunnerBridge\Queue\Internal\Queue::class,
     ],
 
     'registry' => [

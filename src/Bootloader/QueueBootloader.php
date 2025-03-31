@@ -13,12 +13,12 @@ use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Jobs;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunnerBridge\Config\QueueConfig;
-use Spiral\RoadRunnerBridge\Queue\Dispatcher;
-use Spiral\RoadRunnerBridge\Queue\PayloadDeserializer;
+use Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher;
+use Spiral\RoadRunnerBridge\Queue\Internal\PayloadDeserializer;
+use Spiral\RoadRunnerBridge\Queue\Internal\Queue;
+use Spiral\RoadRunnerBridge\Queue\Internal\RPCPipelineRegistry;
 use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
-use Spiral\RoadRunnerBridge\Queue\Queue;
-use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
 use Spiral\Serializer\Bootloader\SerializerBootloader;
 
 final class QueueBootloader extends Bootloader

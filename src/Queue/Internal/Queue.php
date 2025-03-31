@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Queue;
+namespace Spiral\RoadRunnerBridge\Queue\Internal;
 
 use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\Queue\OptionsInterface;
@@ -13,6 +13,7 @@ use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface as RRQueueInterface;
 use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
+use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 
 /**
  * @psalm-import-type TPipeline from \Spiral\RoadRunnerBridge\Config\QueueConfig

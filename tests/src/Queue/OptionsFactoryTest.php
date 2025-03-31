@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Spiral\Tests\Queue;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 use Spiral\Queue\Options;
 use Spiral\RoadRunner\Jobs\KafkaOptions;
 use Spiral\RoadRunner\Jobs\Options as JobsOptions;
 use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
-use PHPUnit\Framework\TestCase;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\Queue\KafkaCreateInfo;
 use Spiral\RoadRunner\Jobs\Queue\MemoryCreateInfo;
-use Spiral\RoadRunnerBridge\Queue\OptionsFactory;
+use Spiral\RoadRunnerBridge\Queue\Internal\OptionsFactory;
 
 final class OptionsFactoryTest extends TestCase
 {

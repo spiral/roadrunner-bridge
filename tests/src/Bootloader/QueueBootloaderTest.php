@@ -8,12 +8,12 @@ use Mockery as m;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
 use Spiral\Queue\HandlerRegistryInterface;
-use Spiral\RoadRunnerBridge\Queue\PayloadDeserializer;
+use Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher;
+use Spiral\RoadRunnerBridge\Queue\Internal\PayloadDeserializer;
+use Spiral\RoadRunnerBridge\Queue\Internal\RPCPipelineRegistry;
 use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
-use Spiral\Serializer\SerializerInterface;
-use Spiral\RoadRunnerBridge\Queue\Dispatcher;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
-use Spiral\RoadRunnerBridge\Queue\RPCPipelineRegistry;
+use Spiral\Serializer\SerializerInterface;
 use Spiral\Serializer\SerializerManager;
 use Spiral\Tests\TestCase;
 

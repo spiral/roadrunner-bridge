@@ -29,7 +29,7 @@ final class FallbackDispatcherTest extends TestCase
         ];
         yield 'jobs' => [
             RoadRunnerMode::Jobs,
-            'To use RoadRunner in `Jobs` mode, please register dispatcher `Spiral\RoadRunnerBridge\Queue\Dispatcher`.',
+            'To use RoadRunner in `Jobs` mode, please register dispatcher `Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher`.',
         ];
         yield 'grpc' => [
             RoadRunnerMode::Grpc,
