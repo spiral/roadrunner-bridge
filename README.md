@@ -14,6 +14,7 @@ Make sure that your server is configured with following PHP version and extensio
 
 - PHP 8.1+
 - Spiral Framework 3.14+
+- Extension `protobuf` (recommended)
 
 ## Installation
 
