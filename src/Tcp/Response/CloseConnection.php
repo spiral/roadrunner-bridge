@@ -6,7 +6,7 @@ namespace Spiral\RoadRunnerBridge\Tcp\Response;
 
 use Spiral\RoadRunner\Tcp\TcpResponse;
 
-class CloseConnection implements ResponseInterface
+final class CloseConnection implements ResponseInterface
 {
     public function getAction(): TcpResponse
     {

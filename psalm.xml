@@ -16,6 +16,7 @@
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
+        <MissingOverrideAttribute errorLevel="suppress"/>
         <DeprecatedInterface errorLevel="suppress"/>
         <MissingClassConstType errorLevel="suppress"/>
         <PropertyNotSetInConstructor>
@@ -30,16 +31,16 @@
         </UndefinedAttributeClass>
         <InvalidCatch>
             <errorLevel type="suppress">
-                <file name="src/GRPC/Dispatcher.php"/>
-                <file name="src/Http/Dispatcher.php"/>
-                <file name="src/Queue/Dispatcher.php"/>
+                <file name="src/GRPC/Internal/Dispatcher.php"/>
+                <file name="src/Http/Internal/Dispatcher.php"/>
+                <file name="src/Queue/Internal/Dispatcher.php"/>
             </errorLevel>
         </InvalidCatch>
         <InvalidReturnType>
             <errorLevel type="suppress">
-                <file name="src/Queue/Dispatcher.php"/>
-                <file name="src/Http/Dispatcher.php"/>
-                <file name="src/GRPC/Dispatcher.php"/>
+                <file name="src/Queue/Internal/Dispatcher.php"/>
+                <file name="src/Http/Internal/Dispatcher.php"/>
+                <file name="src/GRPC/Internal/Dispatcher.php"/>
             </errorLevel>
         </InvalidReturnType>
     </issueHandlers>
