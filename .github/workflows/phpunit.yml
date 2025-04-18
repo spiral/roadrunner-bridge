@@ -11,6 +11,7 @@ jobs:
     uses: spiral/gh-actions/.github/workflows/phpunit.yml@master
     with:
       install_protoc: true
+      extensions: protobuf, sockets
       os: >-
         ['ubuntu-latest']
       stability: >-
