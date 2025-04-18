@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Centrifugo;
+namespace Spiral\RoadRunnerBridge\Centrifugo\Internal;
 
 use RoadRunner\Centrifugo\CentrifugoApiInterface;
 use Spiral\Broadcasting\Driver\AbstractBroadcast;
 
+/**
+ * @internal
+ */
 final class Broadcast extends AbstractBroadcast
 {
     public function __construct(

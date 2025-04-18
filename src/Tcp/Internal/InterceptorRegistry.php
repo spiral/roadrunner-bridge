@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Tcp\Interceptor;
+namespace Spiral\RoadRunnerBridge\Tcp\Internal;
 
 use Psr\Container\ContainerInterface;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Interceptors\InterceptorInterface;
+use Spiral\RoadRunnerBridge\Tcp\Interceptor\RegistryInterface;
 
 /**
  * @psalm-import-type TInterceptor from RegistryInterface

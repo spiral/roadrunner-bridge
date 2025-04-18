@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Constraint\IsEqual;
 use RoadRunner\Centrifugo\CentrifugoApiInterface;
 use Spiral\App\Broadcast\StringableTopic;
-use Spiral\RoadRunnerBridge\Centrifugo\Broadcast;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\Broadcast;
 use Spiral\Tests\TestCase;
 
 final class BroadcastTest extends TestCase

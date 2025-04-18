@@ -25,19 +25,19 @@ final class FallbackDispatcherTest extends TestCase
     {
         yield 'http' => [
             RoadRunnerMode::Http,
-            'To use RoadRunner in `Http` mode, please register dispatcher `Spiral\RoadRunnerBridge\Http\Dispatcher`.',
+            'To use RoadRunner in `Http` mode, please register dispatcher `Spiral\RoadRunnerBridge\Http\Internal\Dispatcher`.',
         ];
         yield 'jobs' => [
             RoadRunnerMode::Jobs,
-            'To use RoadRunner in `Jobs` mode, please register dispatcher `Spiral\RoadRunnerBridge\Queue\Dispatcher`.',
+            'To use RoadRunner in `Jobs` mode, please register dispatcher `Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher`.',
         ];
         yield 'grpc' => [
             RoadRunnerMode::Grpc,
-            'To use RoadRunner in `Grpc` mode, please register dispatcher `Spiral\RoadRunnerBridge\GRPC\Dispatcher`.',
+            'To use RoadRunner in `Grpc` mode, please register dispatcher `Spiral\RoadRunnerBridge\GRPC\Internal\Dispatcher`.',
         ];
         yield 'tcp' => [
             RoadRunnerMode::Tcp,
-            'To use RoadRunner in `Tcp` mode, please register dispatcher `Spiral\RoadRunnerBridge\Tcp\Dispatcher`.',
+            'To use RoadRunner in `Tcp` mode, please register dispatcher `Spiral\RoadRunnerBridge\Tcp\Internal\Dispatcher`.',
         ];
         yield 'temporal' => [
             RoadRunnerMode::Temporal,

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\GRPC;
+namespace Spiral\RoadRunnerBridge\GRPC\Internal;
 
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 

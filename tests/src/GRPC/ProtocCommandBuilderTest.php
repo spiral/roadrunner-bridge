@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC;
 
+use Mockery as m;
 use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
-use Spiral\RoadRunnerBridge\GRPC\ProtocCommandBuilder;
+use Spiral\RoadRunnerBridge\GRPC\Internal\ProtocCommandBuilder;
 use Spiral\Tests\TestCase;
-use Mockery as m;
 
 final class ProtocCommandBuilderTest extends TestCase
 {

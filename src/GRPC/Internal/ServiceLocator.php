@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\GRPC;
+namespace Spiral\RoadRunnerBridge\GRPC\Internal;
 
 use Spiral\RoadRunner\GRPC\ServiceInterface;
+use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\Tokenizer\Attribute\TargetClass;
 use Spiral\Tokenizer\TokenizationListenerInterface;
 

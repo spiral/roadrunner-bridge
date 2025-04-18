@@ -2,17 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\GRPC;
+namespace Spiral\RoadRunnerBridge\GRPC\Internal;
 
 use Psr\Container\ContainerInterface;
 use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Core\Attribute\Proxy;
+use Spiral\Exceptions\ExceptionReporterInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunner\WorkerInterface;
-use Spiral\Exceptions\ExceptionReporterInterface;
-use Spiral\RoadRunnerBridge\Exception\ServiceRegistrationException;
+use Spiral\RoadRunnerBridge\GRPC\Exception\ServiceRegistrationException;
+use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 /**

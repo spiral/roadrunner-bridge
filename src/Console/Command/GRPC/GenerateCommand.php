@@ -10,11 +10,11 @@ use Spiral\Boot\KernelInterface;
 use Spiral\Console\Command;
 use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
-use Spiral\RoadRunnerBridge\GRPC\CommandExecutor;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
-use Spiral\RoadRunnerBridge\GRPC\ProtocCommandBuilder;
-use Spiral\RoadRunnerBridge\GRPC\ProtoCompiler;
+use Spiral\RoadRunnerBridge\GRPC\Internal\CommandExecutor;
+use Spiral\RoadRunnerBridge\GRPC\Internal\ProtocCommandBuilder;
+use Spiral\RoadRunnerBridge\GRPC\Internal\ProtoCompiler;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 
 final class GenerateCommand extends Command

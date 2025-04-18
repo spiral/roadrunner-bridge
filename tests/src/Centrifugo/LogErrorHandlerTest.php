@@ -7,7 +7,7 @@ namespace Spiral\Tests\Centrifugo;
 use PHPUnit\Framework\Constraint\IsEqual;
 use RoadRunner\Centrifugo\Request\RequestInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
-use Spiral\RoadRunnerBridge\Centrifugo\LogErrorHandler;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\LogErrorHandler;
 use Spiral\Tests\TestCase;
 
 final class LogErrorHandlerTest extends TestCase

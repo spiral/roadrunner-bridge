@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Queue;
+namespace Spiral\RoadRunnerBridge\Queue\Internal;
 
 use Spiral\Queue\HandlerInterface;
 use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Queue\SerializerRegistryInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
+use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
 
+/**
+ * @internal
+ */
 final class PayloadDeserializer implements PayloadDeserializerInterface
 {
     /**

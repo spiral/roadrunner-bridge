@@ -8,9 +8,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\App\Centrifugo\TestService;
 use Spiral\Core\Container\Autowire;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\ServiceRegistry;
 use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\ServiceInterface;
-use Spiral\RoadRunnerBridge\Centrifugo\ServiceRegistry;
 use Spiral\Tests\TestCase;
 
 final class ServiceRegistryTest extends TestCase

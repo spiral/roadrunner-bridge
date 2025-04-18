@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Queue;
+namespace Spiral\RoadRunnerBridge\Queue\Internal;
 
 use Spiral\Queue\ExtendedOptionsInterface;
 use Spiral\Queue\OptionsInterface;

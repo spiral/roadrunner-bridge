@@ -10,8 +10,8 @@ use Spiral\App\Centrifugo\TestInterceptor;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Exception\ConfigurationException;
-use Spiral\RoadRunnerBridge\Centrifugo\Interceptor\InterceptorRegistry;
 use Spiral\RoadRunnerBridge\Centrifugo\Interceptor\RegistryInterface;
+use Spiral\RoadRunnerBridge\Centrifugo\Internal\InterceptorRegistry;
 use Spiral\Tests\TestCase;
 
 final class InterceptorRegistryTest extends TestCase

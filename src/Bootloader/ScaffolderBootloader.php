@@ -12,7 +12,7 @@ use Spiral\RoadRunnerBridge\Console\Command\Scaffolder\CentrifugoHandlerCommand;
 use Spiral\RoadRunnerBridge\Console\Command\Scaffolder\TcpServiceCommand;
 use Spiral\RoadRunnerBridge\Scaffolder\Declaration\CentrifugoHandlerDeclaration;
 use Spiral\RoadRunnerBridge\Scaffolder\Declaration\TcpServiceDeclaration;
-use Spiral\RoadRunnerBridge\Tcp\Server;
+use Spiral\RoadRunnerBridge\Tcp\Internal\Server;
 use Spiral\Scaffolder\Bootloader\ScaffolderBootloader as BaseScaffolderBootloader;
 
 final class ScaffolderBootloader extends Bootloader

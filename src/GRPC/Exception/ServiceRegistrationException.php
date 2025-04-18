@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Exception;
+namespace Spiral\RoadRunnerBridge\GRPC\Exception;
 
 use Spiral\Boot\Exception\BootException;
 

@@ -4,17 +4,12 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Http;
 
-use Mockery as m;
 use Nyholm\Psr7\Response;
-use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spiral\Boot\FinalizerInterface;
-use Spiral\Http\Http;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
-use Spiral\RoadRunnerBridge\Http\Dispatcher;
-use Spiral\RoadRunnerBridge\Http\ErrorHandlerInterface;
+use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\TestCase;
 
@@ -32,65 +27,31 @@ final class DispatcherTest extends TestCase
         $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
+    /**
+     * There two requests sent to the worker.
+     * The first request is handled and response is sent to the worker.
+     * The second request is handled and exception is thrown. It should stop the worker.
+     */
     public function testServe(): void
     {
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
 
         $finalizer = $this->mockContainer(FinalizerInterface::class);
-        $finalizer->shouldReceive('finalize')->once()->with(false);
+        $finalizer->shouldReceive('finalize')->twice()->with(false);
 
-        $http = $this->mockContainer(Http::class, RequestHandlerInterface::class);
-
-        $worker = $this->mockContainer(PSR7WorkerInterface::class);
-
-        $worker->shouldReceive('waitRequest')->once()
-            ->andReturn($request = m::mock(ServerRequestInterface::class));
-
-        $worker->shouldReceive('waitRequest')->once()
-            ->andReturnNull();
-
-        $http->shouldReceive('handle')->once()->with($request)
-            ->andReturn($response = m::mock(ResponseInterface::class));
-
-        $worker->shouldReceive('respond')->once()->with($response);
-
-        $this->serveDispatcher(Dispatcher::class);
-    }
-
-    public function testServeWithError(): void
-    {
-        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
-
-        $finalizer = $this->mockContainer(FinalizerInterface::class);
-        $finalizer->shouldReceive('finalize')->once()->with(false);
-
-        $errorHandler = $this->mockContainer(ErrorHandlerInterface::class);
-
-        $http = $this->mockContainer(Http::class, RequestHandlerInterface::class);
+        $httpHandler = $this->mockContainer(RequestHandlerInterface::class);
 
         $worker = $this->mockContainer(PSR7WorkerInterface::class);
+        $worker->shouldReceive('waitRequest')->twice()->andReturn(
+            $request1 = new ServerRequest('GET', '/'),
+            $request2 = new ServerRequest('GET', '/'),
+        );
 
-        $responseFactory = $this->mockContainer(ResponseFactoryInterface::class);
+        $httpHandler->shouldReceive('handle')->once()->with($request1)->andReturn($response1 = new Response());
+        $httpHandler->shouldReceive('handle')->once()->with($request2)->andReturn($response2 = new Response());
 
-        $worker->shouldReceive('waitRequest')->once()
-            ->andReturn($request = m::mock(ServerRequestInterface::class));
-
-        $worker->shouldReceive('waitRequest')->once()
-            ->andReturnNull();
-
-        $http->shouldReceive('handle')->once()
-            ->andThrow($e = new \Exception('Something went wrong'));
-
-        $errorHandler->shouldReceive('handle')->once()->with($e);
-
-        $responseFactory->shouldReceive('createResponse')
-            ->once()
-            ->with(500)
-            ->andReturn($response = new Response());
-
-        $worker->shouldReceive('respond')
-            ->once()
-            ->withArgs(static fn(ResponseInterface $r) => $r === $response);
+        $worker->shouldReceive('respond')->once()->with($response1)->andReturnNull();
+        $worker->shouldReceive('respond')->once()->with($response2)->andThrow(new \Exception());
 
         $this->serveDispatcher(Dispatcher::class);
     }

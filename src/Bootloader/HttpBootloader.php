@@ -13,9 +13,7 @@ use Spiral\Bootloader\Http\HttpBootloader as BaseHttpBootloader;
 use Spiral\RoadRunner\Http\PSR7Worker;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunner\WorkerInterface;
-use Spiral\RoadRunnerBridge\Http\Dispatcher;
-use Spiral\RoadRunnerBridge\Http\ErrorHandlerInterface;
-use Spiral\RoadRunnerBridge\Http\LogErrorHandler;
+use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher;
 
 final class HttpBootloader extends Bootloader
 {
@@ -30,7 +28,6 @@ final class HttpBootloader extends Bootloader
     public function defineSingletons(): array
     {
         return [
-            ErrorHandlerInterface::class => LogErrorHandler::class,
             PSR7Worker::class => PSR7WorkerInterface::class,
 
             PSR7WorkerInterface::class => static fn(

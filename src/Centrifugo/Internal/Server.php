@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Centrifugo;
+namespace Spiral\RoadRunnerBridge\Centrifugo\Internal;
 
 use Psr\Container\ContainerInterface;
 use RoadRunner\Centrifugo\CentrifugoWorkerInterface;
@@ -18,8 +18,13 @@ use Spiral\Interceptors\Context\Target;
 use Spiral\Interceptors\Handler\AutowireHandler;
 use Spiral\Interceptors\HandlerInterface;
 use Spiral\Interceptors\PipelineBuilderInterface;
+use Spiral\RoadRunnerBridge\Centrifugo\ErrorHandlerInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Interceptor\RegistryInterface as InterceptorRegistry;
+use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 
+/**
+ * @internal
+ */
 final class Server
 {
     private readonly PipelineBuilderInterface $pipelineBuilder;

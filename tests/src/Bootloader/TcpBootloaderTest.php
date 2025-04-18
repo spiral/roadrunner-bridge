@@ -6,9 +6,9 @@ namespace Spiral\Tests\Bootloader;
 
 use Spiral\Core\ConfigsInterface;
 use Spiral\RoadRunnerBridge\Config\TcpConfig;
-use Spiral\RoadRunnerBridge\Tcp\Dispatcher;
 use Spiral\RoadRunnerBridge\Tcp\Interceptor;
-use Spiral\RoadRunnerBridge\Tcp\Server;
+use Spiral\RoadRunnerBridge\Tcp\Internal\Dispatcher;
+use Spiral\RoadRunnerBridge\Tcp\Internal\Server;
 use Spiral\RoadRunnerBridge\Tcp\Service;
 use Spiral\Tests\TestCase;
 
@@ -18,12 +18,12 @@ final class TcpBootloaderTest extends TestCase
     {
         $this->assertContainerBoundAsSingleton(
             Interceptor\RegistryInterface::class,
-            Interceptor\InterceptorRegistry::class,
+            \Spiral\RoadRunnerBridge\Tcp\Internal\InterceptorRegistry::class,
         );
 
         $this->assertContainerBoundAsSingleton(
             Service\RegistryInterface::class,
-            Service\ServiceRegistry::class,
+            \Spiral\RoadRunnerBridge\Tcp\Internal\ServiceRegistry::class,
         );
     }
 

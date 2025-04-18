@@ -11,7 +11,7 @@ use Spiral\Queue\Config\QueueConfig;
 use Spiral\Queue\QueueConnectionProviderInterface;
 use Spiral\Queue\QueueInterface;
 use Spiral\Queue\QueueManager;
-use Spiral\RoadRunnerBridge\Queue\Queue;
+use Spiral\RoadRunnerBridge\Queue\Internal\Queue;
 use Spiral\Tests\TestCase;
 
 class QueueManagerTest extends TestCase

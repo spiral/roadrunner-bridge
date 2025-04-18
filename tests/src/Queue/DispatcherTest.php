@@ -12,7 +12,7 @@ use Spiral\Queue\JobHandler;
 use Spiral\Queue\Task;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
-use Spiral\RoadRunnerBridge\Queue\Dispatcher;
+use Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher;
 use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Testing\Attribute\Config;
@@ -108,7 +108,7 @@ final class DispatcherTest extends TestCase
         $task = m::mock(ReceivedTaskInterface::class);
         $task->shouldReceive('getName')->andReturn('foo-task');
         $task->shouldReceive('getId')->once()->andReturn('foo-id');
-        $task->shouldReceive('getHeaders')->once()->andReturn(['foo-headers']);
+        $task->shouldReceive('getHeaders')->once()->andReturn(['foo' => ['foo-headers']]);
         $task->shouldReceive('getQueue')->once()->andReturn('default');
         $task->shouldReceive('complete')->once();
 
@@ -120,7 +120,7 @@ final class DispatcherTest extends TestCase
         $handler = m::mock(JobHandler::class);
         $handler
             ->shouldReceive('handle')
-            ->with('foo-task', 'foo-id', $payload, ['foo-headers']);
+            ->with('foo-task', 'foo-id', $payload, ['foo' => ['foo-headers']]);
 
         $consumer = $this->mockContainer(ConsumerInterface::class);
         $consumer->shouldReceive('waitTask')->once()->andReturn($task);
@@ -128,13 +128,13 @@ final class DispatcherTest extends TestCase
 
         $this->getApp()->serve();
 
-        $this->assertEquals(['queue-task', 'queue', 'root'], ScopedJob::$scopes);
+        $this->assertEquals(['queue-task', 'queue', 'root'], \array_values(\array_filter(ScopedJob::$scopes)));
         $this->assertEquals(new Task(
             id: 'foo-id',
             queue: 'default',
             name: 'foo-task',
             payload: $payload,
-            headers: ['foo-headers'],
+            headers: ['foo' => ['foo-headers']],
         ), ScopedJob::$task);
     }
 }

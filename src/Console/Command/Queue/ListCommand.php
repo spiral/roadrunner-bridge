@@ -8,7 +8,6 @@ use Spiral\Console\Attribute\AsCommand;
 use Spiral\Console\Command;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\JobsInterface;
-use Spiral\RoadRunner\Jobs\Queue;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableCell;
@@ -34,7 +33,9 @@ final class ListCommand extends Command
         }
 
         $queues = \array_map(static function (QueueInterface $queue): array {
-            \assert($queue instanceof Queue);
+            \is_callable([$queue, 'getPipelineStat']) or throw new \RuntimeException(
+                'The queue does not support the pipeline statistics.',
+            );
             $stat = $queue->getPipelineStat();
             \assert($stat !== null);
 

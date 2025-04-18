@@ -2,15 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Centrifugo;
+namespace Spiral\RoadRunnerBridge\Centrifugo\Internal;
 
 use Psr\Container\ContainerInterface;
 use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\FactoryInterface;
+use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
+use Spiral\RoadRunnerBridge\Centrifugo\ServiceInterface;
 
 /**
  * @psalm-import-type TService from RegistryInterface
+ * @internal
  */
 final class ServiceRegistry implements RegistryInterface
 {

@@ -6,7 +6,7 @@ namespace Spiral\RoadRunnerBridge\Tcp\Response;
 
 use Spiral\RoadRunner\Tcp\TcpResponse;
 
-class RespondMessage implements ResponseInterface
+final class RespondMessage implements ResponseInterface
 {
     public function __construct(
         private readonly string $body,

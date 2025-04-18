@@ -7,7 +7,7 @@ namespace Spiral\Tests\GRPC;
 use Service\Message;
 use Spiral\RoadRunner\GRPC\ContextInterface;
 use Spiral\RoadRunner\GRPC\Method;
-use Spiral\RoadRunnerBridge\GRPC\UnaryCall;
+use Spiral\RoadRunnerBridge\GRPC\Internal\UnaryCall;
 use Spiral\Tests\TestCase;
 
 final class UnaryCallTest extends TestCase
