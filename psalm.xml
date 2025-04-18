@@ -24,18 +24,6 @@
                 <directory name="src/Console/Command"/>
             </errorLevel>
         </PropertyNotSetInConstructor>
-        <UndefinedAttributeClass>
-            <errorLevel type="suppress">
-                <referencedClass name="JetBrains\PhpStorm\ExpectedValues"/>
-            </errorLevel>
-        </UndefinedAttributeClass>
-        <InvalidCatch>
-            <errorLevel type="suppress">
-                <file name="src/GRPC/Internal/Dispatcher.php"/>
-                <file name="src/Http/Internal/Dispatcher.php"/>
-                <file name="src/Queue/Internal/Dispatcher.php"/>
-            </errorLevel>
-        </InvalidCatch>
         <InvalidReturnType>
             <errorLevel type="suppress">
                 <file name="src/Queue/Internal/Dispatcher.php"/>
