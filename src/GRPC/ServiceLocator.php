@@ -7,38 +7,41 @@ namespace Spiral\RoadRunnerBridge\GRPC;
 use Psr\Container\ContainerInterface;
 use Spiral\Core\Exception\Container\ContainerException;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
-use Spiral\Tokenizer\ClassesInterface;
+use Spiral\Tokenizer\Attribute\TargetClass;
+use Spiral\Tokenizer\TokenizationListenerInterface;
 
-final class ServiceLocator implements LocatorInterface
+#[TargetClass(ServiceInterface::class)]
+final class ServiceLocator implements LocatorInterface, TokenizationListenerInterface
 {
+    private array $services = [];
+
     public function __construct(
-        private readonly ClassesInterface $classes,
-        private readonly ContainerInterface $container
-    ) {
-    }
+        private readonly ContainerInterface $container,
+    ) {}
 
     public function getServices(): array
     {
-        $result = [];
+        return $this->services;
+    }
 
-        foreach ($this->classes->getClasses(ServiceInterface::class) as $service) {
-            if (!$service->isInstantiable()) {
-                continue;
-            }
-
-            try {
-                $instance = $this->container->get($service->getName());
-            } catch (ContainerException) {
-                continue;
-            }
-
-            foreach ($service->getInterfaces() as $interface) {
-                if ($interface->isSubclassOf(ServiceInterface::class)) {
-                    $result[$interface->getName()] = $instance;
-                }
-            }
+    public function listen(\ReflectionClass $class): void
+    {
+        if (!$class->isInstantiable()) {
+            return;
         }
 
-        return $result;
+        try {
+            $instance = $this->container->get($class->getName());
+        } catch (ContainerException) {
+            return;
+        }
+
+        foreach ($class->getInterfaces() as $interface) {
+            if ($interface->isSubclassOf(ServiceInterface::class)) {
+                $this->services[$interface->getName()] = $instance;
+            }
+        }
     }
+
+    public function finalize(): void {}
 }
