@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Queue;
 
 use Psr\Log\LoggerInterface;
+use RoadRunner\Lock\LockInterface;
 use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Jobs;
@@ -35,6 +36,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         private readonly LoggerInterface $logger,
         private readonly JobsInterface $jobs,
         private readonly RoadRunnerMode $mode,
+        private readonly LockInterface $lock,
         QueueConfig $config,
         private readonly int $ttl = 60,
     ) {
@@ -61,6 +63,15 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
 
             $connector = $this->getConnector($name);
 
+            if ($this->lock->exists($lock = 'rr-jobs-declare-' . $connector->getName())) {
+                continue;
+            }
+
+            $id = $this->lock->lock($lock);
+            if ($id === false) {
+                continue;
+            }
+
             if (!$this->isExists($connector)) {
                 try {
                     $this->jobs->create($connector)->resume();
@@ -74,6 +85,8 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
                     );
                 }
             }
+
+            $this->lock->release($lock, $id);
         }
     }
 
@@ -151,13 +164,13 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         // Connector is required for pipeline declaration
         if (!isset($this->pipelines[$name]['connector'])) {
             throw new InvalidArgumentException(
-                \sprintf('You must specify connector for given pipeline `%s`.', $name)
+                \sprintf('You must specify connector for given pipeline `%s`.', $name),
             );
         }
 
         if (!$this->pipelines[$name]['connector'] instanceof CreateInfoInterface) {
             throw new InvalidArgumentException(
-                \sprintf('Connector should implement %s interface.', CreateInfoInterface::class)
+                \sprintf('Connector should implement %s interface.', CreateInfoInterface::class),
             );
         }
 

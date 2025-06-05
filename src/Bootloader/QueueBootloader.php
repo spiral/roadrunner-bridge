@@ -28,6 +28,7 @@ final class QueueBootloader extends Bootloader
         return [
             RoadRunnerBootloader::class,
             SerializerBootloader::class,
+            LockBootloader::class,
         ];
     }
 
