@@ -55,4 +55,26 @@ final class DispatcherTest extends TestCase
 
         $this->serveDispatcher(Dispatcher::class);
     }
+
+    /**
+     * Test exit command
+     */
+    public function testExit(): void
+    {
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
+
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
+        $finalizer->shouldNotReceive('finalize');
+
+        $httpHandler = $this->mockContainer(RequestHandlerInterface::class);
+        $httpHandler->shouldNotReceive('handle');
+
+        $worker = $this->mockContainer(PSR7WorkerInterface::class);
+        $worker->shouldNotReceive('respond');
+
+        $worker = $this->mockContainer(PSR7WorkerInterface::class);
+        $worker->shouldReceive('waitRequest')->andReturnNull();
+
+        $this->serveDispatcher(Dispatcher::class);
+    }
 }

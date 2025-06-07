@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <dload>
     <actions>
-        <download software="protoc-gen-php-grpc" version="^2024.2"/>
+        <download software="protoc-gen-php-grpc" version=">=2024.2"/>
         <download software="protoc"/>
     </actions>
 </dload>
