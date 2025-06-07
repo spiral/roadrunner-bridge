@@ -42,7 +42,13 @@ final class Dispatcher implements DispatcherInterface
             try {
                 // Wrapped in do/while and try/catch to prevent Worker restart if request parsing is failed
                 //
-                while ($request = $this->worker->waitRequest()) {
+                do {
+                    $request = $this->worker->waitRequest();
+                    if ($request === null) {
+                        // Worker got Close signal, stop serving
+                        return;
+                    }
+
                     try {
                         $response = $this->http->handle($request);
                         $this->worker->respond($response);
@@ -52,7 +58,7 @@ final class Dispatcher implements DispatcherInterface
                     } finally {
                         $this->finalizer->finalize(false);
                     }
-                }
+                } while (true);
             } catch (\Throwable $e) {
                 // Don't continue if the respond() call was failed
                 if (isset($failure)) {
