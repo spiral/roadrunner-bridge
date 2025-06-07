@@ -64,7 +64,7 @@ final class Server
                         new CallContext(
                             /** @see ServiceInterface::handle() */
                             Target::fromPair($services->getService($type), 'handle'),
-                            ['request' => $request],
+                            [$request],
                             [RequestType::class => $type],
                         ),
                     ),
