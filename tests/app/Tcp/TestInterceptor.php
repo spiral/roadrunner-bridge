@@ -15,17 +15,18 @@ class TestInterceptor implements CoreInterceptorInterface
 
     public function process(string $controller, string $action, array $parameters, CoreInterface $core): mixed
     {
+        $request = $parameters[0];
         if (\count($this->data) < 5) {
-            $this->data[] = $parameters['request']->getBody();
+            $this->data[] = $request->getBody();
         }
 
         if (\count($this->data) === 5) {
-            $parameters['request'] = new Request(
-                remoteAddr: $parameters['request']->getRemoteAddress(),
-                event: $parameters['request']->getEvent(),
+            $parameters[0] = new Request(
+                remoteAddr: $request->getRemoteAddress(),
+                event: $request->getEvent(),
                 body: \json_encode($this->data, JSON_THROW_ON_ERROR),
-                connectionUuid: $parameters['request']->getConnectionUuid(),
-                server: $parameters['request']->getServer(),
+                connectionUuid: $request->getConnectionUuid(),
+                server: $request->getServer(),
             );
 
             return $core->callAction($controller, $action, $parameters);
