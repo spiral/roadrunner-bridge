@@ -2,38 +2,29 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Logger;
+namespace Spiral\RoadRunnerBridge\Logger\Formatter;
 
-use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\Formatter\NormalizerFormatter;
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\LogRecord;
-use RoadRunner\Logger\Logger as RoadRunnerLogger;
+use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
 
-/**
- * @deprecated
- */
-final class Handler extends AbstractProcessingHandler
+final class JsonStringFormatter extends NormalizerFormatter
 {
-    /**
-     * @psalm-suppress ArgumentTypeCoercion
-     */
     public function __construct(
-        private readonly RoadRunnerLogger $logger,
         private readonly string $loggerPrefix = '',
         private readonly RoadRunnerLogsMode $loggerMode = RoadRunnerLogsMode::Production,
-        int|string|Level $level = Level::Debug,
-        bool $bubble = true,
+        ?string $dateFormat = null,
     ) {
-        parent::__construct(Logger::toMonologLevel($level), $bubble);
+        parent::__construct($dateFormat);
     }
 
-    protected function write(array|LogRecord $record): void
+    public function format(array|LogRecord $record): string
     {
-        if (\is_array($record) && empty($record)) {
-            throw new \InvalidArgumentException('LogRecord should not be empty if is array');
-        }
-        \assert($record['datetime'] instanceof \DateTimeInterface);
+        $normalized = $this->normalizeRecord($record);
+
+        \assert(\is_string($record['level']));
 
         $level = match (Logger::toMonologLevel($record['level'])) {
             Level::Error, Level::Critical, Level::Alert, Level::Emergency => 'error',
@@ -42,9 +33,13 @@ final class Handler extends AbstractProcessingHandler
             Level::Debug => 'debug',
         };
 
+        \assert($record['datetime'] instanceof \DateTimeInterface);
+
         $ts = $this->loggerMode === RoadRunnerLogsMode::Development
             ? $record['datetime']->format(\DateTimeInterface::RFC3339)
             : $record['datetime']->format('Uu000');
+
+        \assert(\is_string($record['channel']));
 
         $data = [
             'level' => $this->loggerMode === RoadRunnerLogsMode::Development ? \strtoupper($level) : $level,
@@ -52,13 +47,9 @@ final class Handler extends AbstractProcessingHandler
             'logger' => $this->loggerPrefix . $record['channel'],
             'msg' => $record['message'],
         ]
-            + ($record['context'] ?? [])
-            + ($record['extra'] ?? []);
+            + ($normalized['context'] ?? [])
+            + ($normalized['extra'] ?? []);
 
-        try {
-            $this->logger->log(\json_encode($data, JSON_THROW_ON_ERROR) . PHP_EOL);
-        } catch (\JsonException $e) {
-            $this->logger->error($e->getMessage() . PHP_EOL);
-        }
+        return \json_encode($data, JSON_THROW_ON_ERROR);
     }
 }
