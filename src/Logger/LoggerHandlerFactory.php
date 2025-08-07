@@ -8,7 +8,7 @@ use Monolog\Handler\HandlerInterface;
 use Monolog\Level;
 use RoadRunner\Logger\Logger;
 use Spiral\Boot\EnvironmentInterface;
-use Spiral\RoadRunnerBridge\Logger\Formatter\JsonStringFormatter;
+use Spiral\RoadRunnerBridge\Logger\Formatter\RoadRunnerJsonFormatter;
 
 final class LoggerHandlerFactory
 {
@@ -20,7 +20,7 @@ final class LoggerHandlerFactory
 
     public function create(int|string|Level $level = Level::Debug, bool $bubble = true): HandlerInterface
     {
-        $formatter = new JsonStringFormatter(
+        $formatter = new RoadRunnerJsonFormatter(
             (string) $this->env->get('RR_LOGGER_PREFIX'),
             $this->loggerMode,
         );

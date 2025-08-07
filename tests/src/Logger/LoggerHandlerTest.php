@@ -9,7 +9,7 @@ use Monolog\Logger as Monolog;
 use Monolog\LogRecord;
 use RoadRunner\Logger\Logger;
 use Spiral\Goridge\RPC\RPCInterface;
-use Spiral\RoadRunnerBridge\Logger\Formatter\JsonStringFormatter;
+use Spiral\RoadRunnerBridge\Logger\Formatter\RoadRunnerJsonFormatter;
 use Spiral\RoadRunnerBridge\Logger\LoggerHandler;
 use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
 use Spiral\Tests\TestCase;
@@ -140,7 +140,7 @@ final class LoggerHandlerTest extends TestCase
 
         $monolog = new Monolog($channelName);
         $handler = new LoggerHandler(new Logger($rpc), $logLevel);
-        $handler->setFormatter(new JsonStringFormatter($logPrefix));
+        $handler->setFormatter(new RoadRunnerJsonFormatter($logPrefix));
 
         $monolog->setHandlers([$handler]);
 
@@ -193,7 +193,7 @@ final class LoggerHandlerTest extends TestCase
 
         $monolog = new Monolog($channelName);
         $handler = new LoggerHandler(new Logger($rpc), $logLevel);
-        $handler->setFormatter(new JsonStringFormatter(loggerMode: RoadRunnerLogsMode::Development));
+        $handler->setFormatter(new RoadRunnerJsonFormatter(loggerMode: RoadRunnerLogsMode::Development));
 
         $monolog->setHandlers([$handler]);
 
@@ -247,7 +247,7 @@ final class LoggerHandlerTest extends TestCase
 
         $monolog = new Monolog($channelName);
         $handler = new LoggerHandler(new Logger($rpc), $logLevel);
-        $handler->setFormatter(new JsonStringFormatter(loggerMode: RoadRunnerLogsMode::Development));
+        $handler->setFormatter(new RoadRunnerJsonFormatter(loggerMode: RoadRunnerLogsMode::Development));
 
         $monolog->setHandlers([$handler]);
 

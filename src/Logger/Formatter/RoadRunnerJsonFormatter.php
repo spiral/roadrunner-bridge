@@ -10,7 +10,7 @@ use Monolog\Logger;
 use Monolog\LogRecord;
 use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
 
-final class JsonStringFormatter extends NormalizerFormatter
+final class RoadRunnerJsonFormatter extends NormalizerFormatter
 {
     public function __construct(
         private readonly string $loggerPrefix = '',
