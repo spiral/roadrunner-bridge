@@ -15,6 +15,7 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
     public function __construct(
         private readonly string $loggerPrefix = '',
         private readonly RoadRunnerLogsMode $loggerMode = RoadRunnerLogsMode::Production,
+        private readonly int $traceCount = 5,
         ?string $dateFormat = null,
     ) {
         parent::__construct($dateFormat);
@@ -51,5 +52,16 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
             + ($normalized['extra'] ?? []);
 
         return \json_encode($data, JSON_THROW_ON_ERROR);
+    }
+
+    protected function normalizeException(\Throwable $e, int $depth = 0): array
+    {
+        $normalized = parent::normalizeException($e, $depth);
+
+        if (isset($normalized['trace']) && \is_array($normalized['trace'])) {
+            $normalized['trace'] = \array_slice($normalized['trace'], 0, $this->traceCount);
+        }
+
+        return $normalized;
     }
 }

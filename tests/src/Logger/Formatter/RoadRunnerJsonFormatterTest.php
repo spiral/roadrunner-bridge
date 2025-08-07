@@ -71,4 +71,27 @@ final class RoadRunnerJsonFormatterTest extends TestCase
 
         $this->assertEquals($expected, $result);
     }
+
+    public function testFormatWithException(): void
+    {
+        $formatter = new RoadRunnerJsonFormatter('dev_', RoadRunnerLogsMode::Development);
+        $exception = new \Exception('test_exception', 0, new \Exception('previous_test_exception'));
+
+        $result = $formatter->format(
+            new LogRecord(
+                datetime: new \DateTimeImmutable('now'),
+                channel: 'roadrunner',
+                level: Level::Debug,
+                message: 'test_message',
+                context: ['exception' => $exception],
+                extra: ['extra_foo' => 'bar'],
+            ),
+        );
+
+        $result = \json_decode($result, true);
+
+        $this->assertEquals('test_exception', $result['exception']['message']);
+        $this->assertEquals('previous_test_exception', $result['exception']['previous']['message']);
+        $this->assertCount(5, $result['exception']['trace']);
+    }
 }
