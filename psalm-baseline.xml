@@ -97,7 +97,7 @@
       <code><![CDATA[$failure]]></code>
     </UndefinedVariable>
   </file>
-  <file src="src/Logger/Formatter/JsonStringFormatter.php">
+  <file src="src/Logger/Formatter/RoadRunnerJsonFormatter.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[$record['level']]]></code>
     </ArgumentTypeCoercion>
@@ -105,16 +105,6 @@
       <code><![CDATA[$normalized['context'] ?? []]]></code>
       <code><![CDATA[$normalized['extra'] ?? []]]></code>
     </PossiblyInvalidOperand>
-  </file>
-  <file src="src/Logger/Handler.php">
-    <PossiblyInvalidArgument>
-      <code><![CDATA[$record['level']]]></code>
-    </PossiblyInvalidArgument>
-  </file>
-  <file src="src/Logger/LoggerHandler.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[$level]]></code>
-    </ArgumentTypeCoercion>
   </file>
   <file src="src/Queue/Internal/Dispatcher.php">
     <DeprecatedMethod>
