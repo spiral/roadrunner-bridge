@@ -30,7 +30,11 @@ final class Handler extends AbstractProcessingHandler
 
     protected function write(array|LogRecord $record): void
     {
+        $log = \is_array($record['formatted'])
+            ? \json_encode($record['formatted'], \JSON_THROW_ON_ERROR)
+            : $record['formatted'];
+
         $this->logger
-            ->log($record['formatted'] . PHP_EOL);
+            ->log($log . PHP_EOL);
     }
 }

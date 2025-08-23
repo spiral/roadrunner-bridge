@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\Tests\Logger\Formatter;
 
 use Monolog\Level;
+use Monolog\Logger;
 use Monolog\LogRecord;
 use Spiral\RoadRunnerBridge\Logger\Formatter\RoadRunnerJsonFormatter;
 use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
@@ -27,7 +28,36 @@ final class RoadRunnerJsonFormatterTest extends TestCase
             ),
         );
 
-        $result = \json_decode($result, true);
+        $result['ts'] = '_TS_';
+
+        $expected = [
+            'level' => 'debug',
+            'ts' => '_TS_',
+            'logger' => 'production_roadrunner',
+            'msg' => 'test_message',
+            'context_foo' => 'bar',
+            'extra_foo' => 'bar',
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testFormatFromArray(): void
+    {
+        $formatter = new RoadRunnerJsonFormatter('production_', RoadRunnerLogsMode::Production);
+
+        $result = $formatter->format(
+            [
+                'datetime' => new \DateTimeImmutable('now'),
+                'channel' => 'roadrunner',
+                'level' => Logger::DEBUG,
+                'level_name' => 'DEBUG',
+                'message' => 'test_message',
+                'context' => ['context_foo' => 'bar'],
+                'extra' => ['extra_foo' => 'bar'],
+            ],
+        );
+
         $result['ts'] = '_TS_';
 
         $expected = [
@@ -57,7 +87,6 @@ final class RoadRunnerJsonFormatterTest extends TestCase
             ),
         );
 
-        $result = \json_decode($result, true);
         $result['ts'] = '_TS_';
 
         $expected = [
@@ -87,8 +116,6 @@ final class RoadRunnerJsonFormatterTest extends TestCase
                 extra: ['extra_foo' => 'bar'],
             ),
         );
-
-        $result = \json_decode($result, true);
 
         $this->assertEquals('test_exception', $result['exception']['message']);
         $this->assertEquals('previous_test_exception', $result['exception']['previous']['message']);

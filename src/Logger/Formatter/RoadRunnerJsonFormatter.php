@@ -21,9 +21,22 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
         parent::__construct($dateFormat);
     }
 
-    public function format(array|LogRecord $record): string
+    /**
+     * @param LogRecord|array{
+     *     message: string,
+     *     level: Logger::DEBUG|Logger::INFO|Logger::NOTICE|Logger::WARNING|Logger::ERROR|Logger::CRITICAL|Logger::ALERT|Logger::EMERGENCY,
+     *     level_name: 'DEBUG'|'INFO'|'NOTICE'|'WARNING'|'ERROR'|'CRITICAL'|'ALERT'|'EMERGENCY',
+     *     channel: string,
+     *     datetime: \DateTimeImmutable,
+     *     context: array<string|int, mixed>,
+     *     extra: array<string|int, mixed>
+     * } $record
+     * @return array<string|int, mixed>
+     * }
+     */
+    public function format(array|LogRecord $record): array
     {
-        $normalized = $this->normalizeRecord($record);
+        $normalized = $this->normalize(\is_array($record) ? $record : $record->toArray());
 
         \assert(\is_string($record['level']));
 
@@ -42,7 +55,7 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
 
         \assert(\is_string($record['channel']));
 
-        $data = [
+        return [
             'level' => $this->loggerMode === RoadRunnerLogsMode::Development ? \strtoupper($level) : $level,
             'ts' => $ts,
             'logger' => $this->loggerPrefix . $record['channel'],
@@ -50,8 +63,6 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
         ]
             + ($normalized['context'] ?? [])
             + ($normalized['extra'] ?? []);
-
-        return \json_encode($data, JSON_THROW_ON_ERROR);
     }
 
     protected function normalizeException(\Throwable $e, int $depth = 0): array
