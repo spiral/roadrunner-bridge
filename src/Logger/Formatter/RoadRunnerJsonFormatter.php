@@ -10,8 +10,36 @@ use Monolog\Logger;
 use Monolog\LogRecord;
 use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
 
+/**
+ * RoadRunner JSON formatter for Monolog that formats log records according to RoadRunner's logging standards.
+ *
+ * This formatter extends Monolog's NormalizerFormatter to provide RoadRunner-specific JSON formatting.
+ * It handles different logging modes (production vs development) and provides configurable options
+ * for logger prefixes, trace counts, and date formatting.
+ *
+ * The formatter produces JSON output compatible with RoadRunner's logging infrastructure and can
+ * be configured to output either human-readable timestamps (development mode) or Unix timestamps
+ * with microseconds (production mode).
+ *
+ */
 final class RoadRunnerJsonFormatter extends NormalizerFormatter
 {
+    /**
+     * Create a new RoadRunner JSON formatter instance.
+     *
+     * @param string $loggerPrefix Optional prefix to prepend to logger channel names. Useful for
+     *                            namespacing logs in multi-application environments.
+     * @param RoadRunnerLogsMode $loggerMode The logging mode that determines timestamp format and
+     *                                       log level representation. In development mode, provides
+     *                                       human-readable timestamps and uppercase log levels.
+     *                                       In production mode, uses Unix timestamps with microseconds
+     *                                       and lowercase log levels.
+     * @param int $traceCount Maximum number of stack trace entries to include when logging
+     *                        exceptions. Defaults to 5 to prevent excessive log size.
+     * @param string|null $dateFormat Custom date format string. If null, uses the parent
+     *                                class default format. This parameter is passed to the
+     *                                parent NormalizerFormatter.
+     */
     public function __construct(
         private readonly string $loggerPrefix = '',
         private readonly RoadRunnerLogsMode $loggerMode = RoadRunnerLogsMode::Production,
@@ -22,6 +50,16 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
     }
 
     /**
+     * Format a log record into a RoadRunner-compatible JSON structure.
+     *
+     * This method converts Monolog log records into a standardized format that RoadRunner
+     * can process. The output includes essential fields like level, timestamp, logger name,
+     * and message, along with any context and extra data from the original record.
+     *
+     * The formatting behavior varies based on the configured logger mode:
+     * - Development mode: Human-readable timestamps (RFC3339) and uppercase log levels
+     * - Production mode: Unix timestamps with microseconds and lowercase log levels
+     *
      * @param LogRecord|array{
      *     message: string,
      *     level: Logger::DEBUG|Logger::INFO|Logger::NOTICE|Logger::WARNING|Logger::ERROR|Logger::CRITICAL|Logger::ALERT|Logger::EMERGENCY,
@@ -30,9 +68,16 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
      *     datetime: \DateTimeImmutable,
      *     context: array<string|int, mixed>,
      *     extra: array<string|int, mixed>
-     * } $record
-     * @return array<string|int, mixed>
-     * }
+     * } $record The log record to format, either as a LogRecord object or array
+     *
+     * @return array<string|int, mixed> The formatted log record as an array with the following structure:
+     *                                   - level: The log level (string)
+     *                                   - ts: Timestamp in the configured format
+     *                                   - logger: Logger name with optional prefix
+     *                                   - msg: The log message
+     *                                   - Additional context and extra data merged from the original record
+     *
+     * @throws \InvalidArgumentException If the record structure is invalid
      */
     public function format(array|LogRecord $record): array
     {
@@ -65,6 +110,21 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
             + ($normalized['extra'] ?? []);
     }
 
+    /**
+     * Normalize exception data with configurable trace depth limit.
+     *
+     * This method overrides the parent implementation to limit the number of stack trace
+     * entries included in the log output. This prevents excessive log size while still
+     * providing useful debugging information.
+     *
+     * The trace count limit is controlled by the `$traceCount` constructor parameter,
+     * which defaults to 5 entries.
+     *
+     * @param \Throwable $e The exception to normalize
+     * @param int $depth The current recursion depth (used by parent implementation)
+     *
+     * @return array<string|int, mixed> The normalized exception data with limited stack trace
+     */
     protected function normalizeException(\Throwable $e, int $depth = 0): array
     {
         $normalized = parent::normalizeException($e, $depth);
