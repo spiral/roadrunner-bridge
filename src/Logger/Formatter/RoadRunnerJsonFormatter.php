@@ -123,7 +123,7 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
      * @param \Throwable $e The exception to normalize
      * @param int $depth The current recursion depth (used by parent implementation)
      *
-     * @return array<string|int, mixed> The normalized exception data with limited stack trace
+     * @return array<array-key, string|int|array<string|int|array<string>>> The normalized exception data with limited stack trace
      */
     protected function normalizeException(\Throwable $e, int $depth = 0): array
     {
