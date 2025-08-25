@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Logger\Formatter;
+namespace Spiral\RoadRunnerBridge\Logger\Internal;
 
 use Monolog\Formatter\NormalizerFormatter;
 use Monolog\Level;
@@ -21,6 +21,7 @@ use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
  * be configured to output either human-readable timestamps (development mode) or Unix timestamps
  * with microseconds (production mode).
  *
+ * @internal
  */
 final class RoadRunnerJsonFormatter extends NormalizerFormatter
 {

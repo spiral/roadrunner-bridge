@@ -9,7 +9,7 @@ use Monolog\Level;
 use Monolog\Logger;
 use Monolog\LogRecord;
 use RoadRunner\Logger\Logger as RoadRunnerLogger;
-use Spiral\RoadRunnerBridge\Logger\Formatter\RoadRunnerJsonFormatter;
+use Spiral\RoadRunnerBridge\Logger\Internal\RoadRunnerJsonFormatter;
 
 final class Handler extends AbstractProcessingHandler
 {

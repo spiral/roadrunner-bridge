@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Spiral\Tests\Logger\Formatter;
+namespace Spiral\Tests\Logger\Internal;
 
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\LogRecord;
-use Spiral\RoadRunnerBridge\Logger\Formatter\RoadRunnerJsonFormatter;
+use Spiral\RoadRunnerBridge\Logger\Internal\RoadRunnerJsonFormatter;
 use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
 use Spiral\Tests\TestCase;
 
