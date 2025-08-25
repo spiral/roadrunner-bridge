@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="6.10.0@9c0add4eb88d4b169ac04acb7c679918cbb9c252">
+<files psalm-version="6.13.0@70cdf647255a1362b426bb0f522a85817b8c791c">
   <file src="src/Bootloader/GRPCBootloader.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[$list]]></code>
@@ -97,10 +97,14 @@
       <code><![CDATA[$failure]]></code>
     </UndefinedVariable>
   </file>
-  <file src="src/Logger/Handler.php">
-    <PossiblyInvalidArgument>
+  <file src="src/Logger/Formatter/RoadRunnerJsonFormatter.php">
+    <ArgumentTypeCoercion>
       <code><![CDATA[$record['level']]]></code>
-    </PossiblyInvalidArgument>
+    </ArgumentTypeCoercion>
+    <PossiblyInvalidOperand>
+      <code><![CDATA[$normalized['context'] ?? []]]></code>
+      <code><![CDATA[$normalized['extra'] ?? []]]></code>
+    </PossiblyInvalidOperand>
   </file>
   <file src="src/Queue/Internal/Dispatcher.php">
     <DeprecatedMethod>
