@@ -28,17 +28,14 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
      * Create a new RoadRunner JSON formatter instance.
      *
      * @param string $loggerPrefix Optional prefix to prepend to logger channel names. Useful for
-     *                            namespacing logs in multi-application environments.
-     * @param RoadRunnerLogsMode $loggerMode The logging mode that determines timestamp format and
-     *                                       log level representation. In development mode, provides
-     *                                       human-readable timestamps and uppercase log levels.
-     *                                       In production mode, uses Unix timestamps with microseconds
-     *                                       and lowercase log levels.
+     *        namespacing logs in multi-application environments.
+     * @param RoadRunnerLogsMode $loggerMode The logging mode that determines timestamp format and log level
+     *        representation. In development mode, provides human-readable timestamps and uppercase log levels.
+     *        In production mode, uses Unix timestamps with microseconds and lowercase log levels.
      * @param int $traceCount Maximum number of stack trace entries to include when logging
-     *                        exceptions. Defaults to 5 to prevent excessive log size.
-     * @param string|null $dateFormat Custom date format string. If null, uses the parent
-     *                                class default format. This parameter is passed to the
-     *                                parent NormalizerFormatter.
+     *        exceptions. Defaults to 5 to prevent excessive log size.
+     * @param string|null $dateFormat Custom date format string. If null, uses the parent class default format.
+     *        This parameter is passed to the parent NormalizerFormatter.
      */
     public function __construct(
         private readonly string $loggerPrefix = '',
@@ -66,16 +63,22 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
      *     level_name: 'DEBUG'|'INFO'|'NOTICE'|'WARNING'|'ERROR'|'CRITICAL'|'ALERT'|'EMERGENCY',
      *     channel: string,
      *     datetime: \DateTimeImmutable,
-     *     context: array<string|int, mixed>,
-     *     extra: array<string|int, mixed>
+     *     context?: array<array-key, mixed>,
+     *     extra?: array<array-key, mixed>
      * } $record The log record to format, either as a LogRecord object or array
      *
-     * @return array<string|int, mixed> The formatted log record as an array with the following structure:
-     *                                   - level: The log level (string)
-     *                                   - ts: Timestamp in the configured format
-     *                                   - logger: Logger name with optional prefix
-     *                                   - msg: The log message
-     *                                   - Additional context and extra data merged from the original record
+     * @return array{
+     *     level: non-empty-string,
+     *     ts: non-empty-string,
+     *     logger: non-empty-string,
+     *     msg: string,
+     *     ...
+     * } The formatted log record as an array with the following structure:
+     *   - level: The log level (string)
+     *   - ts: Timestamp in the configured format
+     *   - logger: Logger name with optional prefix
+     *   - msg: The log message
+     *   - Additional context and extra data merged from the original record
      *
      * @throws \InvalidArgumentException If the record structure is invalid
      */
