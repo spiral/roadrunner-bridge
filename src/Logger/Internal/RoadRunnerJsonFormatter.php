@@ -87,8 +87,6 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
     {
         $normalized = $this->normalize(\is_array($record) ? $record : $record->toArray());
 
-        \assert(\is_string($record['level']));
-
         $level = match (Logger::toMonologLevel($record['level'])) {
             Level::Error, Level::Critical, Level::Alert, Level::Emergency => 'error',
             Level::Warning => 'warning',
