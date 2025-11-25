@@ -84,7 +84,7 @@ final class Dispatcher implements DispatcherInterface
                 unset($e);
             } catch (\Throwable $e) {
                 $this->reporter->report($e);
-                $task->fail($e);
+                $task->nack($e);
                 unset($e);
             }
 
@@ -95,7 +95,7 @@ final class Dispatcher implements DispatcherInterface
     /**
      * @throws JobsException
      */
-    public function retry(RetryException $e, ReceivedTaskInterface $task): void
+    private function retry(RetryException $e, ReceivedTaskInterface $task): void
     {
         $options = $e->getOptions();
 
