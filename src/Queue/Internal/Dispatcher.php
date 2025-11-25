@@ -20,7 +20,6 @@ use Spiral\Queue\Task;
 use Spiral\Queue\TaskInterface;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
-use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\Task\ProvidesHeadersInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
@@ -106,13 +105,12 @@ final class Dispatcher implements DispatcherInterface
                 $task = $task->withHeader($header, $values);
             }
         }
-        if (
-            ($options instanceof OptionsInterface || $options instanceof JobsOptionsInterface) &&
-            ($delay = $options->getDelay()) !== null
-        ) {
-            $task = $task->withDelay($delay);
+
+        if ($options instanceof OptionsInterface) {
+            $delay = $options->getDelay();
+            $delay === null or $task = $task->withDelay($delay);
         }
 
-        $task->fail($e, true);
+        $task->requeue($e);
     }
 }
