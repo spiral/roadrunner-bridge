@@ -47,7 +47,7 @@
         "spiral/hmvc": "^3.14",
         "spiral/roadrunner-grpc": "^3.3",
         "spiral/roadrunner-http": "^3.5",
-        "spiral/roadrunner-jobs": "^4.4",
+        "spiral/roadrunner-jobs": "^4.6.3",
         "spiral/roadrunner-kv": "^4.0",
         "spiral/roadrunner-metrics": "^3.0",
         "spiral/roadrunner-tcp": "^3.1 || ^4.0",
