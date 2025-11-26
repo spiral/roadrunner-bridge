@@ -44,7 +44,7 @@ final class DispatcherTest extends TestCase
         $task->shouldReceive('getId')->once()->andReturn('foo-id');
         $task->shouldReceive('getHeaders')->once()->andReturn(['foo-headers']);
         $task->shouldReceive('getQueue')->once()->andReturn('default');
-        $task->shouldReceive('complete')->once();
+        $task->shouldReceive('ack')->once();
 
         $deserializer->shouldReceive('deserialize')
             ->once()
@@ -82,7 +82,7 @@ final class DispatcherTest extends TestCase
         $task->shouldReceive('getName')->andReturn('foo-task');
         $task->shouldReceive('getQueue')->once()->andReturn('queue-name');
         $task->shouldReceive('getHeaders')->once()->andReturn(['foo-headers']);
-        $task->shouldReceive('fail')->once()->with($e);
+        $task->shouldReceive('nack')->once()->with($e);
 
         $handler = $this->mockContainer(HandlerRegistryInterface::class);
         $handler->shouldReceive('getHandler')->andThrow($e);
@@ -110,7 +110,7 @@ final class DispatcherTest extends TestCase
         $task->shouldReceive('getId')->once()->andReturn('foo-id');
         $task->shouldReceive('getHeaders')->once()->andReturn(['foo' => ['foo-headers']]);
         $task->shouldReceive('getQueue')->once()->andReturn('default');
-        $task->shouldReceive('complete')->once();
+        $task->shouldReceive('ack')->once();
 
         $deserializer->shouldReceive('deserialize')
             ->once()

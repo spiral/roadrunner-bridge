@@ -75,7 +75,7 @@ final class Dispatcher implements DispatcherInterface
                             headers: $queueTask->getHeaders(),
                         );
 
-                        $task->complete();
+                        $task->ack();
                     },
                 );
             } catch (RetryException $e) {
