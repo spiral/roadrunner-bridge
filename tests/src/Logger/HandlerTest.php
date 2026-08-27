@@ -294,6 +294,45 @@ final class HandlerTest extends TestCase
     }
 
     /**
+     * @covers ::write
+     */
+    public function testLoggerShouldNotEscapeSlashesAndUnicode(): void
+    {
+        $rpc = $this->createMock(RPCInterface::class);
+        $rpc
+            ->expects(self::once())
+            ->method('withServicePrefix')
+            ->with('app')
+            ->willReturnSelf();
+
+        $monolog = new Monolog('http');
+
+        $monolog->setHandlers([
+            new Handler(
+                logger: new Logger($rpc),
+            ),
+        ]);
+
+        $rpc
+            ->expects(self::once())
+            ->method('call')
+            ->with('Log', self::callback(static function (string $json): bool {
+                // Forward slashes must stay as-is, without the default json_encode "\/" escaping.
+                self::assertStringContainsString('"path":"/api/v1/news/tag"', $json);
+                self::assertStringNotContainsString('\\/', $json);
+
+                // Non-ASCII must stay readable, not \uXXXX escaped.
+                self::assertStringContainsString('Привет', $json);
+                self::assertStringNotContainsString('\\u', $json);
+
+                return true;
+            }))
+            ->willReturnSelf();
+
+        $monolog->info('Log message', ['path' => '/api/v1/news/tag', 'greeting' => 'Привет']);
+    }
+
+    /**
      * @dataProvider dataLevelFilter
      */
     public function testLevelFilter(Level $level, LogRecord $record, int $expectsCount = 0): void
