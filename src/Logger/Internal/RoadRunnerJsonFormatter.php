@@ -86,8 +86,9 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
     public function format(array|LogRecord $record): array
     {
         $normalized = $this->normalize(\is_array($record) ? $record : $record->toArray());
+        \assert(\is_array($normalized));
 
-        $level = match (Logger::toMonologLevel($record['level'])) {
+        $level = match ($record instanceof LogRecord ? $record->level : Level::from($record['level'])) {
             Level::Error, Level::Critical, Level::Alert, Level::Emergency => 'error',
             Level::Warning => 'warning',
             Level::Info, Level::Notice => 'info',
@@ -102,14 +103,17 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
 
         \assert(\is_string($record['channel']));
 
+        $context = $normalized['context'] ?? null;
+        $extra = $normalized['extra'] ?? null;
+
         return [
             'level' => $this->loggerMode === RoadRunnerLogsMode::Development ? \strtoupper($level) : $level,
             'ts' => $ts,
             'logger' => $this->loggerPrefix . $record['channel'],
             'msg' => $record['message'],
         ]
-            + ($normalized['context'] ?? [])
-            + ($normalized['extra'] ?? []);
+            + (\is_array($context) ? $context : [])
+            + (\is_array($extra) ? $extra : []);
     }
 
     /**
