@@ -22,11 +22,11 @@ use Spiral\RoadRunnerBridge\GRPC\UnaryCallInterface;
 /**
  * @internal
  */
-final class Invoker implements InvokerInterface
+final readonly class Invoker implements InvokerInterface
 {
     public function __construct(
-        private readonly HandlerInterface $handler,
-        #[Proxy] private readonly ScopeInterface $scope,
+        private HandlerInterface $handler,
+        #[Proxy] private ScopeInterface $scope,
     ) {}
 
     public function invoke(ServiceInterface $service, Method $method, ContextInterface $ctx, ?string $input): string

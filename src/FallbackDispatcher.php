@@ -12,13 +12,13 @@ use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher as Http;
 use Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher as Queue;
 use Spiral\RoadRunnerBridge\Tcp\Internal\Dispatcher as Tcp;
 
-final class FallbackDispatcher implements DispatcherInterface
+final readonly class FallbackDispatcher implements DispatcherInterface
 {
     private const PLUGIN_ERROR = 'To use RoadRunner in `%s` mode, please register dispatcher `%s`.';
     private const TEMPORAL_ERROR = 'To use Temporal with RoadRunner, please install `spiral/temporal-bridge` package.';
 
     public function __construct(
-        private readonly RoadRunnerMode $mode,
+        private RoadRunnerMode $mode,
     ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool

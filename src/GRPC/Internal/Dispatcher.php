@@ -20,11 +20,11 @@ use Spiral\RoadRunnerBridge\RoadRunnerMode;
  * @internal
  */
 #[DispatcherScope(scope: 'grpc')]
-final class Dispatcher implements DispatcherInterface
+final readonly class Dispatcher implements DispatcherInterface
 {
     public function __construct(
-        #[Proxy] private readonly ContainerInterface $container,
-        private readonly FinalizerInterface $finalizer,
+        #[Proxy] private ContainerInterface $container,
+        private FinalizerInterface $finalizer,
     ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool

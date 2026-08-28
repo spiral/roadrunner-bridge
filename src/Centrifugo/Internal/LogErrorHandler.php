@@ -11,10 +11,10 @@ use Spiral\RoadRunnerBridge\Centrifugo\ErrorHandlerInterface;
 /**
  * @internal
  */
-final class LogErrorHandler implements ErrorHandlerInterface
+final readonly class LogErrorHandler implements ErrorHandlerInterface
 {
     public function __construct(
-        private readonly ExceptionReporterInterface $reporter,
+        private ExceptionReporterInterface $reporter,
     ) {}
 
     public function handle(RequestInterface $request, \Throwable $e): void

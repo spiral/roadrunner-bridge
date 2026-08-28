@@ -1,6 +1,16 @@
-/.*      export-ignore
-/tests   export-ignore
-/*.xml   export-ignore
-/*.yml   export-ignore
-/*.lock  export-ignore
-/*.dist  export-ignore
+# Line-ending normalization for text files.
+* text=auto
+
+# PHP-aware hunk headers in `git diff`.
+*.php diff=php
+
+# Default: nothing is included in the `composer archive` / dist tarball.
+# Re-include only the files that actually belong to the published package below.
+* export-ignore
+
+# Package metadata and the source code (`Spiral\RoadRunnerBridge\` namespace).
+/composer.json   -export-ignore
+/LICENSE         -export-ignore
+/README.md       -export-ignore
+/src             -export-ignore
+/src/**          -export-ignore

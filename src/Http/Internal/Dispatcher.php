@@ -20,15 +20,15 @@ use Spiral\RoadRunnerBridge\RoadRunnerMode;
  * @internal
  */
 #[DispatcherScope(scope: 'http')]
-final class Dispatcher implements DispatcherInterface
+final readonly class Dispatcher implements DispatcherInterface
 {
     public function __construct(
-        private readonly PSR7WorkerInterface $worker,
-        private readonly Http $http,
-        private readonly ExceptionHandlerInterface $errorHandler,
-        private readonly ResponseFactoryInterface $responseFactory,
-        private readonly FinalizerInterface $finalizer,
-        private readonly AppEnvironment $environment,
+        private PSR7WorkerInterface $worker,
+        private Http $http,
+        private ExceptionHandlerInterface $errorHandler,
+        private ResponseFactoryInterface $responseFactory,
+        private FinalizerInterface $finalizer,
+        private AppEnvironment $environment,
     ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool

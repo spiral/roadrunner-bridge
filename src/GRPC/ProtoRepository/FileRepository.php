@@ -7,10 +7,10 @@ namespace Spiral\RoadRunnerBridge\GRPC\ProtoRepository;
 /**
  * @internal
  */
-final class FileRepository implements ProtoFilesRepositoryInterface
+final readonly class FileRepository implements ProtoFilesRepositoryInterface
 {
     public function __construct(
-        private readonly array $protoFiles,
+        private array $protoFiles,
     ) {}
 
     public function getProtos(): iterable

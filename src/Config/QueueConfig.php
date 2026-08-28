@@ -15,10 +15,10 @@ use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
  *     options: OptionsInterface|JobsOptionsInterface|null
  * }
  */
-final class QueueConfig
+final readonly class QueueConfig
 {
     public function __construct(
-        private readonly array $pipelines,
+        private array $pipelines,
     ) {}
 
     /**

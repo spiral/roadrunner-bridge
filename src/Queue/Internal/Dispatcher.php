@@ -29,15 +29,15 @@ use Spiral\RoadRunnerBridge\RoadRunnerMode;
  * @internal
  */
 #[DispatcherScope(scope: 'queue')]
-final class Dispatcher implements DispatcherInterface
+final readonly class Dispatcher implements DispatcherInterface
 {
     public function __construct(
-        private readonly FinalizerInterface $finalizer,
-        private readonly ScopeInterface $scope,
-        private readonly ExceptionReporterInterface $reporter,
-        private readonly ConsumerInterface $consumer,
-        private readonly PayloadDeserializerInterface $deserializer,
-        private readonly Handler $handler,
+        private FinalizerInterface $finalizer,
+        private ScopeInterface $scope,
+        private ExceptionReporterInterface $reporter,
+        private ConsumerInterface $consumer,
+        private PayloadDeserializerInterface $deserializer,
+        private Handler $handler,
     ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool

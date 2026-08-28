@@ -7,9 +7,9 @@ namespace Spiral\RoadRunnerBridge\GRPC\ProtoRepository;
 /**
  * @internal
  */
-final class CompositeRepository implements ProtoFilesRepositoryInterface
+final readonly class CompositeRepository implements ProtoFilesRepositoryInterface
 {
-    private readonly array $repositories;
+    private array $repositories;
 
     public function __construct(ProtoFilesRepositoryInterface ...$repositories)
     {

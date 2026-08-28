@@ -12,16 +12,16 @@ use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
  *
  * @internal
  */
-final class ProtoCompiler
+final readonly class ProtoCompiler
 {
-    private readonly string $baseNamespace;
+    private string $baseNamespace;
 
     public function __construct(
-        private readonly string $basePath,
+        private string $basePath,
         string $baseNamespace,
-        private readonly FilesInterface $files,
-        private readonly ProtocCommandBuilder $commandBuilder,
-        private readonly CommandExecutor $executor,
+        private FilesInterface $files,
+        private ProtocCommandBuilder $commandBuilder,
+        private CommandExecutor $executor,
     ) {
         $this->baseNamespace = \str_replace('\\', '/', \rtrim($baseNamespace, '\\'));
     }

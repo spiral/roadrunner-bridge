@@ -6,11 +6,11 @@ namespace Spiral\RoadRunnerBridge\Tcp\Response;
 
 use Spiral\RoadRunner\Tcp\TcpResponse;
 
-final class RespondMessage implements ResponseInterface
+final readonly class RespondMessage implements ResponseInterface
 {
     public function __construct(
-        private readonly string $body,
-        private readonly bool $close = false,
+        private string $body,
+        private bool $close = false,
     ) {}
 
     public function getAction(): TcpResponse

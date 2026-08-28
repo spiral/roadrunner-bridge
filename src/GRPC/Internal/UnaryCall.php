@@ -12,12 +12,12 @@ use Spiral\RoadRunnerBridge\GRPC\UnaryCallInterface;
 /**
  * @internal
  */
-final class UnaryCall implements UnaryCallInterface
+final readonly class UnaryCall implements UnaryCallInterface
 {
     public function __construct(
-        private readonly ContextInterface $context,
-        private readonly Method $method,
-        private readonly Message $message,
+        private ContextInterface $context,
+        private Method $method,
+        private Message $message,
     ) {}
 
     public function getContext(): ContextInterface
