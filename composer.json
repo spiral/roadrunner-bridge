@@ -60,7 +60,7 @@
         "internal/dload": "^1.15",
         "llm/skills": "^1.11",
         "phpunit/phpunit": "^10.5",
-        "roadrunner/cli": "^2.9",
+        "roadrunner/cli": "^3.0",
         "spiral/code-style": "^2.2",
         "spiral/framework": "^3.15.6",
         "spiral/nyholm-bridge": "^1.3",
