@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Config;
 
 use Spiral\Core\InjectableConfig;
-use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Interceptor;
+use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 
 /**
  * @psalm-import-type TService from RegistryInterface

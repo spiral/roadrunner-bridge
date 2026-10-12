@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Spiral\Tests;
 
 use Spiral\Boot\EnvironmentInterface;
-use Spiral\Console\Bootloader\ConsoleBootloader;
 use Spiral\Bootloader as Framework;
+use Spiral\Console\Bootloader\ConsoleBootloader;
 use Spiral\Nyholm\Bootloader\NyholmBootloader;
 use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 

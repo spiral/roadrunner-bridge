@@ -52,7 +52,7 @@ final class InvokerTest extends TestCase
     {
         $this->expectException(InvokeException::class);
 
-        $invoker = new Invoker(m::mock(\Spiral\Interceptors\HandlerInterface::class), $this->getContainer());
+        $invoker = new Invoker(m::mock(HandlerInterface::class), $this->getContainer());
 
         $service = m::mock(ServiceInterface::class);
         $method = Method::parse(new \ReflectionMethod(PingService::class, 'Ping'));

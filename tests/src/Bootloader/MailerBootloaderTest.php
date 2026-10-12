@@ -13,7 +13,7 @@ use Spiral\Tests\TestCase;
 
 final class MailerBootloaderTest extends TestCase
 {
-    /** @var \Mockery\LegacyMockInterface|\Mockery\MockInterface|QueueConnectionProviderInterface */
+    /** @var m\LegacyMockInterface|m\MockInterface|QueueConnectionProviderInterface */
     private $queueProvider;
 
     public function testMailerInterfaceBinding(): void
