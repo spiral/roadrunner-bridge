@@ -6,9 +6,9 @@ namespace Spiral\RoadRunnerBridge\Bootloader;
 
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger as Monologger;
+use RoadRunner\Logger\Logger;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\EnvironmentInterface;
-use RoadRunner\Logger\Logger;
 use Spiral\Monolog\Bootloader\MonologBootloader;
 use Spiral\RoadRunnerBridge\Logger\Handler;
 use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;

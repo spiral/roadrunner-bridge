@@ -27,8 +27,8 @@ use Spiral\Tests\TestCase;
 final class PayloadDeserializerTest extends TestCase
 {
     private PayloadDeserializer $deserializer;
-    private HandlerRegistryInterface|\Mockery\MockInterface $registry;
-    private SerializerRegistryInterface|\Mockery\MockInterface $serializer;
+    private HandlerRegistryInterface|m\MockInterface $registry;
+    private SerializerRegistryInterface|m\MockInterface $serializer;
 
     public static function getHandlersDataProvider(): \Traversable
     {

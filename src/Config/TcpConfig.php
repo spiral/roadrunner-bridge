@@ -6,8 +6,8 @@ namespace Spiral\RoadRunnerBridge\Config;
 
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\InjectableConfig;
-use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
 use Spiral\RoadRunnerBridge\Tcp\Interceptor;
+use Spiral\RoadRunnerBridge\Tcp\Service\ServiceInterface;
 
 /**
  * @psalm-import-type TInterceptor from Interceptor\RegistryInterface

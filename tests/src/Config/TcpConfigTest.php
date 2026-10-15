@@ -11,7 +11,7 @@ final class TcpConfigTest extends TestCase
 {
     public function testDebugMode(): void
     {
-        $config = new TCPConfig([
+        $config = new TcpConfig([
             'debug' => true,
         ]);
 
@@ -20,7 +20,7 @@ final class TcpConfigTest extends TestCase
 
     public function testGetServices(): void
     {
-        $config = new TCPConfig([
+        $config = new TcpConfig([
             'services' => ['foo', 'bar'],
         ]);
 
@@ -29,14 +29,14 @@ final class TcpConfigTest extends TestCase
 
     public function testGetNotExistsServices(): void
     {
-        $config = new TCPConfig();
+        $config = new TcpConfig();
 
         $this->assertSame([], $config->getServices());
     }
 
     public function testGetInterceptors(): void
     {
-        $config = new TCPConfig([
+        $config = new TcpConfig([
             'interceptors' => [
                 'test' => ['foo', 'bar'],
             ],
@@ -47,7 +47,7 @@ final class TcpConfigTest extends TestCase
 
     public function testGetNotExistsInterceptors(): void
     {
-        $config = new TCPConfig();
+        $config = new TcpConfig();
 
         $this->assertSame([], $config->getInterceptors());
     }
