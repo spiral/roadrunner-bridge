@@ -101,7 +101,7 @@ final class InterceptorRegistryTest extends TestCase
 
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage(
-            'The $type value must be one of the `*`, `connect`, `refresh`, `sub_refresh`, `publish`, `subscribe`, `rpc`, `invalid` values.',
+            'The $type value must be one of the `*`, `connect`, `refresh`, `subrefresh`, `publish`, `subscribe`, `rpc`, `invalid` values.',
         );
         $registry->register('foo', new TestInterceptor());
     }
