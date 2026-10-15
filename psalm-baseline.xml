@@ -65,13 +65,6 @@
       <code><![CDATA[defineDependencies]]></code>
     </MissingPureAnnotation>
   </file>
-  <file src="src/Bootloader/TcpBootloader.php">
-    <MissingPureAnnotation>
-      <code><![CDATA[__construct]]></code>
-      <code><![CDATA[defineDependencies]]></code>
-      <code><![CDATA[defineSingletons]]></code>
-    </MissingPureAnnotation>
-  </file>
   <file src="src/Centrifugo/ErrorHandlerInterface.php">
     <MissingAbstractPureAnnotation>
       <code><![CDATA[handle]]></code>
@@ -172,13 +165,6 @@
     </MissingImmutableAnnotation>
     <MissingPureAnnotation>
       <code><![CDATA[__construct]]></code>
-    </MissingPureAnnotation>
-  </file>
-  <file src="src/Config/TcpConfig.php">
-    <MissingPureAnnotation>
-      <code><![CDATA[getInterceptors]]></code>
-      <code><![CDATA[getServices]]></code>
-      <code><![CDATA[isDebugMode]]></code>
     </MissingPureAnnotation>
   </file>
   <file src="src/Console/Command/GRPC/GenerateCommand.php">
@@ -398,93 +384,5 @@
     <MissingPureAnnotation>
       <code><![CDATA[getInstructions]]></code>
     </MissingPureAnnotation>
-  </file>
-  <file src="src/Scaffolder/Declaration/TcpServiceDeclaration.php">
-    <ClassMustBeFinal>
-      <code><![CDATA[TcpServiceDeclaration]]></code>
-    </ClassMustBeFinal>
-  </file>
-  <file src="src/Tcp/Interceptor/RegistryInterface.php">
-    <MissingAbstractPureAnnotation>
-      <code><![CDATA[getInterceptors]]></code>
-      <code><![CDATA[register]]></code>
-    </MissingAbstractPureAnnotation>
-    <MissingInterfaceImmutableAnnotation>
-      <code><![CDATA[RegistryInterface]]></code>
-    </MissingInterfaceImmutableAnnotation>
-  </file>
-  <file src="src/Tcp/Internal/Dispatcher.php">
-    <MissingPureAnnotation>
-      <code><![CDATA[__construct]]></code>
-      <code><![CDATA[canServe]]></code>
-    </MissingPureAnnotation>
-  </file>
-  <file src="src/Tcp/Internal/InterceptorRegistry.php">
-    <MissingPureAnnotation>
-      <code><![CDATA[__construct]]></code>
-      <code><![CDATA[register]]></code>
-    </MissingPureAnnotation>
-  </file>
-  <file src="src/Tcp/Internal/Server.php">
-    <PossiblyInvalidArgument>
-      <code><![CDATA[$this->interceptors->getInterceptors($server)]]></code>
-    </PossiblyInvalidArgument>
-  </file>
-  <file src="src/Tcp/Internal/ServiceRegistry.php">
-    <MissingPureAnnotation>
-      <code><![CDATA[__construct]]></code>
-      <code><![CDATA[hasService]]></code>
-      <code><![CDATA[register]]></code>
-    </MissingPureAnnotation>
-  </file>
-  <file src="src/Tcp/Response/CloseConnection.php">
-    <MissingPureAnnotation>
-      <code><![CDATA[getAction]]></code>
-      <code><![CDATA[getBody]]></code>
-    </MissingPureAnnotation>
-  </file>
-  <file src="src/Tcp/Response/ContinueRead.php">
-    <MissingPureAnnotation>
-      <code><![CDATA[getAction]]></code>
-      <code><![CDATA[getBody]]></code>
-    </MissingPureAnnotation>
-  </file>
-  <file src="src/Tcp/Response/RespondMessage.php">
-    <MissingPureAnnotation>
-      <code><![CDATA[__construct]]></code>
-      <code><![CDATA[getAction]]></code>
-    </MissingPureAnnotation>
-  </file>
-  <file src="src/Tcp/Response/ResponseInterface.php">
-    <MissingAbstractPureAnnotation>
-      <code><![CDATA[getAction]]></code>
-      <code><![CDATA[getBody]]></code>
-    </MissingAbstractPureAnnotation>
-    <MissingInterfaceImmutableAnnotation>
-      <code><![CDATA[ResponseInterface]]></code>
-    </MissingInterfaceImmutableAnnotation>
-  </file>
-  <file src="src/Tcp/Service/Exception/NotFoundException.php">
-    <MissingPureAnnotation>
-      <code><![CDATA[__construct]]></code>
-    </MissingPureAnnotation>
-  </file>
-  <file src="src/Tcp/Service/RegistryInterface.php">
-    <MissingAbstractPureAnnotation>
-      <code><![CDATA[getService]]></code>
-      <code><![CDATA[hasService]]></code>
-      <code><![CDATA[register]]></code>
-    </MissingAbstractPureAnnotation>
-    <MissingInterfaceImmutableAnnotation>
-      <code><![CDATA[RegistryInterface]]></code>
-    </MissingInterfaceImmutableAnnotation>
-  </file>
-  <file src="src/Tcp/Service/ServiceInterface.php">
-    <MissingAbstractPureAnnotation>
-      <code><![CDATA[handle]]></code>
-    </MissingAbstractPureAnnotation>
-    <MissingInterfaceImmutableAnnotation>
-      <code><![CDATA[ServiceInterface]]></code>
-    </MissingInterfaceImmutableAnnotation>
   </file>
 </files>

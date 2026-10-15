@@ -16,7 +16,7 @@ final class RoadRunnerModeTest extends TestCase
     {
         return [
             'http' => ['http', RoadRunnerMode::Http],
-            'tcp' => ['tcp', RoadRunnerMode::Tcp],
+            'tcp' => ['tcp', RoadRunnerMode::Unknown],
             'grpc' => ['grpc', RoadRunnerMode::Grpc],
             'temporal' => ['temporal', RoadRunnerMode::Temporal],
             'jobs' => ['jobs', RoadRunnerMode::Jobs],
