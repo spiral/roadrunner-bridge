@@ -20,7 +20,6 @@ abstract class TestCase extends \Spiral\Testing\TestCase
             RoadRunnerBridge\HttpBootloader::class,
             RoadRunnerBridge\QueueBootloader::class,
             RoadRunnerBridge\RoadRunnerBootloader::class,
-            RoadRunnerBridge\TcpBootloader::class,
             RoadRunnerBridge\MetricsBootloader::class,
             RoadRunnerBridge\LoggerBootloader::class,
             RoadRunnerBridge\CentrifugoBootloader::class,
