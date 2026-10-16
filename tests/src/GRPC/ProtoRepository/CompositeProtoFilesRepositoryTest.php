@@ -10,7 +10,7 @@ use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 use Spiral\Tests\TestCase;
 
-class CompositeProtoFilesRepositoryTest extends TestCase
+final class CompositeProtoFilesRepositoryTest extends TestCase
 {
     public function testGetProtos(): void
     {

@@ -7,7 +7,7 @@ namespace Spiral\Tests\GRPC\ProtoRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
 use Spiral\Tests\TestCase;
 
-class FileRepositoryTest extends TestCase
+final class FileRepositoryTest extends TestCase
 {
     public function testGetProtos(): void
     {
