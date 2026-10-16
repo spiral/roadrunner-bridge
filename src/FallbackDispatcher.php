@@ -10,7 +10,6 @@ use Spiral\RoadRunnerBridge\Exception\DispatcherNotFoundException;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Dispatcher as GRPC;
 use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher as Http;
 use Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher as Queue;
-use Spiral\RoadRunnerBridge\Tcp\Internal\Dispatcher as Tcp;
 
 final readonly class FallbackDispatcher implements DispatcherInterface
 {
@@ -32,7 +31,6 @@ final readonly class FallbackDispatcher implements DispatcherInterface
             RoadRunnerMode::Http => $this->throwException(Http::class),
             RoadRunnerMode::Jobs => $this->throwException(Queue::class),
             RoadRunnerMode::Grpc => $this->throwException(GRPC::class),
-            RoadRunnerMode::Tcp => $this->throwException(Tcp::class),
             RoadRunnerMode::Centrifuge => $this->throwException(Centrifugo::class),
             RoadRunnerMode::Temporal => throw new DispatcherNotFoundException(self::TEMPORAL_ERROR),
             RoadRunnerMode::Unknown => null,

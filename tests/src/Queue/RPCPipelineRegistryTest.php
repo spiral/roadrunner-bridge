@@ -116,7 +116,7 @@ final class RPCPipelineRegistryTest extends TestCase
 
     public function testConsumerPipelinesShouldNotBeDeclaredNotInJobsMode(): void
     {
-        $this->makeJob(RoadRunnerMode::Tcp);
+        $this->makeJob(RoadRunnerMode::Http);
         $this->jobs->shouldNotReceive('getIterator');
         $this->registry->declareConsumerPipelines();
     }
