@@ -55,6 +55,7 @@
         "spiral/serializer": "^3.13"
     },
     "require-dev": {
+        "boundwize/structarmed": "^0.19",
         "buggregator/trap": "^1.16",
         "internal/dload": "^1.15",
         "llm/skills": "^1.11",
@@ -90,7 +91,8 @@
         "cs:fix": "php-cs-fixer fix -v",
         "test": "phpunit",
         "psalm": "psalm",
-        "psalm:baseline": "psalm --set-baseline=psalm-baseline.xml"
+        "psalm:baseline": "psalm --set-baseline=psalm-baseline.xml",
+        "structarmed": "structarmed analyze"
     },
     "config": {
         "sort-packages": true,

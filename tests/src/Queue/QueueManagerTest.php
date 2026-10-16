@@ -14,7 +14,7 @@ use Spiral\Queue\QueueManager;
 use Spiral\RoadRunnerBridge\Queue\Internal\Queue;
 use Spiral\Tests\TestCase;
 
-class QueueManagerTest extends TestCase
+final class QueueManagerTest extends TestCase
 {
     public function testGetsRoadRunnerQueue(): void
     {
