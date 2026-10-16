@@ -6,8 +6,8 @@
 namespace Spiral\App\GRPC\Ping;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Generated from protobuf message <code>ping.dto.PingRequest</code>
@@ -15,19 +15,19 @@ use Google\Protobuf\Internal\GPBUtil;
 class PingRequest extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Generated from protobuf field <code>string from = 1;</code>
+     * Generated from protobuf field <code>string from = 1 [json_name = "from"];</code>
      */
     protected $from = '';
     /**
-     * Generated from protobuf field <code>string to = 2;</code>
+     * Generated from protobuf field <code>string to = 2 [json_name = "to"];</code>
      */
     protected $to = '';
     /**
-     * Generated from protobuf field <code>string subject = 3;</code>
+     * Generated from protobuf field <code>string subject = 3 [json_name = "subject"];</code>
      */
     protected $subject = '';
     /**
-     * Generated from protobuf field <code>string body = 4;</code>
+     * Generated from protobuf field <code>string body = 4 [json_name = "body"];</code>
      */
     protected $body = '';
 
@@ -43,13 +43,14 @@ class PingRequest extends \Google\Protobuf\Internal\Message
      *     @type string $body
      * }
      */
-    public function __construct($data = NULL) {
+    public function __construct($data = null)
+    {
         \Spiral\App\GRPC\Ping\GPBMetadata\Service::initOnce();
         parent::__construct($data);
     }
 
     /**
-     * Generated from protobuf field <code>string from = 1;</code>
+     * Generated from protobuf field <code>string from = 1 [json_name = "from"];</code>
      * @return string
      */
     public function getFrom()
@@ -58,20 +59,20 @@ class PingRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>string from = 1;</code>
+     * Generated from protobuf field <code>string from = 1 [json_name = "from"];</code>
      * @param string $var
      * @return $this
      */
-    public function setFrom($var)
+    public function setFrom(string $var)
     {
-        GPBUtil::checkString($var, True);
+        GPBUtil::checkString($var, true);
         $this->from = $var;
 
         return $this;
     }
 
     /**
-     * Generated from protobuf field <code>string to = 2;</code>
+     * Generated from protobuf field <code>string to = 2 [json_name = "to"];</code>
      * @return string
      */
     public function getTo()
@@ -80,20 +81,20 @@ class PingRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>string to = 2;</code>
+     * Generated from protobuf field <code>string to = 2 [json_name = "to"];</code>
      * @param string $var
      * @return $this
      */
-    public function setTo($var)
+    public function setTo(string $var)
     {
-        GPBUtil::checkString($var, True);
+        GPBUtil::checkString($var, true);
         $this->to = $var;
 
         return $this;
     }
 
     /**
-     * Generated from protobuf field <code>string subject = 3;</code>
+     * Generated from protobuf field <code>string subject = 3 [json_name = "subject"];</code>
      * @return string
      */
     public function getSubject()
@@ -102,20 +103,20 @@ class PingRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>string subject = 3;</code>
+     * Generated from protobuf field <code>string subject = 3 [json_name = "subject"];</code>
      * @param string $var
      * @return $this
      */
-    public function setSubject($var)
+    public function setSubject(string $var)
     {
-        GPBUtil::checkString($var, True);
+        GPBUtil::checkString($var, true);
         $this->subject = $var;
 
         return $this;
     }
 
     /**
-     * Generated from protobuf field <code>string body = 4;</code>
+     * Generated from protobuf field <code>string body = 4 [json_name = "body"];</code>
      * @return string
      */
     public function getBody()
@@ -124,13 +125,13 @@ class PingRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>string body = 4;</code>
+     * Generated from protobuf field <code>string body = 4 [json_name = "body"];</code>
      * @param string $var
      * @return $this
      */
-    public function setBody($var)
+    public function setBody(string $var)
     {
-        GPBUtil::checkString($var, True);
+        GPBUtil::checkString($var, true);
         $this->body = $var;
 
         return $this;

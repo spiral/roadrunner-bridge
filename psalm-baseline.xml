@@ -150,11 +150,14 @@
   </file>
   <file src="src/Config/GRPCConfig.php">
     <MissingPureAnnotation>
-      <code><![CDATA[getBinaryPath]]></code>
+      <code><![CDATA[getBufPath]]></code>
+      <code><![CDATA[getBufTemplate]]></code>
       <code><![CDATA[getGeneratedPath]]></code>
       <code><![CDATA[getGenerators]]></code>
       <code><![CDATA[getInterceptors]]></code>
       <code><![CDATA[getNamespace]]></code>
+      <code><![CDATA[getPluginPath]]></code>
+      <code><![CDATA[getProtocPath]]></code>
       <code><![CDATA[getServices]]></code>
       <code><![CDATA[getServicesBasePath]]></code>
     </MissingPureAnnotation>
@@ -168,16 +171,6 @@
     </MissingPureAnnotation>
   </file>
   <file src="src/Console/Command/GRPC/GenerateCommand.php">
-    <MissingPureAnnotation>
-      <code><![CDATA[getDefaultBinary]]></code>
-    </MissingPureAnnotation>
-    <PossiblyNullArgument>
-      <code><![CDATA[$binaryPath]]></code>
-    </PossiblyNullArgument>
-    <RedundantCondition>
-      <code><![CDATA[$binaryPath !== null]]></code>
-      <code><![CDATA[\assert($binaryPath !== null)]]></code>
-    </RedundantCondition>
     <RiskyTruthyFalsyComparison>
       <code><![CDATA[\realpath($protoFile)]]></code>
     </RiskyTruthyFalsyComparison>
@@ -249,28 +242,9 @@
     </MissingPureAnnotation>
   </file>
   <file src="src/GRPC/Internal/ProtoCompiler.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[$tmpDir]]></code>
-    </ArgumentTypeCoercion>
     <MissingPureAnnotation>
       <code><![CDATA[__construct]]></code>
     </MissingPureAnnotation>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[\realpath($protoFile)]]></code>
-      <code><![CDATA[\realpath($this->tmpDir())]]></code>
-    </RiskyTruthyFalsyComparison>
-  </file>
-  <file src="src/GRPC/Internal/ProtocCommandBuilder.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[$protoDir]]></code>
-    </ArgumentTypeCoercion>
-    <MissingPureAnnotation>
-      <code><![CDATA[__construct]]></code>
-    </MissingPureAnnotation>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[\realpath($dir)]]></code>
-      <code><![CDATA[\realpath($path)]]></code>
-    </RiskyTruthyFalsyComparison>
   </file>
   <file src="src/GRPC/Internal/ServiceLocator.php">
     <MissingPureAnnotation>

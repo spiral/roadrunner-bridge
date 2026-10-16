@@ -17,7 +17,10 @@ final class GRPCConfig extends InjectableConfig
     public const CONFIG = 'grpc';
 
     protected array $config = [
-        'binaryPath' => null,
+        'bufPath' => null,
+        'protocPath' => null,
+        'pluginPath' => null,
+        'bufTemplate' => null,
         'generatedPath' => null,
         'namespace' => null,
         'servicesBasePath' => null,
@@ -40,9 +43,39 @@ final class GRPCConfig extends InjectableConfig
         };
     }
 
-    public function getBinaryPath(): ?string
+    /**
+     * Path to the buf binary.
+     */
+    public function getBufPath(): ?string
     {
-        return $this->config['binaryPath'] ?? null;
+        return $this->config['bufPath'] ?? null;
+    }
+
+    /**
+     * Path to the protoc binary that buf runs for the built-in PHP generator.
+     */
+    public function getProtocPath(): ?string
+    {
+        return $this->config['protocPath'] ?? null;
+    }
+
+    /**
+     * Path to the protoc-gen-php-grpc plugin binary.
+     */
+    public function getPluginPath(): ?string
+    {
+        return $this->config['pluginPath'] ?? null;
+    }
+
+    /**
+     * Path to a user-owned buf.gen.yaml template.
+     *
+     * The template is used as is: its plugins and output directories replace the built-in ones,
+     * so `generatedPath` and `namespace` do not relocate the generated files.
+     */
+    public function getBufTemplate(): ?string
+    {
+        return $this->config['bufTemplate'] ?? null;
     }
 
     /**
@@ -64,7 +97,7 @@ final class GRPCConfig extends InjectableConfig
     }
 
     /**
-     * Root path for all proto files in which imports will be searched.
+     * Root directory of the proto files: the buf input that all imports are resolved from.
      */
     public function getServicesBasePath(): ?string
     {

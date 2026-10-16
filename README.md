@@ -56,6 +56,65 @@ protected const LOAD = [
 > **Note**
 > Read more about RoadRunner configuration on official site https://roadrunner.dev.
 
+## gRPC code generation
+
+`php app.php grpc:generate` compiles the proto files from the `grpc` config with [buf](https://buf.build).
+It runs locally, with no network access, and needs three binaries:
+`buf`, `protoc` (buf calls it for the PHP message classes) and `protoc-gen-php-grpc`.
+Download them with [DLoad](https://github.com/php-internal/dload): add to `dload.xml`
+
+```xml
+<actions>
+    <download software="buf" version="^1.50"/>
+    <download software="protoc" version="^36.0"/>
+    <download software="protoc-gen-php-grpc" version="^3.0"/>
+</actions>
+```
+
+and run `vendor/bin/dload get`. Pick the protoc major version that matches your `google/protobuf` package
+(5.36 → protoc 36.x).
+
+```php
+// app/config/grpc.php
+return [
+    // Binaries. Null looks for `<root>/<name>[.exe]`, then in PATH.
+    'bufPath' => null,
+    'protocPath' => null,
+    'pluginPath' => null,
+
+    // Your own buf.gen.yaml, used as is. Null renders a template with the binaries above.
+    'bufTemplate' => null,
+
+    // The buf input: all imports are resolved from it.
+    'servicesBasePath' => directory('root') . 'proto',
+    'services' => [
+        directory('root') . 'proto/echo/echo.proto',
+    ],
+
+    'generatedPath' => directory('root') . 'generated',
+    'namespace' => 'App',
+    'generators' => [],
+];
+```
+
+Each service is generated together with the other proto files in its directory and subdirectories.
+Without `servicesBasePath`, every service directory is a separate input.
+
+With `bufTemplate`, the template's `out` directories decide where the files go: `generatedPath` and `namespace`
+do not relocate them, and `generators` receive the files created or updated under `generatedPath`.
+Use it for managed mode, extra plugins or BSR dependencies (with your own `buf.yaml`).
+
+### Upgrading from protoc (5.0)
+
+- `binaryPath` is removed; use `pluginPath`. New optional keys: `bufPath`, `protocPath`, `bufTemplate`.
+- Imports are resolved from `servicesBasePath` only, no longer from the directory of the importing file.
+  Rewrite `import "b.proto"` in `foo/a.proto` as `import "foo/b.proto"`.
+  Every file in `services` must be inside `servicesBasePath`.
+- Download `buf`, `protoc` and `protoc-gen-php-grpc` with DLoad as shown above.
+  `rr download-protoc-binary` is no longer used.
+- Regenerated files differ from the protoc output only by the `json_name` field option that buf records
+  in the field comments and the embedded descriptor; the JSON names stay the same.
+
 ## License:
 
 MIT License (MIT). Please see [`LICENSE`](./LICENSE) for more information. Maintained by [Spiral Scout](https://spiralscout.com).

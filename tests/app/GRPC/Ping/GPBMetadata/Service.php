@@ -7,16 +7,16 @@ namespace Spiral\App\GRPC\Ping\GPBMetadata;
 
 class Service
 {
-    public static $is_initialized = false;
+    public static bool $is_initialized = false;
 
-    public static function initOnce() {
+    public static function initOnce(): void {
         $pool = \Google\Protobuf\Internal\DescriptorPool::getGeneratedPool();
 
         if (static::$is_initialized == true) {
           return;
         }
         $pool->internalAddGeneratedFile(
-            "\x0A\xFD\x01\x0A\x0Dservice.proto\x12\x08ping.dto\"F\x0A\x0BPingRequest\x12\x0C\x0A\x04from\x18\x01 \x01(\x09\x12\x0A\x0A\x02to\x18\x02 \x01(\x09\x12\x0F\x0A\x07subject\x18\x03 \x01(\x09\x12\x0C\x0A\x04body\x18\x04 \x01(\x09\"\x0E\x0A\x0CPingResponse2F\x0A\x0BPingService\x127\x0A\x04Ping\x12\x15.ping.dto.PingRequest\x1A\x16.ping.dto.PingResponse\"\x00B:\xCA\x02\x14Spiral\\App\\GRPC\\Ping\xE2\x02 Spiral\\App\\GRPC\\Ping\\GPBMetadatab\x06proto3"
+            "\x0A\x96\x02\x0A\x0Dservice.proto\x12\x08ping.dto\"_\x0A\x0BPingRequest\x12\x12\x0A\x04from\x18\x01 \x01(\x09R\x04from\x12\x0E\x0A\x02to\x18\x02 \x01(\x09R\x02to\x12\x18\x0A\x07subject\x18\x03 \x01(\x09R\x07subject\x12\x12\x0A\x04body\x18\x04 \x01(\x09R\x04body\"\x0E\x0A\x0CPingResponse2F\x0A\x0BPingService\x127\x0A\x04Ping\x12\x15.ping.dto.PingRequest\x1A\x16.ping.dto.PingResponse\"\x00B:\xCA\x02\x14Spiral\\App\\GRPC\\Ping\xE2\x02 Spiral\\App\\GRPC\\Ping\\GPBMetadatab\x06proto3"
         , true);
 
         static::$is_initialized = true;

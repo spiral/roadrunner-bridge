@@ -98,11 +98,24 @@ final class GRPCBootloader extends Bootloader
             GRPCConfig::CONFIG,
             [
                 /**
-                 * Path to protoc-gen-php-grpc library.
+                 * Paths to the buf, protoc and protoc-gen-php-grpc binaries used by `grpc:generate`.
+                 * Null looks for `<root>/<name>[.exe]` (where `vendor/bin/dload get` puts it), then in PATH.
                  */
-                'binaryPath' => null,
+                'bufPath' => null,
+                'protocPath' => null,
+                'pluginPath' => null,
+                /**
+                 * Path to your own buf.gen.yaml. Null renders a template with the local protoc PHP generator
+                 * and protoc-gen-php-grpc. A custom template decides where the files go: `generatedPath` and
+                 * `namespace` do not relocate them.
+                 */
+                'bufTemplate' => null,
                 'generatedPath' => null,
                 'namespace' => null,
+                /**
+                 * Root directory of the proto files; all imports are resolved from it and every file
+                 * in `services` must be inside it. Null compiles each service from its own directory.
+                 */
                 'servicesBasePath' => null,
                 'services' => [],
                 'interceptors' => [],
