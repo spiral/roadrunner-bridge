@@ -1,0 +1,7 @@
+{
+    "$schema": "https://raw.githubusercontent.com/roxblnfk/skills/master/resources/skills.schema.json",
+    "aliases": [
+        ".claude/skills"
+    ],
+    "discovery": true
+}
