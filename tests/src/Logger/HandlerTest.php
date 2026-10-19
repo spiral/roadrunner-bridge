@@ -155,14 +155,14 @@ final class HandlerTest extends TestCase
                     return false;
                 }
 
-                if (!isset($data['ts']) && !\is_int($data['ts'])) {
+                if (!isset($data['time']) || !\is_string($data['time'])) {
                     return false;
                 }
-                $data['ts'] = '_TS_';
+                $data['time'] = '_TS_';
 
                 $expected = [
                     'level' => $logLevel,
-                    'ts' => '_TS_',
+                    'time' => '_TS_',
                     'logger' => $logPrefix . $channelName,
                     'msg' => 'Log message',
                 ];
@@ -211,21 +211,19 @@ final class HandlerTest extends TestCase
                     return false;
                 }
 
-                if (!isset($data['ts']) || !\is_string($data['ts'])) {
+                if (!isset($data['time']) || !\is_string($data['time'])) {
                     return false;
                 }
 
-                $dateFormat = \DateTimeInterface::RFC3339;
-                $datetime = \DateTime::createFromFormat($dateFormat, $data['ts']);
-                if (!$datetime || $datetime->format($dateFormat) != $data['ts']) {
+                if (!\preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{9}Z$/', $data['time'])) {
                     return false;
                 }
 
-                $data['ts'] = '_TS_';
+                $data['time'] = '_TS_';
 
                 $expected = [
                     'level' => \strtoupper($logLevel),
-                    'ts' => '_TS_',
+                    'time' => '_TS_',
                     'logger' => $channelName,
                     'msg' => 'Log message',
                 ];
@@ -268,15 +266,15 @@ final class HandlerTest extends TestCase
                     return false;
                 }
 
-                if (!isset($data['ts']) || !\is_string($data['ts'])) {
+                if (!isset($data['time']) || !\is_string($data['time'])) {
                     return false;
                 }
 
-                $data['ts'] = '_TS_';
+                $data['time'] = '_TS_';
 
                 $expected = [
                     'level' => \strtoupper($logLevel),
-                    'ts' => '_TS_',
+                    'time' => '_TS_',
                     'logger' => $channelName,
                     'msg' => 'Log message',
                     'foo' => 'bar',

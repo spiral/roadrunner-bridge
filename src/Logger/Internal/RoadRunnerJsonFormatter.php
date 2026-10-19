@@ -17,9 +17,8 @@ use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
  * It handles different logging modes (production vs development) and provides configurable options
  * for logger prefixes, trace counts, and date formatting.
  *
- * The formatter produces JSON output compatible with RoadRunner's logging infrastructure and can
- * be configured to output either human-readable timestamps (development mode) or Unix timestamps
- * with microseconds (production mode).
+ * The formatter produces JSON output compatible with RoadRunner's logging infrastructure.
+ * The timestamp is always sent in the `time` field in RFC3339Nano format (UTC).
  *
  * @internal
  */
@@ -30,9 +29,8 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
      *
      * @param string $loggerPrefix Optional prefix to prepend to logger channel names. Useful for
      *        namespacing logs in multi-application environments.
-     * @param RoadRunnerLogsMode $loggerMode The logging mode that determines timestamp format and log level
-     *        representation. In development mode, provides human-readable timestamps and uppercase log levels.
-     *        In production mode, uses Unix timestamps with microseconds and lowercase log levels.
+     * @param RoadRunnerLogsMode $loggerMode The logging mode that determines log level representation.
+     *        In development mode, uses uppercase log levels. In production mode, uses lowercase log levels.
      * @param int $traceCount Maximum number of stack trace entries to include when logging
      *        exceptions. Defaults to 5 to prevent excessive log size.
      * @param string|null $dateFormat Custom date format string. If null, uses the parent class default format.
@@ -55,8 +53,8 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
      * and message, along with any context and extra data from the original record.
      *
      * The formatting behavior varies based on the configured logger mode:
-     * - Development mode: Human-readable timestamps (RFC3339) and uppercase log levels
-     * - Production mode: Unix timestamps with microseconds and lowercase log levels
+     * - Development mode: uppercase log levels
+     * - Production mode: lowercase log levels
      *
      * @param LogRecord|array{
      *     message: string,
@@ -70,13 +68,13 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
      *
      * @return array{
      *     level: non-empty-string,
-     *     ts: non-empty-string,
+     *     time: non-empty-string,
      *     logger: non-empty-string,
      *     msg: string,
      *     ...
      * } The formatted log record as an array with the following structure:
      *   - level: The log level (string)
-     *   - ts: Timestamp in the configured format
+     *   - time: Timestamp in RFC3339Nano format (UTC)
      *   - logger: Logger name with optional prefix
      *   - msg: The log message
      *   - Additional context and extra data merged from the original record
@@ -97,9 +95,10 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
 
         \assert($record['datetime'] instanceof \DateTimeInterface);
 
-        $ts = $this->loggerMode === RoadRunnerLogsMode::Development
-            ? $record['datetime']->format(\DateTimeInterface::RFC3339)
-            : $record['datetime']->format('Uu000');
+        // RFC3339Nano in UTC, e.g. 2026-10-19T19:35:40.270431000Z (PHP has only microseconds precision)
+        $time = \DateTimeImmutable::createFromInterface($record['datetime'])
+            ->setTimezone(new \DateTimeZone('UTC'))
+            ->format('Y-m-d\TH:i:s.u000\Z');
 
         \assert(\is_string($record['channel']));
 
@@ -108,7 +107,7 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
 
         return [
             'level' => $this->loggerMode === RoadRunnerLogsMode::Development ? \strtoupper($level) : $level,
-            'ts' => $ts,
+            'time' => $time,
             'logger' => $this->loggerPrefix . $record['channel'],
             'msg' => $record['message'],
         ]
