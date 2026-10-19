@@ -47,10 +47,10 @@
         "roadrunner/kv": "^4.5",
         "roadrunner/lock": "^1.2",
         "roadrunner/metrics": "^3.4",
+        "roadrunner/roadrunner": "^3.0",
         "spiral/boot": "^3.14",
         "spiral/grpc-client": "^1.0",
         "spiral/hmvc": "^3.14",
-        "spiral/roadrunner": "^3.0",
         "spiral/scaffolder": "^3.13",
         "spiral/serializer": "^3.13"
     },
