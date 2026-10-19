@@ -31,11 +31,11 @@ final class RoadRunnerJsonFormatterTest extends TestCase
             ),
         );
 
-        $result['ts'] = '_TS_';
+        $result['time'] = '_TS_';
 
         $expected = [
             'level' => 'debug',
-            'ts' => '_TS_',
+            'time' => '_TS_',
             'logger' => 'production_roadrunner',
             'msg' => 'test_message',
             'context_foo' => 'bar',
@@ -62,11 +62,11 @@ final class RoadRunnerJsonFormatterTest extends TestCase
             ],
         );
 
-        $result['ts'] = '_TS_';
+        $result['time'] = '_TS_';
 
         $expected = [
             'level' => 'debug',
-            'ts' => '_TS_',
+            'time' => '_TS_',
             'logger' => 'production_roadrunner',
             'msg' => 'test_message',
             'context_foo' => 'bar',
@@ -92,11 +92,11 @@ final class RoadRunnerJsonFormatterTest extends TestCase
             ),
         );
 
-        $result['ts'] = '_TS_';
+        $result['time'] = '_TS_';
 
         $expected = [
             'level' => 'DEBUG',
-            'ts' => '_TS_',
+            'time' => '_TS_',
             'logger' => 'dev_roadrunner',
             'msg' => 'test_message',
             'context_foo' => 'bar',
@@ -104,6 +104,23 @@ final class RoadRunnerJsonFormatterTest extends TestCase
         ];
 
         Assert::equals($result, $expected);
+    }
+
+    #[Test]
+    public function timeIsRfc3339NanoInUtc(): void
+    {
+        $formatter = new RoadRunnerJsonFormatter();
+
+        $result = $formatter->format(
+            new LogRecord(
+                datetime: new \DateTimeImmutable('2026-10-19 22:35:40.270431', new \DateTimeZone('Europe/Moscow')),
+                channel: 'roadrunner',
+                level: Level::Info,
+                message: 'test_message',
+            ),
+        );
+
+        Assert::same($result['time'], '2026-10-19T19:35:40.270431000Z');
     }
 
     #[Test]
