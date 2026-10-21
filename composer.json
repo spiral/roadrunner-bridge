@@ -54,7 +54,6 @@
     },
     "require-dev": {
         "bamarni/composer-bin-plugin": "^1.8",
-        "boundwize/structarmed": "^0.19",
         "buggregator/trap": "^1.16",
         "internal/dload": "^1.15",
         "llm/skills": "^1.11",
@@ -94,7 +93,7 @@
         "psalm": "psalm -c tools/psalm/psalm.xml",
         "psalm:baseline": "psalm -c tools/psalm/psalm.xml --set-baseline=tools/psalm/psalm-baseline.xml",
         "psalm:ci": "psalm -c tools/psalm/psalm.xml --output-format=github --shepherd --show-info=false --stats --threads=4",
-        "structarmed": "structarmed analyze"
+        "structarmed": "structarmed analyze --config=tools/structarmed/structarmed.php"
     },
     "config": {
         "sort-packages": true,
