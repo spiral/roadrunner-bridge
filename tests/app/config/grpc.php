@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+// The test application root is `tests/`, while `vendor/bin/dload get` puts the binaries into the repository root.
+$binary = static fn(string $name): string => \dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . $name
+    . (PHP_OS_FAMILY === 'Windows' ? '.exe' : '');
+
 return [
-    /**
-     * Path to protoc-gen-php-grpc library.
-     * Default: null
-     */
-    // 'binaryPath' => directory('app') . '../protoc-gen-php-grpc',
+    'bufPath' => $binary('buf'),
+    'protocPath' => $binary('protoc'),
+    'pluginPath' => $binary('protoc-gen-php-grpc'),
 
     'generatedPath' => null,
     'namespace' => null,

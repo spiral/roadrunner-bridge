@@ -83,7 +83,10 @@ final class GRPCBootloaderTest extends TestCase
         $config = $configurator->getConfig('grpc');
 
         $this->assertSame([
-            'binaryPath' => null,
+            'bufPath' => $this->binary('buf'),
+            'protocPath' => $this->binary('protoc'),
+            'pluginPath' => $this->binary('protoc-gen-php-grpc'),
+            'bufTemplate' => null,
             'generatedPath' => null,
             'namespace' => null,
             'servicesBasePath' => $this->getDirectoryByAlias('app') . 'proto',
@@ -133,5 +136,10 @@ final class GRPCBootloaderTest extends TestCase
         $this->assertSame([
             'foo', $generator, $autowire,
         ], $configs->getConfig(GRPCConfig::CONFIG)['generators']);
+    }
+
+    private function binary(string $name): string
+    {
+        return \dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . $name . (PHP_OS_FAMILY === 'Windows' ? '.exe' : '');
     }
 }

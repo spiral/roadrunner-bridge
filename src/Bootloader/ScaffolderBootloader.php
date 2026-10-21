@@ -9,10 +9,7 @@ use RoadRunner\Centrifugo\CentrifugoApiInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Console\Bootloader\ConsoleBootloader;
 use Spiral\RoadRunnerBridge\Console\Command\Scaffolder\CentrifugoHandlerCommand;
-use Spiral\RoadRunnerBridge\Console\Command\Scaffolder\TcpServiceCommand;
 use Spiral\RoadRunnerBridge\Scaffolder\Declaration\CentrifugoHandlerDeclaration;
-use Spiral\RoadRunnerBridge\Scaffolder\Declaration\TcpServiceDeclaration;
-use Spiral\RoadRunnerBridge\Tcp\Internal\Server;
 use Spiral\Scaffolder\Bootloader\ScaffolderBootloader as BaseScaffolderBootloader;
 
 final class ScaffolderBootloader extends Bootloader
@@ -40,10 +37,6 @@ final class ScaffolderBootloader extends Bootloader
         if ($this->container->has(CentrifugoApiInterface::class)) {
             $console->addCommand(CentrifugoHandlerCommand::class);
         }
-
-        if ($this->container->has(Server::class)) {
-            $console->addCommand(TcpServiceCommand::class);
-        }
     }
 
     private function configureDeclarations(BaseScaffolderBootloader $scaffolder): void
@@ -52,12 +45,6 @@ final class ScaffolderBootloader extends Bootloader
             'namespace' => 'Endpoint\\Centrifugo\\Handler',
             'postfix' => 'Handler',
             'class' => CentrifugoHandlerDeclaration::class,
-        ]);
-
-        $scaffolder->addDeclaration(TcpServiceDeclaration::TYPE, [
-            'namespace' => 'Endpoint\\Tcp\\Service',
-            'postfix' => 'Service',
-            'class' => TcpServiceDeclaration::class,
         ]);
     }
 }

@@ -10,10 +10,13 @@ use Spiral\Boot\KernelInterface;
 use Spiral\Console\Command;
 use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
+use Spiral\RoadRunnerBridge\GRPC\Exception\BinaryNotFoundException;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
-use Spiral\RoadRunnerBridge\GRPC\Internal\CommandExecutor;
-use Spiral\RoadRunnerBridge\GRPC\Internal\ProtocCommandBuilder;
+use Spiral\RoadRunnerBridge\GRPC\Internal\BinaryLocator;
+use Spiral\RoadRunnerBridge\GRPC\Internal\BufCommandBuilder;
+use Spiral\RoadRunnerBridge\GRPC\Internal\BufTemplate;
+use Spiral\RoadRunnerBridge\GRPC\Internal\ProcessRunner;
 use Spiral\RoadRunnerBridge\GRPC\Internal\ProtoCompiler;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 
@@ -32,42 +35,61 @@ final class GenerateCommand extends Command
         ProtoFilesRepositoryInterface $repository,
         GeneratorRegistryInterface $generatorRegistry,
     ): int {
-        $binaryPath = $config->getBinaryPath();
+        $locator = new BinaryLocator($dirs->get('root'));
+        $userTemplate = $config->getBufTemplate();
 
-        if ($binaryPath === null && \file_exists($this->getDefaultBinary())) {
-            $binaryPath = $this->getDefaultBinary();
-        }
-
-        $binaryPath ?? throw new \RuntimeException('Protoc plugin binary was not set in the configuration.');
-
-        if (!\file_exists($binaryPath)) {
-            $this->error("Protoc plugin binary `$binaryPath` was not found. Use command `./vendor/bin/rr download-protoc-binary` to download it.");
+        try {
+            $bufPath = $locator->locate('buf', 'bufPath', $config->getBufPath());
+            $template = $userTemplate === null
+                ? BufTemplate::local(
+                    $locator->locate('protoc', 'protocPath', $config->getProtocPath()),
+                    $locator->locate('protoc-gen-php-grpc', 'pluginPath', $config->getPluginPath()),
+                )
+                : BufTemplate::user($userTemplate);
+        } catch (BinaryNotFoundException $e) {
+            $this->error($e->getMessage());
 
             return self::FAILURE;
         }
 
-        \assert($binaryPath !== null);
+        if ($userTemplate !== null && !\is_file($userTemplate)) {
+            $this->error("The buf template `$userTemplate` set in `bufTemplate` was not found.");
+
+            return self::FAILURE;
+        }
+
+        $basePath = $config->getServicesBasePath();
+        if ($basePath !== null) {
+            $realBasePath = \realpath($basePath);
+            if ($realBasePath === false || !\is_dir($realBasePath)) {
+                $this->error("The services base path `$basePath` set in `servicesBasePath` was not found.");
+
+                return self::FAILURE;
+            }
+
+            $basePath = $realBasePath;
+        }
+
+        $generatedPath = $this->getPath($kernel, $config->getGeneratedPath());
+        $namespace = $this->getNamespace($kernel, $config->getNamespace());
 
         $compiler = new ProtoCompiler(
-            $this->getPath($kernel, $config->getGeneratedPath()),
-            $this->getNamespace($kernel, $config->getNamespace()),
+            $generatedPath,
+            $namespace,
             $files,
-            new ProtocCommandBuilder($files, $config, $binaryPath),
-            new CommandExecutor(),
+            new BufCommandBuilder($bufPath),
+            new ProcessRunner(),
+            $template,
         );
 
         $compiled = [];
-        foreach ($repository->getProtos() as $protoFile) {
-            if (!\file_exists($protoFile)) {
-                $this->sprintf('<error>Proto file `%s` not found.</error>', $protoFile);
-                continue;
+        foreach ($this->groupByInput($repository, $basePath) as $input => $protoFiles) {
+            foreach ($protoFiles as $protoFile) {
+                $this->sprintf("<info>Compiling <fg=cyan>`%s`</fg=cyan>:</info>\n", $protoFile);
             }
-            $protoFile = \realpath($protoFile) ?: $protoFile;
-
-            $this->sprintf("<info>Compiling <fg=cyan>`%s`</fg=cyan>:</info>\n", $protoFile);
 
             try {
-                $result = $compiler->compile($protoFile);
+                $result = $compiler->compile($input, $protoFiles);
             } catch (CompileException $e) {
                 throw $e;
             } catch (\Throwable $e) {
@@ -75,12 +97,16 @@ final class GenerateCommand extends Command
                 continue;
             }
 
-            if ($result === []) {
-                $this->sprintf("<info>No files were generated for `%s`.</info>\n", $protoFile);
+            if ($result->warnings !== '') {
+                $this->sprintf("<comment>%s</comment>\n", $result->warnings);
+            }
+
+            if ($result->files === []) {
+                $this->sprintf("<info>No files were generated for `%s`.</info>\n", \implode('`, `', $protoFiles));
                 continue;
             }
 
-            foreach ($result as $file) {
+            foreach ($result->files as $file) {
                 $this->sprintf(
                     "<fg=green>•</fg=green> %s%s%s\n",
                     Color::LIGHT_WHITE,
@@ -94,11 +120,7 @@ final class GenerateCommand extends Command
 
         foreach ($generatorRegistry->getGenerators() as $generator) {
             /** @psalm-suppress ArgumentTypeCoercion */
-            $generator->run(
-                $compiled,
-                $this->getPath($kernel, $config->getGeneratedPath()),
-                $this->getNamespace($kernel, $config->getNamespace()),
-            );
+            $generator->run($compiled, $generatedPath, $namespace);
         }
 
         return self::SUCCESS;
@@ -149,8 +171,37 @@ final class GenerateCommand extends Command
         return (new \ReflectionObject($kernel))->getNamespaceName();
     }
 
-    private function getDefaultBinary(): string
+    /**
+     * Groups the existing proto files by the buf input they are compiled from: the services base path,
+     * or the file's own directory when no base path is set.
+     *
+     * @param string|null $basePath Real path of the services base path.
+     *
+     * @return array<string, list<string>> Input directory => real paths of its proto files.
+     */
+    private function groupByInput(ProtoFilesRepositoryInterface $repository, ?string $basePath): array
     {
-        return 'protoc-gen-php-grpc' . (PHP_OS_FAMILY === 'Windows' ? '.exe' : '');
+        $groups = [];
+        foreach ($repository->getProtos() as $protoFile) {
+            if (!\file_exists($protoFile)) {
+                $this->sprintf('<error>Proto file `%s` not found.</error>', $protoFile);
+                continue;
+            }
+
+            $protoFile = \realpath($protoFile) ?: $protoFile;
+
+            if ($basePath !== null && !\str_starts_with($protoFile, \rtrim($basePath, '\\/') . \DIRECTORY_SEPARATOR)) {
+                $this->sprintf(
+                    "<error>Proto file `%s` is outside of the services base path `%s`.</error>\n",
+                    $protoFile,
+                    $basePath,
+                );
+                continue;
+            }
+
+            $groups[$basePath ?? \dirname($protoFile)][] = $protoFile;
+        }
+
+        return $groups;
     }
 }

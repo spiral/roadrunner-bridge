@@ -8,12 +8,66 @@ name: phpunit
 
 jobs:
   phpunit:
-    uses: spiral/gh-actions/.github/workflows/phpunit.yml@master
-    with:
-      install_protoc: true
-      os: >-
-        ['ubuntu-latest']
-      php: >-
-        ['8.2','8.3','8.4','8.5']
-      stability: >-
-        ['prefer-stable']
+    name: PHP ${{ matrix.php }}-${{ matrix.os }}, ${{ matrix.stability }}
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
+        os: ['ubuntu-latest']
+        stability: ['prefer-stable']
+
+    env:
+      # `composer update` runs `dload get`; an authenticated GitHub API has a higher rate limit.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Set Git To Use LF
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: sockets
+          coverage: pcov
+          ini-values: memory_limit=-1
+          tools: composer:v2
+
+      - name: Validate Composer
+        run: composer validate
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Restore Composer Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.php }}-composer
+
+      - name: Install Dependencies
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 5
+          max_attempts: 2
+          command: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+
+      - name: Execute Tests
+        run: vendor/bin/phpunit --coverage-clover=coverage.clover
+
+      - name: Upload Coverage To Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.clover
+          fail_ci_if_error: false

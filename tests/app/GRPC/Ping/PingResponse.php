@@ -6,8 +6,8 @@
 namespace Spiral\App\GRPC\Ping;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Generated from protobuf message <code>ping.dto.PingResponse</code>
@@ -23,7 +23,8 @@ class PingResponse extends \Google\Protobuf\Internal\Message
      *
      * }
      */
-    public function __construct($data = NULL) {
+    public function __construct($data = null)
+    {
         \Spiral\App\GRPC\Ping\GPBMetadata\Service::initOnce();
         parent::__construct($data);
     }

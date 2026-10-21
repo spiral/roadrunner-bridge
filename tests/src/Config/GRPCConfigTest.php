@@ -11,20 +11,51 @@ use Spiral\Tests\TestCase;
 
 final class GRPCConfigTest extends TestCase
 {
-    public function testGetBinaryPath(): void
+    public function testGetBinaryPaths(): void
+    {
+        $config = new GRPCConfig([
+            'bufPath' => 'buf-path',
+            'protocPath' => 'protoc-path',
+            'pluginPath' => 'plugin-path',
+        ]);
+
+        $this->assertSame('buf-path', $config->getBufPath());
+        $this->assertSame('protoc-path', $config->getProtocPath());
+        $this->assertSame('plugin-path', $config->getPluginPath());
+    }
+
+    public function testGetNotExistsBinaryPaths(): void
+    {
+        $config = new GRPCConfig();
+
+        $this->assertNull($config->getBufPath());
+        $this->assertNull($config->getProtocPath());
+        $this->assertNull($config->getPluginPath());
+    }
+
+    public function testBinaryPathKeyIsNotPluginPath(): void
     {
         $config = new GRPCConfig([
             'binaryPath' => 'foo',
         ]);
 
-        $this->assertSame('foo', $config->getBinaryPath());
+        $this->assertNull($config->getPluginPath());
     }
 
-    public function testGetNotExistsBinaryPath(): void
+    public function testGetBufTemplate(): void
+    {
+        $config = new GRPCConfig([
+            'bufTemplate' => 'buf.gen.yaml',
+        ]);
+
+        $this->assertSame('buf.gen.yaml', $config->getBufTemplate());
+    }
+
+    public function testGetNotExistsBufTemplate(): void
     {
         $config = new GRPCConfig();
 
-        $this->assertNull($config->getBinaryPath());
+        $this->assertNull($config->getBufTemplate());
     }
 
     public function testGetsServices(): void
