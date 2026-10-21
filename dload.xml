@@ -6,5 +6,6 @@
         <download software="buf" version="^1.50"/>
         <download software="protoc" version="^36.0"/>
         <download software="protoc-gen-php-grpc" version="^3.0"/>
+        <download software="rr" version="^3.0"/>
     </actions>
 </dload>
