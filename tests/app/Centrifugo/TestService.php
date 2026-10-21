@@ -9,7 +9,5 @@ use Spiral\RoadRunnerBridge\Centrifugo\ServiceInterface;
 
 class TestService implements ServiceInterface
 {
-    public function handle(RequestInterface $request): void
-    {
-    }
+    public function handle(RequestInterface $request): void {}
 }
