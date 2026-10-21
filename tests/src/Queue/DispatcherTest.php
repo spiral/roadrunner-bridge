@@ -17,21 +17,26 @@ use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Testing\Attribute\Config;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class DispatcherTest extends TestCase
 {
-    public function testCanServeShouldReturnFalseWithWrongEnvironment(): void
+    #[Test]
+    public function canServeShouldReturnFalseWithWrongEnvironment(): void
     {
         $this->assertDispatcherCannotBeServed(Dispatcher::class);
     }
 
-    public function testCanServe(): void
+    #[Test]
+    public function canServe(): void
     {
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Jobs);
         $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
-    public function testServeReceivedTask(): void
+    #[Test]
+    public function serveReceivedTask(): void
     {
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Jobs);
 
@@ -66,7 +71,8 @@ final class DispatcherTest extends TestCase
         $this->serveDispatcher(Dispatcher::class);
     }
 
-    public function testServeReceivedTaskWithThrownException(): void
+    #[Test]
+    public function serveReceivedTaskWithThrownException(): void
     {
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Jobs);
         $deserializer = $this->mockContainer(PayloadDeserializerInterface::class);
@@ -95,9 +101,10 @@ final class DispatcherTest extends TestCase
     }
 
     #[Config('queue.registry.handlers', ['foo-task' => ScopedJob::class])]
-    public function testQueueScopes(): void
+    #[Test]
+    public function queueScopes(): void
     {
-        $this->assertSame([], ScopedJob::$scopes);
+        Assert::same(ScopedJob::$scopes, []);
 
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Jobs);
 
@@ -128,13 +135,13 @@ final class DispatcherTest extends TestCase
 
         $this->getApp()->serve();
 
-        $this->assertEquals(['queue-task', 'queue', 'root'], \array_values(\array_filter(ScopedJob::$scopes)));
-        $this->assertEquals(new Task(
+        Assert::equals(\array_values(\array_filter(ScopedJob::$scopes)), ['queue-task', 'queue', 'root']);
+        Assert::equals(ScopedJob::$task, new Task(
             id: 'foo-id',
             queue: 'default',
             name: 'foo-task',
             payload: $payload,
             headers: ['foo' => ['foo-headers']],
-        ), ScopedJob::$task);
+        ));
     }
 }

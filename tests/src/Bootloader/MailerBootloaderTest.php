@@ -10,33 +10,34 @@ use Spiral\Queue\QueueConnectionProviderInterface;
 use Spiral\Queue\QueueInterface;
 use Spiral\SendIt\MailQueue;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 final class MailerBootloaderTest extends TestCase
 {
     /** @var m\LegacyMockInterface|m\MockInterface|QueueConnectionProviderInterface */
     private $queueProvider;
 
-    public function testMailerInterfaceBinding(): void
+    #[Test]
+    public function mailerInterfaceBinding(): void
     {
         $this->queueProvider->shouldReceive('getConnection')
             ->with('foo')
             ->andReturn(m::mock(QueueInterface::class));
 
-        $this->assertInstanceOf(
-            MailQueue::class,
-            $this->getContainer()->get(MailerInterface::class),
-        );
+        Assert::instanceOf($this->getContainer()->get(MailerInterface::class), MailQueue::class);
     }
 
-    public function testJobRegistryShouldNotBeBound(): void
+    #[Test]
+    public function jobRegistryShouldNotBeBound(): void
     {
-        $this->assertFalse($this->getContainer()->has('Spiral\Jobs\JobRegistry'));
+        Assert::false($this->getContainer()->has('Spiral\Jobs\JobRegistry'));
     }
 
-    protected function setUp(): void
+    #[BeforeTest]
+    protected function prepare(): void
     {
-        parent::setUp();
-
         $this->queueProvider = $this->mockContainer(QueueConnectionProviderInterface::class);
     }
 }

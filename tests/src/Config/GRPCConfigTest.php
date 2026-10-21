@@ -8,10 +8,13 @@ use Spiral\Core\Container\Autowire;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class GRPCConfigTest extends TestCase
 {
-    public function testGetBinaryPaths(): void
+    #[Test]
+    public function getBinaryPaths(): void
     {
         $config = new GRPCConfig([
             'bufPath' => 'buf-path',
@@ -19,134 +22,149 @@ final class GRPCConfigTest extends TestCase
             'pluginPath' => 'plugin-path',
         ]);
 
-        $this->assertSame('buf-path', $config->getBufPath());
-        $this->assertSame('protoc-path', $config->getProtocPath());
-        $this->assertSame('plugin-path', $config->getPluginPath());
+        Assert::same($config->getBufPath(), 'buf-path');
+        Assert::same($config->getProtocPath(), 'protoc-path');
+        Assert::same($config->getPluginPath(), 'plugin-path');
     }
 
-    public function testGetNotExistsBinaryPaths(): void
+    #[Test]
+    public function getNotExistsBinaryPaths(): void
     {
         $config = new GRPCConfig();
 
-        $this->assertNull($config->getBufPath());
-        $this->assertNull($config->getProtocPath());
-        $this->assertNull($config->getPluginPath());
+        Assert::null($config->getBufPath());
+        Assert::null($config->getProtocPath());
+        Assert::null($config->getPluginPath());
     }
 
-    public function testBinaryPathKeyIsNotPluginPath(): void
+    #[Test]
+    public function binaryPathKeyIsNotPluginPath(): void
     {
         $config = new GRPCConfig([
             'binaryPath' => 'foo',
         ]);
 
-        $this->assertNull($config->getPluginPath());
+        Assert::null($config->getPluginPath());
     }
 
-    public function testGetBufTemplate(): void
+    #[Test]
+    public function getBufTemplate(): void
     {
         $config = new GRPCConfig([
             'bufTemplate' => 'buf.gen.yaml',
         ]);
 
-        $this->assertSame('buf.gen.yaml', $config->getBufTemplate());
+        Assert::same($config->getBufTemplate(), 'buf.gen.yaml');
     }
 
-    public function testGetNotExistsBufTemplate(): void
+    #[Test]
+    public function getNotExistsBufTemplate(): void
     {
         $config = new GRPCConfig();
 
-        $this->assertNull($config->getBufTemplate());
+        Assert::null($config->getBufTemplate());
     }
 
-    public function testGetsServices(): void
+    #[Test]
+    public function getsServices(): void
     {
         $config = new GRPCConfig([
             'services' => ['foo', 'bar'],
         ]);
 
-        $this->assertSame(['foo', 'bar'], $config->getServices());
+        Assert::same($config->getServices(), ['foo', 'bar']);
     }
 
-    public function testGetNotExistsServices(): void
+    #[Test]
+    public function getNotExistsServices(): void
     {
         $config = new GRPCConfig();
 
-        $this->assertSame([], $config->getServices());
+        Assert::same($config->getServices(), []);
     }
 
-    public function testGetInterceptors(): void
+    #[Test]
+    public function getInterceptors(): void
     {
         $config = new GRPCConfig([
             'interceptors' => ['foo', 'bar'],
         ]);
 
-        $this->assertSame(['foo', 'bar'], $config->getInterceptors());
+        Assert::same($config->getInterceptors(), ['foo', 'bar']);
     }
 
-    public function testGetNotExistsInterceptors(): void
+    #[Test]
+    public function getNotExistsInterceptors(): void
     {
         $config = new GRPCConfig();
 
-        $this->assertSame([], $config->getInterceptors());
+        Assert::same($config->getInterceptors(), []);
     }
 
-    public function testGetGeneratedPath(): void
+    #[Test]
+    public function getGeneratedPath(): void
     {
         $config = new GRPCConfig([
             'generatedPath' => 'foo',
         ]);
 
-        $this->assertSame('foo', $config->getGeneratedPath());
+        Assert::same($config->getGeneratedPath(), 'foo');
     }
 
-    public function testGetNonExistsGeneratedPath(): void
+    #[Test]
+    public function getNonExistsGeneratedPath(): void
     {
         $config = new GRPCConfig();
 
-        $this->assertNull($config->getGeneratedPath());
+        Assert::null($config->getGeneratedPath());
     }
 
-    public function testGetNamespace(): void
+    #[Test]
+    public function getNamespace(): void
     {
         $config = new GRPCConfig([
             'namespace' => 'foo',
         ]);
 
-        $this->assertSame('foo', $config->getNamespace());
+        Assert::same($config->getNamespace(), 'foo');
     }
 
-    public function testGetNonExistsNamespace(): void
+    #[Test]
+    public function getNonExistsNamespace(): void
     {
         $config = new GRPCConfig();
 
-        $this->assertNull($config->getNamespace());
+        Assert::null($config->getNamespace());
     }
 
-    public function testGetServicesBasePath(): void
+    #[Test]
+    public function getServicesBasePath(): void
     {
         $config = new GRPCConfig([
             'servicesBasePath' => 'foo',
         ]);
 
-        $this->assertSame('foo', $config->getServicesBasePath());
+        Assert::same($config->getServicesBasePath(), 'foo');
     }
 
-    public function testGetNonExistsServicesBasePath(): void
+    #[Test]
+    public function getNonExistsServicesBasePath(): void
     {
         $config = new GRPCConfig();
 
-        $this->assertNull($config->getServicesBasePath());
+        Assert::null($config->getServicesBasePath());
     }
 
-    public function testGetGenerators(): void
+    #[Test]
+    public function getGenerators(): void
     {
         $autowire = new Autowire('test');
-        $generator = $this->createMock(GeneratorInterface::class);
+        $generator = \Mockery::mock(GeneratorInterface::class)->shouldIgnoreMissing();
 
         $config = new GRPCConfig([
             'generators' => ['foo', $autowire, $generator],
         ]);
 
-        $this->assertSame(['foo', $autowire, $generator], $config->getGenerators());
+        Assert::same($config->getGenerators(), ['foo', $autowire, $generator]);
     }
 }

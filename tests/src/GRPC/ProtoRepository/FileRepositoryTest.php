@@ -6,13 +6,16 @@ namespace Spiral\Tests\GRPC\ProtoRepository;
 
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class FileRepositoryTest extends TestCase
 {
-    public function testGetProtos(): void
+    #[Test]
+    public function getProtos(): void
     {
         $repository = new FileRepository($arr = ['foo', 'bar']);
 
-        $this->assertSame($arr, \iterator_to_array($repository->getProtos(), false));
+        Assert::same(\iterator_to_array($repository->getProtos(), false), $arr);
     }
 }

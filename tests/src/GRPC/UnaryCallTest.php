@@ -9,39 +9,44 @@ use Spiral\RoadRunner\GRPC\ContextInterface;
 use Spiral\RoadRunner\GRPC\Method;
 use Spiral\RoadRunnerBridge\GRPC\Internal\UnaryCall;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class UnaryCallTest extends TestCase
 {
-    public function testGetContext(): void
+    #[Test]
+    public function getContext(): void
     {
-        $ctx = $this->createMock(ContextInterface::class);
+        $ctx = \Mockery::mock(ContextInterface::class)->shouldIgnoreMissing();
         $call = new UnaryCall($ctx, Method::parse(new \ReflectionMethod($this, 'methodForTests')), new Message());
 
-        $this->assertSame($ctx, $call->getContext());
+        Assert::same($call->getContext(), $ctx);
     }
 
-    public function testGetMethod(): void
+    #[Test]
+    public function getMethod(): void
     {
         $method = Method::parse(new \ReflectionMethod($this, 'methodForTests'));
         $call = new UnaryCall(
-            $this->createMock(ContextInterface::class),
+            \Mockery::mock(ContextInterface::class)->shouldIgnoreMissing(),
             $method,
             new Message(),
         );
 
-        $this->assertSame($method, $call->getMethod());
+        Assert::same($call->getMethod(), $method);
     }
 
-    public function testGetMessage(): void
+    #[Test]
+    public function getMessage(): void
     {
         $message = new Message();
         $call = new UnaryCall(
-            $this->createMock(ContextInterface::class),
+            \Mockery::mock(ContextInterface::class)->shouldIgnoreMissing(),
             Method::parse(new \ReflectionMethod($this, 'methodForTests')),
             $message,
         );
 
-        $this->assertSame($message, $call->getMessage());
+        Assert::same($call->getMessage(), $message);
     }
 
     public function methodForTests(ContextInterface $ctx, Message $in): Message {}

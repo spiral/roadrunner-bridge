@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Spiral\Tests\Console\Command\Scaffolder;
 
 use Spiral\Tests\TestCase;
+use Testo\Test;
 
 final class CentrifugoHandlerCommandTest extends TestCase
 {
-    public function testScaffold(): void
+    #[Test]
+    public function scaffold(): void
     {
         $this->assertScaffolderCommandSame(
             command: 'create:centrifugo-handler',
@@ -62,7 +64,8 @@ PHP,
         );
     }
 
-    public function testScaffoldSubscribe(): void
+    #[Test]
+    public function scaffoldSubscribe(): void
     {
         $this->assertScaffolderCommandSame(
             command: 'create:centrifugo-handler',
@@ -117,7 +120,8 @@ PHP,
         );
     }
 
-    public function testScaffoldRpc(): void
+    #[Test]
+    public function scaffoldRpc(): void
     {
         $this->assertScaffolderCommandSame(
             command: 'create:centrifugo-handler',
@@ -173,7 +177,8 @@ PHP,
         );
     }
 
-    public function testScaffoldRefresh(): void
+    #[Test]
+    public function scaffoldRefresh(): void
     {
         $this->assertScaffolderCommandSame(
             command: 'create:centrifugo-handler',
@@ -222,7 +227,8 @@ PHP,
         );
     }
 
-    public function testScaffoldPublish(): void
+    #[Test]
+    public function scaffoldPublish(): void
     {
         $this->assertScaffolderCommandSame(
             command: 'create:centrifugo-handler',
@@ -271,7 +277,8 @@ PHP,
         );
     }
 
-    public function testScaffoldWithCustomNamespace(): void
+    #[Test]
+    public function scaffoldWithCustomNamespace(): void
     {
         $this->assertScaffolderCommandSame(
             command: 'create:centrifugo-handler',
@@ -322,7 +329,8 @@ PHP,
         );
     }
 
-    public function testScaffoldWithApi(): void
+    #[Test]
+    public function scaffoldWithApi(): void
     {
         $this->assertScaffolderCommandSame(
             command: 'create:centrifugo-handler',

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Spiral\Tests;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use Spiral\RoadRunnerBridge\Exception\DispatcherNotFoundException;
 use Spiral\RoadRunnerBridge\FallbackDispatcher;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Expect;
+use Testo\Test;
 
 final class FallbackDispatcherTest extends TestCase
 {
@@ -41,16 +44,17 @@ final class FallbackDispatcherTest extends TestCase
     }
 
     #[DataProvider('canServeDataProvider')]
-    public function testCanServe(RoadRunnerMode $mode, bool $expected): void
+    #[Test]
+    public function canServe(RoadRunnerMode $mode, bool $expected): void
     {
-        $this->assertSame($expected, FallbackDispatcher::canServe($mode));
+        Assert::same(FallbackDispatcher::canServe($mode), $expected);
     }
 
     #[DataProvider('exceptionDataProvider')]
-    public function testException(RoadRunnerMode $mode, string $message): void
+    #[Test]
+    public function exception(RoadRunnerMode $mode, string $message): void
     {
-        $this->expectException(DispatcherNotFoundException::class);
-        $this->expectExceptionMessage($message);
+        Expect::exception(DispatcherNotFoundException::class)->withMessageContaining($message);
 
         (new FallbackDispatcher($mode))->serve();
     }

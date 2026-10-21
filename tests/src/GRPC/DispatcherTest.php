@@ -12,21 +12,28 @@ use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Dispatcher;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\ConsoleTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\AfterTest;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 final class DispatcherTest extends ConsoleTestCase
 {
-    public function testCanServeShouldReturnFalseWithWrongEnvironment(): void
+    #[Test]
+    public function canServeShouldReturnFalseWithWrongEnvironment(): void
     {
         $this->assertDispatcherCannotBeServed(Dispatcher::class);
     }
 
-    public function testCanServe(): void
+    #[Test]
+    public function canServe(): void
     {
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Grpc);
         $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
-    public function testServe(): void
+    #[Test]
+    public function serve(): void
     {
         $worker = $this->mockContainer(WorkerInterface::class, Worker::class);
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Grpc);
@@ -41,8 +48,8 @@ final class DispatcherTest extends ConsoleTestCase
             ),
         );
 
-        $worker->shouldReceive('respond')->once()->withArgs(function (Payload $payload) {
-            $this->assertSame($payload->body, (new PingResponse())->serializeToString());
+        $worker->shouldReceive('respond')->once()->withArgs(static function (Payload $payload) {
+            Assert::same($payload->body, (new PingResponse())->serializeToString());
             return true;
         });
 
@@ -51,15 +58,15 @@ final class DispatcherTest extends ConsoleTestCase
         $this->serveDispatcher(Dispatcher::class);
     }
 
-    protected function setUp(): void
+    #[BeforeTest]
+    protected function prepare(): void
     {
-        parent::setUp();
         $this->generateGRPCService();
     }
 
-    protected function tearDown(): void
+    #[AfterTest]
+    protected function cleanUp(): void
     {
-        parent::tearDown();
         $this->deleteGRPCService();
     }
 }

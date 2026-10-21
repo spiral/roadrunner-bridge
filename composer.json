@@ -57,11 +57,12 @@
         "buggregator/trap": "^1.16",
         "internal/dload": "^1.15",
         "llm/skills": "^1.11",
-        "phpunit/phpunit": "^10.5",
+        "mockery/mockery": "^1.6.12",
         "roxblnfk/unpoly": "^1.8",
         "spiral/framework": "^3.15.6",
         "spiral/nyholm-bridge": "^1.3",
-        "spiral/testing": "^2.9.0"
+        "spiral/testing": "4.x-dev",
+        "testo/testo": "^0.10.55"
     },
     "conflict": {
         "monolog/monolog": "<3.0"
@@ -88,7 +89,7 @@
         ],
         "cs:diff": "php-cs-fixer fix --dry-run -v --diff --config=tools/code-style/.php-cs-fixer.dist.php",
         "cs:fix": "php-cs-fixer fix -v --config=tools/code-style/.php-cs-fixer.dist.php",
-        "test": "phpunit",
+        "test": "vendor/bin/testo",
         "psalm": "psalm -c tools/psalm/psalm.xml",
         "psalm:baseline": "psalm -c tools/psalm/psalm.xml --set-baseline=tools/psalm/psalm-baseline.xml",
         "psalm:ci": "psalm -c tools/psalm/psalm.xml --output-format=github --shepherd --show-info=false --stats --threads=4",

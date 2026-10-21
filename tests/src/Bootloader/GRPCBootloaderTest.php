@@ -24,10 +24,13 @@ use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class GRPCBootloaderTest extends TestCase
 {
-    public function testGetsServerAsASingleton(): void
+    #[Test]
+    public function getsServerAsASingleton(): void
     {
         $this->assertContainerBoundAsSingleton(
             Server::class,
@@ -35,7 +38,8 @@ final class GRPCBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsInvoker(): void
+    #[Test]
+    public function getsInvoker(): void
     {
         $this->assertContainerBoundAsSingleton(
             InvokerInterface::class,
@@ -43,7 +47,8 @@ final class GRPCBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsServiceLocator(): void
+    #[Test]
+    public function getsServiceLocator(): void
     {
         $this->assertContainerBoundAsSingleton(
             LocatorInterface::class,
@@ -51,7 +56,8 @@ final class GRPCBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsProtoFilesRepository(): void
+    #[Test]
+    public function getsProtoFilesRepository(): void
     {
         $this->assertContainerBoundAsSingleton(
             ProtoFilesRepositoryInterface::class,
@@ -59,17 +65,20 @@ final class GRPCBootloaderTest extends TestCase
         );
     }
 
-    public function testDispatcherShouldBeRegistered(): void
+    #[Test]
+    public function dispatcherShouldBeRegistered(): void
     {
         $this->assertDispatcherRegistered(Dispatcher::class);
     }
 
-    public function testOdlBootloaderShouldNotBeRegistered(): void
+    #[Test]
+    public function odlBootloaderShouldNotBeRegistered(): void
     {
         $this->assertBootloaderMissed('Spiral\Bootloader\GRPC');
     }
 
-    public function testGeneratorRegistryShouldBeBoundAsSingleton(): void
+    #[Test]
+    public function generatorRegistryShouldBeBoundAsSingleton(): void
     {
         $this->assertContainerBoundAsSingleton(
             GeneratorRegistryInterface::class,
@@ -77,12 +86,13 @@ final class GRPCBootloaderTest extends TestCase
         );
     }
 
-    public function testConfigShouldBeDefined(): void
+    #[Test]
+    public function configShouldBeDefined(): void
     {
         $configurator = $this->getContainer()->get(ConfigsInterface::class);
         $config = $configurator->getConfig('grpc');
 
-        $this->assertSame([
+        Assert::same($config, [
             'bufPath' => $this->binary('buf'),
             'protocPath' => $this->binary('protoc'),
             'pluginPath' => $this->binary('protoc-gen-php-grpc'),
@@ -99,12 +109,13 @@ final class GRPCBootloaderTest extends TestCase
             'client' => [
                 'interceptors' => [],
             ],
-        ], $config);
+        ]);
     }
 
-    public function testAddInterceptor(): void
+    #[Test]
+    public function addInterceptor(): void
     {
-        $configs = new ConfigManager($this->createMock(LoaderInterface::class));
+        $configs = new ConfigManager(m::mock(LoaderInterface::class)->shouldIgnoreMissing());
         $configs->setDefaults(GRPCConfig::CONFIG, ['interceptors' => []]);
 
         $interceptor = m::mock(CoreInterceptorInterface::class);
@@ -115,14 +126,15 @@ final class GRPCBootloaderTest extends TestCase
         $bootloader->addInterceptor($interceptor);
         $bootloader->addInterceptor($autowire);
 
-        $this->assertSame([
+        Assert::same($configs->getConfig(GRPCConfig::CONFIG)['interceptors'], [
             'foo', $interceptor, $autowire,
-        ], $configs->getConfig(GRPCConfig::CONFIG)['interceptors']);
+        ]);
     }
 
-    public function testAddGenerator(): void
+    #[Test]
+    public function addGenerator(): void
     {
-        $configs = new ConfigManager($this->createMock(LoaderInterface::class));
+        $configs = new ConfigManager(m::mock(LoaderInterface::class)->shouldIgnoreMissing());
         $configs->setDefaults(GRPCConfig::CONFIG, ['generators' => []]);
 
         $generator = m::mock(GeneratorInterface::class);
@@ -133,9 +145,9 @@ final class GRPCBootloaderTest extends TestCase
         $bootloader->addGenerator($generator);
         $bootloader->addGenerator($autowire);
 
-        $this->assertSame([
+        Assert::same($configs->getConfig(GRPCConfig::CONFIG)['generators'], [
             'foo', $generator, $autowire,
-        ], $configs->getConfig(GRPCConfig::CONFIG)['generators']);
+        ]);
     }
 
     private function binary(string $name): string
