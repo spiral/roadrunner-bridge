@@ -1,0 +1,6 @@
+{
+    "require": {
+        "vimeo/psalm": "^7"
+    },
+    "minimum-stability": "RC"
+}

@@ -23,6 +23,7 @@ use Spiral\Serializer\Bootloader\SerializerBootloader;
 
 final class QueueBootloader extends Bootloader
 {
+    #[\Override]
     public function defineDependencies(): array
     {
         return [
@@ -31,6 +32,7 @@ final class QueueBootloader extends Bootloader
         ];
     }
 
+    #[\Override]
     public function defineSingletons(): array
     {
         return [
@@ -52,7 +54,7 @@ final class QueueBootloader extends Bootloader
     public function init(BaseQueueBootloader $bootloader, KernelInterface $kernel): void
     {
         $bootloader->registerDriverAlias(Queue::class, 'roadrunner');
-        /** @psalm-suppress InvalidArgument */
+        /** @psalm-suppress InvalidArgument KernelInterface lacks the class-name form the kernel accepts */
         $kernel->addDispatcher(Dispatcher::class);
     }
 

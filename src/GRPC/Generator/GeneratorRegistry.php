@@ -14,6 +14,7 @@ final class GeneratorRegistry implements GeneratorRegistryInterface
      */
     private array $generators = [];
 
+    #[\Override]
     public function addGenerator(GeneratorInterface $generator): void
     {
         if (!$this->hasGenerator($generator::class)) {
@@ -24,6 +25,7 @@ final class GeneratorRegistry implements GeneratorRegistryInterface
     /**
      * @return GeneratorInterface[]
      */
+    #[\Override]
     public function getGenerators(): array
     {
         return $this->generators;

@@ -22,6 +22,7 @@ final class ServiceLocator implements LocatorInterface, TokenizationListenerInte
      */
     private array $registry = [];
 
+    #[\Override]
     public function getServices(): array
     {
         return $this->registry;
@@ -29,7 +30,10 @@ final class ServiceLocator implements LocatorInterface, TokenizationListenerInte
 
     /**
      * @param \ReflectionClass<ServiceInterface> $class
+     *
+     * @psalm-suppress MoreSpecificImplementedParamType #[TargetClass] passes only ServiceInterface implementations
      */
+    #[\Override]
     public function listen(\ReflectionClass $class): void
     {
         if (!$class->isInstantiable()) {
@@ -46,6 +50,7 @@ final class ServiceLocator implements LocatorInterface, TokenizationListenerInte
 
             // Deduplicate parents
             foreach ($interfaces as $className => $reflection) {
+                /** @psalm-suppress RedundantCondition Psalm reads isSubclassOf() as a type assertion, not a check */
                 if ($interface->isSubclassOf($className)) {
                     continue 2;
                 }
@@ -72,5 +77,6 @@ final class ServiceLocator implements LocatorInterface, TokenizationListenerInte
         }
     }
 
+    #[\Override]
     public function finalize(): void {}
 }

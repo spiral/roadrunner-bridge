@@ -14,7 +14,7 @@ use Spiral\RoadRunnerBridge\Logger\Internal\RoadRunnerJsonFormatter;
 final class Handler extends AbstractProcessingHandler
 {
     /**
-     * @psalm-suppress ArgumentTypeCoercion
+     * @psalm-suppress ArgumentTypeCoercion Monolog validates the level and throws on an unknown one
      */
     public function __construct(
         private readonly RoadRunnerLogger $logger,
@@ -28,6 +28,7 @@ final class Handler extends AbstractProcessingHandler
         $this->setFormatter(new RoadRunnerJsonFormatter($loggerPrefix, $loggerMode));
     }
 
+    #[\Override]
     protected function write(array|LogRecord $record): void
     {
         $log = \is_array($record['formatted'])

@@ -17,6 +17,7 @@ use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher;
 
 final class HttpBootloader extends Bootloader
 {
+    #[\Override]
     public function defineDependencies(): array
     {
         return [
@@ -25,6 +26,7 @@ final class HttpBootloader extends Bootloader
         ];
     }
 
+    #[\Override]
     public function defineSingletons(): array
     {
         return [
@@ -41,7 +43,7 @@ final class HttpBootloader extends Bootloader
 
     public function boot(KernelInterface $kernel): void
     {
-        /** @psalm-suppress InvalidArgument */
+        /** @psalm-suppress InvalidArgument KernelInterface lacks the class-name form the kernel accepts */
         $kernel->addDispatcher(Dispatcher::class);
     }
 }

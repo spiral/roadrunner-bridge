@@ -20,16 +20,19 @@ final readonly class UnaryCall implements UnaryCallInterface
         private Message $message,
     ) {}
 
+    #[\Override]
     public function getContext(): ContextInterface
     {
         return $this->context;
     }
 
+    #[\Override]
     public function getMethod(): Method
     {
         return $this->method;
     }
 
+    #[\Override]
     public function getMessage(): Message
     {
         return $this->message;

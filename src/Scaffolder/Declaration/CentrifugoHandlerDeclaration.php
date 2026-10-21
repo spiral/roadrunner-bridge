@@ -25,6 +25,7 @@ class CentrifugoHandlerDeclaration extends AbstractDeclaration implements HasIns
         parent::__construct($config, $name, $comment, $namespace);
     }
 
+    #[\Override]
     public function declare(): void
     {
         $this->class->setFinal();
@@ -64,6 +65,7 @@ class CentrifugoHandlerDeclaration extends AbstractDeclaration implements HasIns
             ->setType(RequestInterface::class);
     }
 
+    #[\Override]
     public function getInstructions(): array
     {
         return [

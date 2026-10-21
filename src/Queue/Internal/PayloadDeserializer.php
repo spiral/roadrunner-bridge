@@ -27,6 +27,7 @@ final class PayloadDeserializer implements PayloadDeserializerInterface
         private readonly SerializerRegistryInterface $serializer,
     ) {}
 
+    #[\Override]
     public function deserialize(ReceivedTaskInterface $task): mixed
     {
         $payload = $task->getPayload();

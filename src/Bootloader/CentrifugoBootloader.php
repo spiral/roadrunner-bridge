@@ -30,6 +30,7 @@ final class CentrifugoBootloader extends Bootloader
         private readonly ConfiguratorInterface $config,
     ) {}
 
+    #[\Override]
     public function defineSingletons(): array
     {
         return [

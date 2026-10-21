@@ -47,6 +47,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      * @throws JobsException
      * @throws InvalidArgumentException
      */
+    #[\Override]
     public function declareConsumerPipelines(): void
     {
         if ($this->mode !== RoadRunnerMode::Jobs) {
@@ -83,6 +84,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      * @throws JobsException
      * @throws InvalidArgumentException
      */
+    #[\Override]
     public function getPipeline(string $name): QueueInterface
     {
         if (!isset($this->pipelines[$name])) {
@@ -153,7 +155,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     private function create(CreateInfoInterface $connector, ?OptionsInterface $options = null): QueueInterface
     {
         $this->expiresAt = 0;
-        /** @psalm-suppress TooManyArguments */
+        /** @psalm-suppress TooManyArguments JobsInterface lacks the options Jobs accepts */
         return $this->jobs->create($connector, $options);
     }
 
@@ -162,7 +164,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      */
     private function connect(CreateInfoInterface $connector, ?OptionsInterface $options = null): QueueInterface
     {
-        /** @psalm-suppress TooManyArguments */
+        /** @psalm-suppress TooManyArguments JobsInterface lacks the options Jobs accepts */
         return $this->jobs->connect($connector->getName(), $options);
     }
 }
