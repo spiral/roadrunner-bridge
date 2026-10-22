@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Centrifugo;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use RoadRunner\Centrifugo\Request\RequestType;
 use Spiral\App\Centrifugo\TestService;
 use Spiral\Core\Container\Autowire;
@@ -12,6 +11,9 @@ use Spiral\RoadRunnerBridge\Centrifugo\Internal\ServiceRegistry;
 use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\ServiceInterface;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Test;
 
 final class ServiceRegistryTest extends TestCase
 {
@@ -23,48 +25,53 @@ final class ServiceRegistryTest extends TestCase
         yield ['alias'];
     }
 
-    public function testGetServiceFromObject(): void
+    #[Test]
+    public function getServiceFromObject(): void
     {
         $this->updateConfig('centrifugo.services', [RequestType::Publish->value => new TestService()]);
 
-        $this->assertInstanceOf(TestService::class, $this->getService());
+        Assert::instanceOf($this->getService(), TestService::class);
     }
 
-    public function testGetServiceFromFCQN(): void
+    #[Test]
+    public function getServiceFromFCQN(): void
     {
         $this->updateConfig('centrifugo.services', [RequestType::Publish->value => TestService::class]);
 
-        $this->assertInstanceOf(TestService::class, $this->getService());
+        Assert::instanceOf($this->getService(), TestService::class);
     }
 
-    public function testGetServiceFromAlias(): void
+    #[Test]
+    public function getServiceFromAlias(): void
     {
         $this->getContainer()->bind('alias', static fn() => new TestService());
 
         $this->updateConfig('centrifugo.services', [RequestType::Publish->value => 'alias']);
 
-        $this->assertInstanceOf(TestService::class, $this->getService());
+        Assert::instanceOf($this->getService(), TestService::class);
     }
 
-    public function testGetServiceFromAutowire(): void
+    #[Test]
+    public function getServiceFromAutowire(): void
     {
         $this->updateConfig('centrifugo.services', [RequestType::Publish->value => new Autowire(TestService::class)]);
 
-        $this->assertInstanceOf(TestService::class, $this->getService());
+        Assert::instanceOf($this->getService(), TestService::class);
     }
 
     #[DataProvider('servicesDataProvider')]
-    public function testRegister(Autowire|ServiceInterface|string $service): void
+    #[Test]
+    public function register(Autowire|ServiceInterface|string $service): void
     {
         $this->getContainer()->bind('alias', new TestService());
 
         $registry = new ServiceRegistry([], $this->getContainer(), $this->getContainer());
 
-        $this->assertNull($registry->getService(RequestType::Publish));
+        Assert::null($registry->getService(RequestType::Publish));
 
         $registry->register(RequestType::Publish, $service);
 
-        $this->assertEquals(new TestService(), $registry->getService(RequestType::Publish));
+        Assert::equals($registry->getService(RequestType::Publish), new TestService());
     }
 
     private function getService(): ServiceInterface

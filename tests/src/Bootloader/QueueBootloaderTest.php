@@ -16,10 +16,14 @@ use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\Serializer\SerializerInterface;
 use Spiral\Serializer\SerializerManager;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 final class QueueBootloaderTest extends TestCase
 {
-    public function testGetsHandlerRegistryInterface(): void
+    #[Test]
+    public function getsHandlerRegistryInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             HandlerRegistryInterface::class,
@@ -32,27 +36,23 @@ final class QueueBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsPipelineRegistryInterface(): void
+    #[Test]
+    public function getsPipelineRegistryInterface(): void
     {
-        $this->assertInstanceOf(
-            RPCPipelineRegistry::class,
-            $registry1 = $this->getContainer()->make(PipelineRegistryInterface::class, [
-                'pipelines' => ['foo' => 'bar'],
-                'aliases' => ['bas' => 'bar'],
-            ]),
-        );
-        $this->assertInstanceOf(
-            RPCPipelineRegistry::class,
-            $registry2 = $this->getContainer()->make(PipelineRegistryInterface::class, [
-                'pipelines' => ['foo' => 'bar'],
-                'aliases' => ['bas' => 'bar'],
-            ]),
-        );
+        Assert::instanceOf($registry1 = $this->getContainer()->make(PipelineRegistryInterface::class, [
+            'pipelines' => ['foo' => 'bar'],
+            'aliases' => ['bas' => 'bar'],
+        ]), RPCPipelineRegistry::class);
+        Assert::instanceOf($registry2 = $this->getContainer()->make(PipelineRegistryInterface::class, [
+            'pipelines' => ['foo' => 'bar'],
+            'aliases' => ['bas' => 'bar'],
+        ]), RPCPipelineRegistry::class);
 
-        $this->assertNotSame($registry1, $registry2);
+        Assert::notSame($registry2, $registry1);
     }
 
-    public function testGetsFailedJobHandlerInterface(): void
+    #[Test]
+    public function getsFailedJobHandlerInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             \Spiral\Queue\Failed\FailedJobHandlerInterface::class,
@@ -60,7 +60,8 @@ final class QueueBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsQueueManager(): void
+    #[Test]
+    public function getsQueueManager(): void
     {
         $this->assertContainerBoundAsSingleton(
             \Spiral\Queue\QueueManager::class,
@@ -68,12 +69,14 @@ final class QueueBootloaderTest extends TestCase
         );
     }
 
-    public function testDispatcherShouldBeRegistered(): void
+    #[Test]
+    public function dispatcherShouldBeRegistered(): void
     {
         $this->assertDispatcherRegistered(Dispatcher::class);
     }
 
-    public function testGetsSerializerInterface(): void
+    #[Test]
+    public function getsSerializerInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             SerializerInterface::class,
@@ -81,7 +84,8 @@ final class QueueBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsPayloadDeserializerInterface(): void
+    #[Test]
+    public function getsPayloadDeserializerInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             PayloadDeserializerInterface::class,
@@ -89,18 +93,18 @@ final class QueueBootloaderTest extends TestCase
         );
     }
 
-    public function testConfigShouldBeDefined(): void
+    #[Test]
+    public function configShouldBeDefined(): void
     {
         $configurator = $this->getContainer()->get(ConfigsInterface::class);
         $config = $configurator->getConfig('queue');
 
-        $this->assertIsArray($config);
+        Assert::array($config);
     }
 
-    protected function setUp(): void
+    #[BeforeTest]
+    protected function prepare(): void
     {
-        parent::setUp();
-
         $this->getContainer()->bind(ExceptionReporterInterface::class, static function () {
             return m::mock(ExceptionReporterInterface::class);
         });

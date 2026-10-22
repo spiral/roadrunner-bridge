@@ -10,10 +10,13 @@ use Monolog\LogRecord;
 use Spiral\RoadRunnerBridge\Logger\Internal\RoadRunnerJsonFormatter;
 use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class RoadRunnerJsonFormatterTest extends TestCase
 {
-    public function testProductionFormat(): void
+    #[Test]
+    public function productionFormat(): void
     {
         $formatter = new RoadRunnerJsonFormatter('production_', RoadRunnerLogsMode::Production);
 
@@ -39,10 +42,11 @@ final class RoadRunnerJsonFormatterTest extends TestCase
             'extra_foo' => 'bar',
         ];
 
-        $this->assertEquals($expected, $result);
+        Assert::equals($result, $expected);
     }
 
-    public function testFormatFromArray(): void
+    #[Test]
+    public function formatFromArray(): void
     {
         $formatter = new RoadRunnerJsonFormatter('production_', RoadRunnerLogsMode::Production);
 
@@ -69,10 +73,11 @@ final class RoadRunnerJsonFormatterTest extends TestCase
             'extra_foo' => 'bar',
         ];
 
-        $this->assertEquals($expected, $result);
+        Assert::equals($result, $expected);
     }
 
-    public function testDevelopmentFormat(): void
+    #[Test]
+    public function developmentFormat(): void
     {
         $formatter = new RoadRunnerJsonFormatter('dev_', RoadRunnerLogsMode::Development);
 
@@ -98,10 +103,11 @@ final class RoadRunnerJsonFormatterTest extends TestCase
             'extra_foo' => 'bar',
         ];
 
-        $this->assertEquals($expected, $result);
+        Assert::equals($result, $expected);
     }
 
-    public function testFormatWithException(): void
+    #[Test]
+    public function formatWithException(): void
     {
         $formatter = new RoadRunnerJsonFormatter('dev_', RoadRunnerLogsMode::Development);
         $exception = new \Exception('test_exception', 0, new \Exception('previous_test_exception'));
@@ -117,8 +123,8 @@ final class RoadRunnerJsonFormatterTest extends TestCase
             ),
         );
 
-        $this->assertEquals('test_exception', $result['exception']['message']);
-        $this->assertEquals('previous_test_exception', $result['exception']['previous']['message']);
-        $this->assertCount(5, $result['exception']['trace']);
+        Assert::equals($result['exception']['message'], 'test_exception');
+        Assert::equals($result['exception']['previous']['message'], 'previous_test_exception');
+        Assert::count($result['exception']['trace'], 5);
     }
 }

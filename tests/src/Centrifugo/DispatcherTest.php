@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Centrifugo;
 
-use PHPUnit\Framework\Constraint\IsEqual;
 use RoadRunner\Centrifugo\CentrifugoWorker;
 use RoadRunner\Centrifugo\CentrifugoWorkerInterface;
 use RoadRunner\Centrifugo\Request\Publish;
@@ -20,41 +19,41 @@ use Spiral\RoadRunnerBridge\Centrifugo\ServiceInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Testing\Attribute\Config;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class DispatcherTest extends TestCase
 {
-    public function testCanServeShouldReturnFalseWithWrongEnvironment(): void
+    #[Test]
+    public function canServeShouldReturnFalseWithWrongEnvironment(): void
     {
         $this->assertDispatcherCannotBeServed(Dispatcher::class);
     }
 
-    public function testCanServe(): void
+    #[Test]
+    public function canServe(): void
     {
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Centrifuge);
 
         $this->assertDispatcherCanBeServed(Dispatcher::class);
     }
 
-    public function testServe(): void
+    #[Test]
+    public function serve(): void
     {
         $worker = $this->mockContainer(CentrifugoWorker::class, CentrifugoWorkerInterface::class);
 
-        $request = new Publish($this->createMock(WorkerInterface::class), '', '', '', '', '', '', [], [], []);
-        $service = $this->createMock(ServiceInterface::class);
-        $service
-            ->expects($this->once())
-            ->method('handle')
-            ->with(new IsEqual($request));
+        $request = new Publish(\Mockery::mock(WorkerInterface::class)->shouldIgnoreMissing(), '', '', '', '', '', '', [], [], []);
+        $service = \Mockery::mock(ServiceInterface::class);
+        $service->shouldReceive('handle')->once()->with(\Mockery::isEqual($request), \Mockery::andAnyOtherArgs());
         $registry = new ServiceRegistry(
             [RequestType::Publish->value => $service],
             $this->getContainer(),
             $this->getContainer(),
         );
 
-        $errorHandler = $this->createMock(ErrorHandlerInterface::class);
-        $errorHandler
-            ->expects($this->never())
-            ->method('handle');
+        $errorHandler = \Mockery::mock(ErrorHandlerInterface::class);
+        $errorHandler->shouldReceive('handle')->never();
         $this->getContainer()->bind(ErrorHandlerInterface::class, $errorHandler);
 
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Centrifuge);
@@ -69,29 +68,23 @@ final class DispatcherTest extends TestCase
         $this->serveDispatcher(Dispatcher::class);
     }
 
-    public function testServeWithHandleException(): void
+    #[Test]
+    public function serveWithHandleException(): void
     {
         $worker = $this->mockContainer(CentrifugoWorker::class, CentrifugoWorkerInterface::class);
 
         $error = new \Error('foo');
-        $request = new Publish($this->createMock(WorkerInterface::class), '', '', '', '', '', '', [], [], []);
-        $service = $this->createMock(ServiceInterface::class);
-        $service
-            ->expects($this->once())
-            ->method('handle')
-            ->with(new IsEqual($request))
-            ->willThrowException($error);
+        $request = new Publish(\Mockery::mock(WorkerInterface::class)->shouldIgnoreMissing(), '', '', '', '', '', '', [], [], []);
+        $service = \Mockery::mock(ServiceInterface::class);
+        $service->shouldReceive('handle')->once()->with(\Mockery::isEqual($request), \Mockery::andAnyOtherArgs())->andThrow($error);
         $registry = new ServiceRegistry(
             [RequestType::Publish->value => $service],
             $this->getContainer(),
             $this->getContainer(),
         );
 
-        $errorHandler = $this->createMock(ErrorHandlerInterface::class);
-        $errorHandler
-            ->expects($this->once())
-            ->method('handle')
-            ->with(new IsEqual($request), new IsEqual($error));
+        $errorHandler = \Mockery::mock(ErrorHandlerInterface::class);
+        $errorHandler->shouldReceive('handle')->once()->with(\Mockery::isEqual($request), \Mockery::isEqual($error), \Mockery::andAnyOtherArgs());
         $this->getContainer()->bind(ErrorHandlerInterface::class, $errorHandler);
 
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Centrifuge);
@@ -107,16 +100,17 @@ final class DispatcherTest extends TestCase
     }
 
     #[Config('centrifugo.services', ['publish' => ScopedTestService::class])]
-    public function testCentrifugoScope(): void
+    #[Test]
+    public function centrifugoScope(): void
     {
-        $this->assertEquals([], ScopedTestService::$scopes);
+        Assert::equals(ScopedTestService::$scopes, []);
 
         $worker = $this->mockContainer(CentrifugoWorker::class, CentrifugoWorkerInterface::class);
         $this->getContainer()
             ->getBinder('centrifugo-request')
             ->bindSingleton(ScopedTestService::class, ScopedTestService::class);
 
-        $request = new Publish($this->createMock(WorkerInterface::class), '', '', '', '', '', '', [], [], []);
+        $request = new Publish(\Mockery::mock(WorkerInterface::class)->shouldIgnoreMissing(), '', '', '', '', '', '', [], [], []);
 
         $this->mockContainer(ErrorHandlerInterface::class);
 
@@ -130,6 +124,6 @@ final class DispatcherTest extends TestCase
 
         $this->getApp()->serve();
 
-        $this->assertEquals(['centrifugo-request', 'centrifugo', 'root'], ScopedTestService::$scopes);
+        Assert::equals(ScopedTestService::$scopes, ['centrifugo-request', 'centrifugo', 'root']);
     }
 }

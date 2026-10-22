@@ -8,10 +8,13 @@ use Mockery as m;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\Tests\ConsoleTestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class ResumeCommandTest extends ConsoleTestCase
 {
-    public function testResumePipeline(): void
+    #[Test]
+    public function resumePipeline(): void
     {
         $registry = $this->mockContainer(PipelineRegistryInterface::class);
 
@@ -23,10 +26,11 @@ final class ResumeCommandTest extends ConsoleTestCase
         $queue->shouldReceive('resume')->once();
 
         $result = $this->runCommand('rr:jobs:consume', ['pipeline' => 'foo']);
-        $this->assertStringContainsString('Pipeline [foo] has been started consuming tasks.', $result);
+        Assert::string($result)->contains('Pipeline [foo] has been started consuming tasks.');
     }
 
-    public function testResumeIsConsumingPipeline(): void
+    #[Test]
+    public function resumeIsConsumingPipeline(): void
     {
         $registry = $this->mockContainer(PipelineRegistryInterface::class);
 
@@ -37,6 +41,6 @@ final class ResumeCommandTest extends ConsoleTestCase
         $queue->shouldReceive('isPaused')->once()->andReturnFalse();
 
         $result = $this->runCommand('rr:jobs:consume', ['pipeline' => 'foo']);
-        $this->assertStringContainsString('Pipeline [foo] is not paused.', $result);
+        Assert::string($result)->contains('Pipeline [foo] is not paused.');
     }
 }

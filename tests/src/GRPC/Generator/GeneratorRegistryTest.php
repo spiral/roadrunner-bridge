@@ -7,32 +7,36 @@ namespace Spiral\Tests\GRPC\Generator;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistry;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class GeneratorRegistryTest extends TestCase
 {
-    public function testAddGenerator(): void
+    #[Test]
+    public function addGenerator(): void
     {
         $registry = new GeneratorRegistry();
 
-        $this->assertCount(0, $registry->getGenerators());
+        Assert::count($registry->getGenerators(), 0);
 
-        $generator = $this->createMock(GeneratorInterface::class);
+        $generator = \Mockery::mock(GeneratorInterface::class)->shouldIgnoreMissing();
         $registry->addGenerator($generator);
         $registry->addGenerator($generator);
 
         // not duplicated
-        $this->assertCount(1, $registry->getGenerators());
+        Assert::count($registry->getGenerators(), 1);
 
-        $this->assertSame([$generator], $registry->getGenerators());
+        Assert::same($registry->getGenerators(), [$generator]);
     }
 
-    public function testGetGenerators(): void
+    #[Test]
+    public function getGenerators(): void
     {
         $registry = new GeneratorRegistry();
 
-        $this->assertCount(0, $registry->getGenerators());
+        Assert::count($registry->getGenerators(), 0);
 
-        $generator = $this->createMock(GeneratorInterface::class);
+        $generator = \Mockery::mock(GeneratorInterface::class)->shouldIgnoreMissing();
         $generator2 = new class implements GeneratorInterface {
             public function run(array $files, string $targetPath, string $namespace): void {}
         };
@@ -40,20 +44,21 @@ final class GeneratorRegistryTest extends TestCase
         $registry->addGenerator($generator);
         $registry->addGenerator($generator2);
 
-        $this->assertCount(2, $registry->getGenerators());
+        Assert::count($registry->getGenerators(), 2);
 
-        $this->assertSame([$generator, $generator2], $registry->getGenerators());
+        Assert::same($registry->getGenerators(), [$generator, $generator2]);
     }
 
-    public function testHasGenerator(): void
+    #[Test]
+    public function hasGenerator(): void
     {
         $registry = new GeneratorRegistry();
-        $generator = $this->createMock(GeneratorInterface::class);
+        $generator = \Mockery::mock(GeneratorInterface::class)->shouldIgnoreMissing();
 
-        $this->assertFalse($registry->hasGenerator($generator::class));
+        Assert::false($registry->hasGenerator($generator::class));
 
         $registry->addGenerator($generator);
 
-        $this->assertTrue($registry->hasGenerator($generator::class));
+        Assert::true($registry->hasGenerator($generator::class));
     }
 }

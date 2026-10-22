@@ -8,10 +8,13 @@ use RoadRunner\Jobs\DTO\V1\Stat;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\Tests\ConsoleTestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class ListCommandTest extends ConsoleTestCase
 {
-    public function testGetsListOfAvailablePipelines(): void
+    #[Test]
+    public function getsListOfAvailablePipelines(): void
     {
         $jobs = \Mockery::mock(JobsInterface::class);
         $this->getContainer()->bindSingleton(JobsInterface::class, $jobs, true);
@@ -49,16 +52,13 @@ final class ListCommandTest extends ConsoleTestCase
             ]),
         );
 
-        $this->assertStringContainsStringIgnoringLineEndings(
-            <<<EOL
+        Assert::string($this->runCommand('rr:jobs:list'))->ignoringLineEndings()->contains(<<<EOL
 +---------+--------+----------+-------------+--------------+---------------+-----------+
 | Name    | Driver | Priority | Active jobs | Delayed jobs | Reserved jobs | Is active |
 +---------+--------+----------+-------------+--------------+---------------+-----------+
 | default | amqp   | 250      | 110         | 88           | 56            |  ✖        |
 | test    | memory | 200      | 100         | 55           | 8             |  ✓        |
 +---------+--------+----------+-------------+--------------+---------------+-----------+
-EOL,
-            $this->runCommand('rr:jobs:list'),
-        );
+EOL);
     }
 }

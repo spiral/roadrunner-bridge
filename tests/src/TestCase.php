@@ -9,6 +9,7 @@ use Spiral\Bootloader as Framework;
 use Spiral\Console\Bootloader\ConsoleBootloader;
 use Spiral\Nyholm\Bootloader\NyholmBootloader;
 use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
+use Testo\Lifecycle\AfterTest;
 
 abstract class TestCase extends \Spiral\Testing\TestCase
 {
@@ -48,10 +49,9 @@ abstract class TestCase extends \Spiral\Testing\TestCase
         return $this->getContainer()->get(EnvironmentInterface::class);
     }
 
-    protected function tearDown(): void
+    #[AfterTest]
+    protected function cleanUpRuntime(): void
     {
-        parent::tearDown();
-
         $this->cleanUpRuntimeDirectory();
     }
 

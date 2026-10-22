@@ -4,62 +4,60 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC;
 
-use PHPUnit\Framework\TestCase;
 use Spiral\RoadRunnerBridge\GRPC\Exception\BinaryNotFoundException;
 use Spiral\RoadRunnerBridge\GRPC\Internal\BinaryLocator;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\AfterTest;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-final class BinaryLocatorTest extends TestCase
+#[Test]
+final class BinaryLocatorTest
 {
     private string $dir;
 
-    public function testConfiguredPathWins(): void
+    public function configuredPathWins(): void
     {
         $configured = $this->touch('custom/buf');
         $this->touch('root/buf');
 
         $locator = new BinaryLocator($this->dir . '/root', '', false);
 
-        $this->assertSame($configured, $locator->locate('buf', 'bufPath', $configured));
+        Assert::same($locator->locate('buf', 'bufPath', $configured), $configured);
     }
 
-    public function testMissingConfiguredPathIsNotSilentlyReplaced(): void
+    public function missingConfiguredPathIsNotSilentlyReplaced(): void
     {
         $this->touch('root/buf');
         $locator = new BinaryLocator($this->dir . '/root', '', false);
 
-        $this->expectException(BinaryNotFoundException::class);
-        $this->expectExceptionMessage('`bufPath`');
+        Expect::exception(BinaryNotFoundException::class)->withMessageContaining('`bufPath`');
 
         $locator->locate('buf', 'bufPath', $this->dir . '/missing/buf');
     }
 
-    public function testRootDirectory(): void
+    public function rootDirectory(): void
     {
         $this->touch('root/protoc');
         $this->touch('path/protoc');
 
         $locator = new BinaryLocator($this->dir . '/root', $this->dir . '/path', false);
 
-        $this->assertSame(
-            $this->dir . '/root' . \DIRECTORY_SEPARATOR . 'protoc',
-            $locator->locate('protoc', 'protocPath', null),
-        );
+        Assert::same($locator->locate('protoc', 'protocPath', null), $this->dir . '/root' . \DIRECTORY_SEPARATOR . 'protoc');
     }
 
-    public function testWindowsExtension(): void
+    public function windowsExtension(): void
     {
         $this->touch('root/protoc');
         $this->touch('root/protoc.exe');
 
         $locator = new BinaryLocator($this->dir . '/root', '', true);
 
-        $this->assertSame(
-            $this->dir . '/root' . \DIRECTORY_SEPARATOR . 'protoc.exe',
-            $locator->locate('protoc', 'protocPath', ''),
-        );
+        Assert::same($locator->locate('protoc', 'protocPath', ''), $this->dir . '/root' . \DIRECTORY_SEPARATOR . 'protoc.exe');
     }
 
-    public function testPathEnvironment(): void
+    public function pathEnvironment(): void
     {
         $this->touch('path2/protoc-gen-php-grpc');
 
@@ -69,28 +67,26 @@ final class BinaryLocatorTest extends TestCase
             false,
         );
 
-        $this->assertSame(
-            $this->dir . '/path2' . \DIRECTORY_SEPARATOR . 'protoc-gen-php-grpc',
-            $locator->locate('protoc-gen-php-grpc', 'pluginPath', null),
-        );
+        Assert::same($locator->locate('protoc-gen-php-grpc', 'pluginPath', null), $this->dir . '/path2' . \DIRECTORY_SEPARATOR . 'protoc-gen-php-grpc');
     }
 
-    public function testNotFoundPointsToDload(): void
+    public function notFoundPointsToDload(): void
     {
         $locator = new BinaryLocator($this->dir . '/root', $this->dir . '/path', false);
 
-        $this->expectException(BinaryNotFoundException::class);
-        $this->expectExceptionMessage('vendor/bin/dload get protoc-gen-php-grpc');
+        Expect::exception(BinaryNotFoundException::class)->withMessageContaining('vendor/bin/dload get protoc-gen-php-grpc');
 
         $locator->locate('protoc-gen-php-grpc', 'pluginPath', null);
     }
 
-    protected function setUp(): void
+    #[BeforeTest]
+    protected function prepare(): void
     {
         $this->dir = \sys_get_temp_dir() . '/spiral-binary-locator-' . \bin2hex(\random_bytes(4));
     }
 
-    protected function tearDown(): void
+    #[AfterTest]
+    protected function cleanUp(): void
     {
         if (!\is_dir($this->dir)) {
             return;

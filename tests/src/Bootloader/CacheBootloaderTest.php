@@ -9,10 +9,13 @@ use Spiral\RoadRunner\KeyValue\Factory;
 use Spiral\RoadRunner\KeyValue\FactoryInterface;
 use Spiral\RoadRunner\KeyValue\StorageInterface;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class CacheBootloaderTest extends TestCase
 {
-    public function testGetsCacheFactory(): void
+    #[Test]
+    public function getsCacheFactory(): void
     {
         $this->assertContainerBoundAsSingleton(
             FactoryInterface::class,
@@ -20,28 +23,24 @@ final class CacheBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsStorageInterface(): void
+    #[Test]
+    public function getsStorageInterface(): void
     {
-        $this->assertInstanceOf(
-            \Spiral\RoadRunner\KeyValue\Cache::class,
-            $cache = $this->getContainer()->make(StorageInterface::class, ['driver' => 'memory']),
-        );
+        Assert::instanceOf($cache = $this->getContainer()->make(StorageInterface::class, ['driver' => 'memory']), \Spiral\RoadRunner\KeyValue\Cache::class);
 
-        $this->assertSame('memory', $cache->getName());
+        Assert::same($cache->getName(), 'memory');
 
-        $this->assertInstanceOf(
-            \Spiral\RoadRunner\KeyValue\Cache::class,
-            $cache = $this->getContainer()->make(StorageInterface::class, ['driver' => 'test']),
-        );
+        Assert::instanceOf($cache = $this->getContainer()->make(StorageInterface::class, ['driver' => 'test']), \Spiral\RoadRunner\KeyValue\Cache::class);
 
-        $this->assertSame('test', $cache->getName());
+        Assert::same($cache->getName(), 'test');
     }
 
-    public function testStorageAliasForRoadRunnerShouldBeRegistered(): void
+    #[Test]
+    public function storageAliasForRoadRunnerShouldBeRegistered(): void
     {
         /** @var CacheConfig $config */
         $config = $this->getContainer()->get(CacheConfig::class);
 
-        $this->assertSame(StorageInterface::class, $config->offsetGet('typeAliases')['roadrunner']);
+        Assert::same($config->offsetGet('typeAliases')['roadrunner'], StorageInterface::class);
     }
 }

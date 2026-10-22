@@ -7,22 +7,26 @@ namespace Spiral\Tests\Bootloader;
 use Spiral\RoadRunnerBridge\Scaffolder\Declaration\CentrifugoHandlerDeclaration;
 use Spiral\Scaffolder\Config\ScaffolderConfig;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class ScaffolderBootloaderTest extends TestCase
 {
-    public function testCommandsShouldBeRegistered(): void
+    #[Test]
+    public function commandsShouldBeRegistered(): void
     {
         $this->assertCommandRegistered('create:centrifugo-handler');
     }
 
-    public function testDeclarationsShouldBeRegistered(): void
+    #[Test]
+    public function declarationsShouldBeRegistered(): void
     {
         $config = $this->getConfig(ScaffolderConfig::CONFIG);
 
-        $this->assertSame([
+        Assert::same($config['defaults']['declarations'][CentrifugoHandlerDeclaration::TYPE], [
             'namespace' => 'Endpoint\\Centrifugo\\Handler',
             'postfix' => 'Handler',
             'class' => CentrifugoHandlerDeclaration::class,
-        ], $config['defaults']['declarations'][CentrifugoHandlerDeclaration::TYPE]);
+        ]);
     }
 }

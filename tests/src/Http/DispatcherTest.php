@@ -12,15 +12,18 @@ use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\TestCase;
+use Testo\Test;
 
 final class DispatcherTest extends TestCase
 {
-    public function testCanServeShouldReturnFalseWithWrongEnvironment(): void
+    #[Test]
+    public function canServeShouldReturnFalseWithWrongEnvironment(): void
     {
         $this->assertDispatcherCannotBeServed(Dispatcher::class);
     }
 
-    public function testCanServe(): void
+    #[Test]
+    public function canServe(): void
     {
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
 
@@ -32,7 +35,8 @@ final class DispatcherTest extends TestCase
      * The first request is handled and response is sent to the worker.
      * The second request is handled and exception is thrown. It should stop the worker.
      */
-    public function testServe(): void
+    #[Test]
+    public function serve(): void
     {
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
 
@@ -59,7 +63,8 @@ final class DispatcherTest extends TestCase
     /**
      * Test exit command
      */
-    public function testExit(): void
+    #[Test]
+    public function exit(): void
     {
         $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
 

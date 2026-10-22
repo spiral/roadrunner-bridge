@@ -12,10 +12,11 @@ use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\RoadRunnerBridge\Logger\Handler;
 use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Codecov\Covers;
+use Testo\Data\DataProvider;
+use Testo\Test;
 
-/**
- * @coversDefaultClass \Spiral\RoadRunnerBridge\Logger\Handler
- */
 final class HandlerTest extends TestCase
 {
     public static function toRRWithOutFallbackDataProvider(): iterable
@@ -122,20 +123,14 @@ final class HandlerTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::write
-     *
-     * @dataProvider toRRWithOutFallbackDataProvider
-     */
-    public function testLoggerShouldSendDataToRR(string $channelName, string $logLevel, string $logPrefix = ''): void
+    #[Covers(Handler::class, 'write')]
+    #[Test]
+    #[DataProvider('toRRWithOutFallbackDataProvider')]
+    public function loggerShouldSendDataToRR(string $channelName, string $logLevel, string $logPrefix = ''): void
     {
-        $rpc = $this->createMock(RPCInterface::class);
+        $rpc = \Mockery::mock(RPCInterface::class);
 
-        $rpc
-            ->expects(self::once())
-            ->method('withServicePrefix')
-            ->with('app')
-            ->willReturnSelf();
+        $rpc->shouldReceive('withServicePrefix')->once()->with('app', \Mockery::andAnyOtherArgs())->andReturnSelf();
 
         $monolog = new Monolog($channelName);
 
@@ -146,52 +141,42 @@ final class HandlerTest extends TestCase
             ),
         ]);
 
-        $rpc
-            ->expects(self::once())
-            ->method('call')
-            ->with('Log', self::callback(static function (string $json) use ($channelName, $logLevel, $logPrefix): bool {
-                $data = \json_decode($json, true);
-                if (\json_last_error() !== JSON_ERROR_NONE) {
-                    return false;
-                }
+        $rpc->shouldReceive('call')->once()->with('Log', \Mockery::on(static function (string $json) use ($channelName, $logLevel, $logPrefix): bool {
+            $data = \json_decode($json, true);
+            if (\json_last_error() !== JSON_ERROR_NONE) {
+                return false;
+            }
 
-                if (!isset($data['ts']) && !\is_int($data['ts'])) {
-                    return false;
-                }
-                $data['ts'] = '_TS_';
+            if (!isset($data['ts']) && !\is_int($data['ts'])) {
+                return false;
+            }
+            $data['ts'] = '_TS_';
 
-                $expected = [
-                    'level' => $logLevel,
-                    'ts' => '_TS_',
-                    'logger' => $logPrefix . $channelName,
-                    'msg' => 'Log message',
-                ];
+            $expected = [
+                'level' => $logLevel,
+                'ts' => '_TS_',
+                'logger' => $logPrefix . $channelName,
+                'msg' => 'Log message',
+            ];
 
-                \ksort($data);
-                \ksort($expected);
+            \ksort($data);
+            \ksort($expected);
 
-                return $data === $expected;
-            }))
-            ->willReturnSelf();
+            return $data === $expected;
+        }), \Mockery::andAnyOtherArgs())->andReturnSelf();
 
-        self::assertTrue(\method_exists($monolog, $logLevel));
+        Assert::true(\method_exists($monolog, $logLevel));
         \call_user_func([$monolog, $logLevel], 'Log message');
     }
 
-    /**
-     * @covers ::write
-     *
-     * @dataProvider toRRWithDevModeDataProvider
-     */
-    public function testLoggerShouldSendDataToRRWithTsAndLevelInDevMode(string $channelName, string $logLevel): void
+    #[Covers(Handler::class, 'write')]
+    #[Test]
+    #[DataProvider('toRRWithDevModeDataProvider')]
+    public function loggerShouldSendDataToRRWithTsAndLevelInDevMode(string $channelName, string $logLevel): void
     {
-        $rpc = $this->createMock(RPCInterface::class);
+        $rpc = \Mockery::mock(RPCInterface::class);
 
-        $rpc
-            ->expects(self::once())
-            ->method('withServicePrefix')
-            ->with('app')
-            ->willReturnSelf();
+        $rpc->shouldReceive('withServicePrefix')->once()->with('app', \Mockery::andAnyOtherArgs())->andReturnSelf();
 
         $monolog = new Monolog($channelName);
 
@@ -202,53 +187,46 @@ final class HandlerTest extends TestCase
             ),
         ]);
 
-        $rpc
-            ->expects(self::once())
-            ->method('call')
-            ->with('Log', self::callback(static function (string $json) use ($channelName, $logLevel): bool {
-                $data = \json_decode($json, true);
-                if (\json_last_error() !== JSON_ERROR_NONE) {
-                    return false;
-                }
+        $rpc->shouldReceive('call')->once()->with('Log', \Mockery::on(static function (string $json) use ($channelName, $logLevel): bool {
+            $data = \json_decode($json, true);
+            if (\json_last_error() !== JSON_ERROR_NONE) {
+                return false;
+            }
 
-                if (!isset($data['ts']) || !\is_string($data['ts'])) {
-                    return false;
-                }
+            if (!isset($data['ts']) || !\is_string($data['ts'])) {
+                return false;
+            }
 
-                $dateFormat = \DateTimeInterface::RFC3339;
-                $datetime = \DateTime::createFromFormat($dateFormat, $data['ts']);
-                if (!$datetime || $datetime->format($dateFormat) != $data['ts']) {
-                    return false;
-                }
+            $dateFormat = \DateTimeInterface::RFC3339;
+            $datetime = \DateTime::createFromFormat($dateFormat, $data['ts']);
+            if (!$datetime || $datetime->format($dateFormat) != $data['ts']) {
+                return false;
+            }
 
-                $data['ts'] = '_TS_';
+            $data['ts'] = '_TS_';
 
-                $expected = [
-                    'level' => \strtoupper($logLevel),
-                    'ts' => '_TS_',
-                    'logger' => $channelName,
-                    'msg' => 'Log message',
-                ];
+            $expected = [
+                'level' => \strtoupper($logLevel),
+                'ts' => '_TS_',
+                'logger' => $channelName,
+                'msg' => 'Log message',
+            ];
 
-                \ksort($data);
-                \ksort($expected);
+            \ksort($data);
+            \ksort($expected);
 
-                return $data === $expected;
-            }))
-            ->willReturnSelf();
+            return $data === $expected;
+        }), \Mockery::andAnyOtherArgs())->andReturnSelf();
 
-        self::assertTrue(\method_exists($monolog, $logLevel));
+        Assert::true(\method_exists($monolog, $logLevel));
         \call_user_func([$monolog, $logLevel], 'Log message');
     }
 
-    public function testLoggerShouldSendMessageWithContextToRR(string $channelName = 'default', string $logLevel = 'error'): void
+    #[Test]
+    public function loggerShouldSendMessageWithContextToRR(string $channelName = 'default', string $logLevel = 'error'): void
     {
-        $rpc = $this->createMock(RPCInterface::class);
-        $rpc
-            ->expects(self::once())
-            ->method('withServicePrefix')
-            ->with('app')
-            ->willReturnSelf();
+        $rpc = \Mockery::mock(RPCInterface::class);
+        $rpc->shouldReceive('withServicePrefix')->once()->with('app', \Mockery::andAnyOtherArgs())->andReturnSelf();
 
         $monolog = new Monolog($channelName);
 
@@ -259,51 +237,42 @@ final class HandlerTest extends TestCase
             ),
         ]);
 
-        $rpc
-            ->expects(self::once())
-            ->method('call')
-            ->with('Log', self::callback(static function (string $json) use ($channelName, $logLevel): bool {
-                $data = \json_decode($json, true);
-                if (\json_last_error() !== JSON_ERROR_NONE) {
-                    return false;
-                }
+        $rpc->shouldReceive('call')->once()->with('Log', \Mockery::on(static function (string $json) use ($channelName, $logLevel): bool {
+            $data = \json_decode($json, true);
+            if (\json_last_error() !== JSON_ERROR_NONE) {
+                return false;
+            }
 
-                if (!isset($data['ts']) || !\is_string($data['ts'])) {
-                    return false;
-                }
+            if (!isset($data['ts']) || !\is_string($data['ts'])) {
+                return false;
+            }
 
-                $data['ts'] = '_TS_';
+            $data['ts'] = '_TS_';
 
-                $expected = [
-                    'level' => \strtoupper($logLevel),
-                    'ts' => '_TS_',
-                    'logger' => $channelName,
-                    'msg' => 'Log message',
-                    'foo' => 'bar',
-                ];
+            $expected = [
+                'level' => \strtoupper($logLevel),
+                'ts' => '_TS_',
+                'logger' => $channelName,
+                'msg' => 'Log message',
+                'foo' => 'bar',
+            ];
 
-                \ksort($data);
-                \ksort($expected);
+            \ksort($data);
+            \ksort($expected);
 
-                return $data === $expected;
-            }))
-            ->willReturnSelf();
+            return $data === $expected;
+        }), \Mockery::andAnyOtherArgs())->andReturnSelf();
 
-        self::assertTrue(\method_exists($monolog, $logLevel));
+        Assert::true(\method_exists($monolog, $logLevel));
         \call_user_func([$monolog, $logLevel], 'Log message', ['foo' => 'bar']);
     }
 
-    /**
-     * @covers ::write
-     */
-    public function testLoggerShouldNotEscapeSlashesAndUnicode(): void
+    #[Covers(Handler::class, 'write')]
+    #[Test]
+    public function loggerShouldNotEscapeSlashesAndUnicode(): void
     {
-        $rpc = $this->createMock(RPCInterface::class);
-        $rpc
-            ->expects(self::once())
-            ->method('withServicePrefix')
-            ->with('app')
-            ->willReturnSelf();
+        $rpc = \Mockery::mock(RPCInterface::class);
+        $rpc->shouldReceive('withServicePrefix')->once()->with('app', \Mockery::andAnyOtherArgs())->andReturnSelf();
 
         $monolog = new Monolog('http');
 
@@ -313,39 +282,23 @@ final class HandlerTest extends TestCase
             ),
         ]);
 
-        $rpc
-            ->expects(self::once())
-            ->method('call')
-            ->with('Log', self::callback(static function (string $json): bool {
-                // Forward slashes must stay as-is, without the default json_encode "\/" escaping.
-                self::assertStringContainsString('"path":"/api/v1/news/tag"', $json);
-                self::assertStringNotContainsString('\\/', $json);
+        $rpc->shouldReceive('call')->once()->with('Log', \Mockery::on(static function (string $json): bool {
+            // Forward slashes must stay as-is, without the default json_encode "\/" escaping.
+            Assert::string($json)->contains('"path":"/api/v1/news/tag"')->notContains('\\/')->contains('Привет')->notContains('\\u');
 
-                // Non-ASCII must stay readable, not \uXXXX escaped.
-                self::assertStringContainsString('Привет', $json);
-                self::assertStringNotContainsString('\\u', $json);
-
-                return true;
-            }))
-            ->willReturnSelf();
+            return true;
+        }), \Mockery::andAnyOtherArgs())->andReturnSelf();
 
         $monolog->info('Log message', ['path' => '/api/v1/news/tag', 'greeting' => 'Привет']);
     }
 
-    /**
-     * @dataProvider dataLevelFilter
-     */
-    public function testLevelFilter(Level $level, LogRecord $record, int $expectsCount = 0): void
+    #[Test]
+    #[DataProvider('dataLevelFilter')]
+    public function levelFilter(Level $level, LogRecord $record, int $expectsCount = 0): void
     {
-        $rpc = $this->createMock(RPCInterface::class);
-        $rpc
-            ->expects(self::once())
-            ->method('withServicePrefix')
-            ->with('app')
-            ->willReturnSelf();
-        $rpc
-            ->expects(self::exactly($expectsCount))
-            ->method('call');
+        $rpc = \Mockery::mock(RPCInterface::class);
+        $rpc->shouldReceive('withServicePrefix')->once()->with('app', \Mockery::andAnyOtherArgs())->andReturnSelf();
+        $rpc->shouldReceive('call')->times($expectsCount);
 
         $handler = new Handler(new Logger($rpc), level: $level);
         $handler->handle($record);
