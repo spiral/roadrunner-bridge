@@ -23,7 +23,9 @@ jobs:
     uses: spiral/gh-actions/.github/workflows/testo.yml@master
     with:
       os: >-
-        ['ubuntu-latest']
+        ['ubuntu-latest', 'windows-latest']
+      # fileinfo is built in on Linux but not enabled by default on Windows runners.
+      extensions: sockets, fileinfo
       php: >-
         ['8.2', '8.5']
       run: vendor/bin/testo --suite=Acceptance
