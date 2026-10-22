@@ -1,22 +1,43 @@
-on:
+---
+
+on:  # yamllint disable-line rule:truthy
   pull_request: null
   push:
     branches:
-      - '*.*'
+      - '5.x'
 
 name: structarmed
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   structarmed:
+    name: StructArmed
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
-      - uses: shivammathur/setup-php@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           coverage: none
 
-      - uses: ramsey/composer-install@v3
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
 
-      - run: composer structarmed
+      # StructArmed is isolated in tools/structarmed via bamarni/composer-bin-plugin.
+      - name: Install StructArmed
+        run: composer bin structarmed install --no-interaction --no-progress
+
+      - name: Run StructArmed
+        run: composer structarmed -- --report=github --no-progress
