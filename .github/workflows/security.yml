@@ -57,6 +57,8 @@ jobs:
         uses: ramsey/composer-install@v3
         with:
           dependency-versions: ${{ matrix.dependencies }}
+          # `post-update-cmd` runs `dload get` (buf, protoc) — not needed for the audit.
+          composer-options: --no-scripts
 
       - name: 🐛 Check installed packages for security vulnerability advisories
         run: composer audit --ansi
