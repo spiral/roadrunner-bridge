@@ -17,8 +17,7 @@ final class ScopedTestService implements ServiceInterface
 
     public function __construct(
         private readonly ContainerInterface $container,
-    ) {
-    }
+    ) {}
 
     public function handle(RequestInterface $request): void
     {
