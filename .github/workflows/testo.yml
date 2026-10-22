@@ -17,3 +17,13 @@ jobs:
         ['ubuntu-latest']
       dependencies: >-
         ['lowest', 'highest']
+      run: vendor/bin/testo --suite=Unit
+
+  acceptance:
+    uses: spiral/gh-actions/.github/workflows/testo.yml@master
+    with:
+      os: >-
+        ['ubuntu-latest']
+      php: >-
+        ['8.2', '8.5']
+      run: vendor/bin/testo --suite=Acceptance

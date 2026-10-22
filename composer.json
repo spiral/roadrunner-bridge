@@ -80,7 +80,8 @@
             "GPBMetadata\\": "tests/generated/GPBMetadata",
             "Service\\": "tests/generated/Service",
             "Spiral\\App\\": "tests/app",
-            "Spiral\\Tests\\": "tests/src"
+            "Spiral\\Tests\\": "tests/src",
+            "Spiral\\Tests\\Acceptance\\": "tests/Acceptance"
         }
     },
     "scripts": {
