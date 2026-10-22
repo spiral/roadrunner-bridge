@@ -17,6 +17,7 @@ use Spiral\RoadRunner\Jobs\JobsInterface;
 )]
 final class PauseCommand extends Command
 {
+    /** @psalm-suppress PropertyNotSetInConstructor Set by the console from the command argument */
     #[Argument(description: 'Pipeline name')]
     #[Question('Provide pipeline name to resume')]
     public string $pipeline;

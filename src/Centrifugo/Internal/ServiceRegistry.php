@@ -33,11 +33,13 @@ final class ServiceRegistry implements RegistryInterface
         }
     }
 
+    #[\Override]
     public function register(RequestType $requestType, Autowire|ServiceInterface|string $service): void
     {
         $this->services[$requestType->value] = $service;
     }
 
+    #[\Override]
     public function getService(RequestType $requestType): ?ServiceInterface
     {
         if (!$this->hasService($requestType)) {
@@ -51,13 +53,14 @@ final class ServiceRegistry implements RegistryInterface
         return $this->services[$requestType->value];
     }
 
+    #[\Override]
     public function hasService(RequestType $requestType): bool
     {
         return isset($this->services[$requestType->value]);
     }
 
     /**
-     * @psalm-suppress LessSpecificReturnStatement
+     * @psalm-suppress LessSpecificReturnStatement The container returns the configured service
      */
     private function createService(Autowire|ServiceInterface|string $service): ServiceInterface
     {

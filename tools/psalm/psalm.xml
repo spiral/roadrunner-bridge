@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!--
+    Lives next to the isolated Psalm install in tools/psalm/. resolveFromConfigFile is off, so paths
+    below resolve against the project root (where `composer psalm` runs) and Psalm loads the
+    project's own vendor/autoload.php from there.
+-->
+<psalm
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    errorLevel="2"
+    resolveFromConfigFile="false"
+    findUnusedCode="false"
+>
+    <projectFiles>
+        <directory name="src" />
+        <ignoreFiles>
+            <directory name="vendor" />
+        </ignoreFiles>
+    </projectFiles>
+    <issueHandlers>
+        <!-- Making public classes final would break BC for users who extend them -->
+        <ClassMustBeFinal errorLevel="suppress" />
+        <!-- Legacy interceptors stay supported in the public API until the next major -->
+        <DeprecatedInterface>
+            <errorLevel type="suppress">
+                <referencedClass name="Spiral\Core\CoreInterceptorInterface" />
+            </errorLevel>
+        </DeprecatedInterface>
+        <!--
+            Psalm 7 asks for purity/immutability annotations to aid taint analysis, which this package
+            does not run. On public interfaces and non-final methods they would restrict user
+            implementations, so they are not added.
+        -->
+        <MissingPureAnnotation errorLevel="suppress" />
+        <MissingAbstractPureAnnotation errorLevel="suppress" />
+        <MissingInterfaceImmutableAnnotation errorLevel="suppress" />
+        <MissingImmutableAnnotation errorLevel="suppress" />
+    </issueHandlers>
+    <forbiddenFunctions>
+        <function name="dd"/>
+        <function name="exit"/>
+        <function name="die"/>
+        <function name="var_dump"/>
+        <function name="echo"/>
+        <function name="print"/>
+        <function name="trap"/>
+        <function name="td"/>
+        <function name="tr"/>
+    </forbiddenFunctions>
+</psalm>

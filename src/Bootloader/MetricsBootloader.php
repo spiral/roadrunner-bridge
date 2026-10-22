@@ -11,6 +11,7 @@ use Spiral\RoadRunner\Metrics\MetricsInterface;
 
 final class MetricsBootloader extends Bootloader
 {
+    #[\Override]
     public function defineDependencies(): array
     {
         return [
@@ -18,6 +19,7 @@ final class MetricsBootloader extends Bootloader
         ];
     }
 
+    #[\Override]
     public function defineSingletons(): array
     {
         return [

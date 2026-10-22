@@ -58,6 +58,7 @@ final class Server
                 $pipeline = $this->getHandler($type);
                 $services = $this->services;
 
+                /** @psalm-suppress PossiblyNullArgument A request type without a service fails here; the error handler reports it */
                 $scope->runScope(
                     new Scope('centrifugo-request', [RequestInterface::class => $request]),
                     static fn(): mixed => $pipeline->handle(
@@ -80,7 +81,7 @@ final class Server
 
     public function getHandler(RequestType $type): HandlerInterface
     {
-        /** @psalm-suppress PossiblyInvalidArgument */
+        /** @psalm-suppress PossiblyInvalidArgument Interceptors are resolved; the default builder accepts legacy ones */
         return $this->pipelines[$type->value] ??= $this->pipelineBuilder
             ->withInterceptors(...$this->interceptors->getInterceptors($type->value))
             ->build($this->handler);

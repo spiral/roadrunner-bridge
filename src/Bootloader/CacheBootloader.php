@@ -15,6 +15,7 @@ use Spiral\RoadRunner\KeyValue\StorageInterface;
 
 final class CacheBootloader extends Bootloader
 {
+    #[\Override]
     public function defineDependencies(): array
     {
         return [
@@ -22,6 +23,7 @@ final class CacheBootloader extends Bootloader
         ];
     }
 
+    #[\Override]
     public function defineSingletons(): array
     {
         return [
@@ -34,6 +36,7 @@ final class CacheBootloader extends Bootloader
         ];
     }
 
+    #[\Override]
     public function defineBindings(): array
     {
         return [

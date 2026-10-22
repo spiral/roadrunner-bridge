@@ -36,9 +36,11 @@ final readonly class Dispatcher implements DispatcherInterface
         return \PHP_SAPI === 'cli' && $mode === RoadRunnerMode::Http;
     }
 
+    #[\Override]
     public function serve(): void
     {
         do {
+            $failure = null;
             try {
                 // Wrapped in do/while and try/catch to prevent Worker restart if request parsing is failed
                 //

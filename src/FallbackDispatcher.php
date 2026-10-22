@@ -25,6 +25,7 @@ final readonly class FallbackDispatcher implements DispatcherInterface
         return \PHP_SAPI === 'cli' && $mode !== RoadRunnerMode::Unknown;
     }
 
+    #[\Override]
     public function serve(): void
     {
         match ($this->mode) {

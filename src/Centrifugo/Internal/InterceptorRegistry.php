@@ -22,7 +22,7 @@ final class InterceptorRegistry implements RegistryInterface
 {
     private const INTERCEPTORS_FOR_ALL_SERVICES = '*';
 
-    /** @var array<non-empty-string, array<TInterceptor|TLegacyInterceptor>> */
+    /** @var array<non-empty-string, list<TInterceptor|TLegacyInterceptor>> */
     private array $interceptors = [];
 
     /**
@@ -44,6 +44,7 @@ final class InterceptorRegistry implements RegistryInterface
         }
     }
 
+    #[\Override]
     public function register(
         string $type,
         Autowire|CoreInterceptorInterface|InterceptorInterface|string $interceptor,
@@ -67,6 +68,7 @@ final class InterceptorRegistry implements RegistryInterface
         $this->interceptors[$type][] = $object;
     }
 
+    #[\Override]
     public function getInterceptors(string $type): array
     {
         return \array_merge(

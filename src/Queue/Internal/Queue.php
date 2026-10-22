@@ -44,8 +44,9 @@ final class Queue implements QueueInterface
      * @throws InvalidArgumentException
      * @throws JobsException
      *
-     * @psalm-suppress MoreSpecificImplementedParamType
+     * @psalm-suppress MoreSpecificImplementedParamType RoadRunner rejects an empty job name
      */
+    #[\Override]
     public function push(
         string $name,
         mixed $payload = '',

@@ -17,6 +17,7 @@ final readonly class LogErrorHandler implements ErrorHandlerInterface
         private ExceptionReporterInterface $reporter,
     ) {}
 
+    #[\Override]
     public function handle(RequestInterface $request, \Throwable $e): void
     {
         $this->reporter->report($e);

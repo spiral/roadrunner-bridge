@@ -31,6 +31,7 @@ use Spiral\RoadRunnerBridge\GRPC\Internal\ServiceLocator;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
+use Spiral\Tokenizer\TokenizationListenerInterface;
 use Spiral\Tokenizer\TokenizerListenerRegistryInterface;
 
 final class GRPCBootloader extends Bootloader
@@ -39,6 +40,7 @@ final class GRPCBootloader extends Bootloader
         private readonly ConfiguratorInterface $config,
     ) {}
 
+    #[\Override]
     public function defineDependencies(): array
     {
         return [
@@ -47,6 +49,7 @@ final class GRPCBootloader extends Bootloader
         ];
     }
 
+    #[\Override]
     public function defineSingletons(): array
     {
         return [
@@ -64,12 +67,13 @@ final class GRPCBootloader extends Bootloader
         LocatorInterface $listener,
     ): void {
         $this->initGrpcConfig();
+        \assert($listener instanceof TokenizationListenerInterface);
         $listenerRegistry->addListener($listener);
     }
 
     public function boot(KernelInterface $kernel): void
     {
-        /** @psalm-suppress InvalidArgument */
+        /** @psalm-suppress InvalidArgument KernelInterface lacks the class-name form the kernel accepts */
         $kernel->addDispatcher(Dispatcher::class);
     }
 
@@ -127,19 +131,16 @@ final class GRPCBootloader extends Bootloader
         );
     }
 
-    /**
-     * @psalm-suppress DeprecatedInterface
-     */
     private function initInvoker(
         GRPCConfig $config,
         #[Proxy] ContainerInterface $container,
         FactoryInterface $factory,
         ?PipelineBuilderInterface $pipelineBuilder = null,
     ): InvokerInterface {
-        /** @var PipelineBuilderInterface $pipelineBuilder */
         $pipelineBuilder ??= $container->get(CompatiblePipelineBuilder::class);
+        \assert($pipelineBuilder instanceof PipelineBuilderInterface);
 
-        $handler = new AutowireHandler($container, false);
+        $handler = new AutowireHandler($container);
 
         /**
          * @var list<InterceptorInterface|CoreInterceptorInterface> $list
@@ -153,6 +154,7 @@ final class GRPCBootloader extends Bootloader
             $list[] = $this->resolve($interceptor, $c, $factory);
         }
 
+        /** @psalm-suppress ArgumentTypeCoercion The default CompatiblePipelineBuilder also accepts legacy interceptors */
         return $f->make(Invoker::class, [
             'handler' => $pipelineBuilder->withInterceptors(...$list)->build($handler),
         ]);

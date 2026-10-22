@@ -14,6 +14,7 @@ use Spiral\Scaffolder\Command\AbstractCommand;
 #[AsCommand(name: 'create:centrifugo-handler', description: 'Create Centrifugo handler declaration')]
 final class CentrifugoHandlerCommand extends AbstractCommand
 {
+    /** @psalm-suppress PropertyNotSetInConstructor Set by the console from the command argument */
     #[Argument(description: 'Centrifugo handler name')]
     #[Question(question: 'What would you like to name the Centrifugo handler?')]
     private string $name;

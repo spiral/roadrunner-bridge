@@ -10,6 +10,7 @@ use Spiral\Boot\Bootloader\Bootloader;
 
 final class LockBootloader extends Bootloader
 {
+    #[\Override]
     public function defineDependencies(): array
     {
         return [
@@ -17,6 +18,7 @@ final class LockBootloader extends Bootloader
         ];
     }
 
+    #[\Override]
     public function defineSingletons(): array
     {
         return [

@@ -18,6 +18,7 @@ final class ScaffolderBootloader extends Bootloader
         private readonly ContainerInterface $container,
     ) {}
 
+    #[\Override]
     public function defineDependencies(): array
     {
         return [
