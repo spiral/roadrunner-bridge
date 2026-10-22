@@ -1,30 +1,47 @@
-# RoadRunner bridge to Spiral Framework
+<p align="center">
+    <a href="https://spiral.dev"><img alt="Spiral Framework" src="https://user-images.githubusercontent.com/773481/228578125-8e0ad713-905f-4450-a473-5839bd650472.png" style="width: 6in; display: block"></a>
+</p>
 
-[![PHP Version Require](https://poser.pugx.org/spiral/roadrunner-bridge/require/php)](https://packagist.org/packages/spiral/roadrunner-bridge)
-[![Latest Stable Version](https://poser.pugx.org/spiral/roadrunner-bridge/v/stable)](https://packagist.org/packages/spiral/roadrunner-bridge)
-[![phpunit](https://github.com/spiral/roadrunner-bridge/actions/workflows/phpunit.yml/badge.svg)](https://github.com/spiral/roadrunner-bridge/actions)
-[![psalm](https://github.com/spiral/roadrunner-bridge/actions/workflows/psalm.yml/badge.svg)](https://github.com/spiral/roadrunner-bridge/actions)
-[![Codecov](https://codecov.io/gh/spiral/roadrunner-bridge/branch/master/graph/badge.svg)](https://codecov.io/gh/spiral/roadrunner-bridge/)
-[![Total Downloads](https://poser.pugx.org/spiral/roadrunner-bridge/downloads)](https://packagist.org/packages/spiral/roadrunner-bridge)
-<a href="https://discord.gg/8bZsjYhVVk"><img src="https://img.shields.io/badge/discord-chat-magenta.svg"></a>
+<p align="center">RoadRunner integration for Spiral Framework</p>
 
-## Requirements
+<div align="center">
 
-Make sure that your server is configured with following PHP version and extensions:
+[![Documentation](https://img.shields.io/badge/Documentation-blue?style=for-the-badge&logo=gitbook&logoColor=white)](https://spiral.dev/docs/packages-roadrunner-bridge)
+[![Sponsor](https://img.shields.io/static/v1?style=for-the-badge&label=&message=Sponsor&logo=githubsponsors&logoColor=white&color=%23EA4AAA)](https://github.com/sponsors/spiral)
 
-- PHP 8.2+
-- Spiral Framework 3.14+
-- Extension `protobuf` (recommended)
+[![Psalm Level](https://shepherd.dev/github/spiral/roadrunner-bridge/level.svg)](https://shepherd.dev/github/spiral/roadrunner-bridge)
+[![Type Coverage](https://shepherd.dev/github/spiral/roadrunner-bridge/coverage.svg)](https://shepherd.dev/github/spiral/roadrunner-bridge)
 
-## Installation
+</div>
 
-To install the package:
+<br />
+
+This package runs a Spiral application on [RoadRunner](https://roadrunner.dev) and connects it to the RoadRunner plugins:
+HTTP, Jobs, KV, gRPC, Centrifugo, Metrics, Logger and Lock.
+
+## Get Started
+
+### Installation
 
 ```bash
 composer require spiral/roadrunner-bridge
 ```
 
-After package install you need to add bootloaders from the package in your application on the top of the list.
+[![PHP](https://img.shields.io/packagist/php-v/spiral/roadrunner-bridge.svg?style=flat-square&logo=php)](https://packagist.org/packages/spiral/roadrunner-bridge)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/spiral/roadrunner-bridge.svg?style=flat-square&logo=packagist)](https://packagist.org/packages/spiral/roadrunner-bridge)
+[![License](https://img.shields.io/packagist/l/spiral/roadrunner-bridge.svg?style=flat-square)](LICENSE)
+[![Total Downloads](https://img.shields.io/packagist/dt/spiral/roadrunner-bridge.svg?style=flat-square)](https://packagist.org/packages/spiral/roadrunner-bridge/stats)
+
+Requirements:
+
+- PHP 8.2+
+- Spiral Framework 3.14+
+- RoadRunner 3
+- Extension `protobuf` (recommended)
+
+### Configuration
+
+Add the bootloaders you need at the top of the application's bootloader list:
 
 ```php
 use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
@@ -44,7 +61,7 @@ protected const LOAD = [
 ];
 ```
 
-## Usage
+### Usage
 
 - [Cache](https://spiral.dev/docs/basics-cache)
 - [Queue](https://spiral.dev/docs/queue-configuration)
@@ -52,9 +69,10 @@ protected const LOAD = [
 - [Websockets](https://spiral.dev/docs/websockets-configuration)
 - [Logger](https://spiral.dev/docs/basics-logging/#roadrunner-handler)
 - [Metrics](https://spiral.dev/docs/advanced-prometheus-metrics)
+- [Locks](https://spiral.dev/docs/advanced-locks)
 
-> **Note**
-> Read more about RoadRunner configuration on official site https://roadrunner.dev.
+> [!NOTE]
+> Read more about RoadRunner configuration in the [RoadRunner documentation](https://docs.roadrunner.dev).
 
 ## gRPC code generation
 
@@ -114,7 +132,3 @@ Use it for managed mode, extra plugins or BSR dependencies (with your own `buf.y
   `rr download-protoc-binary` is no longer used.
 - Regenerated files differ from the protoc output only by the `json_name` field option that buf records
   in the field comments and the embedded descriptor; the JSON names stay the same.
-
-## License:
-
-MIT License (MIT). Please see [`LICENSE`](./LICENSE) for more information. Maintained by [Spiral Scout](https://spiralscout.com).
