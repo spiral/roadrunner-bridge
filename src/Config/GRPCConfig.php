@@ -30,6 +30,9 @@ final class GRPCConfig extends InjectableConfig
         'client' => [],
     ];
 
+    /**
+     * @psalm-capabilities read-props
+     */
     public function getClientConfig(): GrpcClientConfig
     {
         // Map Client options
@@ -106,6 +109,8 @@ final class GRPCConfig extends InjectableConfig
 
     /**
      * @return array<class-string<ServiceInterface>>
+     *
+     * @psalm-capabilities read-props
      */
     public function getServices(): array
     {
