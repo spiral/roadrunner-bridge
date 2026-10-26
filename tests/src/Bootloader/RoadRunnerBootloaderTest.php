@@ -16,10 +16,13 @@ use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\FallbackDispatcher;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class RoadRunnerBootloaderTest extends TestCase
 {
-    public function testGetsEnvironmentInterface(): void
+    #[Test]
+    public function getsEnvironmentInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             EnvironmentInterface::class,
@@ -32,7 +35,8 @@ final class RoadRunnerBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsRPCInterface(): void
+    #[Test]
+    public function getsRPCInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             RPCInterface::class,
@@ -45,7 +49,8 @@ final class RoadRunnerBootloaderTest extends TestCase
         );
     }
 
-    public function testGetsWorkerInterface(): void
+    #[Test]
+    public function getsWorkerInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             WorkerInterface::class,
@@ -61,7 +66,8 @@ final class RoadRunnerBootloaderTest extends TestCase
         \ob_end_flush();
     }
 
-    public function testGetsPSR7WorkerInterface(): void
+    #[Test]
+    public function getsPSR7WorkerInterface(): void
     {
         $this->assertContainerBoundAsSingleton(
             PSR7WorkerInterface::class,
@@ -77,12 +83,13 @@ final class RoadRunnerBootloaderTest extends TestCase
         \ob_end_flush();
     }
 
-    public function testFailbackDispatcherShouldBeLast(): void
+    #[Test]
+    public function failbackDispatcherShouldBeLast(): void
     {
         $kernel = $this->getContainer()->get(KernelInterface::class);
         $dispatchers = (new \ReflectionProperty($kernel, 'dispatchers'))->getValue($kernel);
         $dispatchers = \array_filter($dispatchers, static fn(string $disp): bool => $disp !== ConsoleDispatcher::class);
 
-        $this->assertSame(FallbackDispatcher::class, $dispatchers[\array_key_last($dispatchers)]);
+        Assert::same($dispatchers[\array_key_last($dispatchers)], FallbackDispatcher::class);
     }
 }

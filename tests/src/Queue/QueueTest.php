@@ -14,6 +14,9 @@ use Spiral\RoadRunnerBridge\Queue\Internal\Queue;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\Serializer\SerializerInterface;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 final class QueueTest extends TestCase
 {
@@ -21,7 +24,8 @@ final class QueueTest extends TestCase
     private PipelineRegistryInterface|m\MockInterface $registry;
     private SerializerRegistryInterface|m\MockInterface $serializerRegistry;
 
-    public function testTaskShouldBePushedToDefaultQueue(): void
+    #[Test]
+    public function taskShouldBePushedToDefaultQueue(): void
     {
         $this->registry->shouldReceive('getPipeline')
             ->once()
@@ -51,11 +55,12 @@ final class QueueTest extends TestCase
         $queue->shouldReceive('dispatch')->twice()->with($preparedTask)->andReturn($queuedTask);
         $queue->shouldReceive('create')->twice()->andReturn($preparedTask);
 
-        $this->assertSame('task-id1', $this->queue->push('foo', $payload1));
-        $this->assertSame('task-id2', $this->queue->push('foo', $payload2));
+        Assert::same($this->queue->push('foo', $payload1), 'task-id1');
+        Assert::same($this->queue->push('foo', $payload2), 'task-id2');
     }
 
-    public function testTaskShouldBePushedToCustomQueue(): void
+    #[Test]
+    public function taskShouldBePushedToCustomQueue(): void
     {
         $this->registry->shouldReceive('getPipeline')
             ->once()
@@ -83,14 +88,13 @@ final class QueueTest extends TestCase
         $barQueue->shouldReceive('dispatch')->once()->with($preparedTask)->andReturn($queuedTask);
         $barQueue->shouldReceive('create')->once()->withSomeOfArgs('bar')->andReturn($preparedTask);
 
-        $this->assertSame('task-id1', $this->queue->push('foo', ['foo' => 'bar'], QueueOptions::onQueue('foo')));
-        $this->assertSame('task-id2', $this->queue->push('bar', ['foo' => 'bar'], QueueOptions::onQueue('bar')));
+        Assert::same($this->queue->push('foo', ['foo' => 'bar'], QueueOptions::onQueue('foo')), 'task-id1');
+        Assert::same($this->queue->push('bar', ['foo' => 'bar'], QueueOptions::onQueue('bar')), 'task-id2');
     }
 
-    protected function setUp(): void
+    #[BeforeTest]
+    protected function prepare(): void
     {
-        parent::setUp();
-
         $this->registry = m::mock(PipelineRegistryInterface::class);
         $this->serializerRegistry = m::mock(SerializerRegistryInterface::class);
 

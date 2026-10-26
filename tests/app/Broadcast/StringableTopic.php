@@ -7,9 +7,8 @@ namespace Spiral\App\Broadcast;
 final class StringableTopic implements \Stringable
 {
     public function __construct(
-        private readonly string $name
-    ) {
-    }
+        private readonly string $name,
+    ) {}
 
     public function __toString(): string
     {

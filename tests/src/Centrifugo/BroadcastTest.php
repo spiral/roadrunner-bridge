@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Centrifugo;
 
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Constraint\IsEqual;
 use RoadRunner\Centrifugo\CentrifugoApiInterface;
 use Spiral\App\Broadcast\StringableTopic;
 use Spiral\RoadRunnerBridge\Centrifugo\Internal\Broadcast;
 use Spiral\Tests\TestCase;
+use Testo\Data\DataProvider;
+use Testo\Test;
 
 final class BroadcastTest extends TestCase
 {
@@ -28,13 +28,11 @@ final class BroadcastTest extends TestCase
     }
 
     #[DataProvider('topicsDataProvider')]
-    public function testPublish(iterable|\Stringable|string $topics, array $expectedTopics): void
+    #[Test]
+    public function publish(iterable|\Stringable|string $topics, array $expectedTopics): void
     {
-        $centrifugoApi = $this->createMock(CentrifugoApiInterface::class);
-        $centrifugoApi
-            ->expects($this->once())
-            ->method('broadcast')
-            ->with(new IsEqual($expectedTopics), new IsEqual('bar'));
+        $centrifugoApi = \Mockery::mock(CentrifugoApiInterface::class);
+        $centrifugoApi->shouldReceive('broadcast')->once()->with(\Mockery::isEqual($expectedTopics), \Mockery::isEqual('bar'), \Mockery::andAnyOtherArgs());
 
         $broadcast = new Broadcast($centrifugoApi);
 
@@ -42,22 +40,12 @@ final class BroadcastTest extends TestCase
     }
 
     #[DataProvider('messagesDataProvider')]
-    public function testPublishWithArrayMessage(iterable $messages): void
+    #[Test]
+    public function publishWithArrayMessage(iterable $messages): void
     {
-        $centrifugoApi = $this->createMock(CentrifugoApiInterface::class);
-        $centrifugoApi
-            ->expects($this->exactly(2))
-            ->method('broadcast')
-            ->willReturnCallback(function (...$args) {
-                static $series = [
-                    [['foo'], 'one', true, []],
-                    [['foo'], 'two', true, []],
-                ];
-
-                $this->assertSame(\array_shift($series), $args);
-
-                return true;
-            });
+        $centrifugoApi = \Mockery::mock(CentrifugoApiInterface::class);
+        $centrifugoApi->shouldReceive('broadcast')->once()->ordered()->with(['foo'], 'one');
+        $centrifugoApi->shouldReceive('broadcast')->once()->ordered()->with(['foo'], 'two');
 
         $broadcast = new Broadcast($centrifugoApi);
 

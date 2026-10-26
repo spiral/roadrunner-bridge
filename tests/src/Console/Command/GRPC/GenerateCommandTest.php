@@ -13,6 +13,11 @@ use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 use Spiral\Tests\ConsoleTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\AfterTest;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 final class GenerateCommandTest extends ConsoleTestCase
 {
@@ -21,7 +26,8 @@ final class GenerateCommandTest extends ConsoleTestCase
     /** @var array<string, mixed> */
     private array $config = [];
 
-    public function testGenerateServices(): void
+    #[Test]
+    public function generateServices(): void
     {
         $result = $this->generateGRPCService();
 
@@ -33,36 +39,29 @@ final class GenerateCommandTest extends ConsoleTestCase
         ];
 
         $path = $this->getDirectoryByAlias('app') . 'proto/service.proto';
-        $this->assertStringContainsString(
-            \sprintf('Compiling `%s`:', \realpath($path) ?: $path),
-            $result,
-        );
+        Assert::string($result)->contains(\sprintf('Compiling `%s`:', \realpath($path) ?: $path));
 
         foreach ($files as $file) {
-            $this->assertFileExists($this->getDirectoryByAlias('app') . $file);
-            $this->assertStringContainsString(
-                $file,
-                $result,
-            );
+            Assert::true(\file_exists($this->getDirectoryByAlias('app') . $file));
+            Assert::string($result)->contains($file);
         }
 
-        $this->assertMatchesRegularExpression(
-            '#Proto file `.+proto[\\\\/]foo\\.proto` not found.#',
-            $result,
-        );
+        Assert::string($result)->matchesRegex('#Proto file `.+proto[\\\\/]foo\\.proto` not found.#');
     }
 
-    public function testGenerateWithoutServicesBasePath(): void
+    #[Test]
+    public function generateWithoutServicesBasePath(): void
     {
         $this->configure('servicesBasePath', null);
 
         $result = $this->generate();
 
-        $this->assertStringContainsString('GRPC/Ping/PingServiceInterface.php', $result);
-        $this->assertFileExists($this->workDir . '/out/GRPC/Ping/PingServiceInterface.php');
+        Assert::string($result)->contains('GRPC/Ping/PingServiceInterface.php');
+        Assert::true(\file_exists($this->workDir . '/out/GRPC/Ping/PingServiceInterface.php'));
     }
 
-    public function testImportsResolveFromServicesBasePath(): void
+    #[Test]
+    public function importsResolveFromServicesBasePath(): void
     {
         $this->writeProto('common/meta.proto', <<<'PROTO'
             syntax = "proto3";
@@ -97,48 +96,50 @@ final class GenerateCommandTest extends ConsoleTestCase
 
         $this->generate('Acme');
 
-        $this->assertFileExists($this->workDir . '/out/Talk/EchoServiceInterface.php');
-        $this->assertFileExists($this->workDir . '/out/Talk/EchoMessage.php');
-        $this->assertFileExists($this->workDir . '/out/GPBMetadata/Talk/Talk.php');
+        Assert::true(\file_exists($this->workDir . '/out/Talk/EchoServiceInterface.php'));
+        Assert::true(\file_exists($this->workDir . '/out/Talk/EchoMessage.php'));
+        Assert::true(\file_exists($this->workDir . '/out/GPBMetadata/Talk/Talk.php'));
         // buf compiles imported files without generating them.
-        $this->assertFileDoesNotExist($this->workDir . '/out/Common/Meta.php');
+        Assert::false(\file_exists($this->workDir . '/out/Common/Meta.php'));
     }
 
-    public function testProtoFileOutsideServicesBasePath(): void
+    #[Test]
+    public function protoFileOutsideServicesBasePath(): void
     {
         $this->writeProto('outside.proto', 'syntax = "proto3";');
         $this->configure('services', [$this->workDir . '/proto/outside.proto']);
 
         $result = $this->generate();
 
-        $this->assertStringContainsString('is outside of the services base path', $result);
-        $this->assertDirectoryDoesNotExist($this->workDir . '/out');
+        Assert::string($result)->contains('is outside of the services base path');
+        Assert::false(\is_dir($this->workDir . '/out'));
     }
 
-    public function testCompileError(): void
+    #[Test]
+    public function compileError(): void
     {
         $this->writeProto('broken.proto', 'syntax = "proto3"; message {');
         $this->configure('servicesBasePath', $this->workDir . '/proto');
         $this->configure('services', [$this->workDir . '/proto/broken.proto']);
 
-        $this->expectException(CompileException::class);
-        $this->expectExceptionMessage('broken.proto');
+        Expect::exception(CompileException::class)->withMessageContaining('broken.proto');
 
         $this->generate();
     }
 
-    public function testMissingBinary(): void
+    #[Test]
+    public function missingBinary(): void
     {
         $this->configure('bufPath', $this->workDir . '/missing/buf');
 
         $result = $this->generate();
 
-        $this->assertStringContainsString('`bufPath`', $result);
-        $this->assertStringContainsString('vendor/bin/dload get buf', $result);
-        $this->assertDirectoryDoesNotExist($this->workDir . '/out');
+        Assert::string($result)->contains('`bufPath`')->contains('vendor/bin/dload get buf');
+        Assert::false(\is_dir($this->workDir . '/out'));
     }
 
-    public function testGeneratorsReceiveGeneratedFiles(): void
+    #[Test]
+    public function generatorsReceiveGeneratedFiles(): void
     {
         $generator = new class implements GeneratorInterface {
             public array $calls = [];
@@ -153,20 +154,21 @@ final class GenerateCommandTest extends ConsoleTestCase
         $this->generate();
 
         $out = $this->workDir . '/out';
-        $this->assertCount(1, $generator->calls);
+        Assert::count($generator->calls, 1);
         [$files, $targetPath, $namespace] = $generator->calls[0];
         \sort($files);
-        $this->assertSame([
+        Assert::same($files, [
             $out . '/GRPC/Ping/GPBMetadata/Service.php',
             $out . '/GRPC/Ping/PingRequest.php',
             $out . '/GRPC/Ping/PingResponse.php',
             $out . '/GRPC/Ping/PingServiceInterface.php',
-        ], $files);
-        $this->assertSame($out, $targetPath);
-        $this->assertSame('Spiral\\App', $namespace);
+        ]);
+        Assert::same($targetPath, $out);
+        Assert::same($namespace, 'Spiral\\App');
     }
 
-    public function testUserTemplate(): void
+    #[Test]
+    public function userTemplate(): void
     {
         $out = $this->workDir . '/out';
         $template = $this->workDir . '/buf.gen.yaml';
@@ -201,37 +203,37 @@ final class GenerateCommandTest extends ConsoleTestCase
 
         // The template output is used as is: the namespace prefix is not stripped.
         $interface = $out . '/php/Spiral/App/GRPC/Ping/PingServiceInterface.php';
-        $this->assertFileExists($interface);
-        $this->assertStringContainsString('php/Spiral/App/GRPC/Ping/PingServiceInterface.php', $result);
+        Assert::true(\file_exists($interface));
+        Assert::string($result)->contains('php/Spiral/App/GRPC/Ping/PingServiceInterface.php');
 
         \sort($generator->files);
-        $this->assertSame([
+        Assert::same($generator->files, [
             $out . '/php/Spiral/App/GRPC/Ping/GPBMetadata/Service.php',
             $out . '/php/Spiral/App/GRPC/Ping/PingRequest.php',
             $out . '/php/Spiral/App/GRPC/Ping/PingResponse.php',
             $interface,
-        ], $generator->files);
+        ]);
     }
 
-    public function testMissingUserTemplate(): void
+    #[Test]
+    public function missingUserTemplate(): void
     {
         $this->configure('bufTemplate', $this->workDir . '/missing.yaml');
 
         $result = $this->generate();
 
-        $this->assertStringContainsString('`bufTemplate`', $result);
+        Assert::string($result)->contains('`bufTemplate`');
     }
 
-    protected function setUp(): void
+    #[BeforeTest]
+    protected function prepare(): void
     {
-        parent::setUp();
-
         $this->workDir = (new Files())->normalizePath($this->getDirectoryByAlias('runtime') . 'grpc-generate');
     }
 
-    protected function tearDown(): void
+    #[AfterTest]
+    protected function cleanUp(): void
     {
-        parent::tearDown();
         $this->deleteGRPCService();
 
         $files = new Files();

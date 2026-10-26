@@ -13,6 +13,7 @@ final readonly class FileRepository implements ProtoFilesRepositoryInterface
         private array $protoFiles,
     ) {}
 
+    #[\Override]
     public function getProtos(): iterable
     {
         yield from $this->protoFiles;

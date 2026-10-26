@@ -32,6 +32,7 @@ final readonly class Dispatcher implements DispatcherInterface
         return \PHP_SAPI === 'cli' && $mode === RoadRunnerMode::Grpc;
     }
 
+    #[\Override]
     public function serve(): void
     {
         $container = $this->container->get(ContainerInterface::class);

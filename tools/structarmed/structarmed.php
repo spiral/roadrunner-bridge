@@ -25,8 +25,6 @@ return Architecture::define()
     ->layer('GRPCInternal', 'src/GRPC/Internal')
     ->layer('Queue', 'src/Queue', 'src/Queue/Internal')
     ->layer('QueueInternal', 'src/Queue/Internal')
-    ->layer('Tcp', 'src/Tcp', 'src/Tcp/Internal')
-    ->layer('TcpInternal', 'src/Tcp/Internal')
     ->layer('Config', 'src/Config')
     ->layer('Scaffolder', 'src/Scaffolder')
     ->layer('Console', 'src/Console')
@@ -43,11 +41,9 @@ return Architecture::define()
         'GRPCInternal'       => ['Config', 'GRPC', 'RoadRunnerMode'],
         'Queue'              => [],
         'QueueInternal'      => ['Config', 'Queue', 'RoadRunnerMode'],
-        'Tcp'                => [],
-        'TcpInternal'        => ['Config', 'Tcp', 'RoadRunnerMode'],
-        'Config'             => ['Centrifugo', 'GRPC', 'Tcp'],
-        'Scaffolder'         => ['Centrifugo', 'Tcp'],
+        'Config'             => ['Centrifugo', 'GRPC'],
+        'Scaffolder'         => ['Centrifugo'],
         'Console'            => ['+GRPCInternal', 'Queue', 'Scaffolder'],
-        'FallbackDispatcher' => ['Exception', 'CentrifugoInternal', 'GRPCInternal', '+Http', 'QueueInternal', 'TcpInternal'],
+        'FallbackDispatcher' => ['Exception', 'CentrifugoInternal', 'GRPCInternal', '+Http', 'QueueInternal'],
         'Bootloader'         => ['+Console', '+FallbackDispatcher', '+Scaffolder', 'Logger'],
     ]);

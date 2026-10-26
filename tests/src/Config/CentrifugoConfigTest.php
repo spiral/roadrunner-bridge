@@ -9,10 +9,13 @@ use Spiral\App\Centrifugo\TestService;
 use Spiral\Core\Container\Autowire;
 use Spiral\RoadRunnerBridge\Config\CentrifugoConfig;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class CentrifugoConfigTest extends TestCase
 {
-    public function testGetServices(): void
+    #[Test]
+    public function getServices(): void
     {
         $services = [
             'string-alias' => 'foo',
@@ -23,17 +26,19 @@ final class CentrifugoConfigTest extends TestCase
 
         $config = new CentrifugoConfig(['services' => $services]);
 
-        $this->assertEquals($services, $config->getServices());
+        Assert::equals($config->getServices(), $services);
     }
 
-    public function testGetNotExistsServices(): void
+    #[Test]
+    public function getNotExistsServices(): void
     {
         $config = new CentrifugoConfig();
 
-        $this->assertSame([], $config->getServices());
+        Assert::same($config->getServices(), []);
     }
 
-    public function testGetInterceptors(): void
+    #[Test]
+    public function getInterceptors(): void
     {
         $interceptors = [
             'string-alias' => 'foo',
@@ -44,13 +49,14 @@ final class CentrifugoConfigTest extends TestCase
 
         $config = new CentrifugoConfig(['interceptors' => $interceptors]);
 
-        $this->assertEquals($interceptors, $config->getInterceptors());
+        Assert::equals($config->getInterceptors(), $interceptors);
     }
 
-    public function testGetNotExistsInterceptors(): void
+    #[Test]
+    public function getNotExistsInterceptors(): void
     {
         $config = new CentrifugoConfig();
 
-        $this->assertSame([], $config->getInterceptors());
+        Assert::same($config->getInterceptors(), []);
     }
 }

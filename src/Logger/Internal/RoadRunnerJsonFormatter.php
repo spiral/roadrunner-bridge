@@ -83,6 +83,7 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
      *
      * @throws \InvalidArgumentException If the record structure is invalid
      */
+    #[\Override]
     public function format(array|LogRecord $record): array
     {
         $normalized = $this->normalize(\is_array($record) ? $record : $record->toArray());
@@ -131,6 +132,7 @@ final class RoadRunnerJsonFormatter extends NormalizerFormatter
      *
      * @return array<array-key, string|int|array<string|int|array<string>>> The normalized exception data with limited stack trace
      */
+    #[\Override]
     protected function normalizeException(\Throwable $e, int $depth = 0): array
     {
         $normalized = parent::normalizeException($e, $depth);

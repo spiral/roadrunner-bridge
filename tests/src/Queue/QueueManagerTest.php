@@ -13,10 +13,13 @@ use Spiral\Queue\QueueInterface;
 use Spiral\Queue\QueueManager;
 use Spiral\RoadRunnerBridge\Queue\Internal\Queue;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class QueueManagerTest extends TestCase
 {
-    public function testGetsRoadRunnerQueue(): void
+    #[Test]
+    public function getsRoadRunnerQueue(): void
     {
         $manager = $this->getContainer()->get(QueueConnectionProviderInterface::class);
 
@@ -26,13 +29,11 @@ final class QueueManagerTest extends TestCase
         $core = $this->accessProtected($core, 'handler');
         $connection = $this->accessProtected($core, 'connection');
 
-        $this->assertInstanceOf(
-            Queue::class,
-            $connection,
-        );
+        Assert::instanceOf($connection, Queue::class);
     }
 
-    public function testPushIntoDefaultRoadRunnerPipeline(): void
+    #[Test]
+    public function pushIntoDefaultRoadRunnerPipeline(): void
     {
         $factory = m::mock(FactoryInterface::class);
 
@@ -62,6 +63,6 @@ final class QueueManagerTest extends TestCase
             ->once()
             ->withSomeOfArgs('foo', ['boo' => 'bar'])->andReturn('task-id');
 
-        $this->assertSame('task-id', $queue->push('foo', ['boo' => 'bar']));
+        Assert::same($queue->push('foo', ['boo' => 'bar']), 'task-id');
     }
 }

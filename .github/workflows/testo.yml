@@ -1,0 +1,31 @@
+on:
+  pull_request: null
+  push:
+    branches:
+      - '5.x'
+
+name: testo
+
+permissions:
+  contents: read
+
+jobs:
+  testo:
+    uses: spiral/gh-actions/.github/workflows/testo.yml@master
+    with:
+      os: >-
+        ['ubuntu-latest']
+      dependencies: >-
+        ['lowest', 'highest']
+      run: vendor/bin/testo --suite=Unit
+
+  acceptance:
+    uses: spiral/gh-actions/.github/workflows/testo.yml@master
+    with:
+      os: >-
+        ['ubuntu-latest', 'windows-latest']
+      # fileinfo is built in on Linux but not enabled by default on Windows runners.
+      extensions: sockets, fileinfo
+      php: >-
+        ['8.2', '8.5']
+      run: vendor/bin/testo --suite=Acceptance

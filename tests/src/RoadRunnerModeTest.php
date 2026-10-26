@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Spiral\Tests;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use Spiral\Boot\Injector\EnumInjector;
 use Spiral\RoadRunner\Environment;
 use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 final class RoadRunnerModeTest extends TestCase
 {
@@ -25,18 +28,19 @@ final class RoadRunnerModeTest extends TestCase
     }
 
     #[DataProvider('roadRunnerModes')]
-    public function testDetectMode(string $mode, RoadRunnerMode $expected): void
+    #[Test]
+    public function detectMode(string $mode, RoadRunnerMode $expected): void
     {
         $this->getContainer()->bindSingleton(EnvironmentInterface::class, static fn() => new Environment([
             'RR_MODE' => $mode,
         ]), true);
 
-        $this->assertSame($expected, $this->getContainer()->get(RoadRunnerMode::class));
+        Assert::same($this->getContainer()->get(RoadRunnerMode::class), $expected);
     }
 
-    protected function setUp(): void
+    #[BeforeTest]
+    protected function prepare(): void
     {
-        parent::setUp();
         $this->getContainer()->removeBinding(RoadRunnerMode::class);
         $this->getContainer()->bindInjector(RoadRunnerMode::class, EnumInjector::class);
     }

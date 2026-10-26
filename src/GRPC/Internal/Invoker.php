@@ -29,12 +29,13 @@ final readonly class Invoker implements InvokerInterface
         #[Proxy] private ScopeInterface $scope,
     ) {}
 
+    #[\Override]
     public function invoke(ServiceInterface $service, Method $method, ContextInterface $ctx, ?string $input): string
     {
         $message = $this->makeInput($method, $input);
         $handler = $this->handler;
 
-        /** @psalm-suppress InvalidArgument */
+        /** @psalm-suppress InvalidArgument ScopeInterface lacks the Scope form the container accepts */
         return $this->scope->runScope(
             new Scope('grpc-request', [UnaryCallInterface::class => new UnaryCall($ctx, $method, $message)]),
             static fn(): string => self::resultToString($handler->handle(
@@ -70,7 +71,7 @@ final readonly class Invoker implements InvokerInterface
         try {
             $class = $method->inputType;
 
-            /** @psalm-suppress UnsafeInstantiation */
+            /** @psalm-suppress UnsafeInstantiation Generated protobuf messages share the Message constructor */
             $in = new $class();
 
             if ($body !== null) {

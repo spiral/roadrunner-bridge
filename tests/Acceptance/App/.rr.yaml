@@ -1,0 +1,44 @@
+version: '3'
+
+rpc:
+  listen: tcp://127.0.0.1:${RR_RPC_PORT}
+
+server:
+  command: '${ACCEPTANCE_PHP} worker.php'
+  relay: pipes
+  env:
+    # The channel the bridge LoggerBootloader attaches its RoadRunner handler to.
+    MONOLOG_DEFAULT_CHANNEL: roadrunner
+
+logs:
+  mode: development
+  level: warn
+
+http:
+  address: 127.0.0.1:${RR_HTTP_PORT}
+  pool:
+    num_workers: 2
+
+jobs:
+  consume: []
+  pool:
+    num_workers: 1
+
+kv:
+  local:
+    driver: memory
+    config: {}
+
+grpc:
+  listen: tcp://127.0.0.1:${RR_GRPC_PORT}
+  proto:
+    - ../../app/proto/service.proto
+  pool:
+    num_workers: 1
+
+metrics:
+  address: 127.0.0.1:${RR_METRICS_PORT}
+  collect:
+    acceptance_hits:
+      type: counter
+      help: Hits of the /metrics/hit endpoint.

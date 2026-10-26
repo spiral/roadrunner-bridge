@@ -19,10 +19,13 @@ use Spiral\RoadRunnerBridge\Centrifugo\Internal\ServiceRegistry;
 use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 use Spiral\RoadRunnerBridge\Config\CentrifugoConfig;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class CentrifugoBootloaderTest extends TestCase
 {
-    public function testRegistryShouldBeSingleton(): void
+    #[Test]
+    public function registryShouldBeSingleton(): void
     {
         $this->assertContainerBoundAsSingleton(
             RegistryInterface::class,
@@ -30,7 +33,8 @@ final class CentrifugoBootloaderTest extends TestCase
         );
     }
 
-    public function testInterceptorRegistryShouldBeSingleton(): void
+    #[Test]
+    public function interceptorRegistryShouldBeSingleton(): void
     {
         $this->assertContainerBoundAsSingleton(
             Interceptor\RegistryInterface::class,
@@ -38,7 +42,8 @@ final class CentrifugoBootloaderTest extends TestCase
         );
     }
 
-    public function testCentrifugoWorkerShouldBeSingleton(): void
+    #[Test]
+    public function centrifugoWorkerShouldBeSingleton(): void
     {
         $this->assertContainerBoundAsSingleton(
             CentrifugoWorkerInterface::class,
@@ -49,7 +54,8 @@ final class CentrifugoBootloaderTest extends TestCase
         \ob_end_flush();
     }
 
-    public function testErrorHandlerShouldBeSingleton(): void
+    #[Test]
+    public function errorHandlerShouldBeSingleton(): void
     {
         $this->assertContainerBoundAsSingleton(
             ErrorHandlerInterface::class,
@@ -57,7 +63,8 @@ final class CentrifugoBootloaderTest extends TestCase
         );
     }
 
-    public function testCentrifugoApiShouldBeSingleton(): void
+    #[Test]
+    public function centrifugoApiShouldBeSingleton(): void
     {
         $this->assertContainerBoundAsSingleton(
             CentrifugoApiInterface::class,
@@ -65,29 +72,32 @@ final class CentrifugoBootloaderTest extends TestCase
         );
     }
 
-    public function testDispatcherShouldBeRegistered(): void
+    #[Test]
+    public function dispatcherShouldBeRegistered(): void
     {
         $this->assertDispatcherRegistered(Dispatcher::class);
     }
 
-    public function testBroadcastingDriverShouldBeRegistered(): void
+    #[Test]
+    public function broadcastingDriverShouldBeRegistered(): void
     {
         $configurator = $this->getContainer()->get(ConfigsInterface::class);
         $config = $configurator->getConfig(BroadcastConfig::CONFIG);
 
-        $this->assertArrayHasKey('centrifugo', $config['driverAliases']);
-        $this->assertSame(Broadcast::class, $config['driverAliases']['centrifugo']);
+        Assert::array($config['driverAliases'])->hasKeys('centrifugo');
+        Assert::same($config['driverAliases']['centrifugo'], Broadcast::class);
     }
 
-    public function testDefaultConfigShouldBeDefined(): void
+    #[Test]
+    public function defaultConfigShouldBeDefined(): void
     {
         $configurator = $this->getContainer()->get(ConfigsInterface::class);
         $config = $configurator->getConfig(CentrifugoConfig::CONFIG);
 
-        $this->assertIsArray($config);
-        $this->assertSame([
+        Assert::array($config);
+        Assert::same($config, [
             'services' => [],
             'interceptors' => [],
-        ], $config);
+        ]);
     }
 }

@@ -9,10 +9,13 @@ use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\CompositeRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class CompositeProtoFilesRepositoryTest extends TestCase
 {
-    public function testGetProtos(): void
+    #[Test]
+    public function getProtos(): void
     {
         $repository = new CompositeRepository(
             $fooRepository = m::mock(ProtoFilesRepositoryInterface::class),
@@ -21,6 +24,6 @@ final class CompositeProtoFilesRepositoryTest extends TestCase
 
         $fooRepository->shouldReceive('getProtos')->withNoArgs()->andReturn(['path1', 'path2']);
 
-        $this->assertSame(['path1', 'path2', 'path3', 'path4'], \iterator_to_array($repository->getProtos(), false));
+        Assert::same(\iterator_to_array($repository->getProtos(), false), ['path1', 'path2', 'path3', 'path4']);
     }
 }

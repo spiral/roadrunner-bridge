@@ -4,39 +4,39 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC;
 
-use PHPUnit\Framework\TestCase;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 use Spiral\RoadRunnerBridge\GRPC\Internal\ProcessRunner;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Test;
 
-final class ProcessRunnerTest extends TestCase
+#[Test]
+final class ProcessRunnerTest
 {
-    public function testSuccessReturnsErrorOutput(): void
+    public function successReturnsErrorOutput(): void
     {
         $warnings = (new ProcessRunner())->run([
             \PHP_BINARY, '-r', 'echo "out"; fwrite(STDERR, " a \"quoted\" warning ");',
         ]);
 
-        $this->assertSame('a "quoted" warning', $warnings);
+        Assert::same($warnings, 'a "quoted" warning');
     }
 
-    public function testSuccessWithoutErrorOutput(): void
+    public function successWithoutErrorOutput(): void
     {
-        $this->assertSame('', (new ProcessRunner())->run([\PHP_BINARY, '-r', 'echo "out";']));
+        Assert::same((new ProcessRunner())->run([\PHP_BINARY, '-r', 'echo "out";']), '');
     }
 
-    public function testNonZeroExitCode(): void
+    public function nonZeroExitCode(): void
     {
-        $this->expectException(CompileException::class);
-        $this->expectExceptionMessage('broken proto');
-        $this->expectExceptionCode(3);
+        Expect::exception(CompileException::class)->withMessageContaining('broken proto')->withCode(3);
 
         (new ProcessRunner())->run([\PHP_BINARY, '-r', 'fwrite(STDERR, "broken proto"); exit(3);']);
     }
 
-    public function testNonZeroExitCodeWithoutErrorOutput(): void
+    public function nonZeroExitCodeWithoutErrorOutput(): void
     {
-        $this->expectException(CompileException::class);
-        $this->expectExceptionMessage('exited with code 2. details');
+        Expect::exception(CompileException::class)->withMessageContaining('exited with code 2. details');
 
         (new ProcessRunner())->run([\PHP_BINARY, '-r', 'echo "details"; exit(2);']);
     }

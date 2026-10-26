@@ -6,28 +6,30 @@ namespace Spiral\Tests\Bootloader;
 
 use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
 final class HttpBootloaderTest extends TestCase
 {
-    public function testDispatcherShouldBeRegistered(): void
+    #[Test]
+    public function dispatcherShouldBeRegistered(): void
     {
         $dispatchers = $this->getRegisteredDispatchers();
 
-        $this->assertCount(
-            1,
-            \array_filter($dispatchers, static function ($dispatcher) {
-                return $dispatcher === Dispatcher::class;
-            }),
-        );
+        Assert::count(\array_filter($dispatchers, static function ($dispatcher) {
+            return $dispatcher === Dispatcher::class;
+        }), 1);
     }
 
-    public function testOldRoadRunnerDispatchersShouldNotBeLoaded(): void
+    #[Test]
+    public function oldRoadRunnerDispatchersShouldNotBeLoaded(): void
     {
         $this->assertDispatcherMissed('Spiral\Http\LegacyRrDispatcher');
         $this->assertDispatcherMissed('Spiral\Http\RrDispatcher');
     }
 
-    public function testOldRoadRunnerBootloadersShouldNotBeLoaded(): void
+    #[Test]
+    public function oldRoadRunnerBootloadersShouldNotBeLoaded(): void
     {
         $this->assertBootloaderMissed('Spiral\Bootloader\ServerBootloader');
         $this->assertBootloaderMissed('Spiral\Bootloader\Server\LegacyRoadRunnerBootloader');

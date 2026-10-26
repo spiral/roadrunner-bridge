@@ -26,6 +26,7 @@ final readonly class Dispatcher implements DispatcherInterface
         return \PHP_SAPI === 'cli' && $mode === RoadRunnerMode::Centrifuge;
     }
 
+    #[\Override]
     public function serve(): void
     {
         /** @var Server $server */

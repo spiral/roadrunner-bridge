@@ -4,24 +4,22 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Centrifugo;
 
-use PHPUnit\Framework\Constraint\IsEqual;
 use RoadRunner\Centrifugo\Request\RequestInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Internal\LogErrorHandler;
 use Spiral\Tests\TestCase;
+use Testo\Test;
 
 final class LogErrorHandlerTest extends TestCase
 {
-    public function testHandle(): void
+    #[Test]
+    public function handle(): void
     {
         $error = new \Error('some');
 
-        $reporter = $this->createMock(ExceptionReporterInterface::class);
-        $reporter
-            ->expects($this->once())
-            ->method('report')
-            ->with(new IsEqual($error));
+        $reporter = \Mockery::mock(ExceptionReporterInterface::class);
+        $reporter->shouldReceive('report')->once()->with(\Mockery::isEqual($error), \Mockery::andAnyOtherArgs());
 
-        (new LogErrorHandler($reporter))->handle($this->createMock(RequestInterface::class), $error);
+        (new LogErrorHandler($reporter))->handle(\Mockery::mock(RequestInterface::class)->shouldIgnoreMissing(), $error);
     }
 }

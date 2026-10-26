@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Centrifugo\Interceptor;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use Spiral\App\Centrifugo\OtherInterceptor;
 use Spiral\App\Centrifugo\TestInterceptor;
 use Spiral\Core\Container\Autowire;
@@ -13,6 +12,10 @@ use Spiral\RoadRunnerBridge\Centrifugo\Exception\ConfigurationException;
 use Spiral\RoadRunnerBridge\Centrifugo\Interceptor\RegistryInterface;
 use Spiral\RoadRunnerBridge\Centrifugo\Internal\InterceptorRegistry;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Expect;
+use Testo\Test;
 
 final class InterceptorRegistryTest extends TestCase
 {
@@ -24,37 +27,42 @@ final class InterceptorRegistryTest extends TestCase
         yield ['alias'];
     }
 
-    public function testGetInterceptorFromObject(): void
+    #[Test]
+    public function getInterceptorFromObject(): void
     {
         $this->updateConfig('centrifugo.interceptors', ['publish' => new TestInterceptor()]);
 
-        $this->assertInstanceOf(TestInterceptor::class, $this->getInterceptor());
+        Assert::instanceOf($this->getInterceptor(), TestInterceptor::class);
     }
 
-    public function testGetInterceptorFromFCQN(): void
+    #[Test]
+    public function getInterceptorFromFCQN(): void
     {
         $this->updateConfig('centrifugo.interceptors', ['publish' => TestInterceptor::class]);
 
-        $this->assertInstanceOf(TestInterceptor::class, $this->getInterceptor());
+        Assert::instanceOf($this->getInterceptor(), TestInterceptor::class);
     }
 
-    public function testGetInterceptorFromAlias(): void
+    #[Test]
+    public function getInterceptorFromAlias(): void
     {
         $this->getContainer()->bind('alias', static fn() => new TestInterceptor());
 
         $this->updateConfig('centrifugo.interceptors', ['publish' => 'alias']);
 
-        $this->assertInstanceOf(TestInterceptor::class, $this->getInterceptor());
+        Assert::instanceOf($this->getInterceptor(), TestInterceptor::class);
     }
 
-    public function testGetInterceptorFromAutowire(): void
+    #[Test]
+    public function getInterceptorFromAutowire(): void
     {
         $this->updateConfig('centrifugo.interceptors', ['publish' => new Autowire(TestInterceptor::class)]);
 
-        $this->assertInstanceOf(TestInterceptor::class, $this->getInterceptor());
+        Assert::instanceOf($this->getInterceptor(), TestInterceptor::class);
     }
 
-    public function testGetInterceptorsForAllServices(): void
+    #[Test]
+    public function getInterceptorsForAllServices(): void
     {
         $interceptors = [
             new TestInterceptor(),
@@ -65,11 +73,12 @@ final class InterceptorRegistryTest extends TestCase
 
         $registry = $this->getContainer()->get(RegistryInterface::class);
 
-        $this->assertEquals($interceptors, $registry->getInterceptors('publish'));
-        $this->assertEquals($interceptors, $registry->getInterceptors('connect'));
+        Assert::equals($registry->getInterceptors('publish'), $interceptors);
+        Assert::equals($registry->getInterceptors('connect'), $interceptors);
     }
 
-    public function testInterceptorsForAllServicesShouldBeFirst(): void
+    #[Test]
+    public function interceptorsForAllServicesShouldBeFirst(): void
     {
         $this->updateConfig('centrifugo.interceptors', [
             '*' => new TestInterceptor(),
@@ -78,31 +87,30 @@ final class InterceptorRegistryTest extends TestCase
 
         $registry = $this->getContainer()->get(RegistryInterface::class);
 
-        $this->assertEquals([new TestInterceptor(), new OtherInterceptor()], $registry->getInterceptors('publish'));
+        Assert::equals($registry->getInterceptors('publish'), [new TestInterceptor(), new OtherInterceptor()]);
     }
 
     #[DataProvider('interceptorsDataProvider')]
-    public function testRegister(Autowire|CoreInterceptorInterface|string $interceptor): void
+    #[Test]
+    public function register(Autowire|CoreInterceptorInterface|string $interceptor): void
     {
         $this->getContainer()->bind('alias', new TestInterceptor());
 
         $registry = new InterceptorRegistry([], $this->getContainer(), $this->getContainer());
 
-        $this->assertSame([], $registry->getInterceptors('publish'));
+        Assert::same($registry->getInterceptors('publish'), []);
 
         $registry->register('publish', $interceptor);
 
-        $this->assertEquals([new TestInterceptor()], $registry->getInterceptors('publish'));
+        Assert::equals($registry->getInterceptors('publish'), [new TestInterceptor()]);
     }
 
-    public function testRegisterWrongType(): void
+    #[Test]
+    public function registerWrongType(): void
     {
         $registry = new InterceptorRegistry([], $this->getContainer(), $this->getContainer());
 
-        $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessage(
-            'The $type value must be one of the `*`, `connect`, `refresh`, `subrefresh`, `publish`, `subscribe`, `rpc`, `invalid` values.',
-        );
+        Expect::exception(ConfigurationException::class)->withMessageContaining('The $type value must be one of the `*`, `connect`, `refresh`, `subrefresh`, `publish`, `subscribe`, `rpc`, `invalid` values.');
         $registry->register('foo', new TestInterceptor());
     }
 

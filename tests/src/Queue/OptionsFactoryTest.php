@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Queue;
 
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
 use Spiral\Queue\Options;
 use Spiral\RoadRunner\Jobs\KafkaOptions;
 use Spiral\RoadRunner\Jobs\Options as JobsOptions;
@@ -14,8 +12,12 @@ use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\Queue\KafkaCreateInfo;
 use Spiral\RoadRunner\Jobs\Queue\MemoryCreateInfo;
 use Spiral\RoadRunnerBridge\Queue\Internal\OptionsFactory;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Test;
 
-final class OptionsFactoryTest extends TestCase
+#[Test]
+final class OptionsFactoryTest
 {
     public static function createDataProvider(): \Traversable
     {
@@ -39,14 +41,14 @@ final class OptionsFactoryTest extends TestCase
     }
 
     #[DataProvider('createDataProvider')]
-    public function testCreate(?JobsOptionsInterface $expected, mixed $from): void
+    public function create(?JobsOptionsInterface $expected, mixed $from): void
     {
-        $this->assertEquals($expected, OptionsFactory::create($from));
+        Assert::equals(OptionsFactory::create($from), $expected);
     }
 
     #[DataProvider('fromCreateInfoDataProvider')]
-    public function testFromCreateInfo(mixed $expected, CreateInfoInterface $createInfo): void
+    public function fromCreateInfo(mixed $expected, CreateInfoInterface $createInfo): void
     {
-        $this->assertEquals($expected, OptionsFactory::fromCreateInfo($createInfo));
+        Assert::equals(OptionsFactory::fromCreateInfo($createInfo), $expected);
     }
 }

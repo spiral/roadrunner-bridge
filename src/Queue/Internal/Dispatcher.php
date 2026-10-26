@@ -50,13 +50,14 @@ final readonly class Dispatcher implements DispatcherInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function serve(): void
     {
         $handler = $this->handler;
 
         while ($task = $this->consumer->waitTask()) {
             try {
-                /** @psalm-suppress InvalidArgument */
+                /** @psalm-suppress InvalidArgument ScopeInterface lacks the Scope form the container accepts */
                 $this->scope->runScope(
                     new Scope('queue-task', [TaskInterface::class => new Task(
                         id: $task->getId(),

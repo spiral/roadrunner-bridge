@@ -19,6 +19,7 @@ use Spiral\RoadRunnerBridge\FallbackDispatcher;
 
 final class RoadRunnerBootloader extends Bootloader
 {
+    #[\Override]
     public function defineSingletons(): array
     {
         return [
@@ -30,7 +31,7 @@ final class RoadRunnerBootloader extends Bootloader
 
             RPC::class => RPCInterface::class,
             RPCInterface::class =>
-            /** @psalm-suppress ArgumentTypeCoercion */
+            /** @psalm-suppress ArgumentTypeCoercion The RPC address always has a default value */
                 static fn(
                     EnvironmentInterface $env,
                 ): RPCInterface => new RPC(Relay::create($env->getRPCAddress())),
@@ -48,7 +49,7 @@ final class RoadRunnerBootloader extends Bootloader
         // Register Fallback Dispatcher after all dispatchers
         // It will be called if no other dispatcher can handle RoadRunner request
         $kernel->bootstrapped(static function (KernelInterface $kernel): void {
-            /** @psalm-suppress InvalidArgument */
+            /** @psalm-suppress InvalidArgument KernelInterface lacks the class-name form the kernel accepts */
             $kernel->addDispatcher(FallbackDispatcher::class);
         });
     }

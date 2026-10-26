@@ -16,6 +16,7 @@ use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 final class LoggerBootloader extends Bootloader
 {
+    #[\Override]
     public function defineDependencies(): array
     {
         return [

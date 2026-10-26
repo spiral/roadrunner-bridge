@@ -16,6 +16,7 @@ final readonly class CompositeRepository implements ProtoFilesRepositoryInterfac
         $this->repositories = $repositories;
     }
 
+    #[\Override]
     public function getProtos(): iterable
     {
         foreach ($this->repositories as $repository) {

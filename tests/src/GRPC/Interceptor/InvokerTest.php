@@ -16,10 +16,14 @@ use Spiral\RoadRunner\GRPC\Method;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Invoker;
 use Spiral\Tests\TestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Test;
 
 final class InvokerTest extends TestCase
 {
-    public function testInvoke(): void
+    #[Test]
+    public function invoke(): void
     {
         $invoker = new Invoker($core = m::mock(HandlerInterface::class), $this->getContainer());
 
@@ -33,24 +37,22 @@ final class InvokerTest extends TestCase
         $core
             ->shouldReceive('handle')
             ->once()
-            ->withArgs(function (CallContextInterface $context) use ($service, $input) {
-                $this->assertSame($context->getTarget()->getPath()[0], $service::class);
-                $this->assertSame('Ping', $context->getTarget()->getPath()[1]);
-                $this->assertInstanceOf(ContextInterface::class, $context->getArguments()[0]);
-                $this->assertInstanceOf(PingRequest::class, $context->getArguments()[1]);
+            ->withArgs(static function (CallContextInterface $context) use ($service, $input) {
+                Assert::same($context->getTarget()->getPath()[0], $service::class);
+                Assert::same($context->getTarget()->getPath()[1], 'Ping');
+                Assert::instanceOf($context->getArguments()[0], ContextInterface::class);
+                Assert::instanceOf($context->getArguments()[1], PingRequest::class);
 
                 return true;
             })->andReturn($output);
 
-        $this->assertSame(
-            $output->serializeToString(),
-            $invoker->invoke($service, $method, $ctx, $input->serializeToString()),
-        );
+        Assert::same($invoker->invoke($service, $method, $ctx, $input->serializeToString()), $output->serializeToString());
     }
 
-    public function testInvokeWithBrokenText(): void
+    #[Test]
+    public function invokeWithBrokenText(): void
     {
-        $this->expectException(InvokeException::class);
+        Expect::exception(InvokeException::class);
 
         $invoker = new Invoker(m::mock(HandlerInterface::class), $this->getContainer());
 
@@ -61,6 +63,6 @@ final class InvokerTest extends TestCase
         $output = 'output';
 
         $ctx = m::mock(ContextInterface::class);
-        $this->assertSame($output, $invoker->invoke($service, $method, $ctx, $input));
+        Assert::same($invoker->invoke($service, $method, $ctx, $input), $output);
     }
 }

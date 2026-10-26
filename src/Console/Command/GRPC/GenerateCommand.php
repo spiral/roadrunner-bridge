@@ -119,7 +119,7 @@ final class GenerateCommand extends Command
         }
 
         foreach ($generatorRegistry->getGenerators() as $generator) {
-            /** @psalm-suppress ArgumentTypeCoercion */
+            /** @psalm-suppress ArgumentTypeCoercion Paths of generated files are never empty */
             $generator->run($compiled, $generatedPath, $namespace);
         }
 
@@ -146,7 +146,7 @@ final class GenerateCommand extends Command
 
         $r = new \ReflectionObject($kernel);
 
-        /** @psalm-suppress LessSpecificReturnStatement */
+        /** @psalm-suppress LessSpecificReturnStatement dirname() never returns an empty string */
         return \dirname($r->getFileName());
     }
 
@@ -155,7 +155,7 @@ final class GenerateCommand extends Command
      *
      * @return non-empty-string
      *
-     * @psalm-suppress LessSpecificReturnStatement
+     * @psalm-suppress LessSpecificReturnStatement The argument, the config and the kernel namespace are not expected to be empty
      */
     protected function getNamespace(KernelInterface $kernel, ?string $protoNamespace): string
     {
@@ -188,7 +188,8 @@ final class GenerateCommand extends Command
                 continue;
             }
 
-            $protoFile = \realpath($protoFile) ?: $protoFile;
+            $realPath = \realpath($protoFile);
+            $protoFile = $realPath === false ? $protoFile : $realPath;
 
             if ($basePath !== null && !\str_starts_with($protoFile, \rtrim($basePath, '\\/') . \DIRECTORY_SEPARATOR)) {
                 $this->sprintf(
