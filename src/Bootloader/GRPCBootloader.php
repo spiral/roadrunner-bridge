@@ -160,6 +160,9 @@ final class GRPCBootloader extends Bootloader
         ]);
     }
 
+    /**
+     * @psalm-pure
+     */
     private function initProtoFilesRepository(GRPCConfig $config): ProtoFilesRepositoryInterface
     {
         return new FileRepository($config->getServices());
