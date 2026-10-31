@@ -8,8 +8,8 @@ use Psr\Container\ContainerInterface;
 use RoadRunner\Centrifugo\CentrifugoApiInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Console\Bootloader\ConsoleBootloader;
-use Spiral\RoadRunnerBridge\Console\Command\Scaffolder\CentrifugoHandlerCommand;
 use Spiral\RoadRunnerBridge\Scaffolder\Declaration\CentrifugoHandlerDeclaration;
+use Spiral\RoadRunnerBridge\Scaffolder\Internal\CentrifugoHandlerCommand;
 use Spiral\Scaffolder\Bootloader\ScaffolderBootloader as BaseScaffolderBootloader;
 
 /**

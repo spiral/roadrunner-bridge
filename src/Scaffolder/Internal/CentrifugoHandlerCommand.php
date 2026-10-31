@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Console\Command\Scaffolder;
+namespace Spiral\RoadRunnerBridge\Scaffolder\Internal;
 
 use Spiral\Console\Attribute\Argument;
 use Spiral\Console\Attribute\AsCommand;

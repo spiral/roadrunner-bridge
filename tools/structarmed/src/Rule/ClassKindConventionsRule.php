@@ -11,29 +11,36 @@ use Boundwize\StructArmed\Rule\RuleViolation;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Support\Ancestry;
 
 /**
- * A class under an `Exception` namespace segment carries the `Exception` suffix and
- * extends one of the given bases. Interfaces there (e.g. a marker extending Throwable)
- * are left alone.
+ * A kind of class (exception, console command, ...) carries the kind's suffix and
+ * extends one of its bases. Only classes are checked: an interface of the kind (e.g.
+ * a marker extending Throwable) is left alone.
  *
- * Exceptions are matched by namespace rather than as a layer: a `layerPattern()` would
- * take precedence over the path layers and move every exception out of its module's
- * ruleset.
+ * A class is of the kind when it lives under the given namespace segment or, without
+ * a segment, when it has the suffix or extends a base. Kinds are matched here rather
+ * than as layers: a `layerPattern()` would take precedence over the path layers and
+ * move the matched classes out of their module's ruleset.
  */
-final readonly class ExceptionConventionsRule implements RuleInterface, MultipleRuleViolationInterface
+final readonly class ClassKindConventionsRule implements RuleInterface, MultipleRuleViolationInterface
 {
     /**
      * @param non-empty-list<class-string> $bases
      */
     public function __construct(
         private string $layer,
+        private string $suffix,
         private array $bases,
+        private ?string $segment = null,
     ) {}
 
     public function appliesTo(ClassNode $classNode): bool
     {
-        return $classNode->isClass()
-            && $classNode->isInLayer($this->layer)
-            && \str_contains($classNode->className, '\\Exception\\');
+        if (! $classNode->isClass() || ! $classNode->isInLayer($this->layer)) {
+            return false;
+        }
+
+        return $this->segment === null
+            ? $classNode->nameEndsWith($this->suffix) || Ancestry::extendsAny($classNode, $this->bases)
+            : \str_contains($classNode->className, '\\' . $this->segment . '\\');
     }
 
     public function evaluate(ClassNode $classNode): ?RuleViolation
@@ -48,9 +55,10 @@ final readonly class ExceptionConventionsRule implements RuleInterface, Multiple
     {
         $messages = [];
 
-        $classNode->nameEndsWith('Exception') or $messages[] = \sprintf(
-            'Class [%s] must have suffix [Exception]',
+        $classNode->nameEndsWith($this->suffix) or $messages[] = \sprintf(
+            'Class [%s] must have suffix [%s]',
             $classNode->className,
+            $this->suffix,
         );
 
         Ancestry::extendsAny($classNode, $this->bases) or $messages[] = \sprintf(

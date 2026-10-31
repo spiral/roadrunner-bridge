@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\Tests\Console\Command\Queue;
+namespace Spiral\Tests\Queue;
 
 use Spiral\RoadRunner\Jobs\JobsInterface;
 use Spiral\Tests\ConsoleTestCase;

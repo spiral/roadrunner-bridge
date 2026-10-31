@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\Tests\Console\Command\Scaffolder;
+namespace Spiral\Tests\Scaffolder;
 
 use Spiral\Tests\TestCase;
 use Testo\Test;

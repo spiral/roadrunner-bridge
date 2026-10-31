@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\Console\Command\Queue;
+namespace Spiral\RoadRunnerBridge\Queue\Internal;
 
 use Spiral\Console\Attribute\AsCommand;
 use Spiral\Console\Command;

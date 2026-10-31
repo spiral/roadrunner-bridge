@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\Tests\Console\Command\GRPC;
+namespace Spiral\Tests\GRPC;
 
 use Spiral\Files\Files;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
@@ -278,6 +278,6 @@ final class GenerateCommandTest extends ConsoleTestCase
 
     private function binary(string $name): string
     {
-        return \dirname(__DIR__, 5) . \DIRECTORY_SEPARATOR . $name . (\PHP_OS_FAMILY === 'Windows' ? '.exe' : '');
+        return \dirname(__DIR__, 3) . \DIRECTORY_SEPARATOR . $name . (\PHP_OS_FAMILY === 'Windows' ? '.exe' : '');
     }
 }

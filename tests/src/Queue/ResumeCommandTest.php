@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\Tests\Console\Command\Queue;
+namespace Spiral\Tests\Queue;
 
 use Mockery as m;
 use Spiral\RoadRunner\Jobs\QueueInterface;

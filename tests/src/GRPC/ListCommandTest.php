@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\Tests\Console\Command\GRPC;
+namespace Spiral\Tests\GRPC;
 
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\Tests\ConsoleTestCase;
