@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\GRPC\Internal;
+namespace Spiral\RoadRunnerBridge\GRPC\Internal\Command;
 
 use Spiral\Console\Command;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;

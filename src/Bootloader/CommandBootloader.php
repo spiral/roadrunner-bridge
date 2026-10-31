@@ -8,9 +8,9 @@ use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Console\Bootloader\ConsoleBootloader;
 use Spiral\Core\Container;
 use Spiral\RoadRunner\Jobs\JobsInterface;
-use Spiral\RoadRunnerBridge\GRPC\Internal as GRPC;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Command as GRPC;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
-use Spiral\RoadRunnerBridge\Queue\Internal as Queue;
+use Spiral\RoadRunnerBridge\Queue\Internal\Command as Queue;
 
 /**
  * @api

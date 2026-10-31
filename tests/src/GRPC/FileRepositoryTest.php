@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC;
 
-use Spiral\RoadRunnerBridge\GRPC\Internal\FileRepository;
+use Spiral\RoadRunnerBridge\GRPC\Internal\ProtoRepository\FileRepository;
 use Spiral\Tests\TestCase;
 use Testo\Assert;
 use Testo\Test;

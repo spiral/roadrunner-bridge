@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\GRPC\Internal;
+namespace Spiral\RoadRunnerBridge\GRPC\Internal\Compiler;
 
 /**
  * The `buf.gen.yaml` template for a run: either a user-owned file or one rendered from local binaries.

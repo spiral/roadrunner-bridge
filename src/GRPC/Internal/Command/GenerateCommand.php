@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\GRPC\Internal;
+namespace Spiral\RoadRunnerBridge\GRPC\Internal\Command;
 
 use Codedungeon\PHPCliColors\Color;
 use Spiral\Boot\DirectoriesInterface;
@@ -13,6 +13,11 @@ use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Exception\BinaryNotFoundException;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BinaryLocator;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BufCommandBuilder;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BufTemplate;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\ProcessRunner;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\ProtoCompiler;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 
 /**
