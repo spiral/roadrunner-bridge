@@ -7,12 +7,12 @@ namespace Spiral\RoadRunnerBridge\Tools\StructArmed\Rule;
 use Boundwize\StructArmed\Analyser\ClassNode;
 use Boundwize\StructArmed\Rule\RuleInterface;
 use Boundwize\StructArmed\Rule\RuleViolation;
+use Spiral\RoadRunnerBridge\Tools\StructArmed\Support\Ancestry;
 
 /**
- * Every concrete class in the layer must extend one of the given parents, directly
- * or through a scanned ancestor. StructArmed resolves the parent chain only across
- * scanned classes, so a vendor intermediate (e.g. the scaffolder's AbstractCommand)
- * has to be listed itself.
+ * Every class in the layer must extend one of the given parents, directly or through
+ * an ancestor. A vendor intermediate (e.g. the scaffolder's AbstractCommand) has to be
+ * listed itself, see Ancestry.
  */
 final readonly class MustExtendRule implements RuleInterface
 {
@@ -31,13 +31,7 @@ final readonly class MustExtendRule implements RuleInterface
 
     public function evaluate(ClassNode $classNode): ?RuleViolation
     {
-        foreach ($this->parents as $parent) {
-            if ($classNode->extendsClass($parent)) {
-                return null;
-            }
-        }
-
-        return new RuleViolation(
+        return Ancestry::extendsAny($classNode, $this->parents) ? null : new RuleViolation(
             message: \sprintf('Class [%s] must extend one of [%s]', $classNode->className, \implode(', ', $this->parents)),
             file: $classNode->file,
             line: $classNode->line,

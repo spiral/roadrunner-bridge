@@ -22,8 +22,9 @@ use PhpParser\ParserFactory;
  * Extracts the fully-qualified type names a class exposes on its public surface:
  * the parameter and return types of its public and protected methods, and the
  * types of its public and protected properties (promoted ones included), both
- * native and from the `@param` / `@return` / `@var` tags of their docblocks.
- * Protected members of a final class are not surface.
+ * native and from their docblock tags, plus the types in the class docblock's
+ * `@method`, `@property`, `@extends`, `@template` and similar tags. Protected
+ * members of a final class and members annotated @internal are not surface.
  *
  * StructArmed's MethodNode records only counts (paramCount, hasReturnType), not
  * type names, so a signature-level rule has to read them from the AST. Names are
@@ -32,7 +33,11 @@ use PhpParser\ParserFactory;
  */
 final class ClassSignatures
 {
-    private const DOC_TAG = '/@(?:phpstan-|psalm-)?(?:param|return|var)\s+/';
+    private const MEMBER_TAGS = 'param-out|param|return|var|self-out|this-out';
+    private const CLASS_TAGS = 'property-read|property-write|property|method|extends|implements|use|mixin|template-covariant|template-contravariant|template';
+
+    /** Tags whose types do not come first: `@method Ret name(Arg $a)`, `@template T of Bound`. */
+    private const LINE_TAGS = ['method', 'template', 'template-covariant', 'template-contravariant'];
 
     /** @var array<string, array<string, list<string>>> file => short class name => FQ type names on its public surface */
     private static array $cache = [];
@@ -79,29 +84,32 @@ final class ClassSignatures
 
             $final = $class instanceof Class_ && $class->isFinal();
             $types = [];
+            self::collectDoc($class->getDocComment(), $context, self::CLASS_TAGS, $types);
 
             foreach ($class->getMethods() as $method) {
-                $exposed = self::isExposed($method->isPrivate(), $method->isProtected(), $final);
+                $exposed = ! self::isInternal($method->getDocComment())
+                    && self::isExposed($method->isPrivate(), $method->isProtected(), $final);
 
                 foreach ($method->params as $param) {
-                    // A promoted param is a property: its own visibility decides, not the method's.
-                    $paramExposed = $param->isPromoted()
-                        ? self::isExposed($param->isPrivate(), $param->isProtected(), $final)
-                        : $exposed;
+                    // A promoted param is also a property, exposed by either visibility.
+                    $paramExposed = $exposed
+                        || ($param->isPromoted() && self::isExposed($param->isPrivate(), $param->isProtected(), $final));
 
                     $paramExposed and self::collect($param->type, $types);
                 }
 
                 if ($exposed) {
                     self::collect($method->returnType, $types);
-                    self::collectDoc($method->getDocComment(), $context, $types);
+                    self::collectDoc($method->getDocComment(), $context, self::MEMBER_TAGS, $types);
                 }
             }
 
             foreach ($class->getProperties() as $property) {
-                if (self::isExposed($property->isPrivate(), $property->isProtected(), $final)) {
+                $doc = $property->getDocComment();
+
+                if (! self::isInternal($doc) && self::isExposed($property->isPrivate(), $property->isProtected(), $final)) {
                     self::collect($property->type, $types);
-                    self::collectDoc($property->getDocComment(), $context, $types);
+                    self::collectDoc($doc, $context, self::MEMBER_TAGS, $types);
                 }
             }
 
@@ -114,6 +122,11 @@ final class ClassSignatures
     private static function isExposed(bool $private, bool $protected, bool $final): bool
     {
         return ! $private && ! ($protected && $final);
+    }
+
+    private static function isInternal(?Doc $doc): bool
+    {
+        return $doc !== null && \preg_match('/^[\/*\s]*@internal(?![\w-])/m', $doc->getText()) === 1;
     }
 
     /**
@@ -143,15 +156,19 @@ final class ClassSignatures
      * array-shape keys resolve to names that no scanned class has, so callers matching against
      * scanned classes can take them as they come.
      *
+     * @param string $tags alternation of tag names, without the phpstan-/psalm- prefix
      * @param list<string> $types
      */
-    private static function collectDoc(?Doc $doc, NameContext $context, array &$types): void
+    private static function collectDoc(?Doc $doc, NameContext $context, string $tags, array &$types): void
     {
         $text = $doc?->getText() ?? '';
-        \preg_match_all(self::DOC_TAG, $text, $matches, \PREG_OFFSET_CAPTURE);
+        \preg_match_all('/@(?:phpstan-|psalm-)?(' . $tags . ')\s+/', $text, $matches, \PREG_SET_ORDER | \PREG_OFFSET_CAPTURE);
 
-        foreach ($matches[0] as [$tag, $offset]) {
-            $expression = self::typeExpression($text, $offset + \strlen($tag));
+        foreach ($matches as [[$tag, $offset], [$tagName]]) {
+            $start = $offset + \strlen($tag);
+            $expression = \in_array($tagName, self::LINE_TAGS, true)
+                ? \strstr(\substr($text, $start) . "\n", "\n", true)
+                : self::typeExpression($text, $start);
             \preg_match_all('/(?<![\w\\\\$-])\\\\?[A-Za-z_]\w*(?:\\\\\w+)*/', $expression, $names);
 
             foreach ($names[0] as $typeName) {
@@ -163,14 +180,16 @@ final class ClassSignatures
     }
 
     /**
-     * The type expression starting at $offset: up to the first whitespace outside brackets,
-     * so `array<string, Foo> $foo` yields `array<string, Foo>`.
+     * The type expression starting at $offset: up to the first whitespace outside brackets
+     * that does not sit next to `:`, `|` or `&`, so `array<string, Foo> $foo` yields
+     * `array<string, Foo>` and `\Closure(): Foo | null $f` yields `\Closure(): Foo | null`.
      */
     private static function typeExpression(string $text, int $offset): string
     {
         $depth = 0;
+        $length = \strlen($text);
 
-        for ($i = $offset, $length = \strlen($text); $i < $length; ++$i) {
+        for ($i = $offset; $i < $length; ++$i) {
             $char = $text[$i];
 
             if (\str_contains('<{(', $char)) {
@@ -178,7 +197,12 @@ final class ClassSignatures
             } elseif (\str_contains('>})', $char)) {
                 --$depth;
             } elseif ($depth <= 0 && \ctype_space($char)) {
-                break;
+                $before = \rtrim(\substr($text, $offset, $i - $offset));
+                $after = \ltrim(\substr($text, $i, 64));
+
+                if (! \str_contains(':|&', \substr($before, -1) ?: ' ') && ! \str_contains(':|&', $after[0] ?? ' ')) {
+                    break;
+                }
             }
         }
 

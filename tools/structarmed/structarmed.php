@@ -7,12 +7,16 @@ use Boundwize\StructArmed\Preset\Preset;
 use Boundwize\StructArmed\Rule\Rules\Class_\ClassNameMustHaveSuffixRule;
 use Boundwize\StructArmed\Rule\Rules\Class_\MustBeFinalRule;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\ClassMustDeclareApiOrInternalRule;
-use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InNamespaceSegmentRule;
+use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\ExceptionConventionsRule;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalClassMustBeFinalRule;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalIsUsableOnlyWithinItsModuleRule;
+use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalMustLiveInInternalNamespaceRule;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalMustNotLeakIntoPublicSignatureRule;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalNamespaceMustBeAnnotatedInternalRule;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\MustExtendRule;
+
+// Layers that wire the modules together: they may reach into any module's internals.
+$compositionRoots = ['Bootloader', 'Console', 'FallbackDispatcher'];
 
 return Architecture::define()
     ->withPresets(Preset::PSR4(), Preset::CODEQUALITY())
@@ -27,11 +31,15 @@ return Architecture::define()
     ->layer('Bridge', 'src')
     ->rule('bridge.class_must_declare_api_or_internal', new ClassMustDeclareApiOrInternalRule('Bridge'))
     ->rule('bridge.internal_namespace_must_be_annotated_internal', new InternalNamespaceMustBeAnnotatedInternalRule('Bridge'))
+    ->rule(
+        'bridge.internal_must_live_in_internal_namespace',
+        new InternalMustLiveInInternalNamespaceRule('Bridge', $compositionRoots),
+    )
     ->rule('bridge.internal_class_must_be_final', new InternalClassMustBeFinalRule('Bridge'))
     ->rule('bridge.internal_must_not_leak_into_public_signature', new InternalMustNotLeakIntoPublicSignatureRule('Bridge'))
     ->rule(
         'bridge.internal_is_usable_only_within_its_module',
-        new InternalIsUsableOnlyWithinItsModuleRule('Bridge', ['Bootloader', 'Console', 'FallbackDispatcher']),
+        new InternalIsUsableOnlyWithinItsModuleRule('Bridge', $compositionRoots),
     )
 
     // Conventions per kind of class.
@@ -45,13 +53,10 @@ return Architecture::define()
         Spiral\Scaffolder\Command\AbstractCommand::class,
     ]))
     ->rule('config.must_be_final', new MustBeFinalRule('Config'))
-    ->rule('exceptions.must_have_suffix', new InNamespaceSegmentRule('Exception', new ClassNameMustHaveSuffixRule('Bridge', 'Exception')))
-    ->rule('exceptions.must_extend_exception', new InNamespaceSegmentRule('Exception', new MustExtendRule('Bridge', [
-        RuntimeException::class,
-        LogicException::class,
+    ->rule('exceptions.conventions', new ExceptionConventionsRule('Bridge', [
         Exception::class,
         Spiral\Boot\Exception\BootException::class,
-    ])))
+    ]))
 
     // Dependency direction between modules.
     ->layer('RoadRunnerMode', 'src/RoadRunnerMode.php')
