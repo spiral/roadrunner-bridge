@@ -16,7 +16,7 @@ use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalNamespaceMustBeAnnota
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\MustExtendRule;
 
 // Layers that wire the modules together: they may reach into any module's internals.
-$compositionRoots = ['Bootloader', 'Console', 'FallbackDispatcher'];
+$compositionRoots = ['Bootloader', 'BootloaderInternal', 'Console'];
 
 return Architecture::define()
     ->withPresets(Preset::PSR4(), Preset::CODEQUALITY())
@@ -72,8 +72,8 @@ return Architecture::define()
     ->layer('Config', 'src/Config')
     ->layer('Scaffolder', 'src/Scaffolder')
     ->layer('Console', 'src/Console')
-    ->layer('FallbackDispatcher', 'src/FallbackDispatcher.php')
-    ->layer('Bootloader', 'src/Bootloader')
+    ->layer('Bootloader', 'src/Bootloader', 'src/Bootloader/Internal')
+    ->layer('BootloaderInternal', 'src/Bootloader/Internal')
     ->ruleset([
         'RoadRunnerMode'     => [],
         'Exception'          => [],
@@ -88,6 +88,6 @@ return Architecture::define()
         'Config'             => ['Centrifugo', 'GRPC'],
         'Scaffolder'         => ['Centrifugo'],
         'Console'            => ['+GRPCInternal', 'Queue', 'Scaffolder'],
-        'FallbackDispatcher' => ['Exception', 'CentrifugoInternal', 'GRPCInternal', '+Http', 'QueueInternal'],
-        'Bootloader'         => ['+Console', '+FallbackDispatcher', '+Scaffolder', 'Logger'],
+        'BootloaderInternal' => ['Exception', 'CentrifugoInternal', 'GRPCInternal', '+Http', 'QueueInternal'],
+        'Bootloader'         => ['+Console', '+BootloaderInternal', '+Scaffolder', 'Logger'],
     ]);

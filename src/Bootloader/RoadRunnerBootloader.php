@@ -15,7 +15,7 @@ use Spiral\RoadRunner\Environment;
 use Spiral\RoadRunner\EnvironmentInterface;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
-use Spiral\RoadRunnerBridge\FallbackDispatcher;
+use Spiral\RoadRunnerBridge\Bootloader\Internal\FallbackDispatcher;
 
 /**
  * @api

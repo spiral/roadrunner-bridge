@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Spiral\Tests;
+namespace Spiral\Tests\Bootloader;
 
+use Spiral\RoadRunnerBridge\Bootloader\Internal\FallbackDispatcher;
 use Spiral\RoadRunnerBridge\Exception\DispatcherNotFoundException;
-use Spiral\RoadRunnerBridge\FallbackDispatcher;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
+use Spiral\Tests\TestCase;
 use Testo\Assert;
 use Testo\Data\DataProvider;
 use Testo\Expect;
