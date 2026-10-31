@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Spiral\Tests\GRPC\ProtoRepository;
+namespace Spiral\Tests\GRPC;
 
 use Mockery as m;
-use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\CompositeRepository;
-use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\FileRepository;
+use Spiral\RoadRunnerBridge\GRPC\Internal\CompositeRepository;
+use Spiral\RoadRunnerBridge\GRPC\Internal\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 use Spiral\Tests\TestCase;
 use Testo\Assert;

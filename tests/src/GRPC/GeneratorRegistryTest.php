@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Spiral\Tests\GRPC\Generator;
+namespace Spiral\Tests\GRPC;
 
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
-use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistry;
+use Spiral\RoadRunnerBridge\GRPC\Internal\GeneratorRegistry;
 use Spiral\Tests\TestCase;
 use Testo\Assert;
 use Testo\Test;

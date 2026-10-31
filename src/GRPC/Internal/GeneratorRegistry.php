@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Spiral\RoadRunnerBridge\GRPC\Generator;
+namespace Spiral\RoadRunnerBridge\GRPC\Internal;
+
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
+use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
 
 /**
  * @internal
