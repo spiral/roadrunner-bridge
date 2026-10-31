@@ -14,7 +14,7 @@ use Spiral\RoadRunner\Http\PSR7Worker;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
-use Spiral\RoadRunnerBridge\FallbackDispatcher;
+use Spiral\RoadRunnerBridge\Bootloader\Internal\FallbackDispatcher;
 use Spiral\Tests\TestCase;
 use Testo\Assert;
 use Testo\Test;

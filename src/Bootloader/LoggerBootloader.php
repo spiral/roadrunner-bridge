@@ -14,6 +14,9 @@ use Spiral\RoadRunnerBridge\Logger\Handler;
 use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
+/**
+ * @api
+ */
 final class LoggerBootloader extends Bootloader
 {
     #[\Override]

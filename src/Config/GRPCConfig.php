@@ -12,6 +12,9 @@ use Spiral\Interceptors\InterceptorInterface;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
 
+/**
+ * @api
+ */
 final class GRPCConfig extends InjectableConfig
 {
     public const CONFIG = 'grpc';

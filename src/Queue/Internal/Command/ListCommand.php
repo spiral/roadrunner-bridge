@@ -1,0 +1,99 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Spiral\RoadRunnerBridge\Queue\Internal\Command;
+
+use Spiral\Console\Attribute\AsCommand;
+use Spiral\Console\Command;
+use Spiral\RoadRunner\Jobs\Exception\JobsException;
+use Spiral\RoadRunner\Jobs\JobsInterface;
+use Spiral\RoadRunner\Jobs\QueueInterface;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableCell;
+use Symfony\Component\Console\Helper\TableCellStyle;
+
+/**
+ * @internal
+ */
+#[AsCommand(
+    name: 'rr:jobs:list',
+    description: 'Displays a list of available job pipelines for the RoadRunner.',
+)]
+final class ListCommand extends Command
+{
+    /**
+     * @throws JobsException
+     */
+    public function perform(JobsInterface $jobs): int
+    {
+        $queues = \iterator_to_array($jobs->getIterator());
+
+        if ($queues === []) {
+            $this->info('No job pipelines are currently declared for the RoadRunner.');
+
+            return self::SUCCESS;
+        }
+
+        $queues = \array_map(static function (QueueInterface $queue): array {
+            \is_callable([$queue, 'getPipelineStat']) or throw new \RuntimeException(
+                'The queue does not support the pipeline statistics.',
+            );
+            $stat = $queue->getPipelineStat();
+            \assert($stat !== null);
+
+            $isReady = $stat->getReady();
+            $fontColor = $isReady ? 'green' : 'gray';
+            $defaultColor = $isReady ? 'default' : 'gray';
+            $activeFont = $isReady ? 'bold' : '';
+
+            return [
+                'name' => new TableCell($stat->getPipeline(), [
+                    'style' => new TableCellStyle(['fg' => $fontColor, 'options' => $activeFont]),
+                ]),
+                'driver' => new TableCell($stat->getDriver(), [
+                    'style' => new TableCellStyle(
+                        ['fg' => $defaultColor, 'options' => $activeFont],
+                    ),
+                ]),
+                'priority' => new TableCell((string) $stat->getPriority(), [
+                    'style' => new TableCellStyle(
+                        ['fg' => $defaultColor, 'options' => $activeFont],
+                    ),
+                ]),
+                'active_jobs' => new TableCell((string) $stat->getActive(), [
+                    'style' => new TableCellStyle(
+                        ['fg' => $stat->getActive() > 0 ? 'green' : $defaultColor, 'options' => $activeFont],
+                    ),
+                ]),
+                'delayed_jobs' => new TableCell((string) $stat->getDelayed(), [
+                    'style' => new TableCellStyle(
+                        ['fg' => $stat->getDelayed() > 0 ? 'green' : $defaultColor, 'options' => $activeFont],
+                    ),
+                ]),
+                'reserved_jobs' => new TableCell((string) $stat->getReserved(), [
+                    'style' => new TableCellStyle(
+                        ['fg' => $stat->getReserved() > 0 ? 'green' : $defaultColor, 'options' => $activeFont],
+                    ),
+                ]),
+                'is_active' => $stat->getReady() ? '<fg=green> ✓ </>' : '<fg=red> ✖ </>',
+            ];
+        }, $queues);
+
+        \ksort($queues);
+        \assert($this->output !== null);
+        $table = new Table($this->output);
+
+        $table->setHeaders(
+            ['Name', 'Driver', 'Priority', 'Active jobs', 'Delayed jobs', 'Reserved jobs', 'Is active',],
+        );
+
+        foreach ($queues as $data) {
+            $table->addRow($data);
+        }
+
+        $table->render();
+
+        return self::SUCCESS;
+    }
+}

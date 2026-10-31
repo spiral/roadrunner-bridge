@@ -8,10 +8,13 @@ use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Console\Bootloader\ConsoleBootloader;
 use Spiral\Core\Container;
 use Spiral\RoadRunner\Jobs\JobsInterface;
-use Spiral\RoadRunnerBridge\Console\Command\GRPC;
-use Spiral\RoadRunnerBridge\Console\Command\Queue;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Command as GRPC;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
+use Spiral\RoadRunnerBridge\Queue\Internal\Command as Queue;
 
+/**
+ * @api
+ */
 final class CommandBootloader extends Bootloader
 {
     public function init(ConsoleBootloader $console, Container $container): void
