@@ -13,7 +13,8 @@ use Spiral\RoadRunnerBridge\Tools\StructArmed\Support\ClassSignatures;
 
 /**
  * A class on the public surface must not name an internal type in its signature:
- * a public or protected parameter, return, or property. A type is internal when it
+ * a parent, interface or trait, or a public or protected parameter, return, or
+ * property (native or PHPDoc type). A type is internal when it
  * lives under an `Internal` namespace or is annotated @internal — the annotation
  * counts too, because an @internal interface outside `Internal` is just as free to
  * change. Classes that are themselves internal are exempt.
@@ -46,6 +47,27 @@ final class InternalMustNotLeakIntoPublicSignatureRule extends AbstractLayerAwar
     public function evaluateAll(ClassNode $classNode): array
     {
         $violations = [];
+
+        $supertypes = [$classNode->extends, ...$classNode->implements, ...$classNode->interfaceExtends, ...$classNode->traits];
+
+        foreach (\array_filter($supertypes) as $type) {
+            if (! $this->isInternalType($type)) {
+                continue;
+            }
+
+            $violations[] = new RuleViolation(
+                message: \sprintf(
+                    '%s [%s] must not extend, implement or use internal [%s]',
+                    $classNode->getType(),
+                    $classNode->className,
+                    $type,
+                ),
+                file: $classNode->file,
+                line: $classNode->line,
+                className: $classNode->className,
+                layer: $classNode->layer,
+            );
+        }
 
         foreach (ClassSignatures::publicTypes($classNode->file, $classNode->shortName()) as $type) {
             if (! $this->isInternalType($type)) {

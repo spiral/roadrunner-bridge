@@ -7,6 +7,7 @@ use Boundwize\StructArmed\Preset\Preset;
 use Boundwize\StructArmed\Rule\Rules\Class_\ClassNameMustHaveSuffixRule;
 use Boundwize\StructArmed\Rule\Rules\Class_\MustBeFinalRule;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\ClassMustDeclareApiOrInternalRule;
+use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InNamespaceSegmentRule;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalClassMustBeFinalRule;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalIsUsableOnlyWithinItsModuleRule;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalMustNotLeakIntoPublicSignatureRule;
@@ -44,14 +45,13 @@ return Architecture::define()
         Spiral\Scaffolder\Command\AbstractCommand::class,
     ]))
     ->rule('config.must_be_final', new MustBeFinalRule('Config'))
-    ->layerPattern('Exceptions', '/^Spiral\\\\RoadRunnerBridge\\\\(?:\w+\\\\)*Exception\\\\/')
-    ->rule('exceptions.must_have_suffix', new ClassNameMustHaveSuffixRule('Exceptions', 'Exception'))
-    ->rule('exceptions.must_extend_exception', new MustExtendRule('Exceptions', [
+    ->rule('exceptions.must_have_suffix', new InNamespaceSegmentRule('Exception', new ClassNameMustHaveSuffixRule('Bridge', 'Exception')))
+    ->rule('exceptions.must_extend_exception', new InNamespaceSegmentRule('Exception', new MustExtendRule('Bridge', [
         RuntimeException::class,
         LogicException::class,
         Exception::class,
         Spiral\Boot\Exception\BootException::class,
-    ]))
+    ])))
 
     // Dependency direction between modules.
     ->layer('RoadRunnerMode', 'src/RoadRunnerMode.php')
