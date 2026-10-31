@@ -1,5 +1,11 @@
 {
     "require": {
-        "boundwize/structarmed": "^0.19"
+        "boundwize/structarmed": "^0.19",
+        "nikic/php-parser": "^5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Spiral\\RoadRunnerBridge\\Tools\\StructArmed\\": "src/"
+        }
     }
 }

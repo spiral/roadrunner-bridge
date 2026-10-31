@@ -12,6 +12,9 @@ use Spiral\RoadRunnerBridge\Console\Command\GRPC;
 use Spiral\RoadRunnerBridge\Console\Command\Queue;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 
+/**
+ * @api
+ */
 final class CommandBootloader extends Bootloader
 {
     public function init(ConsoleBootloader $console, Container $container): void

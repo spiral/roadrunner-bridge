@@ -11,6 +11,9 @@ use Spiral\Console\Attribute\Question;
 use Spiral\RoadRunnerBridge\Scaffolder\Declaration\CentrifugoHandlerDeclaration;
 use Spiral\Scaffolder\Command\AbstractCommand;
 
+/**
+ * @internal
+ */
 #[AsCommand(name: 'create:centrifugo-handler', description: 'Create Centrifugo handler declaration')]
 final class CentrifugoHandlerCommand extends AbstractCommand
 {

@@ -10,6 +10,8 @@ use Spiral\RoadRunner\GRPC\Method;
 
 /**
  * The currently processing gRPC request with its context.
+ *
+ * @api
  */
 interface UnaryCallInterface
 {

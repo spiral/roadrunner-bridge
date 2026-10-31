@@ -11,6 +11,9 @@ use Spiral\Console\Command;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 
+/**
+ * @internal
+ */
 #[AsCommand(
     name: 'rr:jobs:consume',
     description: 'Resumes the consumption of jobs for the specified pipeline in the RoadRunner.',

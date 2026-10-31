@@ -11,6 +11,9 @@ use Spiral\Console\Command;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\JobsInterface;
 
+/**
+ * @internal
+ */
 #[AsCommand(
     name: 'rr:jobs:pause',
     description: 'Pauses the consumption of jobs for the specified pipeline in the RoadRunner.',

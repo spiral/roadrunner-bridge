@@ -17,6 +17,9 @@ use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\FallbackDispatcher;
 
+/**
+ * @api
+ */
 final class RoadRunnerBootloader extends Bootloader
 {
     #[\Override]

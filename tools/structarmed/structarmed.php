@@ -4,7 +4,14 @@ declare(strict_types=1);
 
 use Boundwize\StructArmed\Architecture;
 use Boundwize\StructArmed\Preset\Preset;
+use Boundwize\StructArmed\Rule\Rules\Class_\ClassNameMustHaveSuffixRule;
 use Boundwize\StructArmed\Rule\Rules\Class_\MustBeFinalRule;
+use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\ClassMustDeclareApiOrInternalRule;
+use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalClassMustBeFinalRule;
+use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalIsUsableOnlyWithinItsModuleRule;
+use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalMustNotLeakIntoPublicSignatureRule;
+use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalNamespaceMustBeAnnotatedInternalRule;
+use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\MustExtendRule;
 
 return Architecture::define()
     ->withPresets(Preset::PSR4(), Preset::CODEQUALITY())
@@ -15,6 +22,38 @@ return Architecture::define()
     )
     ->layer('tests', 'tests/src')
 
+    // Encapsulation: who may see what.
+    ->layer('Bridge', 'src')
+    ->rule('bridge.class_must_declare_api_or_internal', new ClassMustDeclareApiOrInternalRule('Bridge'))
+    ->rule('bridge.internal_namespace_must_be_annotated_internal', new InternalNamespaceMustBeAnnotatedInternalRule('Bridge'))
+    ->rule('bridge.internal_class_must_be_final', new InternalClassMustBeFinalRule('Bridge'))
+    ->rule('bridge.internal_must_not_leak_into_public_signature', new InternalMustNotLeakIntoPublicSignatureRule('Bridge'))
+    ->rule(
+        'bridge.internal_is_usable_only_within_its_module',
+        new InternalIsUsableOnlyWithinItsModuleRule('Bridge', ['Bootloader', 'Console', 'FallbackDispatcher']),
+    )
+
+    // Conventions per kind of class.
+    ->rule('bootloader.must_be_final', new MustBeFinalRule('Bootloader'))
+    ->rule('bootloader.must_have_suffix', new ClassNameMustHaveSuffixRule('Bootloader', 'Bootloader'))
+    ->rule('bootloader.must_extend_bootloader', new MustExtendRule('Bootloader', [Spiral\Boot\Bootloader\Bootloader::class]))
+    ->rule('console.must_be_final', new MustBeFinalRule('Console'))
+    ->rule('console.must_have_suffix', new ClassNameMustHaveSuffixRule('Console', 'Command'))
+    ->rule('console.must_extend_command', new MustExtendRule('Console', [
+        Spiral\Console\Command::class,
+        Spiral\Scaffolder\Command\AbstractCommand::class,
+    ]))
+    ->rule('config.must_be_final', new MustBeFinalRule('Config'))
+    ->layerPattern('Exceptions', '/^Spiral\\\\RoadRunnerBridge\\\\(?:\w+\\\\)*Exception\\\\/')
+    ->rule('exceptions.must_have_suffix', new ClassNameMustHaveSuffixRule('Exceptions', 'Exception'))
+    ->rule('exceptions.must_extend_exception', new MustExtendRule('Exceptions', [
+        RuntimeException::class,
+        LogicException::class,
+        Exception::class,
+        Spiral\Boot\Exception\BootException::class,
+    ]))
+
+    // Dependency direction between modules.
     ->layer('RoadRunnerMode', 'src/RoadRunnerMode.php')
     ->layer('Exception', 'src/Exception')
     ->layer('Logger', 'src/Logger')

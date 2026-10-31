@@ -24,6 +24,9 @@ use Spiral\RoadRunnerBridge\Centrifugo\Internal\ServiceRegistry;
 use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
 use Spiral\RoadRunnerBridge\Config\CentrifugoConfig;
 
+/**
+ * @api
+ */
 final class CentrifugoBootloader extends Bootloader
 {
     public function __construct(

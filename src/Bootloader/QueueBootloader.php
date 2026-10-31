@@ -21,6 +21,9 @@ use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\Serializer\Bootloader\SerializerBootloader;
 
+/**
+ * @api
+ */
 final class QueueBootloader extends Bootloader
 {
     #[\Override]

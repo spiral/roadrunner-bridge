@@ -11,6 +11,9 @@ use Spiral\RoadRunnerBridge\GRPC\Internal\Dispatcher as GRPC;
 use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher as Http;
 use Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher as Queue;
 
+/**
+ * @internal
+ */
 final readonly class FallbackDispatcher implements DispatcherInterface
 {
     private const PLUGIN_ERROR = 'To use RoadRunner in `%s` mode, please register dispatcher `%s`.';

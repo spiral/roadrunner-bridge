@@ -6,4 +6,7 @@ namespace Spiral\RoadRunnerBridge\GRPC\Exception;
 
 use Spiral\Boot\Exception\BootException;
 
+/**
+ * @api
+ */
 class ServiceRegistrationException extends BootException {}

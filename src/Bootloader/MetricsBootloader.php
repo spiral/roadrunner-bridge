@@ -9,6 +9,9 @@ use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\RoadRunner\Metrics\Metrics;
 use Spiral\RoadRunner\Metrics\MetricsInterface;
 
+/**
+ * @api
+ */
 final class MetricsBootloader extends Bootloader
 {
     #[\Override]

@@ -20,6 +20,9 @@ use Spiral\RoadRunnerBridge\GRPC\Internal\ProcessRunner;
 use Spiral\RoadRunnerBridge\GRPC\Internal\ProtoCompiler;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 
+/**
+ * @internal
+ */
 final class GenerateCommand extends Command
 {
     protected const SIGNATURE = 'grpc:generate

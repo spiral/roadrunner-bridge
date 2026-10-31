@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\GRPC\ProtoRepository;
 
+/**
+ * @api
+ */
 interface ProtoFilesRepositoryInterface
 {
     /**

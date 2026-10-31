@@ -12,6 +12,9 @@ use Spiral\RoadRunnerBridge\Console\Command\Scaffolder\CentrifugoHandlerCommand;
 use Spiral\RoadRunnerBridge\Scaffolder\Declaration\CentrifugoHandlerDeclaration;
 use Spiral\Scaffolder\Bootloader\ScaffolderBootloader as BaseScaffolderBootloader;
 
+/**
+ * @api
+ */
 final class ScaffolderBootloader extends Bootloader
 {
     public function __construct(

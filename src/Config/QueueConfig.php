@@ -14,6 +14,8 @@ use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
  *     consume: bool,
  *     options: OptionsInterface|JobsOptionsInterface|null
  * }
+ *
+ * @api
  */
 final readonly class QueueConfig
 {

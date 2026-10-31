@@ -13,6 +13,9 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Helper\TableCellStyle;
 
+/**
+ * @internal
+ */
 #[AsCommand(
     name: 'rr:jobs:list',
     description: 'Displays a list of available job pipelines for the RoadRunner.',

@@ -34,6 +34,9 @@ use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 use Spiral\Tokenizer\TokenizationListenerInterface;
 use Spiral\Tokenizer\TokenizerListenerRegistryInterface;
 
+/**
+ * @api
+ */
 final class GRPCBootloader extends Bootloader
 {
     public function __construct(

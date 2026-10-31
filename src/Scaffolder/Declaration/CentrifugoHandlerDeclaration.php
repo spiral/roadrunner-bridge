@@ -11,6 +11,9 @@ use Spiral\Scaffolder\Config\ScaffolderConfig;
 use Spiral\Scaffolder\Declaration\AbstractDeclaration;
 use Spiral\Scaffolder\Declaration\HasInstructions;
 
+/**
+ * @api
+ */
 class CentrifugoHandlerDeclaration extends AbstractDeclaration implements HasInstructions
 {
     public const TYPE = 'centrifugo-handler';

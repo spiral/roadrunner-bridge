@@ -11,6 +11,8 @@ use Spiral\Interceptors\InterceptorInterface;
 /**
  * @psalm-type TLegacyInterceptor = Autowire|CoreInterceptorInterface|class-string<CoreInterceptorInterface>
  * @psalm-type TInterceptor = Autowire|InterceptorInterface|class-string<InterceptorInterface>
+ *
+ * @api
  */
 interface RegistryInterface
 {

@@ -8,6 +8,9 @@ use RoadRunner\Lock\Lock;
 use RoadRunner\Lock\LockInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 
+/**
+ * @api
+ */
 final class LockBootloader extends Bootloader
 {
     #[\Override]

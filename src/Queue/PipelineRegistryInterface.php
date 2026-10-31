@@ -7,7 +7,7 @@ namespace Spiral\RoadRunnerBridge\Queue;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 
 /**
- * @internal
+ * @api
  */
 interface PipelineRegistryInterface
 {

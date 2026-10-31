@@ -7,6 +7,9 @@ namespace Spiral\RoadRunnerBridge\Console\Command\GRPC;
 use Spiral\Console\Command;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 
+/**
+ * @internal
+ */
 final class ListCommand extends Command
 {
     protected const SIGNATURE = 'grpc:services';
