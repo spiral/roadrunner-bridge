@@ -1,6 +1,6 @@
 {
     "require": {
-        "boundwize/structarmed": "^0.19",
+        "boundwize/structarmed": "^0.20",
         "nikic/php-parser": "^5.4"
     },
     "autoload": {

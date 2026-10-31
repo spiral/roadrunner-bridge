@@ -9,7 +9,6 @@ use Boundwize\StructArmed\Rule\AbstractLayerAwareRule;
 use Boundwize\StructArmed\Rule\MultipleRuleViolationInterface;
 use Boundwize\StructArmed\Rule\RuleInterface;
 use Boundwize\StructArmed\Rule\RuleViolation;
-use Spiral\RoadRunnerBridge\Tools\StructArmed\Support\ClassAnnotations;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Support\ClassSignatures;
 
 /**
@@ -80,6 +79,6 @@ final class InternalMustNotLeakIntoPublicSignatureRule extends AbstractLayerAwar
     private function isInternal(ClassNode $classNode): bool
     {
         return \str_contains($classNode->className, self::SEGMENT)
-            || ClassAnnotations::hasInternal($classNode->file, $classNode->shortName());
+            || $classNode->isInternal;
     }
 }
