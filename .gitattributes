@@ -14,3 +14,7 @@
 /README.md       -export-ignore
 /src             -export-ignore
 /src/**          -export-ignore
+
+# Agent skills that llm/skills installs into dependent projects.
+/skills          -export-ignore
+/skills/**       -export-ignore

@@ -69,7 +69,10 @@
         "monolog/monolog": "<3.0"
     },
     "suggest": {
-        "ext-protobuf": "For better performance, install the protobuf C extension."
+        "ext-protobuf": "For better performance, install the protobuf C extension.",
+        "internal/dload": "Downloads the rr, buf, protoc and protoc-gen-php-grpc binaries pinned in dload.xml.",
+        "roadrunner/cli": "Downloads the RoadRunner binary and the gRPC code generation tools (rr get, rr get-grpc-tools).",
+        "llm/skills": "Installs the package's AI agent skills (skills/) into the project automatically."
     },
     "autoload": {
         "psr-4": {
@@ -110,6 +113,9 @@
             "bin-links": true,
             "forward-command": false,
             "target-directory": "tools"
+        },
+        "skills": {
+            "source": "skills"
         }
     },
     "minimum-stability": "dev",

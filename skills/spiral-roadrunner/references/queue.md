@@ -1,0 +1,112 @@
+# Jobs queue
+
+`QueueBootloader` turns the RoadRunner Jobs plugin into a `spiral/queue` driver: jobs pushed through
+`Spiral\Queue\QueueInterface` go to a RoadRunner pipeline, and a `jobs` worker consumes them and runs the
+Spiral job handlers. Job handlers, `JobHandler`, serializers and queue interceptors are `spiral/queue`
+itself — this file covers what the bridge adds.
+
+## Configuration
+
+Everything lives in `app/config/queue.php`. The connection uses the `roadrunner` driver alias the bridge
+registers; `pipelines` is a **top-level** key of the queue config, not part of a connection.
+
+```php
+use Spiral\RoadRunner\Jobs\Queue\AMQPCreateInfo;
+use Spiral\RoadRunner\Jobs\Queue\MemoryCreateInfo;
+use Spiral\Queue\Options;
+
+return [
+    'default' => env('QUEUE_CONNECTION', 'roadrunner'),
+    'connections' => [
+        'roadrunner' => [
+            'driver' => 'roadrunner',
+            'default' => 'memory',   // pipeline used when a push names none
+            // 'pipeline' => 'mail', // preferred over 'default' when both are set
+        ],
+    ],
+    // Pipelines the application declares in RoadRunner itself.
+    'pipelines' => [
+        'memory' => [
+            'connector' => new MemoryCreateInfo('local'), // required: any CreateInfoInterface
+            'consume' => true,                            // declare and resume when a jobs worker boots
+        ],
+        'mail' => [
+            'connector' => new AMQPCreateInfo('mail', /* ... */),
+            'consume' => false,                           // start later with rr:jobs:consume
+            'options' => Options::delayed(0),             // default options for this pipeline
+        ],
+    ],
+];
+```
+
+The pipeline a push goes to: `Options::onQueue()` / `withQueue()` → the connection's `pipeline` → its
+`default`. None of them set fails with `InvalidArgumentException`.
+
+### Two ways a pipeline exists
+
+- **Declared in `.rr.yaml`** (`jobs.pipelines`, consumed through `jobs.consume`) — push to it by name;
+  leave it out of the PHP `pipelines` list. The bridge just connects to it.
+- **Declared from PHP** — listed in `pipelines` with a `connector`. The bridge creates it in RoadRunner on
+  the first push when it is missing; with `consume: true` a `jobs` worker also creates and resumes it at
+  boot (a failure is logged as a warning, not thrown). The `.rr.yaml` then needs only the `jobs` section
+  with a pool and the driver's own connection settings (e.g. `amqp`).
+
+The connector's name is the pipeline's name in RoadRunner. Pipeline existence is cached for 60 seconds.
+A `KafkaCreateInfo` connector without `options` gets `KafkaOptions` for its topic.
+
+## Pushing
+
+```php
+use Spiral\Queue\Options;
+use Spiral\Queue\QueueInterface;
+
+$id = $queue->push(SendMail::class, ['to' => $email], Options::onQueue('mail')->withDelay(30));
+```
+
+`$options` is either a Spiral `OptionsInterface` (queue, delay and headers are carried over) or a
+RoadRunner `Spiral\RoadRunner\Jobs\OptionsInterface` for driver features such as priority or
+auto-ack — those go to the default pipeline, since they carry no queue name.
+
+### Payload serialization
+
+The payload is serialized with the serializer `spiral/queue` resolves for the job name (queue config
+`registry.serializers`, default from `SerializerBootloader`). On the consuming side the bridge decides the
+type to unserialize into:
+
+1. an object payload travels with a `payload_class` header → unserialized into that class;
+2. otherwise the type of the `$payload` parameter of the handler's `invoke()` → that class, or the raw
+   string for `string`;
+3. otherwise the serializer's default (an array for JSON).
+
+Replace the logic by rebinding `Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface`.
+
+## Consuming
+
+A `jobs` worker runs each task in the `queue-task` scope, where `Spiral\Queue\TaskInterface` holds the id,
+queue, name, payload and headers, and calls the `spiral/queue` handler with driver `roadrunner`.
+
+- success → the task is **acked**;
+- `Spiral\Queue\Exception\RetryException` → reported and **requeued**; its `OptionsInterface` sets the
+  retry delay and extra headers (`new RetryException('reason', Options::delayed(10))`);
+- any other exception → reported and **nacked**; what happens next is the pipeline's RoadRunner retry
+  settings.
+
+## Lower-level access
+
+- `Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface::getPipeline($name)` — the RoadRunner
+  `Spiral\RoadRunner\Jobs\QueueInterface` for a pipeline, created from config when missing: pause, resume,
+  dispatch prepared tasks, read stats.
+- `Spiral\RoadRunner\Jobs\JobsInterface` and `ConsumerInterface` are bound as singletons.
+
+## Commands
+
+Registered by `CommandBootloader` when `QueueBootloader` is loaded:
+
+| Command | Does |
+|---|---|
+| `rr:jobs:list` | Pipelines in RoadRunner with driver, priority, active/delayed/reserved jobs, readiness |
+| `rr:jobs:pause <pipeline>` | Stops consuming the pipeline; takes the RoadRunner pipeline name (the connector name) |
+| `rr:jobs:consume <pipeline>` | Resumes a paused pipeline; fails when it is not paused. Takes the `queue.pipelines` key, or the RoadRunner name for a pipeline missing from that list |
+
+The two commands read the name differently, so give a `queue.pipelines` key the same name as its
+connector — then one name works for both.
