@@ -33,7 +33,7 @@ return [
         'mail' => [
             'connector' => new AMQPCreateInfo('mail', /* ... */),
             'consume' => false,                           // start later with rr:jobs:consume
-            'options' => Options::delayed(0),             // default options for this pipeline
+            'options' => Options::delayed(5),             // defaults for pushes to this pipeline
         ],
     ],
 ];
@@ -47,12 +47,25 @@ The pipeline a push goes to: `Options::onQueue()` / `withQueue()` → the connec
 - **Declared in `.rr.yaml`** (`jobs.pipelines`, consumed through `jobs.consume`) — push to it by name;
   leave it out of the PHP `pipelines` list. The bridge just connects to it.
 - **Declared from PHP** — listed in `pipelines` with a `connector`. The bridge creates it in RoadRunner on
-  the first push when it is missing; with `consume: true` a `jobs` worker also creates and resumes it at
-  boot (a failure is logged as a warning, not thrown). The `.rr.yaml` then needs only the `jobs` section
-  with a pool and the driver's own connection settings (e.g. `amqp`).
+  the first push when it is missing, paused; with `consume: true` a `jobs` worker creates and resumes it
+  at boot (a failure is logged as a warning, not thrown). A pipeline that already exists at boot is left
+  as is, so one a push created earlier stays paused until `rr:jobs:consume`. The `.rr.yaml` then needs
+  only the `jobs` section with a pool and the driver's own connection settings (e.g. `amqp`).
 
-The connector's name is the pipeline's name in RoadRunner. Pipeline existence is cached for 60 seconds.
-A `KafkaCreateInfo` connector without `options` gets `KafkaOptions` for its topic.
+The connector's name is the pipeline's name in RoadRunner. Pipeline existence is cached for 60 seconds per
+worker: the first push after another process (or the worker's own boot) declared the pipeline can fail
+with `pipeline already exists`, and the next push succeeds.
+
+For a Kafka pipeline give `options` a `KafkaOptions` with the topic (`new KafkaOptions('orders')`): the
+topic is not taken from the connector, and other options leave the push without one.
+
+### Default options
+
+`options` sets defaults for pushes that name the pipeline by its `pipelines` key — a push naming the
+RoadRunner pipeline instead gets none. Per-push options override them only partly:
+
+- a per-push delay or priority wins when it is not zero; an explicit zero keeps the default;
+- per-push headers replace the default headers as a whole, so set shared headers per push instead.
 
 ## Pushing
 
@@ -63,7 +76,8 @@ use Spiral\Queue\QueueInterface;
 $id = $queue->push(SendMail::class, ['to' => $email], Options::onQueue('mail')->withDelay(30));
 ```
 
-`$options` is either a Spiral `OptionsInterface` (queue, delay and headers are carried over) or a
+`$options` is either a Spiral `OptionsInterface` (queue, delay and headers are carried over, merged with
+the pipeline defaults as above) or a
 RoadRunner `Spiral\RoadRunner\Jobs\OptionsInterface` for driver features such as priority or
 auto-ack — those go to the default pipeline, since they carry no queue name.
 

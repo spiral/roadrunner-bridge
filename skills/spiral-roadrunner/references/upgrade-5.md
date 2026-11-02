@@ -39,8 +39,10 @@ addresses for RPC and relays are not the plugin and keep working.
 - The base `namespace` is cut from generated paths only as a whole segment: with `App`, a
   `php_namespace` of `AppExtra\...` used to land in `Extra/...` and now lands in `AppExtra/...`.
   Regenerate and review the diff of the generated directory.
-- Regenerated files differ from the protoc output only by the `json_name` option buf records in field
-  comments and the embedded descriptor; JSON names stay the same.
+- Regenerated files differ from the protoc output in the proto file path — the `# source:` header and
+  the descriptor's file name are relative to `servicesBasePath` now — and in the `json_name` buf records
+  in field comments and the descriptor; class names, code and JSON field names stay the same. Regenerate
+  all proto files at once rather than mixing old and new output.
 
 ## Centrifugo `subrefresh`
 
