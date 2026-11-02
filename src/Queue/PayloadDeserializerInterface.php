@@ -6,6 +6,9 @@ namespace Spiral\RoadRunnerBridge\Queue;
 
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 
+/**
+ * @api
+ */
 interface PayloadDeserializerInterface
 {
     /**

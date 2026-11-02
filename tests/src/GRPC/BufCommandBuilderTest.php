@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC;
 
-use Spiral\RoadRunnerBridge\GRPC\Internal\BufCommandBuilder;
-use Spiral\RoadRunnerBridge\GRPC\Internal\BufTemplate;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BufCommandBuilder;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BufTemplate;
 use Testo\Assert;
 use Testo\Test;
 

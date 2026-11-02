@@ -17,6 +17,8 @@ use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 
 /**
  * @psalm-import-type TPipeline from \Spiral\RoadRunnerBridge\Config\QueueConfig
+ *
+ * @internal
  */
 final class Queue implements QueueInterface
 {

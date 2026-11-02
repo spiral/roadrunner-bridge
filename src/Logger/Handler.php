@@ -11,6 +11,9 @@ use Monolog\LogRecord;
 use RoadRunner\Logger\Logger as RoadRunnerLogger;
 use Spiral\RoadRunnerBridge\Logger\Internal\RoadRunnerJsonFormatter;
 
+/**
+ * @api
+ */
 final class Handler extends AbstractProcessingHandler
 {
     /**

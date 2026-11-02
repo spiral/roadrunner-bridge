@@ -6,6 +6,9 @@ namespace Spiral\RoadRunnerBridge\Centrifugo;
 
 use RoadRunner\Centrifugo\Request\RequestInterface;
 
+/**
+ * @api
+ */
 interface ErrorHandlerInterface
 {
     public function handle(RequestInterface $request, \Throwable $e): void;

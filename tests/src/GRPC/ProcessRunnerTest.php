@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Spiral\Tests\GRPC;
 
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
-use Spiral\RoadRunnerBridge\GRPC\Internal\ProcessRunner;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\ProcessRunner;
 use Testo\Assert;
 use Testo\Expect;
 use Testo\Test;

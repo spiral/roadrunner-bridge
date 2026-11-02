@@ -10,6 +10,8 @@ use Spiral\Boot\Injector\ProvideFrom;
 
 /**
  * @see https://docs.roadrunner.dev/docs/logging-and-observability/logger#modes
+ *
+ * @api
  */
 #[ProvideFrom(method: 'detect')]
 enum RoadRunnerLogsMode: string implements InjectableEnumInterface

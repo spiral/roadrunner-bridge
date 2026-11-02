@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\GRPC\Generator;
 
+/**
+ * @api
+ */
 interface GeneratorInterface
 {
     /**

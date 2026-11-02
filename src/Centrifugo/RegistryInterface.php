@@ -9,6 +9,8 @@ use Spiral\Core\Container\Autowire;
 
 /**
  * @psalm-type TService = Autowire|ServiceInterface|class-string<ServiceInterface>
+ *
+ * @api
  */
 interface RegistryInterface
 {

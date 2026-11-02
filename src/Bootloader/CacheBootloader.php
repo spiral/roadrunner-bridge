@@ -13,6 +13,9 @@ use Spiral\RoadRunner\KeyValue\Serializer\DefaultSerializer;
 use Spiral\RoadRunner\KeyValue\Serializer\SerializerInterface;
 use Spiral\RoadRunner\KeyValue\StorageInterface;
 
+/**
+ * @api
+ */
 final class CacheBootloader extends Bootloader
 {
     #[\Override]

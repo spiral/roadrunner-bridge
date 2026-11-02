@@ -8,6 +8,8 @@ use Spiral\RoadRunner\GRPC\ServiceInterface;
 
 /**
  * The gRPC service locator.
+ *
+ * @api
  */
 interface LocatorInterface
 {

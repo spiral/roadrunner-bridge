@@ -12,6 +12,8 @@ use Spiral\RoadRunnerBridge\Centrifugo\RegistryInterface;
  * @psalm-import-type TService from RegistryInterface
  * @psalm-import-type TInterceptor from Interceptor\RegistryInterface
  * @psalm-import-type TLegacyInterceptor from Interceptor\RegistryInterface
+ *
+ * @api
  */
 final class CentrifugoConfig extends InjectableConfig
 {

@@ -8,6 +8,9 @@ use Spiral\Boot\Injector\InjectableEnumInterface;
 use Spiral\Boot\Injector\ProvideFrom;
 use Spiral\RoadRunner\EnvironmentInterface;
 
+/**
+ * @api
+ */
 #[ProvideFrom(method: 'detect')]
 enum RoadRunnerMode: string implements InjectableEnumInterface
 {

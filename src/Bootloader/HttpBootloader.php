@@ -15,6 +15,9 @@ use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher;
 
+/**
+ * @api
+ */
 final class HttpBootloader extends Bootloader
 {
     #[\Override]

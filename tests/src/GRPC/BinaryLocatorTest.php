@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Spiral\Tests\GRPC;
 
 use Spiral\RoadRunnerBridge\GRPC\Exception\BinaryNotFoundException;
-use Spiral\RoadRunnerBridge\GRPC\Internal\BinaryLocator;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BinaryLocator;
 use Testo\Assert;
 use Testo\Expect;
 use Testo\Lifecycle\AfterTest;
