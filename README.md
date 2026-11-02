@@ -54,7 +54,7 @@ protected const LOAD = [
     RoadRunnerBridge\CentrifugoBootloader::class, // Optional, if it needs to work with centrifugo server
     RoadRunnerBridge\MetricsBootloader::class, // Optional, if it needs to work with metrics plugin
     RoadRunnerBridge\LoggerBootloader::class, // Optional, if it needs to work with app-logger plugin
-    RoadRunnerBridge\LockBootloader::class, // Optional, if it needs to work with lock plugin
+    RoadRunnerBridge\LockBootloader::class, // Optional, if it needs to work with lock plugin; QueueBootloader loads it
     RoadRunnerBridge\ScaffolderBootloader::class, // Optional, to generate Centrifugo handlers via Scaffolder
     RoadRunnerBridge\CommandBootloader::class,
     // ...

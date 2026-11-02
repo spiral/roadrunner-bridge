@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Queue\Internal;
 
 use Psr\Log\LoggerInterface;
+use RoadRunner\Lock\LockInterface;
+use Spiral\Goridge\Exception\GoridgeException;
 use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Jobs;
@@ -17,12 +19,25 @@ use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 /**
+ * Declares the pipelines of the `pipelines` config in RoadRunner.
+ *
+ * One process at a time declares a pipeline, under a RoadRunner lock; the others wait for it. A pipeline is
+ * declared paused, and a `consume` one is resumed by its declarer. A pending marker lives from the declaration
+ * until that resume, so a pipeline whose declarer died in between is resumed by the next process, while a
+ * pipeline paused on purpose (`rr:jobs:pause`) stays paused.
+ *
  * @internal
  *
  * @psalm-import-type TPipeline from \Spiral\RoadRunnerBridge\Config\QueueConfig
  */
 final class RPCPipelineRegistry implements PipelineRegistryInterface
 {
+    /** How long a declaration may hold its lock, in seconds. */
+    private const DECLARE_TTL = 30;
+
+    /** How long to wait for another process declaring the same pipeline, in seconds. */
+    private const DECLARE_WAIT = 10;
+
     private int $expiresAt = 0;
 
     /** @var list<array-key> */
@@ -31,8 +46,10 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     /** @var array<non-empty-string,TPipeline> */
     private readonly array $pipelines;
 
-    /** @var array<string, non-empty-string>|null RoadRunner pipeline name => `pipelines` key */
+    /** @var array<string, non-empty-list<non-empty-string>>|null RoadRunner pipeline name => `pipelines` keys */
     private ?array $keys = null;
+
+    private readonly PipelineLocks $locks;
 
     /**
      * @param Jobs|JobsInterface $jobs
@@ -42,10 +59,12 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         private readonly LoggerInterface $logger,
         private readonly JobsInterface $jobs,
         private readonly RoadRunnerMode $mode,
+        private readonly LockInterface $lock,
         QueueConfig $config,
         private readonly int $ttl = 60,
     ) {
         $this->pipelines = $config->getPipelines();
+        $this->locks = new PipelineLocks($config);
     }
 
     /**
@@ -68,12 +87,11 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
             }
 
             $connector = $this->getConnector($name);
-            if ($this->isExists($connector)) {
-                continue;
-            }
 
             try {
-                $this->create($name, $connector);
+                if (!$this->isExists($connector) || $this->isPending($connector)) {
+                    $this->declare($connector);
+                }
             } catch (JobsException $e) {
                 $this->logger->warning(
                     \sprintf(
@@ -108,7 +126,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         );
 
         if (!$this->isExists($connector)) {
-            return $this->create($key, $connector, $options);
+            return $this->declare($connector, $options);
         }
 
         return $this->connect($connector, $options);
@@ -142,17 +160,41 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      */
     private function keyOf(string $pipeline): ?string
     {
-        if ($this->keys === null) {
-            $this->keys = [];
-            foreach ($this->pipelines as $key => $config) {
-                $connector = $config['connector'] ?? null;
-                if ($connector instanceof CreateInfoInterface) {
-                    $this->keys[$connector->getName()] ??= $key;
-                }
+        $this->keys ??= $this->connectorKeys();
+
+        return $this->keys[$pipeline][0] ?? null;
+    }
+
+    /**
+     * Whether any `pipelines` entry declaring the RoadRunner pipeline asks to consume it.
+     */
+    private function consumes(CreateInfoInterface $connector): bool
+    {
+        $this->keys ??= $this->connectorKeys();
+
+        foreach ($this->keys[$connector->getName()] ?? [] as $key) {
+            if ($this->pipelines[$key]['consume'] ?? false) {
+                return true;
             }
         }
 
-        return $this->keys[$pipeline] ?? null;
+        return false;
+    }
+
+    /**
+     * @return array<string, non-empty-list<non-empty-string>> RoadRunner pipeline name => `pipelines` keys
+     */
+    private function connectorKeys(): array
+    {
+        $keys = [];
+        foreach ($this->pipelines as $key => $config) {
+            $connector = $config['connector'] ?? null;
+            if ($connector instanceof CreateInfoInterface) {
+                $keys[$connector->getName()][] = $key;
+            }
+        }
+
+        return $keys;
     }
 
     /**
@@ -172,18 +214,62 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     }
 
     /**
-     * Declares the pipeline in RoadRunner, or connects to it when another process declared it after the
-     * cached list was read.
-     *
-     * @param non-empty-string $name The `pipelines` key.
+     * Declares the pipeline unless it exists and resumes a `consume` pipeline left pending, holding the
+     * declaration lock meanwhile.
      *
      * @throws JobsException
      */
-    private function create(
-        string $name,
-        CreateInfoInterface $connector,
-        ?OptionsInterface $options = null,
-    ): QueueInterface {
+    private function declare(CreateInfoInterface $connector, ?OptionsInterface $options = null): QueueInterface
+    {
+        $pipeline = $connector->getName();
+        $resource = $this->locks->declare($pipeline);
+        $id = $this->call(fn(): string|false => $this->lock->lock($resource, null, self::DECLARE_TTL, self::DECLARE_WAIT));
+        if ($id === false) {
+            throw new JobsException(
+                \sprintf('Pipeline "%s" is still being declared by another process.', $pipeline),
+            );
+        }
+
+        try {
+            $this->expiresAt = 0;
+            $consume = $this->consumes($connector);
+            if ($this->isExists($connector)) {
+                $queue = $this->connect($connector, $options);
+            } else {
+                if ($consume) {
+                    $this->call(fn(): string|false => $this->lock->lock($this->locks->pending($pipeline)));
+                }
+
+                try {
+                    $queue = $this->create($connector, $options);
+                } catch (JobsException $e) {
+                    # A marker left without a pipeline would resume one later declared and paused elsewhere.
+                    if ($consume) {
+                        $this->releaseQuietly($this->locks->pending($pipeline));
+                    }
+
+                    throw $e;
+                }
+            }
+
+            if ($consume && $this->isPending($connector)) {
+                $this->resume($queue, $connector);
+            }
+
+            return $queue;
+        } finally {
+            # The lock expires anyway; a failed release must not fail a done declaration or hide its error.
+            $this->releaseQuietly($resource, $id);
+        }
+    }
+
+    /**
+     * Creates the pipeline, or connects to it when a process outside the declaration lock created it first.
+     *
+     * @throws JobsException
+     */
+    private function create(CreateInfoInterface $connector, ?OptionsInterface $options): QueueInterface
+    {
         try {
             /** @psalm-suppress TooManyArguments JobsInterface lacks the options Jobs accepts */
             $queue = $this->jobs->create($connector, $options);
@@ -204,19 +290,68 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
 
         $this->existPipelines[] = $connector->getName();
 
-        # RoadRunner declares a pipeline paused, and a booting jobs worker leaves an existing pipeline
-        # alone (one paused by `rr:jobs:pause` stays paused): whoever declares a `consume` pipeline resumes it.
-        if ($this->pipelines[$name]['consume'] ?? false) {
-            try {
-                $queue->resume();
-            } catch (JobsException $e) {
-                $this->logger->warning(
-                    \sprintf('Unable to resume pipeline "%s". Reason: %s', $name, $e->getMessage()),
-                );
-            }
+        return $queue;
+    }
+
+    /**
+     * A failed resume keeps the pending marker, so the next process declaring the pipeline retries it.
+     */
+    private function resume(QueueInterface $queue, CreateInfoInterface $connector): void
+    {
+        try {
+            $queue->resume();
+        } catch (JobsException $e) {
+            $this->logger->warning(
+                \sprintf('Unable to resume pipeline "%s". Reason: %s', $connector->getName(), $e->getMessage()),
+            );
+
+            return;
         }
 
-        return $queue;
+        $this->call(fn(): bool => $this->lock->forceRelease($this->locks->pending($connector->getName())));
+    }
+
+    /**
+     * Releases a lock, or any holder's lock without an id, logging an RPC failure instead of throwing it.
+     */
+    private function releaseQuietly(string $resource, ?string $id = null): void
+    {
+        \assert($resource !== '' && $id !== '');
+
+        try {
+            $id === null ? $this->lock->forceRelease($resource) : $this->lock->release($resource, $id);
+        } catch (GoridgeException $e) {
+            $this->logger->warning(
+                \sprintf('Unable to release the lock "%s". Reason: %s', $resource, $e->getMessage()),
+            );
+        }
+    }
+
+    /**
+     * @throws JobsException
+     */
+    private function isPending(CreateInfoInterface $connector): bool
+    {
+        return $this->call(fn(): bool => $this->lock->exists($this->locks->pending($connector->getName())));
+    }
+
+    /**
+     * Runs a lock call, reporting an RPC failure as a jobs failure.
+     *
+     * @template T
+     *
+     * @param \Closure(): T $call
+     *
+     * @return T
+     * @throws JobsException
+     */
+    private function call(\Closure $call): mixed
+    {
+        try {
+            return $call();
+        } catch (GoridgeException $e) {
+            throw new JobsException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**

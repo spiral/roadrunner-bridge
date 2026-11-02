@@ -32,6 +32,7 @@ final class QueueBootloader extends Bootloader
         return [
             RoadRunnerBootloader::class,
             SerializerBootloader::class,
+            LockBootloader::class,
         ];
     }
 
@@ -49,6 +50,7 @@ final class QueueBootloader extends Bootloader
 
                 return new QueueConfig(
                     $config['pipelines'] ?? [],
+                    (string) ($config['lockPrefix'] ?? QueueConfig::DEFAULT_LOCK_PREFIX),
                 );
             },
         ];

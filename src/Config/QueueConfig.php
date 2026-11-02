@@ -19,9 +19,17 @@ use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
  */
 final readonly class QueueConfig
 {
+    public const DEFAULT_LOCK_PREFIX = 'roadrunner-bridge:jobs:';
+
+    /**
+     * @param string $lockPrefix Prefix of the RoadRunner locks that guard pipeline declaration.
+     */
     public function __construct(
         private array $pipelines,
-    ) {}
+        private string $lockPrefix = self::DEFAULT_LOCK_PREFIX,
+    ) {
+        $lockPrefix !== '' or throw new \InvalidArgumentException('The queue `lockPrefix` must not be empty.');
+    }
 
     /**
      * @return array<non-empty-string, TPipeline> $pipelines
@@ -29,5 +37,15 @@ final readonly class QueueConfig
     public function getPipelines(): array
     {
         return $this->pipelines;
+    }
+
+    /**
+     * @return non-empty-string
+     */
+    public function getLockPrefix(): string
+    {
+        \assert($this->lockPrefix !== '');
+
+        return $this->lockPrefix;
     }
 }
