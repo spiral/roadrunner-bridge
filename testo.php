@@ -19,8 +19,9 @@ return new ApplicationConfig(
             name: 'Acceptance',
             location: new FinderConfig(
                 include: ['tests/Acceptance'],
-                # The application RoadRunner serves: `worker.php` starts serving once loaded.
-                exclude: ['tests/Acceptance/App'],
+                # Applications the tests run in separate processes: their entry scripts run once loaded,
+                # and GenerateApp has classes that need generated code.
+                exclude: ['tests/Acceptance/App', 'tests/Acceptance/GenerateApp'],
             ),
         ),
     ],

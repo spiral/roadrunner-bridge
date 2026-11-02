@@ -9,7 +9,8 @@ use Spiral\Goridge\RPC\RPC;
 use Spiral\Goridge\RPC\RPCInterface;
 
 /**
- * A RoadRunner binary serving `tests/Acceptance/App` on free local ports, with its own runtime directory.
+ * A RoadRunner binary serving an application (`tests/Acceptance/App` by default) on free local ports, with its own
+ * runtime directory.
  */
 final class RoadRunner
 {
@@ -19,16 +20,27 @@ final class RoadRunner
     /**
      * @param resource $process
      * @param array<non-empty-string, int> $ports
+     * @param list<'http'|'metrics'|'grpc'> $plugins
      */
     private function __construct(
         private $process,
         public readonly string $runtime,
         private readonly array $ports,
         private readonly string $log,
+        private readonly array $plugins,
     ) {}
 
-    public static function start(): self
-    {
+    /**
+     * @param string $appDir Directory with the `.rr.yaml` to serve; the working directory of RoadRunner.
+     * @param array<non-empty-string, string> $env Extra environment of RoadRunner and its workers.
+     * @param list<'http'|'metrics'|'grpc'> $plugins The listening plugins `.rr.yaml` configures: the server is
+     *        ready when all of them answer.
+     */
+    public static function start(
+        string $appDir = self::APP_DIR,
+        array $env = [],
+        array $plugins = ['http', 'metrics', 'grpc'],
+    ): self {
         $root = \dirname(__DIR__, 3);
         $binary = $root . \DIRECTORY_SEPARATOR . (\PHP_OS_FAMILY === 'Windows' ? 'rr.exe' : 'rr');
         \is_file($binary) or throw new \RuntimeException(
@@ -42,21 +54,21 @@ final class RoadRunner
         $ports = self::freePorts('RR_RPC_PORT', 'RR_HTTP_PORT', 'RR_GRPC_PORT', 'RR_METRICS_PORT');
 
         # .rr.yaml reads the ports and the PHP binary from the environment; the workers inherit it.
-        $env = \array_merge(\getenv(), $ports, [
+        $env = \array_merge(\getenv(), $env, $ports, [
             'ACCEPTANCE_PHP' => \PHP_BINARY,
             'ACCEPTANCE_RUNTIME' => $runtime,
         ]);
 
         $process = \proc_open(
-            [$binary, 'serve', '-c', '.rr.yaml', '-w', self::APP_DIR],
+            [$binary, 'serve', '-c', '.rr.yaml', '-w', $appDir],
             [0 => ['pipe', 'r'], 1 => ['file', $log, 'a'], 2 => ['file', $log, 'a']],
             $pipes,
-            self::APP_DIR,
+            $appDir,
             $env,
         );
         \is_resource($process) or throw new \RuntimeException('Cannot start RoadRunner.');
 
-        $server = new self($process, $runtime, $ports, $log);
+        $server = new self($process, $runtime, $ports, $log, $plugins);
         $server->waitUntilReady();
 
         return $server;
@@ -128,10 +140,7 @@ final class RoadRunner
             }
 
             # The plugins start listening independently of each other.
-            if (Http::request('GET', $this->httpUrl('/hello'))?->status === 200
-                && Http::request('GET', $this->metricsUrl())?->status === 200
-                && Http::request('POST', $this->grpcUrl('/'), http2: true) !== null
-            ) {
+            if ($this->listens('http') && $this->listens('metrics') && $this->listens('grpc')) {
                 return;
             }
 
@@ -141,5 +150,17 @@ final class RoadRunner
         $log = $this->log();
         $this->stop();
         throw new \RuntimeException("RoadRunner did not start in time:\n" . $log);
+    }
+
+    /**
+     * @param 'http'|'metrics'|'grpc' $plugin
+     */
+    private function listens(string $plugin): bool
+    {
+        return !\in_array($plugin, $this->plugins, true) || match ($plugin) {
+            'http' => Http::request('GET', $this->httpUrl('/hello'))?->status === 200,
+            'metrics' => Http::request('GET', $this->metricsUrl())?->status === 200,
+            'grpc' => Http::request('POST', $this->grpcUrl('/'), http2: true) !== null,
+        };
     }
 }

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package acceptance.common;
+
+option php_namespace = "Acceptance\\Common";
+option php_metadata_namespace = "Acceptance\\GPBMetadata\\Common";
+
+import "types/currency.proto";
+
+message Money {
+  int64 units = 1;
+  acceptance.types.Currency currency = 2;
+}

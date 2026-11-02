@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package acceptance.types;
+
+option php_namespace = "Acceptance\\Types";
+option php_metadata_namespace = "Acceptance\\GPBMetadata\\Types\\Currency";
+
+enum Currency {
+  CURRENCY_UNSPECIFIED = 0;
+  EUR = 1;
+  USD = 2;
+}

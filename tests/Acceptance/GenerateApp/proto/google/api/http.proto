@@ -1,0 +1,9 @@
+// A trimmed copy of googleapis' google/api/http.proto, as projects vendor it.
+syntax = "proto3";
+
+package google.api;
+
+message HttpRule {
+  string get = 1;
+  string post = 2;
+}
