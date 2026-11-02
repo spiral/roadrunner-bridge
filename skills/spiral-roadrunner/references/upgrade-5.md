@@ -44,6 +44,17 @@ addresses for RPC and relays are not the plugin and keep working.
   in field comments and the descriptor; class names, code and JSON field names stay the same. Regenerate
   all proto files at once rather than mixing old and new output.
 
+## Queue pipelines declared from PHP
+
+- A push that creates a missing `consume: true` pipeline resumes it; 4.x left it paused until
+  `rr:jobs:consume`.
+- A push may name a configured pipeline by its RoadRunner (connector) name and gets the config defaults;
+  4.x connected without them.
+- Per-push headers are added to the pipeline's default headers instead of replacing them, and an explicit
+  per-push delay of `0` overrides a non-zero default.
+- A Kafka pipeline whose `options` are not `KafkaOptions` sends them with the topic `default` instead of
+  an empty topic.
+
 ## Centrifugo `subrefresh`
 
 `RequestType::SubRefresh` is now `subrefresh` (was `sub_refresh`). Rename the key in

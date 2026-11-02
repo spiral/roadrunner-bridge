@@ -46,26 +46,29 @@ The pipeline a push goes to: `Options::onQueue()` / `withQueue()` → the connec
 
 - **Declared in `.rr.yaml`** (`jobs.pipelines`, consumed through `jobs.consume`) — push to it by name;
   leave it out of the PHP `pipelines` list. The bridge just connects to it.
-- **Declared from PHP** — listed in `pipelines` with a `connector`. The bridge creates it in RoadRunner on
-  the first push when it is missing, paused; with `consume: true` a `jobs` worker creates and resumes it
-  at boot (a failure is logged as a warning, not thrown). A pipeline that already exists at boot is left
-  as is, so one a push created earlier stays paused until `rr:jobs:consume`. The `.rr.yaml` then needs
-  only the `jobs` section with a pool and the driver's own connection settings (e.g. `amqp`).
+- **Declared from PHP** — listed in `pipelines` with a `connector`. Whoever finds it missing creates it:
+  a `jobs` worker at boot for `consume: true` pipelines (a failure is logged as a warning, not thrown), or
+  the first push. A `consume: true` pipeline is resumed right after creation, any other stays paused until
+  `rr:jobs:consume`; a failed resume is logged as a warning and leaves it paused. A pipeline that already
+  exists is left as is, so one paused with `rr:jobs:pause` stays paused across worker restarts. The
+  `.rr.yaml` then needs only the `jobs` section with a pool and the driver's own connection settings
+  (e.g. `amqp`).
 
-The connector's name is the pipeline's name in RoadRunner. Pipeline existence is cached for 60 seconds per
-worker: the first push after another process (or the worker's own boot) declared the pipeline can fail
-with `pipeline already exists`, and the next push succeeds.
+The connector's name is the pipeline's name in RoadRunner; a push may name the pipeline by its
+`pipelines` key or by that name, and a `pipelines` key wins over a connector name. Give each pipeline a
+connector name of its own.
 
 For a Kafka pipeline give `options` a `KafkaOptions` with the topic (`new KafkaOptions('orders')`): the
-topic is not taken from the connector, and other options leave the push without one.
+bridge does not read topics from the connector, and any other options are sent with the topic `default`.
 
 ### Default options
 
-`options` sets defaults for pushes that name the pipeline by its `pipelines` key — a push naming the
-RoadRunner pipeline instead gets none. Per-push options override them only partly:
+`options` sets defaults for pushes to the pipeline. Per-push options override them:
 
-- a per-push delay or priority wins when it is not zero; an explicit zero keeps the default;
-- per-push headers replace the default headers as a whole, so set shared headers per push instead.
+- a delay from Spiral `Options` wins whenever it is set, `0` included;
+- per-push headers are added to the default headers; a header set in both takes the per-push value;
+- RoadRunner options override a default delay or priority only with a non-zero value, and auto-ack only
+  with `true`.
 
 ## Pushing
 

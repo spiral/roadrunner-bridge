@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Spiral\Tests\Queue;
 
 use Mockery as m;
+use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\Queue\Options as QueueOptions;
 use Spiral\Queue\SerializerRegistryInterface;
+use Spiral\RoadRunner\Jobs\Options as JobsOptions;
+use Spiral\RoadRunner\Jobs\Queue as RoadRunnerQueue;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
 use Spiral\RoadRunner\Jobs\Task\QueuedTaskInterface;
@@ -54,6 +57,7 @@ final class QueueTest extends TestCase
 
         $queue->shouldReceive('dispatch')->twice()->with($preparedTask)->andReturn($queuedTask);
         $queue->shouldReceive('create')->twice()->andReturn($preparedTask);
+        $queue->shouldReceive('getDefaultOptions')->andReturn(new JobsOptions());
 
         Assert::same($this->queue->push('foo', $payload1), 'task-id1');
         Assert::same($this->queue->push('foo', $payload2), 'task-id2');
@@ -84,12 +88,57 @@ final class QueueTest extends TestCase
 
         $fooQueue->shouldReceive('dispatch')->once()->with($preparedTask)->andReturn($queuedTask);
         $fooQueue->shouldReceive('create')->once()->withSomeOfArgs('foo')->andReturn($preparedTask);
+        $fooQueue->shouldReceive('getDefaultOptions')->andReturn(new JobsOptions());
 
         $barQueue->shouldReceive('dispatch')->once()->with($preparedTask)->andReturn($queuedTask);
         $barQueue->shouldReceive('create')->once()->withSomeOfArgs('bar')->andReturn($preparedTask);
+        $barQueue->shouldReceive('getDefaultOptions')->andReturn(new JobsOptions());
 
         Assert::same($this->queue->push('foo', ['foo' => 'bar'], QueueOptions::onQueue('foo')), 'task-id1');
         Assert::same($this->queue->push('bar', ['foo' => 'bar'], QueueOptions::onQueue('bar')), 'task-id2');
+    }
+
+    #[Test]
+    public function pushHeadersAreAddedToPipelineDefaultHeaders(): void
+    {
+        $task = $this->pushTo(
+            (new JobsOptions())->withHeader('x-default', 'd')->withHeader('x-both', 'default'),
+            QueueOptions::onQueue('default')->withHeader('x-push', 'p')->withHeader('x-both', 'push'),
+        );
+
+        Assert::same($task->getHeaders(), ['x-push' => ['p'], 'x-both' => ['push'], 'x-default' => ['d']]);
+    }
+
+    #[Test]
+    public function pipelineDefaultHeadersAreKeptWithoutPushHeaders(): void
+    {
+        $task = $this->pushTo((new JobsOptions())->withHeader('x-default', 'd'), null);
+
+        Assert::same($task->getHeaders(), ['x-default' => ['d']]);
+    }
+
+    #[Test]
+    public function explicitZeroDelayOverridesPipelineDefault(): void
+    {
+        $task = $this->pushTo(new JobsOptions(10), QueueOptions::delayed(0));
+
+        Assert::same($task->getDelay(), 0);
+    }
+
+    #[Test]
+    public function pipelineDefaultDelayAppliesWhenPushSetsNone(): void
+    {
+        $task = $this->pushTo(new JobsOptions(10), QueueOptions::onQueue('default'));
+
+        Assert::same($task->getDelay(), 10);
+    }
+
+    #[Test]
+    public function pushDelayOverridesPipelineDefault(): void
+    {
+        $task = $this->pushTo(new JobsOptions(10), QueueOptions::delayed(3));
+
+        Assert::same($task->getDelay(), 3);
     }
 
     #[BeforeTest]
@@ -99,5 +148,37 @@ final class QueueTest extends TestCase
         $this->serializerRegistry = m::mock(SerializerRegistryInterface::class);
 
         $this->queue = new Queue($this->serializerRegistry, $this->registry, 'default');
+    }
+
+    /**
+     * Pushes through a real RoadRunner queue with the given defaults and returns the task it dispatches.
+     */
+    private function pushTo(JobsOptions $defaults, ?QueueOptions $options): PreparedTaskInterface
+    {
+        $rpc = m::mock(RPCInterface::class);
+        $rpc->shouldReceive('withCodec')->andReturnSelf();
+        $real = new RoadRunnerQueue('default', $rpc, $defaults);
+
+        $queue = m::mock(QueueInterface::class);
+        $queue->shouldReceive('getDefaultOptions')->andReturn($defaults);
+        $queue->shouldReceive('create')->once()->andReturnUsing($real->create(...));
+        $queuedTask = m::mock(QueuedTaskInterface::class);
+        $queuedTask->shouldReceive('getId')->andReturn('task-id');
+        $dispatched = null;
+        $queue->shouldReceive('dispatch')->once()->andReturnUsing(
+            static function (PreparedTaskInterface $task) use (&$dispatched, $queuedTask): QueuedTaskInterface {
+                $dispatched = $task;
+                return $queuedTask;
+            },
+        );
+
+        $this->registry->shouldReceive('getPipeline')->with('default')->andReturn($queue);
+        $this->serializerRegistry->shouldReceive('getSerializer')->andReturn($serializer = m::mock(SerializerInterface::class));
+        $serializer->shouldReceive('serialize')->andReturn('payload');
+
+        $this->queue->push('job', 'payload', $options);
+
+        \assert($dispatched instanceof PreparedTaskInterface);
+        return $dispatched;
     }
 }
