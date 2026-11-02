@@ -11,8 +11,11 @@ use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Jobs;
 use Spiral\RoadRunner\Jobs\JobsInterface;
+use Spiral\RoadRunner\Jobs\KafkaOptions;
+use Spiral\RoadRunner\Jobs\KafkaOptionsInterface;
 use Spiral\RoadRunner\Jobs\OptionsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
+use Spiral\RoadRunner\Jobs\Queue\Driver;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunnerBridge\Config\QueueConfig;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
@@ -32,12 +35,6 @@ use Spiral\RoadRunnerBridge\RoadRunnerMode;
  */
 final class RPCPipelineRegistry implements PipelineRegistryInterface
 {
-    /** How long a declaration may hold its lock, in seconds. */
-    private const DECLARE_TTL = 30;
-
-    /** How long to wait for another process declaring the same pipeline, in seconds. */
-    private const DECLARE_WAIT = 10;
-
     private int $expiresAt = 0;
 
     /** @var list<array-key> */
@@ -90,7 +87,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
 
             try {
                 if (!$this->isExists($connector) || $this->isPending($connector)) {
-                    $this->declare($connector);
+                    $this->declare($connector, wait: PipelineLocks::BOOT_WAIT);
                 }
             } catch (JobsException $e) {
                 $this->logger->warning(
@@ -120,13 +117,19 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         }
 
         $connector = $this->getConnector($key);
-        $options = OptionsFactory::fromCreateInfo(
-            $connector,
-            OptionsFactory::create($this->pipelines[$key]['options'] ?? null),
-        );
+        $options = OptionsFactory::create($this->pipelines[$key]['options'] ?? null);
+        if ($connector->getDriver() === Driver::Kafka && $options !== null && !$options instanceof KafkaOptionsInterface) {
+            throw new InvalidArgumentException(\sprintf(
+                'Pipeline `%s` has a Kafka connector: its `options` must be `%s` with the topic to push to.',
+                $key,
+                KafkaOptions::class,
+            ));
+        }
+
+        $options = OptionsFactory::fromCreateInfo($connector, $options);
 
         if (!$this->isExists($connector)) {
-            return $this->declare($connector, $options);
+            return $this->declare($connector, $options, PipelineLocks::PUSH_WAIT);
         }
 
         return $this->connect($connector, $options);
@@ -219,11 +222,14 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
      *
      * @throws JobsException
      */
-    private function declare(CreateInfoInterface $connector, ?OptionsInterface $options = null): QueueInterface
-    {
+    private function declare(
+        CreateInfoInterface $connector,
+        ?OptionsInterface $options = null,
+        int $wait = 0,
+    ): QueueInterface {
         $pipeline = $connector->getName();
         $resource = $this->locks->declare($pipeline);
-        $id = $this->call(fn(): string|false => $this->lock->lock($resource, null, self::DECLARE_TTL, self::DECLARE_WAIT));
+        $id = $this->call(fn(): string|false => $this->lock->lock($resource, null, PipelineLocks::TTL, $wait));
         if ($id === false) {
             throw new JobsException(
                 \sprintf('Pipeline "%s" is still being declared by another process.', $pipeline),
@@ -241,14 +247,17 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
                 }
 
                 try {
-                    $queue = $this->create($connector, $options);
+                    /** @psalm-suppress TooManyArguments JobsInterface lacks the options Jobs accepts */
+                    $queue = $this->jobs->create($connector, $options);
+                    $this->existPipelines[] = $pipeline;
                 } catch (JobsException $e) {
-                    # A marker left without a pipeline would resume one later declared and paused elsewhere.
+                    # Without a pipeline of its own the marker would resume one declared elsewhere, maybe
+                    # meant to stay paused.
                     if ($consume) {
                         $this->releaseQuietly($this->locks->pending($pipeline));
                     }
 
-                    throw $e;
+                    $queue = $this->connectDeclaredElsewhere($connector, $options, $e);
                 }
             }
 
@@ -264,33 +273,28 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
     }
 
     /**
-     * Creates the pipeline, or connects to it when a process outside the declaration lock created it first.
+     * Connects to the pipeline after its creation failed, when a process outside the declaration lock created
+     * it first; otherwise rethrows the creation error.
      *
      * @throws JobsException
      */
-    private function create(CreateInfoInterface $connector, ?OptionsInterface $options): QueueInterface
-    {
+    private function connectDeclaredElsewhere(
+        CreateInfoInterface $connector,
+        ?OptionsInterface $options,
+        JobsException $error,
+    ): QueueInterface {
+        $this->expiresAt = 0;
         try {
-            /** @psalm-suppress TooManyArguments JobsInterface lacks the options Jobs accepts */
-            $queue = $this->jobs->create($connector, $options);
-        } catch (JobsException $e) {
-            $this->expiresAt = 0;
-            try {
-                $exists = $this->isExists($connector);
-            } catch (JobsException) {
-                throw $e;
-            }
-
-            if (!$exists) {
-                throw $e;
-            }
-
-            return $this->connect($connector, $options);
+            $exists = $this->isExists($connector);
+        } catch (JobsException) {
+            throw $error;
         }
 
-        $this->existPipelines[] = $connector->getName();
+        if (!$exists) {
+            throw $error;
+        }
 
-        return $queue;
+        return $this->connect($connector, $options);
     }
 
     /**
@@ -350,7 +354,11 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         try {
             return $call();
         } catch (GoridgeException $e) {
-            throw new JobsException($e->getMessage(), $e->getCode(), $e);
+            throw new JobsException(
+                'RoadRunner lock call failed, the RoadRunner build must include the `lock` plugin: ' . $e->getMessage(),
+                $e->getCode(),
+                $e,
+            );
         }
     }
 

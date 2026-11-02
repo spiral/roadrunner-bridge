@@ -52,15 +52,18 @@ The pipeline a push goes to: `Options::onQueue()` / `withQueue()` → the connec
   the first push. The `.rr.yaml` then needs only the `jobs` section with a pool and the driver's own
   connection settings (e.g. `amqp`).
 
-A pipeline declared from PHP is created under a RoadRunner lock (`<lockPrefix>declare:<pipeline>`; the
-`lock` plugin needs no `.rr.yaml` section, but a custom rr build must include it): one process declares it while the others wait for it and
-then connect; after 10 seconds of waiting a push fails and a booting worker logs a warning. RoadRunner creates the pipeline paused; a `consume: true` one is resumed by its declarer,
-any other stays paused until `rr:jobs:consume`. A pipeline that already exists is left as is, so one
-paused with `rr:jobs:pause` stays paused across worker restarts. A declarer that dies or fails between
-the declaration and the resume leaves the marker `<lockPrefix>pending:<pipeline>`, and the next booting
-jobs worker resumes the pipeline; `rr:jobs:pause` removes the marker. Set `lockPrefix` when several applications with the same pipeline
-names share one RoadRunner.
+A pipeline declared from PHP is created under the RoadRunner lock `<lockPrefix>declare:<pipeline>` (the
+`lock` plugin needs no `.rr.yaml` section, but a custom rr build must include it). One process declares
+the pipeline while the others wait and then connect; the lock lives 20 seconds, a booting jobs worker
+waits for it up to 25 seconds (and so takes over from a declarer that died), a push up to 10 seconds
+before it fails. RoadRunner creates the pipeline paused: a `consume: true` one is resumed by its
+declarer, any other stays paused until `rr:jobs:consume`.
 
+A pipeline that already exists is left as is, so one paused with `rr:jobs:pause` stays paused across
+worker restarts. A declarer that dies or fails between the declaration and the resume leaves the marker
+`<lockPrefix>pending:<pipeline>`, and the next booting jobs worker resumes the pipeline;
+`rr:jobs:pause` removes the marker. Set `lockPrefix` when several applications with the same pipeline
+names share one RoadRunner.
 To have pipelines ready before the first worker boots, declare them in `.rr.yaml` instead. Do not
 declare them from a `server.on_init` script: RoadRunner 3 fails to start the `jobs` plugin with a
 pipeline declared over RPC before it (`config not found by provided key: jobs.pipelines.<name>.config`).
@@ -70,7 +73,8 @@ The connector's name is the pipeline's name in RoadRunner; a push may name the p
 connector name of its own.
 
 For a Kafka pipeline give `options` a `KafkaOptions` with the topic (`new KafkaOptions('orders')`): the
-bridge does not read topics from the connector, and any other options are sent with the topic `default`.
+bridge does not read topics from the connector. Other `options` throw `InvalidArgumentException` on push;
+without `options` pushes go to the topic `default`.
 
 ### Default options
 

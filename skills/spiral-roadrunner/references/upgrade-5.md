@@ -47,15 +47,16 @@ addresses for RPC and relays are not the plugin and keep working.
 ## Queue pipelines declared from PHP
 
 - `QueueBootloader` loads `LockBootloader`: pipelines are declared under a RoadRunner lock. The `lock`
-  plugin needs no `.rr.yaml` section, but a custom rr build must include it; `lockPrefix` in the queue config changes the lock names.
+  plugin needs no `.rr.yaml` section, but a custom rr build must include it; `lockPrefix` in the queue
+  config changes the lock names.
 - A push that creates a missing `consume: true` pipeline resumes it; 4.x left it paused until
   `rr:jobs:consume`.
 - A push may name a configured pipeline by its RoadRunner (connector) name: it gets the config defaults
   and creates the pipeline when it is missing; 4.x connected without the defaults and never created it.
 - Per-push headers are added to the pipeline's default headers instead of replacing them, and an explicit
   per-push delay of `0` overrides a non-zero default.
-- A Kafka pipeline whose `options` are not `KafkaOptions` sends them with the topic `default` instead of
-  an empty topic.
+- A Kafka pipeline whose `options` are not `KafkaOptions` throws `InvalidArgumentException` on push; 4.x
+  sent such pushes with an empty topic.
 
 ## Centrifugo `subrefresh`
 

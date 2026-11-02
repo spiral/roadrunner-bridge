@@ -26,5 +26,10 @@ final class PauseCommandTest extends ConsoleTestCase
         $result = $this->runCommand('rr:jobs:pause', ['pipeline' => 'foo']);
         Assert::string($result)->contains('Pipeline [foo] has been paused.');
         Assert::same($lock->locks, []);
+        Assert::same($lock->log, [
+            'lock roadrunner-bridge:jobs:declare:foo ttl=20 wait=10',
+            'forceRelease roadrunner-bridge:jobs:pending:foo',
+            'release roadrunner-bridge:jobs:declare:foo',
+        ]);
     }
 }

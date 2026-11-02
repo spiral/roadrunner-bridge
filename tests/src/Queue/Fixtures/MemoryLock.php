@@ -26,7 +26,8 @@ final class MemoryLock implements LockInterface
         int|float|\DateInterval $ttl = 0,
         int|float|\DateInterval $waitTTL = 0,
     ): false|string {
-        $this->log[] = "lock $resource";
+        \assert(\is_int($ttl) && \is_int($waitTTL));
+        $this->log[] = "lock $resource ttl=$ttl wait=$waitTTL";
         if (isset($this->locks[$resource])) {
             return false;
         }

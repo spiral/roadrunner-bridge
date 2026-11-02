@@ -21,6 +21,7 @@ final class JobsTest extends ServerTestCase
     public function consumesPushedJob(): void
     {
         Assert::true(self::eventually(self::consumedPipeline(...)) === true, self::$server->log());
+        Assert::string(self::$server->log())->notContains('Unable to declare consumer pipeline');
 
         $this->assertConsumed();
     }

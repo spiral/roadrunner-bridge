@@ -39,20 +39,42 @@ final class PauseCommand extends Command
             $this->info(\sprintf('Pausing pipeline [%s]...', $this->pipeline));
         }
 
-        $jobs->pause($this->pipeline);
+        # Under the declaration lock, so a process declaring the pipeline cannot resume it right after.
+        $declare = $locks->declare($this->pipeline);
+        $id = $this->quietly(
+            static fn(): string|false => $lock->lock($declare, null, PipelineLocks::TTL, PipelineLocks::PUSH_WAIT),
+        );
 
-        # A pending marker makes the next booting jobs worker resume the pipeline.
         try {
-            $lock->forceRelease($locks->pending($this->pipeline));
-        } catch (GoridgeException $e) {
-            $this->warning(\sprintf(
-                'The pipeline may be resumed when a jobs worker boots: unable to release its pending marker. Reason: %s',
-                $e->getMessage(),
-            ));
+            $jobs->pause($this->pipeline);
+
+            # A pending marker makes the next booting jobs worker resume the pipeline.
+            $this->quietly(fn(): bool => $lock->forceRelease($locks->pending($this->pipeline)));
+        } finally {
+            if (\is_string($id) && $id !== '') {
+                $this->quietly(static fn(): bool => $lock->release($declare, $id));
+            }
         }
 
         $this->info(\sprintf('Pipeline [%s] has been paused.', $this->pipeline));
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Runs a lock call; a failure only warns that a booting jobs worker may still resume the pipeline.
+     */
+    private function quietly(\Closure $call): mixed
+    {
+        try {
+            return $call();
+        } catch (GoridgeException $e) {
+            $this->warning(\sprintf(
+                'A booting jobs worker may resume the pipeline: the RoadRunner lock call failed (the RoadRunner build must include the `lock` plugin). Reason: %s',
+                $e->getMessage(),
+            ));
+
+            return null;
+        }
     }
 }

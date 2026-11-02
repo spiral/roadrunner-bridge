@@ -130,17 +130,27 @@ final class RPCPipelineRegistryTest extends TestCase
     }
 
     #[Test]
-    public function kafkaPipelineWithPlainOptionsGetsThemAsKafkaOptions(): void
+    public function kafkaPipelineWithPlainOptionsIsRejected(): void
     {
         $this->makeRegistry(pipelines: [
-            'events' => [
-                'connector' => new KafkaCreateInfo('events'),
-                'options' => Options::delayed(3)->withHeader('x-default', 'd'),
-            ],
+            'events' => ['connector' => new KafkaCreateInfo('events'), 'options' => Options::delayed(3)],
         ]);
+        $this->jobs->shouldNotReceive('connect');
+        $this->jobs->shouldNotReceive('create');
+        Expect::exception(InvalidArgumentException::class)->withMessage(
+            'Pipeline `events` has a Kafka connector: its `options` must be `Spiral\RoadRunner\Jobs\KafkaOptions` with the topic to push to.',
+        );
+
+        $this->registry->getPipeline('events');
+    }
+
+    #[Test]
+    public function kafkaPipelineWithoutOptionsPushesToTheDefaultTopic(): void
+    {
+        $this->makeRegistry(pipelines: ['events' => ['connector' => new KafkaCreateInfo('events')]]);
         $this->existing('events');
         $this->jobs->shouldReceive('connect')->once()
-            ->with('events', Matchers::equalTo((new KafkaOptions('default', 3))->withHeader('x-default', 'd')))
+            ->with('events', Matchers::equalTo(new KafkaOptions('default')))
             ->andReturn($queue = $this->queue());
 
         Assert::same($this->registry->getPipeline('events'), $queue);
@@ -195,9 +205,11 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->jobs->shouldReceive('create')->once()
             ->andThrow(new JobsException('rpc_declare_pipeline: pipeline already exists, name: memory'));
         $this->jobs->shouldReceive('connect')->once()->with('memory', null)->andReturn($queue = $this->queue());
-        $queue->shouldReceive('resume')->once();
+        # Its creator resumes it, or leaves it paused on purpose.
+        $queue->shouldNotReceive('resume');
 
         Assert::same($this->registry->getPipeline('memory'), $queue);
+        Assert::same($this->lock->locks, []);
     }
 
     #[Test]
@@ -263,8 +275,8 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->registry->getPipeline('memory');
 
         Assert::same($this->lock->log, [
-            'lock app:declare:memory',
-            'lock app:pending:memory',
+            'lock app:declare:memory ttl=20 wait=10',
+            'lock app:pending:memory ttl=0 wait=0',
             'forceRelease app:pending:memory',
             'release app:declare:memory',
         ]);
@@ -280,7 +292,7 @@ final class RPCPipelineRegistryTest extends TestCase
 
         $this->registry->getPipeline('mail');
 
-        Assert::same($this->lock->log, ['lock app:declare:mail-rr', 'release app:declare:mail-rr']);
+        Assert::same($this->lock->log, ['lock app:declare:mail-rr ttl=20 wait=10', 'release app:declare:mail-rr']);
     }
 
     #[Test]
@@ -323,6 +335,7 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->registry->declareConsumerPipelines();
 
         Assert::same($this->lock->locks, []);
+        Assert::same($this->lock->log[0], 'lock app:declare:memory ttl=20 wait=25');
     }
 
     #[Test]
@@ -407,7 +420,9 @@ final class RPCPipelineRegistryTest extends TestCase
             new QueueConfig(['mail' => ['connector' => new MemoryCreateInfo('mail')]]),
         );
         $jobs->shouldReceive('getIterator')->andReturn(new \ArrayIterator([]));
-        Expect::exception(JobsException::class)->withMessage('lock.Lock: unknown service');
+        Expect::exception(JobsException::class)->withMessage(
+            'RoadRunner lock call failed, the RoadRunner build must include the `lock` plugin: lock.Lock: unknown service',
+        );
 
         $registry->getPipeline('mail');
     }

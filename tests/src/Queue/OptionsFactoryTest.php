@@ -44,11 +44,7 @@ final class OptionsFactoryTest
             new KafkaCreateInfo('foo'),
             new KafkaOptions('orders', 3),
         ];
-        yield 'kafka wraps plain options' => [
-            (new KafkaOptions('default', 3, 2, true))->withHeader('x', 'y'),
-            new KafkaCreateInfo('foo'),
-            (new JobsOptions(3, 2, true))->withHeader('x', 'y'),
-        ];
+
     }
 
     #[DataProvider('createDataProvider')]
