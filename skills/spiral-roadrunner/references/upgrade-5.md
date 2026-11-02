@@ -49,6 +49,20 @@ addresses for RPC and relays are not the plugin and keep working.
 `RequestType::SubRefresh` is now `subrefresh` (was `sub_refresh`). Rename the key in
 `centrifugo.services` and `centrifugo.interceptors`; `sub_refresh` now throws `ConfigurationException`.
 
+## Logger output
+
+The `roadrunner` handler sends records through the app-logger level methods, and RoadRunner formats them;
+see "Logger" in [`services.md`](services.md).
+
+- `RR_LOGGER_MODE` has no effect; the format follows `logs.mode` of `.rr.yaml`. Remove the variable.
+  `RoadRunnerLogsMode` is deprecated.
+- `new Handler(...)` no longer takes `loggerMode`, and `Handler` has no formatter; `RoadRunnerJsonFormatter`
+  is removed. Search for `loggerMode` and `setFormatter` on this handler.
+- Log consumers (dashboards, alerts, parsers) read `time` instead of `ts`, an upper-case level (`WARN`, not
+  `warning`), the channel from `channel` instead of `logger`, and nested context from `key.subkey` fields.
+  Context keys named `time`, `level`, `msg`, `logger` or `channel` arrive as `context.<key>`; `time` is
+  the moment RoadRunner received the record, not when it was created.
+
 ## Internal classes
 
 Classes outside the `@api` surface moved into `*\Internal\*` namespaces. Search the application for
