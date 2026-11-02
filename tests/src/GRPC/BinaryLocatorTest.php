@@ -6,6 +6,7 @@ namespace Spiral\Tests\GRPC;
 
 use Spiral\RoadRunnerBridge\GRPC\Exception\BinaryNotFoundException;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BinaryLocator;
+use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\Path;
 use Testo\Assert;
 use Testo\Expect;
 use Testo\Lifecycle\AfterTest;
@@ -68,6 +69,24 @@ final class BinaryLocatorTest
         );
 
         Assert::same($locator->locate('protoc-gen-php-grpc', 'pluginPath', null), $this->dir . '/path2' . \DIRECTORY_SEPARATOR . 'protoc-gen-php-grpc');
+    }
+
+    public function relativePathEntryBecomesAbsolute(): void
+    {
+        $this->touch('path/buf');
+        $locator = new BinaryLocator($this->dir . '/root', 'path', false);
+
+        $cwd = (string) \getcwd();
+        \chdir($this->dir);
+        try {
+            $located = $locator->locate('buf', 'bufPath', null);
+        } finally {
+            \chdir($cwd);
+        }
+
+        // buf runs from the application root, where the relative entry would point elsewhere.
+        Assert::same(\realpath($located), \realpath($this->dir . '/path/buf'));
+        Assert::true(Path::isAbsolute($located));
     }
 
     public function notFoundPointsToDload(): void

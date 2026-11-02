@@ -67,7 +67,9 @@ final readonly class BinaryLocator
 
             $candidate = \rtrim($dir, '\\/') . \DIRECTORY_SEPARATOR . $fileName;
             if (\is_file($candidate)) {
-                return $candidate;
+                // A relative `PATH` entry resolves from the current directory, which is not where buf runs.
+                // Not realpath(): version-manager shims are symlinks that pick the tool by their own name.
+                return Path::from((string) \getcwd(), $candidate) ?? $candidate;
             }
         }
 

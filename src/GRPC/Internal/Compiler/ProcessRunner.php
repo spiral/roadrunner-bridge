@@ -15,12 +15,13 @@ final class ProcessRunner
 {
     /**
      * @param non-empty-list<string> $command
+     * @param string|null $cwd Working directory; null keeps the current one.
      *
      * @return string Error output of a successful run: buf and plugins print warnings there.
      *
      * @throws CompileException When the command cannot be started or exits with a non-zero code.
      */
-    public function run(array $command): string
+    public function run(array $command, ?string $cwd = null): string
     {
         // Files instead of pipes: reading one pipe to the end blocks while the process fills the other.
         $stdout = \tmpfile();
@@ -30,7 +31,7 @@ final class ProcessRunner
         }
 
         try {
-            $process = \proc_open($command, [1 => $stdout, 2 => $stderr], $pipes);
+            $process = \proc_open($command, [1 => $stdout, 2 => $stderr], $pipes, $cwd);
             if ($process === false) {
                 throw new CompileException(\sprintf('Unable to run `%s`.', $command[0]));
             }
