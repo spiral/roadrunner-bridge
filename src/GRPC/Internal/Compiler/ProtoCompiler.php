@@ -62,8 +62,6 @@ final readonly class ProtoCompiler
      * A commented-out import must not pull in a file that may not even compile. Strings are matched in the same
      * pass, so `//` or `/*` inside one (`go_package = "example.com/x/*"`) does not start a comment. A comment
      * becomes a space: protoc accepts one between `import` and the path with no whitespace around it.
-     *
-     * @psalm-pure
      */
     private static function stripComments(string $code): string
     {
@@ -81,7 +79,7 @@ final readonly class ProtoCompiler
     }
 
     /**
-     * @param list<string> $dirs
+     * @param list<non-empty-string> $dirs
      */
     private static function isWithinAny(Path $path, array $dirs): bool
     {
@@ -99,7 +97,7 @@ final readonly class ProtoCompiler
      *
      * @param list<string> $protoFiles
      *
-     * @return list<string>
+     * @return list<non-empty-string>
      */
     private static function paths(string $input, array $protoFiles): array
     {
@@ -132,7 +130,7 @@ final readonly class ProtoCompiler
      * Type) is left to buf, as is a `google/...` one: a vendored copy of googleapis or of the Well-Known Types
      * would duplicate the classes of google/common-protos and google/protobuf.
      *
-     * @param non-empty-list<string> $dirs Directories inside the input.
+     * @param non-empty-list<non-empty-string> $dirs Directories inside the input.
      *
      * @return list<string> Paths of the imported files.
      */
@@ -196,7 +194,7 @@ final readonly class ProtoCompiler
                     if (\str_starts_with($source, $this->baseNamespace . '/')) {
                         $source = \substr($source, \strlen($this->baseNamespace) + 1);
                     } elseif (\str_contains($source, '/')) {
-                        $foreign[] = \strstr($source, '/', true);
+                        $foreign[] = \explode('/', $source, 2)[0];
                     }
                 }
 
