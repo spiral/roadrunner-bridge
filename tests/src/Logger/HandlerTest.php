@@ -113,7 +113,8 @@ final class HandlerTest extends TestCase
     public function sendsExceptionAsSeparateAttributes(): void
     {
         $monolog = new Monolog('default', [new Handler($this->appLogger())]);
-        $exception = new \RuntimeException('Boom', 42);
+        $previous = new \LogicException('Cause');
+        $exception = self::deepException(8, $previous);
 
         $monolog->error('Failed', ['exception' => $exception]);
 
@@ -121,8 +122,86 @@ final class HandlerTest extends TestCase
         Assert::same($attributes['exception.class'], \RuntimeException::class);
         Assert::same($attributes['exception.message'], 'Boom');
         Assert::same($attributes['exception.code'], '42');
-        Assert::same($attributes['exception.line'], (string) $exception->getLine());
-        Assert::same($attributes['exception.trace'], $exception->getTraceAsString());
+        Assert::same($attributes['exception.file'], $exception->getFile() . ':' . $exception->getLine());
+        Assert::count(\json_decode($attributes['exception.trace'], true), 5);
+        Assert::same($attributes['exception.previous.class'], \LogicException::class);
+        Assert::same($attributes['exception.previous.message'], 'Cause');
+    }
+
+    #[Test]
+    public function normalizesValuesJsonCannotEncode(): void
+    {
+        $monolog = new Monolog('default', [new Handler($this->appLogger())]);
+
+        $object = new class implements \JsonSerializable {
+            public function jsonSerialize(): array
+            {
+                return ['id' => 5];
+            }
+        };
+
+        $monolog->info('Log message', ['nan' => \NAN, 'list' => [1.5, \INF], 'object' => $object]);
+
+        // Monolog keys a normalized object by its class
+        Assert::same($this->attributes(), [
+            'channel' => 'default',
+            'nan' => 'NaN',
+            'list' => '[1.5,"INF"]',
+            'object.' . \Monolog\Utils::getClass($object) . '.id' => '5',
+        ]);
+    }
+
+    #[Test]
+    public function limitsNormalizationDepth(): void
+    {
+        $monolog = new Monolog('default', [new Handler($this->appLogger())]);
+        $context = ['level' => 0];
+        $context['self'] = &$context;
+
+        $monolog->info('Log message', $context);
+
+        Assert::count($this->calls, 1);
+    }
+
+    #[Test]
+    public function movesKeysClashingWithRoadRunnerFields(): void
+    {
+        $monolog = new Monolog('default', [new Handler($this->appLogger())]);
+
+        $monolog->info('Log message', ['msg' => 'a', 'time' => 'b', 'level' => 'c', 'logger' => 'd', 'channel' => 'e']);
+
+        Assert::same($this->attributes(), [
+            'channel' => 'default',
+            'context.msg' => 'a',
+            'context.time' => 'b',
+            'context.level' => 'c',
+            'context.logger' => 'd',
+            'context.channel' => 'e',
+        ]);
+    }
+
+    #[Test]
+    public function resetResetsProcessors(): void
+    {
+        $handler = new Handler($this->appLogger());
+        $processor = new class implements \Monolog\ResettableInterface {
+            public int $resets = 0;
+
+            public function __invoke(LogRecord $record): LogRecord
+            {
+                return $record;
+            }
+
+            public function reset(): void
+            {
+                ++$this->resets;
+            }
+        };
+        $handler->pushProcessor($processor);
+
+        $handler->reset();
+
+        Assert::same($processor->resets, 1);
     }
 
     #[Test]
@@ -154,6 +233,13 @@ final class HandlerTest extends TestCase
         $handler->handle($record);
 
         Assert::count($this->calls, $expectsCount);
+    }
+
+    private static function deepException(int $depth, \Throwable $previous): \RuntimeException
+    {
+        return $depth === 0
+            ? new \RuntimeException('Boom', 42, $previous)
+            : self::deepException($depth - 1, $previous);
     }
 
     private function appLogger(): Logger
