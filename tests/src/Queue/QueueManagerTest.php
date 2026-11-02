@@ -40,7 +40,7 @@ final class QueueManagerTest extends TestCase
         $factory->shouldReceive('make')->once()
             ->with('roadrunner', [
                 'driver' => 'roadrunner',
-                'pipelines' => [],
+                'default' => 'memory',
             ])
             ->andReturn($driver = m::mock(QueueInterface::class));
 
@@ -49,7 +49,7 @@ final class QueueManagerTest extends TestCase
                 'connections' => [
                     'roadrunner' => [
                         'driver' => 'roadrunner',
-                        'pipelines' => [],
+                        'default' => 'memory',
                     ],
                 ],
             ]),
