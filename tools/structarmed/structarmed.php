@@ -16,7 +16,7 @@ use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\InternalNamespaceMustBeAnnota
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Rule\MustExtendRule;
 
 // Layers that wire the modules together: they may reach into any module's internals.
-$compositionRoots = ['Bootloader', 'BootloaderInternal'];
+$compositionRoots = ['Bootloader'];
 
 return Architecture::define()
     ->withPresets(Preset::PSR4(), Preset::CODEQUALITY())
@@ -83,6 +83,6 @@ return Architecture::define()
         'Config'             => ['Centrifugo', 'GRPC'],
         'Scaffolder'         => ['Centrifugo'],
         'ScaffolderInternal' => ['+Scaffolder'],
-        'BootloaderInternal' => ['Exception', 'CentrifugoInternal', 'GRPCInternal', '+Http', 'QueueInternal'],
-        'Bootloader'         => ['+BootloaderInternal', '+GRPCInternal', '+QueueInternal', '+ScaffolderInternal', 'Logger'],
+        'BootloaderInternal' => ['Bootloader', 'Exception', 'RoadRunnerMode'],
+        'Bootloader'         => ['BootloaderInternal', 'CentrifugoInternal', 'Exception', '+Http', '+GRPCInternal', '+QueueInternal', '+ScaffolderInternal', 'Logger'],
     ]);
