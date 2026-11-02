@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\GRPC\Internal\Command;
 
+use Internal\Path;
 use Spiral\Boot\DirectoriesInterface;
 use Spiral\Boot\KernelInterface;
 use Spiral\Console\Command;
@@ -14,7 +15,6 @@ use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BinaryLocator;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BufCommandBuilder;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BufTemplate;
-use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\Path;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\ProcessRunner;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\ProtoCompiler;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
@@ -41,43 +41,38 @@ final class GenerateCommand extends Command
         GeneratorRegistryInterface $generatorRegistry,
     ): int {
         // buf runs in the root, so relative config paths resolve from it here as well.
-        $root = $dirs->get('root');
-        $locator = new BinaryLocator($root);
-        $userTemplate = Path::from($root, $config->getBufTemplate());
+        $root = Path::create($dirs->get('root'))->absolute();
+        $locator = new BinaryLocator((string) $root);
+        $userTemplate = self::fromRoot($root, $config->getBufTemplate());
 
         try {
-            $bufPath = $locator->locate('buf', 'bufPath', Path::from($root, $config->getBufPath()));
+            $bufPath = $locator->locate('buf', 'bufPath', self::fromRoot($root, $config->getBufPath()));
             $template = $userTemplate === null
                 ? BufTemplate::local(
-                    $locator->locate('protoc', 'protocPath', Path::from($root, $config->getProtocPath())),
-                    $locator->locate('protoc-gen-php-grpc', 'pluginPath', Path::from($root, $config->getPluginPath())),
+                    $locator->locate('protoc', 'protocPath', self::fromRoot($root, $config->getProtocPath())),
+                    $locator->locate('protoc-gen-php-grpc', 'pluginPath', self::fromRoot($root, $config->getPluginPath())),
                 )
-                : BufTemplate::user($userTemplate);
+                : BufTemplate::user((string) $userTemplate);
         } catch (BinaryNotFoundException $e) {
             $this->error($e->getMessage());
 
             return self::FAILURE;
         }
 
-        if ($userTemplate !== null && !\is_file($userTemplate)) {
+        if ($userTemplate !== null && !$userTemplate->isFile()) {
             $this->error("The buf template `$userTemplate` set in `bufTemplate` was not found.");
 
             return self::FAILURE;
         }
 
-        $basePath = Path::from($root, $config->getServicesBasePath());
-        if ($basePath !== null) {
-            $realBasePath = \realpath($basePath);
-            if ($realBasePath === false || !\is_dir($realBasePath)) {
-                $this->error("The services base path `$basePath` set in `servicesBasePath` was not found.");
+        $basePath = self::fromRoot($root, $config->getServicesBasePath());
+        if ($basePath !== null && !$basePath->isDir()) {
+            $this->error("The services base path `$basePath` set in `servicesBasePath` was not found.");
 
-                return self::FAILURE;
-            }
-
-            $basePath = $realBasePath;
+            return self::FAILURE;
         }
 
-        $generatedPath = $this->getPath($kernel, Path::from($root, $config->getGeneratedPath()));
+        $generatedPath = $this->getPath($kernel, self::fromRoot($root, $config->getGeneratedPath()));
         $namespace = $this->getNamespace($kernel, $config->getNamespace());
 
         $compiler = new ProtoCompiler(
@@ -87,7 +82,7 @@ final class GenerateCommand extends Command
             new BufCommandBuilder($bufPath),
             new ProcessRunner(),
             $template,
-            $root,
+            (string) $root,
         );
 
         $this->failed = false;
@@ -116,10 +111,7 @@ final class GenerateCommand extends Command
             }
 
             foreach ($result->files as $file) {
-                $this->sprintf(
-                    "<fg=green>•</fg=green> <fg=white;options=bold>%s</>\n",
-                    $files->relativePath($file, $root),
-                );
+                $this->sprintf("<fg=green>•</fg=green> <fg=white;options=bold>%s</>\n", self::shown($file, $root));
 
                 $compiled[] = $file;
             }
@@ -136,7 +128,7 @@ final class GenerateCommand extends Command
                 $this->sprintf(
                     '  "%s\\\\": "%s/"' . "\n",
                     $topNamespace,
-                    $files->relativePath($generatedPath . '/' . $topNamespace, $root),
+                    self::shown(Path::create($generatedPath)->join($topNamespace), $root),
                 );
             }
         }
@@ -161,25 +153,24 @@ final class GenerateCommand extends Command
     /**
      * Get or detect base source code path. By default fallbacks to kernel location.
      *
-     * @param non-empty-string|null $generatedPath
+     * The `path` argument is relative to the current directory, as any path typed in a shell.
      *
      * @return non-empty-string
      */
-    protected function getPath(KernelInterface $kernel, ?string $generatedPath): string
+    protected function getPath(KernelInterface $kernel, ?Path $generatedPath): string
     {
         $path = $this->argument('path');
         if ($path !== 'auto') {
-            return $path;
+            return (string) Path::create($path)->absolute();
         }
 
         if ($generatedPath !== null) {
-            return $generatedPath;
+            return (string) $generatedPath;
         }
 
         $r = new \ReflectionObject($kernel);
 
-        /** @psalm-suppress LessSpecificReturnStatement dirname() never returns an empty string */
-        return \dirname($r->getFileName());
+        return (string) Path::create((string) $r->getFileName())->parent();
     }
 
     /**
@@ -204,29 +195,51 @@ final class GenerateCommand extends Command
     }
 
     /**
+     * A config path: a relative one resolves from the root. An empty value means unset, as one read from an unset
+     * environment variable.
+     */
+    private static function fromRoot(Path $root, ?string $path): ?Path
+    {
+        if ($path === null || $path === '') {
+            return null;
+        }
+
+        $path = Path::create($path);
+
+        return $path->isAbsolute() ? $path : $root->join($path);
+    }
+
+    /**
+     * The path as printed: relative to the root when it lies under it.
+     */
+    private static function shown(Path|string $path, Path $root): string
+    {
+        $path = Path::create($path);
+
+        return (string) ($path->isWithin($root) ? $path->tryRelative($root) : $path);
+    }
+
+    /**
      * Groups the existing proto files by the buf input they are compiled from: the services base path,
      * or the file's own directory when no base path is set.
      *
-     * @param string $root Application root that relative proto file paths resolve from.
-     * @param string|null $basePath Real path of the services base path.
+     * @param Path $root Application root that relative proto file paths resolve from.
+     * @param Path|null $basePath The services base path.
      *
-     * @return array<string, list<string>> Input directory => real paths of its proto files.
+     * @return array<string, list<string>> Input directory => paths of its proto files.
      */
-    private function groupByInput(ProtoFilesRepositoryInterface $repository, string $root, ?string $basePath): array
+    private function groupByInput(ProtoFilesRepositoryInterface $repository, Path $root, ?Path $basePath): array
     {
         $groups = [];
         foreach ($repository->getProtos() as $entry) {
-            $protoFile = Path::from($root, $entry);
-            if ($protoFile === null || !\file_exists($protoFile)) {
+            $protoFile = self::fromRoot($root, $entry);
+            if ($protoFile === null || !$protoFile->isFile()) {
                 $this->sprintf("<error>Proto file `%s` not found.</error>\n", $entry);
                 $this->failed = true;
                 continue;
             }
 
-            $realPath = \realpath($protoFile);
-            $protoFile = $realPath === false ? $protoFile : $realPath;
-
-            if ($basePath !== null && !\str_starts_with($protoFile, \rtrim($basePath, '\\/') . \DIRECTORY_SEPARATOR)) {
+            if ($basePath !== null && !$protoFile->isWithin($basePath)) {
                 $this->sprintf(
                     "<error>Proto file `%s` is outside of the services base path `%s`.</error>\n",
                     $protoFile,
@@ -236,7 +249,7 @@ final class GenerateCommand extends Command
                 continue;
             }
 
-            $groups[$basePath ?? \dirname($protoFile)][] = $protoFile;
+            $groups[(string) ($basePath ?? $protoFile->parent())][] = (string) $protoFile;
         }
 
         return $groups;

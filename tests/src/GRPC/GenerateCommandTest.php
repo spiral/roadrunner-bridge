@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC;
 
+use Internal\Path;
 use Spiral\Files\Files;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
@@ -42,7 +43,7 @@ final class GenerateCommandTest extends ConsoleTestCase
         ];
 
         $path = $this->getDirectoryByAlias('app') . 'proto/service.proto';
-        Assert::string($result)->contains(\sprintf('Compiling `%s`:', \realpath($path) ?: $path));
+        Assert::string($result)->contains(\sprintf('Compiling `%s`:', Path::create($path)->absolute()));
 
         foreach ($files as $file) {
             Assert::true(\file_exists($this->getDirectoryByAlias('app') . $file));
@@ -426,10 +427,10 @@ final class GenerateCommandTest extends ConsoleTestCase
         $files = new Files();
         $root = $this->getDirectoryByAlias('root');
         $template = $this->writeTemplate([
-            ['protoc_builtin' => 'php', 'protoc_path' => $this->binary('protoc'), 'out' => $files->relativePath($this->workDir . '/rel', $root)],
+            ['protoc_builtin' => 'php', 'protoc_path' => $this->binary('protoc'), 'out' => $this->relativeToRoot($this->workDir . '/rel')],
         ]);
-        $this->configure('bufTemplate', $files->relativePath($template, $root));
-        $this->configure('servicesBasePath', $files->relativePath($this->getDirectoryByAlias('app') . 'proto', $root));
+        $this->configure('bufTemplate', $this->relativeToRoot($template));
+        $this->configure('servicesBasePath', $this->relativeToRoot($this->getDirectoryByAlias('app') . 'proto'));
         $this->configure('services', [$this->serviceProto()]);
 
         $cwd = (string) \getcwd();
@@ -697,8 +698,8 @@ final class GenerateCommandTest extends ConsoleTestCase
     {
         $files = new Files();
         $root = $this->getDirectoryByAlias('root');
-        $this->configure('generatedPath', $files->relativePath($this->workDir . '/generated', $root));
-        $this->configure('services', [$files->relativePath($this->serviceProto(), $root)]);
+        $this->configure('generatedPath', $this->relativeToRoot($this->workDir . '/generated'));
+        $this->configure('services', [$this->relativeToRoot($this->serviceProto())]);
 
         $cwd = (string) \getcwd();
         \chdir(\sys_get_temp_dir());
@@ -843,7 +844,8 @@ final class GenerateCommandTest extends ConsoleTestCase
     #[BeforeTest]
     protected function prepare(): void
     {
-        $this->workDir = (new Files())->normalizePath($this->getDirectoryByAlias('runtime') . 'grpc-generate');
+        // Normalized as the command normalizes the paths it reports: `tests/src/../runtime` becomes `tests/runtime`.
+        $this->workDir = (string) Path::create($this->getDirectoryByAlias('runtime') . 'grpc-generate');
     }
 
     #[AfterTest]
@@ -909,6 +911,14 @@ final class GenerateCommandTest extends ConsoleTestCase
         (new Files())->write($template, $content, ensureDirectory: true);
 
         return $template;
+    }
+
+    /**
+     * The path relative to the application root, which the command resolves relative config paths from.
+     */
+    private function relativeToRoot(string $path): string
+    {
+        return (string) Path::create($path)->tryRelative($this->getDirectoryByAlias('root'));
     }
 
     /**

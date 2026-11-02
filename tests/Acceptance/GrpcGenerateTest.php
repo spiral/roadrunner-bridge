@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Acceptance;
 
+use Internal\Path;
 use Spiral\Tests\Acceptance\Support\GenerateProject;
 use Spiral\Tests\Acceptance\Support\ProcessResult;
 use Testo\Assert;
@@ -211,7 +212,7 @@ final class GrpcGenerateTest
      */
     private static function rootless(ProcessResult $result, GenerateProject $project): string
     {
-        return \str_replace([(string) \realpath($project->root), $project->root], '<root>', $result->output);
+        return \str_replace([(string) \realpath($project->root), (string) Path::create($project->root), $project->root], '<root>', $result->output);
     }
 
     /**

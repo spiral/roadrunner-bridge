@@ -36,6 +36,7 @@
     ],
     "require": {
         "php": ">=8.2",
+        "internal/path": "^1.4",
         "psr/http-factory": "^1.1",
         "roadrunner/app-logger": "^1.3",
         "roadrunner/centrifugo": "^2.5",

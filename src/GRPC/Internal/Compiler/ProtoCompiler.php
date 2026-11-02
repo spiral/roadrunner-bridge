@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\GRPC\Internal\Compiler;
 
+use Internal\Path;
 use Spiral\Files\FilesInterface;
 use Spiral\RoadRunnerBridge\GRPC\Exception\CompileException;
 
@@ -81,13 +82,11 @@ final readonly class ProtoCompiler
 
     /**
      * @param list<string> $dirs
-     *
-     * @psalm-pure
      */
-    private static function isInside(string $file, array $dirs): bool
+    private static function isWithinAny(Path $path, array $dirs): bool
     {
         foreach ($dirs as $dir) {
-            if (\str_starts_with($file, $dir . \DIRECTORY_SEPARATOR)) {
+            if ($path->isWithin($dir)) {
                 return true;
             }
         }
@@ -101,28 +100,24 @@ final readonly class ProtoCompiler
      * @param list<string> $protoFiles
      *
      * @return list<string>
-     *
-     * @psalm-pure
      */
     private static function paths(string $input, array $protoFiles): array
     {
-        $input = \rtrim($input, '\\/');
-        $dirs = \array_unique(\array_map(static fn(string $file): string => \dirname($file), $protoFiles));
+        $dirs = \array_unique(\array_map(
+            static fn(string $file): string => (string) Path::create($file)->parent(),
+            $protoFiles,
+        ));
+        // Parents sort before their subdirectories.
         \sort($dirs);
 
         $result = [];
         foreach ($dirs as $dir) {
-            if ($dir === $input) {
+            // The file directories lie in the input, so one that contains the input is the input itself.
+            if (Path::create($input)->isWithin($dir)) {
                 return [];
             }
 
-            foreach ($result as $parent) {
-                if (\str_starts_with($dir, $parent . \DIRECTORY_SEPARATOR)) {
-                    continue 2;
-                }
-            }
-
-            $result[] = $dir;
+            self::isWithinAny(Path::create($dir), $result) or $result[] = $dir;
         }
 
         return $result;
@@ -137,20 +132,20 @@ final readonly class ProtoCompiler
      * Type) is left to buf, as is a `google/...` one: a vendored copy of googleapis or of the Well-Known Types
      * would duplicate the classes of google/common-protos and google/protobuf.
      *
-     * @param non-empty-list<string> $dirs Real paths of directories inside the input.
+     * @param non-empty-list<string> $dirs Directories inside the input.
      *
-     * @return list<string> Real paths of the imported files.
+     * @return list<string> Paths of the imported files.
      */
     private function importsOutside(string $input, array $dirs): array
     {
         $queue = [];
         foreach ($dirs as $dir) {
             foreach ($this->files->getFiles($dir) as $file) {
-                \str_ends_with($file, '.proto') and $queue[] = (string) \realpath($file);
+                \str_ends_with($file, '.proto') and $queue[] = (string) Path::create($file);
             }
         }
 
-        $input = \rtrim($input, '\\/');
+        $input = Path::create($input);
         $seen = \array_fill_keys($queue, true);
         $result = [];
         while ($queue !== []) {
@@ -158,18 +153,19 @@ final readonly class ProtoCompiler
             \preg_match_all('/\bimport\s*(?:(?:public|weak)\s*)?(["\'])([^"\']+)\1\s*;/', $code, $matches);
 
             foreach ($matches[2] as $import) {
-                if (\str_starts_with($import, 'google/')) {
+                $import = Path::create($import);
+                if ($import->isAbsolute() || \str_starts_with((string) $import, 'google/')) {
                     continue;
                 }
 
-                $file = \realpath($input . \DIRECTORY_SEPARATOR . $import);
-                if ($file === false || isset($seen[$file]) || !self::isInside($file, [$input])) {
+                $file = $input->join($import);
+                if (isset($seen[(string) $file]) || !$file->isWithin($input) || !$file->isFile()) {
                     continue;
                 }
 
-                $seen[$file] = true;
-                $queue[] = $file;
-                self::isInside($file, $dirs) or $result[] = $file;
+                $seen[(string) $file] = true;
+                $queue[] = (string) $file;
+                self::isWithinAny($file, $dirs) or $result[] = (string) $file;
             }
         }
 
