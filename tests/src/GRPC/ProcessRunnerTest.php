@@ -27,6 +27,16 @@ final class ProcessRunnerTest
         Assert::same((new ProcessRunner())->run([\PHP_BINARY, '-r', 'echo "out";']), '');
     }
 
+    public function runsInGivenDirectory(): void
+    {
+        $dir = \dirname(__DIR__);
+
+        $cwd = (new ProcessRunner())->run([\PHP_BINARY, '-r', 'fwrite(STDERR, getcwd());'], $dir);
+
+        Assert::same(\realpath($cwd), \realpath($dir));
+        Assert::notSame(\realpath($cwd), \realpath((string) \getcwd()));
+    }
+
     public function nonZeroExitCode(): void
     {
         Expect::exception(CompileException::class)->withMessageContaining('broken proto')->withCode(3);

@@ -454,6 +454,392 @@ final class GenerateCommandTest extends ConsoleTestCase
         Assert::string($result)->contains('`bufTemplate`');
     }
 
+    #[Test]
+    public function importCycleIsReportedByBuf(): void
+    {
+        $this->writeProto('common/a.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.common;
+            option php_namespace = "Acme\\Common";
+
+            import "common/b.proto";
+
+            message A {}
+            PROTO);
+        $this->writeProto('common/b.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.common;
+            option php_namespace = "Acme\\Common";
+
+            import "common/a.proto";
+
+            message B {}
+            PROTO);
+        $this->writeProto('talk/talk.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.talk;
+            option php_namespace = "Acme\\Talk";
+
+            import "common/a.proto";
+
+            message Note {
+                acme.common.A a = 1;
+            }
+            PROTO);
+        $this->configure('servicesBasePath', $this->workDir . '/proto');
+        $this->configure('services', [$this->workDir . '/proto/talk/talk.proto']);
+
+        $result = $this->generate('Acme');
+
+        // Following the imports terminates; the cycle itself is buf's to reject.
+        Assert::same($this->exitCode, Command::FAILURE);
+        Assert::string($result)->contains('Error:')->contains('cyclic import');
+    }
+
+    #[Test]
+    public function importFromTheServiceDirectory(): void
+    {
+        $this->writeProto('talk/meta.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.talk;
+            option php_namespace = "Acme\\Talk";
+
+            message Meta {}
+            PROTO);
+        $this->writeProto('talk/talk.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.talk;
+            option php_namespace = "Acme\\Talk";
+
+            import "talk/meta.proto";
+
+            message Note {
+                Meta meta = 1;
+            }
+            PROTO);
+        $this->configure('servicesBasePath', $this->workDir . '/proto');
+        $this->configure('services', [$this->workDir . '/proto/talk/talk.proto']);
+
+        $this->generate('Acme');
+
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::true(\file_exists($this->workDir . '/out/Talk/Note.php'));
+        Assert::true(\file_exists($this->workDir . '/out/Talk/Meta.php'));
+    }
+
+    #[Test]
+    public function missingImportIsReportedByBuf(): void
+    {
+        $generator = new class implements GeneratorInterface {
+            public bool $called = false;
+
+            public function run(array $files, string $targetPath, string $namespace): void
+            {
+                $this->called = true;
+            }
+        };
+        $this->configure('generators', [$generator]);
+        $this->writeProto('talk/talk.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.talk;
+            option php_namespace = "Acme\\Talk";
+
+            import "common/missing.proto";
+
+            message Note {}
+            PROTO);
+        $this->configure('servicesBasePath', $this->workDir . '/proto');
+        $this->configure('services', [$this->workDir . '/proto/talk/talk.proto']);
+
+        $result = $this->generate('Acme');
+
+        Assert::same($this->exitCode, Command::FAILURE);
+        Assert::string($result)->contains('Error:')->contains('does not exist');
+        Assert::false($generator->called);
+        Assert::false(\file_exists($this->workDir . '/out/Talk/Note.php'));
+    }
+
+    #[Test]
+    public function servicesInDifferentDirectoriesWithoutBasePath(): void
+    {
+        // The same import name resolves to a different file in each directory: each one is its own input.
+        foreach (['a', 'b'] as $dir) {
+            $namespace = 'Acme\\\\' . \strtoupper($dir);
+            $this->writeProto("$dir/shared.proto", <<<PROTO
+                syntax = "proto3";
+                package acme.$dir;
+                option php_namespace = "$namespace";
+
+                message Shared {}
+                PROTO);
+            $this->writeProto("$dir/service.proto", <<<PROTO
+                syntax = "proto3";
+                package acme.$dir;
+                option php_namespace = "$namespace";
+
+                import "shared.proto";
+
+                message Note {
+                    Shared shared = 1;
+                }
+                PROTO);
+        }
+        $this->configure('servicesBasePath', null);
+        $this->configure('services', [
+            $this->workDir . '/proto/a/service.proto',
+            $this->workDir . '/proto/b/service.proto',
+        ]);
+
+        $this->generate('Acme');
+
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::true(\file_exists($this->workDir . '/out/A/Note.php'));
+        Assert::true(\file_exists($this->workDir . '/out/A/Shared.php'));
+        Assert::true(\file_exists($this->workDir . '/out/B/Note.php'));
+        Assert::true(\file_exists($this->workDir . '/out/B/Shared.php'));
+    }
+
+    #[Test]
+    public function generatorsReceiveFilesSharedByGroupsOnce(): void
+    {
+        $generator = new class implements GeneratorInterface {
+            public array $files = [];
+
+            public function run(array $files, string $targetPath, string $namespace): void
+            {
+                $this->files = $files;
+            }
+        };
+        $this->configure('generators', [$generator]);
+        $this->writeProto('a/a.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.a;
+            option php_namespace = "Acme\\A";
+            option php_metadata_namespace = "Acme\\GPBMetadata\\A";
+
+            message First {}
+            PROTO);
+        $this->writeProto('a/sub/b.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.a.sub;
+            option php_namespace = "Acme\\A\\Sub";
+            option php_metadata_namespace = "Acme\\GPBMetadata\\A\\Sub";
+
+            message Second {}
+            PROTO);
+        // Without a base path each file is grouped by its own directory, and the input of the first group
+        // contains the second one.
+        $this->configure('servicesBasePath', null);
+        $this->configure('services', [
+            $this->workDir . '/proto/a/a.proto',
+            $this->workDir . '/proto/a/sub/b.proto',
+        ]);
+
+        $this->generate('Acme');
+
+        $out = $this->workDir . '/out';
+        Assert::same($this->exitCode, Command::SUCCESS);
+        \sort($generator->files);
+        Assert::same($generator->files, [
+            $out . '/A/First.php',
+            $out . '/A/Sub/Second.php',
+            $out . '/GPBMetadata/A/A.php',
+            $out . '/GPBMetadata/A/Sub/B.php',
+        ]);
+    }
+
+    #[Test]
+    public function failureDoesNotCarryOverToTheNextRun(): void
+    {
+        $generator = new class implements GeneratorInterface {
+            public int $calls = 0;
+
+            public function run(array $files, string $targetPath, string $namespace): void
+            {
+                ++$this->calls;
+            }
+        };
+        $this->configure('generators', [$generator]);
+        $command = $this->getConsole()->getApplication()->find('grpc:generate');
+
+        // The default config lists a missing `foo.proto`.
+        $this->generate();
+        $first = $this->exitCode;
+        $this->configure('services', [$this->serviceProto()]);
+        $this->generate();
+
+        Assert::same($this->getConsole()->getApplication()->find('grpc:generate'), $command);
+        Assert::same($first, Command::FAILURE);
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::same($generator->calls, 1);
+    }
+
+    #[Test]
+    public function relativePathArgumentResolvesFromCurrentDirectory(): void
+    {
+        $this->configure('services', [$this->serviceProto()]);
+        (new Files())->ensureDirectory($this->workDir);
+
+        $cwd = (string) \getcwd();
+        \chdir($this->workDir);
+        try {
+            $this->generate(path: 'cwd-out');
+        } finally {
+            \chdir($cwd);
+        }
+
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::true(\file_exists($this->workDir . '/cwd-out/GRPC/Ping/PingServiceInterface.php'));
+    }
+
+    #[Test]
+    public function generatedPathAndServicesResolveFromRoot(): void
+    {
+        $files = new Files();
+        $root = $this->getDirectoryByAlias('root');
+        $this->configure('generatedPath', $files->relativePath($this->workDir . '/generated', $root));
+        $this->configure('services', [$files->relativePath($this->serviceProto(), $root)]);
+
+        $cwd = (string) \getcwd();
+        \chdir(\sys_get_temp_dir());
+        try {
+            $this->generate(path: 'auto');
+        } finally {
+            \chdir($cwd);
+        }
+
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::true(\file_exists($this->workDir . '/generated/GRPC/Ping/PingServiceInterface.php'));
+    }
+
+    #[Test]
+    public function emptyConfigValuesAreUnset(): void
+    {
+        $this->writeProto('talk/meta.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.talk;
+            option php_namespace = "Acme\\Talk";
+
+            message Meta {}
+            PROTO);
+        // Resolves only when the file's own directory is the input, that is when no base path is set.
+        $this->writeProto('talk/talk.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.talk;
+            option php_namespace = "Acme\\Talk";
+
+            import "meta.proto";
+
+            message Note {
+                Meta meta = 1;
+            }
+            PROTO);
+        $this->configure('bufTemplate', '');
+        $this->configure('servicesBasePath', '');
+        $this->configure('services', [$this->workDir . '/proto/talk/talk.proto']);
+
+        $this->generate('Acme');
+
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::true(\file_exists($this->workDir . '/out/Talk/Note.php'));
+        Assert::true(\file_exists($this->workDir . '/out/Talk/Meta.php'));
+    }
+
+    #[Test]
+    public function rootMetadataNamespaceIsSuggested(): void
+    {
+        // Without `php_metadata_namespace`, protoc puts the metadata class into the root `GPBMetadata`.
+        $this->writeProto('talk.proto', <<<'PROTO'
+            syntax = "proto3";
+            package acme.talk;
+            option php_namespace = "Acme\\Talk";
+
+            message Note {}
+            PROTO);
+        $this->configure('servicesBasePath', $this->workDir . '/proto');
+        $this->configure('services', [$this->workDir . '/proto/talk.proto']);
+
+        $result = $this->generate('Acme');
+
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::true(\file_exists($this->workDir . '/out/Talk/Note.php'));
+        Assert::true(\file_exists($this->workDir . '/out/GPBMetadata/Talk.php'));
+        Assert::string($result)->contains('"GPBMetadata\\\\": "runtime/grpc-generate/out/GPBMetadata/"');
+    }
+
+    #[Test]
+    public function eachForeignNamespaceIsSuggestedOnce(): void
+    {
+        foreach (['a', 'b'] as $dir) {
+            $name = \strtoupper($dir);
+            $this->writeProto("$dir/$dir.proto", <<<PROTO
+                syntax = "proto3";
+                package extra.$dir;
+                option php_namespace = "AcmeExtra\\\\$name";
+                option php_metadata_namespace = "Other\\\\GPBMetadata\\\\$name";
+
+                message Note {}
+                PROTO);
+        }
+        // Two groups, both with classes in the same foreign namespaces.
+        $this->configure('servicesBasePath', null);
+        $this->configure('services', [$this->workDir . '/proto/a/a.proto', $this->workDir . '/proto/b/b.proto']);
+
+        $result = $this->generate('Acme');
+
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::same(\substr_count($result, '"AcmeExtra\\\\": "runtime/grpc-generate/out/AcmeExtra/"'), 1);
+        Assert::same(\substr_count($result, '"Other\\\\": "runtime/grpc-generate/out/Other/"'), 1);
+        Assert::same(\substr_count($result, 'outside the base namespace'), 1);
+    }
+
+    #[Test]
+    public function emptyBaseNamespaceKeepsFullPaths(): void
+    {
+        $this->configure('namespace', '');
+        $this->configure('services', [$this->serviceProto()]);
+
+        $result = $this->generate('auto');
+
+        // Every class is under the root namespace, so none needs a rule of its own.
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::true(\file_exists($this->workDir . '/out/Spiral/App/GRPC/Ping/PingServiceInterface.php'));
+        Assert::false(\str_contains($result, 'outside the base namespace'));
+    }
+
+    #[Test]
+    public function userTemplateGetsNoAutoloadSuggestion(): void
+    {
+        $out = $this->workDir . '/out';
+        $this->configure('bufTemplate', $this->writeTemplate([
+            ['protoc_builtin' => 'php', 'protoc_path' => $this->binary('protoc'), 'out' => $out],
+        ]));
+        $this->configure('services', [$this->serviceProto()]);
+
+        $result = $this->generate('Acme');
+
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::true(\file_exists($out . '/Spiral/App/GRPC/Ping/PingRequest.php'));
+        Assert::false(\str_contains($result, 'outside the base namespace'));
+    }
+
+    #[Test]
+    public function warningsOfSuccessfulRunArePrinted(): void
+    {
+        // buf passes the error output of a plugin through.
+        $plugin = $this->workDir . '/plugin.php';
+        (new Files())->write($plugin, '<?php stream_get_contents(STDIN); fwrite(STDERR, "plugin says beware");', ensureDirectory: true);
+        $this->configure('bufTemplate', $this->writeTemplate([
+            ['local' => [\PHP_BINARY, $plugin], 'out' => $this->workDir . '/out'],
+        ]));
+        $this->configure('services', [$this->serviceProto()]);
+
+        $result = $this->generate();
+
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::string($result)->contains('plugin says beware');
+    }
+
     #[BeforeTest]
     protected function prepare(): void
     {
@@ -492,11 +878,14 @@ final class GenerateCommandTest extends ConsoleTestCase
         $container->bindSingleton(GeneratorRegistryInterface::class, $registry);
     }
 
-    private function generate(string $namespace = 'Spiral\\App'): string
+    /**
+     * @param string|null $path The `path` argument; null means `out` in the work directory.
+     */
+    private function generate(string $namespace = 'Spiral\\App', ?string $path = null): string
     {
         $output = new BufferedOutput();
         $this->exitCode = $this->getConsole()->run('grpc:generate', [
-            'path' => $this->workDir . '/out',
+            'path' => $path ?? $this->workDir . '/out',
             'namespace' => $namespace,
         ], $output)->getCode();
 
@@ -509,7 +898,7 @@ final class GenerateCommandTest extends ConsoleTestCase
     }
 
     /**
-     * @param list<array<string, string>> $plugins
+     * @param list<array<string, string|list<string>>> $plugins
      *
      * @return string Path to the written buf.gen.yaml.
      */
