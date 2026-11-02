@@ -8,6 +8,7 @@ use Mockery as m;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Exceptions\ExceptionReporterInterface;
 use Spiral\Queue\HandlerRegistryInterface;
+use Spiral\RoadRunnerBridge\Config\QueueConfig;
 use Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher;
 use Spiral\RoadRunnerBridge\Queue\Internal\PayloadDeserializer;
 use Spiral\RoadRunnerBridge\Queue\Internal\RPCPipelineRegistry;
@@ -39,16 +40,22 @@ final class QueueBootloaderTest extends TestCase
     #[Test]
     public function getsPipelineRegistryInterface(): void
     {
-        Assert::instanceOf($registry1 = $this->getContainer()->make(PipelineRegistryInterface::class, [
-            'pipelines' => ['foo' => 'bar'],
-            'aliases' => ['bas' => 'bar'],
-        ]), RPCPipelineRegistry::class);
-        Assert::instanceOf($registry2 = $this->getContainer()->make(PipelineRegistryInterface::class, [
-            'pipelines' => ['foo' => 'bar'],
-            'aliases' => ['bas' => 'bar'],
-        ]), RPCPipelineRegistry::class);
+        $this->assertContainerBoundAsSingleton(
+            PipelineRegistryInterface::class,
+            RPCPipelineRegistry::class,
+        );
+    }
 
-        Assert::notSame($registry2, $registry1);
+    #[Test]
+    public function pipelinesAreReadFromTopLevelQueueConfig(): void
+    {
+        $pipelines = $this->getContainer()->get(QueueConfig::class)->getPipelines();
+
+        Assert::same(\array_keys($pipelines), ['memory']);
+
+        $registry = $this->getContainer()->get(PipelineRegistryInterface::class);
+        \assert($registry instanceof RPCPipelineRegistry);
+        Assert::same($registry->getConnector('memory'), $pipelines['memory']['connector']);
     }
 
     #[Test]

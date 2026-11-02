@@ -27,49 +27,39 @@ return [
             // Job will be handled immediately without queueing
             'driver' => 'sync',
         ],
-        'laravel' => [
-            'driver' => 'laravel',
-        ],
         'roadrunner' => [
             'driver' => 'roadrunner',
-            'default' => 'memory', // Required
-            'aliases' => [ // Optional
-                'foo' => 'memory',
-            ],
-            'pipelines' => [
-                'memory' => [
-                    'connector' => new MemoryCreateInfo('local'), // Required
-                    // Run consumer for this pipeline on startup (by default)
-                    // You can pause consumer for this pipeline via console command
-                    // php app.php queue:pause local
-                    'consume' => true, // Optional
-                ],
-                'withSerializer' => [
-                    'connector' => new MemoryCreateInfo('local'),
-                    'consume' => true,
-                ],
-                // 'amqp' => [
-                //     'connector' => new AMQPCreateInfo('bus', ...),
-                //     // Don't consume jobs for this pipeline on start
-                //     // You can run consumer for this pipeline via console command
-                //     // php app.php queue:resume local
-                //     'consume' => false
-                // ],
-                //
-                // 'beanstalk' => [
-                //     'connector' => new BeanstalkCreateInfo('bus', ...),
-                // ],
-                //
-                // 'sqs' => [
-                //     'connector' => new SQSCreateInfo('amazon', ...),
-                // ],
-            ],
+            // Pipeline jobs are pushed to unless Options::onQueue() names another one
+            'default' => 'memory',
         ],
     ],
 
-    'driverAliases' => [
-        'sync' => \Spiral\Queue\Driver\SyncDriver::class,
-        'roadrunner' => \Spiral\RoadRunnerBridge\Queue\Internal\Queue::class,
+    /**
+     * RoadRunner pipelines the bridge declares and connects to
+     */
+    'pipelines' => [
+        'memory' => [
+            'connector' => new MemoryCreateInfo('local'), // Required
+            // Run consumer for this pipeline on startup (by default)
+            // You can pause consumer for this pipeline via console command
+            // php app.php rr:jobs:pause local
+            'consume' => true, // Optional
+        ],
+        // 'amqp' => [
+        //     'connector' => new AMQPCreateInfo('bus', ...),
+        //     // Don't consume jobs for this pipeline on start
+        //     // You can run consumer for this pipeline via console command
+        //     // php app.php rr:jobs:consume amqp
+        //     'consume' => false
+        // ],
+        //
+        // 'beanstalk' => [
+        //     'connector' => new BeanstalkCreateInfo('bus', ...),
+        // ],
+        //
+        // 'sqs' => [
+        //     'connector' => new SQSCreateInfo('amazon', ...),
+        // ],
     ],
 
     'registry' => [
