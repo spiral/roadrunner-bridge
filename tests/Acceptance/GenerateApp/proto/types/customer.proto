@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package acceptance.types;
+
+option php_namespace = "Acceptance\\Types";
+option php_metadata_namespace = "Acceptance\\GPBMetadata\\Types\\Customer";
+
+message Customer {
+  string id = 1;
+  string email = 2;
+}

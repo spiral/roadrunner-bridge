@@ -1,0 +1,31 @@
+// Orders. Routes: /v1/orders/*   <- a `/*` inside a line comment does not open a block comment
+syntax = "proto3";
+
+package acceptance.shop;
+
+option php_namespace = "Acceptance\\Shop";
+option php_metadata_namespace = "Acceptance\\GPBMetadata\\Shop";
+
+import "common/money.proto";
+import "google/protobuf/timestamp.proto"; // a Well-Known Type: ships with google/protobuf
+import "google/api/http.proto";           // a vendored googleapis copy: ships with google/common-protos
+import 'types/customer.proto';
+/*
+import "legacy/broken.proto";
+*/
+
+service OrderService {
+  rpc Place (PlaceOrderRequest) returns (Order) {}
+}
+
+message PlaceOrderRequest {
+  acceptance.types.Customer customer = 1;
+  acceptance.common.Money total = 2;
+}
+
+message Order {
+  string id = 1;
+  acceptance.common.Money total = 2;
+  google.protobuf.Timestamp placed_at = 3;
+  google.api.HttpRule route = 4;
+}

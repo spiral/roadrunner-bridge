@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package acceptance.notes;
+
+// Starts with the base namespace `Acceptance` but is not inside it.
+option php_namespace = "AcceptanceExtra\\Notes";
+option php_metadata_namespace = "AcceptanceExtra\\GPBMetadata\\Notes";
+
+service NoteService {
+  rpc Add (Note) returns (Note) {}
+}
+
+message Note {
+  string text = 1;
+}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC;
 
+use Internal\Path;
 use Spiral\RoadRunnerBridge\GRPC\Exception\BinaryNotFoundException;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\BinaryLocator;
 use Testo\Assert;
@@ -24,7 +25,7 @@ final class BinaryLocatorTest
 
         $locator = new BinaryLocator($this->dir . '/root', '', false);
 
-        Assert::same($locator->locate('buf', 'bufPath', $configured), $configured);
+        Assert::same($locator->locate('buf', 'bufPath', $configured), (string) Path::create($configured));
     }
 
     public function missingConfiguredPathIsNotSilentlyReplaced(): void
@@ -44,7 +45,7 @@ final class BinaryLocatorTest
 
         $locator = new BinaryLocator($this->dir . '/root', $this->dir . '/path', false);
 
-        Assert::same($locator->locate('protoc', 'protocPath', null), $this->dir . '/root' . \DIRECTORY_SEPARATOR . 'protoc');
+        Assert::same($locator->locate('protoc', 'protocPath', null), (string) Path::create($this->dir . '/root/protoc'));
     }
 
     public function windowsExtension(): void
@@ -54,7 +55,7 @@ final class BinaryLocatorTest
 
         $locator = new BinaryLocator($this->dir . '/root', '', true);
 
-        Assert::same($locator->locate('protoc', 'protocPath', ''), $this->dir . '/root' . \DIRECTORY_SEPARATOR . 'protoc.exe');
+        Assert::same($locator->locate('protoc', 'protocPath', ''), (string) Path::create($this->dir . '/root/protoc.exe'));
     }
 
     public function pathEnvironment(): void
@@ -67,7 +68,24 @@ final class BinaryLocatorTest
             false,
         );
 
-        Assert::same($locator->locate('protoc-gen-php-grpc', 'pluginPath', null), $this->dir . '/path2' . \DIRECTORY_SEPARATOR . 'protoc-gen-php-grpc');
+        Assert::same($locator->locate('protoc-gen-php-grpc', 'pluginPath', null), (string) Path::create($this->dir . '/path2/protoc-gen-php-grpc'));
+    }
+
+    public function relativePathEntryBecomesAbsolute(): void
+    {
+        $this->touch('path/buf');
+        $locator = new BinaryLocator($this->dir . '/root', 'path', false);
+
+        $cwd = (string) \getcwd();
+        \chdir($this->dir);
+        try {
+            $located = $locator->locate('buf', 'bufPath', null);
+        } finally {
+            \chdir($cwd);
+        }
+
+        // buf runs from the application root, where the relative entry would point elsewhere.
+        Assert::same($located, (string) Path::create($this->dir . '/path/buf'));
     }
 
     public function notFoundPointsToDload(): void

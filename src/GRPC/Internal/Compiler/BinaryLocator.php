@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\GRPC\Internal\Compiler;
 
+use Internal\Path;
 use Spiral\RoadRunnerBridge\GRPC\Exception\BinaryNotFoundException;
 
 /**
@@ -28,13 +29,13 @@ final readonly class BinaryLocator
     /**
      * @param non-empty-string $name Binary name without extension; also the DLoad alias.
      * @param non-empty-string $configKey The gRPC config key that overrides the lookup.
-     * @param string|null $configured Value of that config key.
+     * @param Path|string|null $configured Value of that config key; empty means unset.
      *
      * @return non-empty-string Path to the executable.
      *
      * @throws BinaryNotFoundException
      */
-    public function locate(string $name, string $configKey, ?string $configured): string
+    public function locate(string $name, string $configKey, Path|string|null $configured): string
     {
         $hint = \sprintf(
             'Download it with `vendor/bin/dload get %s` (add `<download software="%s"/>` to dload.xml) '
@@ -45,18 +46,19 @@ final readonly class BinaryLocator
         );
 
         if ($configured !== null && $configured !== '') {
-            \is_file($configured) or throw new BinaryNotFoundException(
+            $configured = Path::create($configured);
+            $configured->isFile() or throw new BinaryNotFoundException(
                 \sprintf('The `%s` binary `%s` set in `%s` was not found. %s', $name, $configured, $configKey, $hint),
             );
 
-            return $configured;
+            return (string) $configured;
         }
 
         $fileName = $name . ($this->windows ? '.exe' : '');
 
-        $local = \rtrim($this->rootDir, '\\/') . \DIRECTORY_SEPARATOR . $fileName;
-        if (\is_file($local)) {
-            return $local;
+        $local = Path::create($this->rootDir)->join($fileName);
+        if ($local->isFile()) {
+            return (string) $local;
         }
 
         $pathEnv = $this->pathEnv ?? (string) \getenv('PATH');
@@ -65,9 +67,11 @@ final readonly class BinaryLocator
                 continue;
             }
 
-            $candidate = \rtrim($dir, '\\/') . \DIRECTORY_SEPARATOR . $fileName;
-            if (\is_file($candidate)) {
-                return $candidate;
+            $candidate = Path::create($dir)->join($fileName);
+            if ($candidate->isFile()) {
+                // A relative `PATH` entry resolves from the current directory, which is not where buf runs.
+                // Not realpath(): version-manager shims are symlinks that pick the tool by their own name.
+                return (string) $candidate->absolute();
             }
         }
 

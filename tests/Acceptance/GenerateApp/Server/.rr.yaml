@@ -1,0 +1,19 @@
+version: '3'
+
+rpc:
+  listen: tcp://127.0.0.1:${RR_RPC_PORT}
+
+server:
+  command: '${ACCEPTANCE_PHP} worker.php'
+  relay: pipes
+
+logs:
+  mode: development
+  level: warn
+
+grpc:
+  listen: tcp://127.0.0.1:${RR_GRPC_PORT}
+  proto:
+    - ${GENERATE_ROOT}/proto/shop/order.proto
+  pool:
+    num_workers: 1
