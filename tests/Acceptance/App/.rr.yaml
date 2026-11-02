@@ -11,7 +11,7 @@ server:
     MONOLOG_DEFAULT_CHANNEL: roadrunner
 
 logs:
-  mode: development
+  mode: ${RR_LOGS_MODE:-development}
   level: warn
 
 http:
