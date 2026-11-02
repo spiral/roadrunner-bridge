@@ -95,8 +95,8 @@ final class AuthInterceptor implements InterceptorInterface
 php app.php grpc:generate [path] [namespace]
 ```
 
-The command compiles the `services` proto files with [buf](https://buf.build), locally and with no
-network access. Optional `path` (relative to the current directory) and `namespace` override
+The command compiles the `services` proto files with [buf](https://buf.build); with the bridge's own
+template it runs locally, with no network access. Optional `path` (relative to the current directory) and `namespace` override
 `generatedPath` / `namespace`; with neither set, both fall back to the kernel's directory and namespace.
 Relative paths in the config resolve from the application root.
 
@@ -119,16 +119,23 @@ major must match the installed `google/protobuf` (5.36.x → protoc 36.x).
 - Generated classes are placed by namespace under `generatedPath`, with the base `namespace` cut from the
   path. Classes outside it (a `php_namespace` of another vendor) keep their full namespace as the path;
   the command prints the PSR-4 rules to add to `composer.json` for them.
-- A missing proto file, one outside `servicesBasePath` or a buf error fails the command, and then the
-  generators are skipped.
+- Failures make the command exit with 1 and skip the generators. A missing proto file, an empty entry
+  and one outside `servicesBasePath` are reported and left out; the rest still generates. A buf error
+  fails the whole input: with `servicesBasePath` set all services are one buf run, so one proto file
+  that does not compile leaves every service ungenerated.
 
 ### Custom `buf.gen.yaml`
 
 `bufTemplate` points to your own template, used as is — for managed mode, extra plugins or BSR
-dependencies (with your own `buf.yaml`). Its `out` directories decide where files go: `generatedPath` and
-`namespace` no longer relocate them; `generatedPath` only tells which files count as generated for the
-generators. buf runs in the application root, so relative paths in the template resolve from it
-(`protoc_path: protoc`, `local: protoc-gen-php-grpc`) — on Windows with the `.exe` suffix.
+dependencies (with your own `buf.yaml`). The bridge then only runs buf:
+
+- Its `out` directories decide where files go: `generatedPath` and `namespace` no longer relocate them;
+  `generatedPath` only tells which files count as generated for the generators.
+- Imports are not added: set `include_imports: true` on each plugin, or the generated code references
+  classes of imported files that were never generated.
+- `protocPath` and `pluginPath` are not used; the template names the binaries.
+- buf runs in the application root, so relative paths in the template resolve from it
+  (`protoc_path: protoc`, `local: protoc-gen-php-grpc`) — on Windows with the `.exe` suffix.
 
 ### Generators
 

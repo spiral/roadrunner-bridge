@@ -4,8 +4,8 @@ A Spiral app on RoadRunner needs the `rr` server binary; `grpc:generate` also ne
 `protoc-gen-php-grpc`. Pick the way that matches where the binary runs: DLoad or `roadrunner/cli` for a
 project checkout and CI, a Docker stage for images.
 
-Bridge 5.x needs RoadRunner 3: in `dload.xml` give `rr` the version `^3`; `rr get` from `roadrunner/cli` 3
-downloads RoadRunner 3 by default. Bridge 5.x needs RoadRunner 3; check with `rr --version`.
+Bridge 5.x needs RoadRunner 3 (check with `rr --version`): in `dload.xml` give `rr` the version `^3`;
+`rr get` from `roadrunner/cli` 3 downloads RoadRunner 3 by default.
 
 Downloaded binaries stay out of git: add `/rr`, `/buf`, `/protoc`, `/protoc-gen-php-grpc` (and their
 `.exe` on Windows) to `.gitignore`.

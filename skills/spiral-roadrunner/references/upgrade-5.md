@@ -34,6 +34,11 @@ addresses for RPC and relays are not the plugin and keep working.
   inside `servicesBasePath`.
 - Download `buf`, `protoc` and `protoc-gen-php-grpc` (DLoad or `rr get-grpc-tools`);
   `rr download-protoc-binary` is no longer used.
+- `grpc:generate` exits with 1 when a proto file is missing or does not compile; 4.x exited with 0 for a
+  missing file. Check scripts and CI steps that run it.
+- The base `namespace` is cut from generated paths only as a whole segment: with `App`, a
+  `php_namespace` of `AppExtra\...` used to land in `Extra/...` and now lands in `AppExtra/...`.
+  Regenerate and review the diff of the generated directory.
 - Regenerated files differ from the protoc output only by the `json_name` option buf records in field
   comments and the embedded descriptor; JSON names stay the same.
 
@@ -44,9 +49,7 @@ addresses for RPC and relays are not the plugin and keep working.
 
 ## Internal classes
 
-Classes outside the `@api` surface moved into `*\Internal\*` namespaces: console commands
-(`Console\Command\*`), `FallbackDispatcher`, `GRPC\Generator\GeneratorRegistry`,
-`GRPC\ProtoRepository\FileRepository` / `CompositeRepository`. Search the application for
+Classes outside the `@api` surface moved into `*\Internal\*` namespaces. Search the application for
 `Spiral\RoadRunnerBridge\` and keep only the bootloaders, configs, `RoadRunnerMode` and the public
 interfaces: run commands by name, select the queue driver through the `roadrunner` alias, and implement
 `ProtoFilesRepositoryInterface` / `GeneratorRegistryInterface` yourself instead of reusing the internal

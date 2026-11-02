@@ -73,8 +73,8 @@ which plugin it serves through the `RR_MODE` env variable. `RoadRunnerMode` (inj
 | `grpc` | `GRPCBootloader` | `grpc` | `grpc-request` (`UnaryCallInterface`) |
 | `centrifuge` | `CentrifugoBootloader` | `centrifugo` | `centrifugo-request` (`RequestInterface`) |
 
-A mode without its bootloader fails at start with `DispatcherNotFoundException` naming the missing
-dispatcher; `temporal` points to `spiral/temporal-bridge`. Outside RoadRunner the mode is `Unknown` and
+A mode without its bootloader fails at start with `DispatcherNotFoundException` naming the bootloader to
+add to the kernel; `temporal` points to `spiral/temporal-bridge`. Outside RoadRunner the mode is `Unknown` and
 the console/other dispatchers run as usual.
 
 The HTTP worker hands every request to `Spiral\Http\Http`. An exception that escapes the HTTP pipeline is
