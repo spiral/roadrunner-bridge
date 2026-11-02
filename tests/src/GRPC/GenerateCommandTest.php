@@ -263,10 +263,15 @@ final class GenerateCommandTest extends ConsoleTestCase
         $this->configure('servicesBasePath', $this->workDir . '/proto');
         $this->configure('services', [$this->workDir . '/proto/extra.proto']);
 
-        $this->generate('Acme');
+        $result = $this->generate('Acme');
 
         Assert::true(\file_exists($this->workDir . '/out/AcmeExtra/Talk/Note.php'));
         Assert::false(\file_exists($this->workDir . '/out/Extra/Talk/Note.php'));
+        // The `Acme` autoload rule does not cover it, so the command suggests one.
+        Assert::same($this->exitCode, Command::SUCCESS);
+        Assert::string($result)
+            ->contains('outside the base namespace `Acme`')
+            ->contains('"AcmeExtra\\\\": "runtime/grpc-generate/out/AcmeExtra/"');
     }
 
     #[Test]
@@ -351,10 +356,12 @@ final class GenerateCommandTest extends ConsoleTestCase
         $this->configure('generators', [$generator]);
         $this->configure('services', [$this->serviceProto()]);
 
-        $this->generate();
+        $result = $this->generate();
 
         $out = $this->workDir . '/out';
         Assert::same($this->exitCode, Command::SUCCESS);
+        // Everything is under the base namespace.
+        Assert::false(\str_contains($result, 'outside the base namespace'));
         Assert::count($generator->calls, 1);
         [$files, $targetPath, $namespace] = $generator->calls[0];
         \sort($files);

@@ -92,6 +92,7 @@ final class GenerateCommand extends Command
 
         $this->failed = false;
         $compiled = [];
+        $foreign = [];
         foreach ($this->groupByInput($repository, $root, $basePath) as $input => $protoFiles) {
             foreach ($protoFiles as $protoFile) {
                 $this->sprintf("<info>Compiling <fg=cyan>`%s`</fg=cyan>:</info>\n", $protoFile);
@@ -121,6 +122,22 @@ final class GenerateCommand extends Command
                 );
 
                 $compiled[] = $file;
+            }
+
+            $foreign = [...$foreign, ...$result->foreignNamespaces];
+        }
+
+        if ($foreign !== []) {
+            $this->sprintf(
+                "<comment>Classes outside the base namespace `%s` keep their full namespace as the path and need their own autoload rules:</comment>\n",
+                $namespace,
+            );
+            foreach (\array_unique($foreign) as $topNamespace) {
+                $this->sprintf(
+                    '  "%s\\\\": "%s/"' . "\n",
+                    $topNamespace,
+                    $files->relativePath($generatedPath . '/' . $topNamespace, $root),
+                );
             }
         }
 

@@ -192,14 +192,25 @@ final readonly class ProtoCompiler
             $warnings = $this->runner->run($this->commandBuilder->build($input, $templateFile, $paths), $this->workingDir);
 
             $result = [];
+            $foreign = [];
             foreach ($this->files->getFiles($outDir) as $file) {
-                $result[] = $this->copy($outDir, $file);
+                $source = \ltrim($this->files->relativePath($file, $outDir), '\\/');
+                if ($this->baseNamespace !== '') {
+                    // Whole segments only: the prefix `App` must leave `AppExtra/...` alone.
+                    if (\str_starts_with($source, $this->baseNamespace . '/')) {
+                        $source = \substr($source, \strlen($this->baseNamespace) + 1);
+                    } elseif (\str_contains($source, '/')) {
+                        $foreign[] = \strstr($source, '/', true);
+                    }
+                }
+
+                $result[] = $this->copy($file, $source);
             }
         } finally {
             $this->files->deleteDirectory($workDir);
         }
 
-        return new CompileResult($result, $warnings);
+        return new CompileResult($result, $warnings, \array_values(\array_unique($foreign)));
     }
 
     /**
@@ -246,14 +257,11 @@ final readonly class ProtoCompiler
         return $result;
     }
 
-    private function copy(string $tmpDir, string $file): string
+    /**
+     * @param string $source Target path relative to the base path.
+     */
+    private function copy(string $file, string $source): string
     {
-        $source = \ltrim($this->files->relativePath($file, $tmpDir), '\\/');
-        // Whole segments only: the prefix `App` must leave `AppExtra/...` alone.
-        if ($this->baseNamespace !== '' && \str_starts_with($source, $this->baseNamespace . '/')) {
-            $source = \substr($source, \strlen($this->baseNamespace) + 1);
-        }
-
         $target = $this->files->normalizePath($this->basePath . '/' . $source);
 
         $this->files->ensureDirectory(\dirname($target));
