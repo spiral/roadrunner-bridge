@@ -7,300 +7,187 @@ namespace Spiral\Tests\Logger;
 use Monolog\Level;
 use Monolog\Logger as Monolog;
 use Monolog\LogRecord;
+use RoadRunner\AppLogger\DTO\V1\LogAttrs;
+use RoadRunner\AppLogger\DTO\V1\LogEntry;
 use RoadRunner\Logger\Logger;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\RoadRunnerBridge\Logger\Handler;
-use Spiral\RoadRunnerBridge\Logger\RoadRunnerLogsMode;
 use Spiral\Tests\TestCase;
 use Testo\Assert;
 use Testo\Codecov\Covers;
 use Testo\Data\DataProvider;
 use Testo\Test;
 
+#[Covers(Handler::class)]
 final class HandlerTest extends TestCase
 {
-    public static function toRRWithOutFallbackDataProvider(): iterable
+    /** @var list<array{string, mixed}> */
+    private array $calls = [];
+
+    public static function levelMappingDataProvider(): iterable
     {
-        yield 'Channel name is default, log level is error' => [
-            'default',
-            'error',
-        ];
-
-        yield 'Channel name is queue, log level is info' => [
-            'queue',
-            'info',
-        ];
-
-        yield 'Channel name is queue, log level is info, prefix is app-' => [
-            'queue',
-            'info',
-            'app-',
-        ];
-    }
-
-    public static function toRRWithDevModeDataProvider(): iterable
-    {
-        yield 'Channel name is default, log level is error' => [
-            'default',
-            'error',
-        ];
-
-        yield 'Channel name is queue, log level is info' => [
-            'queue',
-            'info',
-        ];
+        yield 'debug' => [Level::Debug, 'DebugWithContext'];
+        yield 'info' => [Level::Info, 'InfoWithContext'];
+        yield 'notice' => [Level::Notice, 'InfoWithContext'];
+        yield 'warning' => [Level::Warning, 'WarningWithContext'];
+        yield 'error' => [Level::Error, 'ErrorWithContext'];
+        yield 'critical' => [Level::Critical, 'ErrorWithContext'];
+        yield 'alert' => [Level::Alert, 'ErrorWithContext'];
+        yield 'emergency' => [Level::Emergency, 'ErrorWithContext'];
     }
 
     public static function dataLevelFilter(): iterable
     {
         $dt = new \DateTimeImmutable();
 
-        yield [
-            Level::Debug,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-            1,
-        ];
-        yield [
-            Level::Notice,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-        yield [
-            Level::Warning,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-        yield [
-            Level::Error,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-        yield [
-            Level::Critical,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-        yield [
-            Level::Alert,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-        yield [
-            Level::Emergency,
-            new LogRecord($dt, 'ch', Level::Debug, 'msg'),
-        ];
-
-
-        yield [
-            Level::Debug,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-            1,
-        ];
-        yield [
-            Level::Notice,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-            1,
-        ];
-        yield [
-            Level::Warning,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-            1,
-        ];
-        yield [
-            Level::Error,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-            1,
-        ];
-        yield [
-            Level::Critical,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-            1,
-        ];
-        yield [
-            Level::Alert,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-            1,
-        ];
-        yield [
-            Level::Emergency,
-            new LogRecord($dt, 'ch', Level::Emergency, 'msg'),
-            1,
-        ];
-    }
-
-    #[Covers(Handler::class, 'write')]
-    #[Test]
-    #[DataProvider('toRRWithOutFallbackDataProvider')]
-    public function loggerShouldSendDataToRR(string $channelName, string $logLevel, string $logPrefix = ''): void
-    {
-        $rpc = \Mockery::mock(RPCInterface::class);
-
-        $rpc->shouldReceive('withServicePrefix')->once()->with('app', \Mockery::andAnyOtherArgs())->andReturnSelf();
-
-        $monolog = new Monolog($channelName);
-
-        $monolog->setHandlers([
-            new Handler(
-                logger: new Logger($rpc),
-                loggerPrefix: $logPrefix,
-            ),
-        ]);
-
-        $rpc->shouldReceive('call')->once()->with('Log', \Mockery::on(static function (string $json) use ($channelName, $logLevel, $logPrefix): bool {
-            $data = \json_decode($json, true);
-            if (\json_last_error() !== JSON_ERROR_NONE) {
-                return false;
-            }
-
-            if (!isset($data['ts']) && !\is_int($data['ts'])) {
-                return false;
-            }
-            $data['ts'] = '_TS_';
-
-            $expected = [
-                'level' => $logLevel,
-                'ts' => '_TS_',
-                'logger' => $logPrefix . $channelName,
-                'msg' => 'Log message',
-            ];
-
-            \ksort($data);
-            \ksort($expected);
-
-            return $data === $expected;
-        }), \Mockery::andAnyOtherArgs())->andReturnSelf();
-
-        Assert::true(\method_exists($monolog, $logLevel));
-        \call_user_func([$monolog, $logLevel], 'Log message');
-    }
-
-    #[Covers(Handler::class, 'write')]
-    #[Test]
-    #[DataProvider('toRRWithDevModeDataProvider')]
-    public function loggerShouldSendDataToRRWithTsAndLevelInDevMode(string $channelName, string $logLevel): void
-    {
-        $rpc = \Mockery::mock(RPCInterface::class);
-
-        $rpc->shouldReceive('withServicePrefix')->once()->with('app', \Mockery::andAnyOtherArgs())->andReturnSelf();
-
-        $monolog = new Monolog($channelName);
-
-        $monolog->setHandlers([
-            new Handler(
-                logger: new Logger($rpc),
-                loggerMode: RoadRunnerLogsMode::Development,
-            ),
-        ]);
-
-        $rpc->shouldReceive('call')->once()->with('Log', \Mockery::on(static function (string $json) use ($channelName, $logLevel): bool {
-            $data = \json_decode($json, true);
-            if (\json_last_error() !== JSON_ERROR_NONE) {
-                return false;
-            }
-
-            if (!isset($data['ts']) || !\is_string($data['ts'])) {
-                return false;
-            }
-
-            $dateFormat = \DateTimeInterface::RFC3339;
-            $datetime = \DateTime::createFromFormat($dateFormat, $data['ts']);
-            if (!$datetime || $datetime->format($dateFormat) != $data['ts']) {
-                return false;
-            }
-
-            $data['ts'] = '_TS_';
-
-            $expected = [
-                'level' => \strtoupper($logLevel),
-                'ts' => '_TS_',
-                'logger' => $channelName,
-                'msg' => 'Log message',
-            ];
-
-            \ksort($data);
-            \ksort($expected);
-
-            return $data === $expected;
-        }), \Mockery::andAnyOtherArgs())->andReturnSelf();
-
-        Assert::true(\method_exists($monolog, $logLevel));
-        \call_user_func([$monolog, $logLevel], 'Log message');
+        yield [Level::Debug, new LogRecord($dt, 'ch', Level::Debug, 'msg'), 1];
+        yield [Level::Notice, new LogRecord($dt, 'ch', Level::Debug, 'msg')];
+        yield [Level::Emergency, new LogRecord($dt, 'ch', Level::Debug, 'msg')];
+        yield [Level::Debug, new LogRecord($dt, 'ch', Level::Emergency, 'msg'), 1];
+        yield [Level::Emergency, new LogRecord($dt, 'ch', Level::Emergency, 'msg'), 1];
     }
 
     #[Test]
-    public function loggerShouldSendMessageWithContextToRR(string $channelName = 'default', string $logLevel = 'error'): void
+    #[DataProvider('levelMappingDataProvider')]
+    public function mapsMonologLevelToAppLoggerMethod(Level $level, string $method): void
     {
-        $rpc = \Mockery::mock(RPCInterface::class);
-        $rpc->shouldReceive('withServicePrefix')->once()->with('app', \Mockery::andAnyOtherArgs())->andReturnSelf();
+        $monolog = new Monolog('default', [new Handler($this->appLogger())]);
 
-        $monolog = new Monolog($channelName);
+        $monolog->log($level, 'Log message');
 
-        $monolog->setHandlers([
-            new Handler(
-                logger: new Logger($rpc),
-                loggerMode: RoadRunnerLogsMode::Development,
-            ),
-        ]);
-
-        $rpc->shouldReceive('call')->once()->with('Log', \Mockery::on(static function (string $json) use ($channelName, $logLevel): bool {
-            $data = \json_decode($json, true);
-            if (\json_last_error() !== JSON_ERROR_NONE) {
-                return false;
-            }
-
-            if (!isset($data['ts']) || !\is_string($data['ts'])) {
-                return false;
-            }
-
-            $data['ts'] = '_TS_';
-
-            $expected = [
-                'level' => \strtoupper($logLevel),
-                'ts' => '_TS_',
-                'logger' => $channelName,
-                'msg' => 'Log message',
-                'foo' => 'bar',
-            ];
-
-            \ksort($data);
-            \ksort($expected);
-
-            return $data === $expected;
-        }), \Mockery::andAnyOtherArgs())->andReturnSelf();
-
-        Assert::true(\method_exists($monolog, $logLevel));
-        \call_user_func([$monolog, $logLevel], 'Log message', ['foo' => 'bar']);
+        Assert::count($this->calls, 1);
+        Assert::same($this->calls[0][0], $method);
+        Assert::same($this->entry()->getMessage(), 'Log message');
     }
 
-    #[Covers(Handler::class, 'write')]
     #[Test]
-    public function loggerShouldNotEscapeSlashesAndUnicode(): void
+    public function sendsChannelWithPrefix(): void
     {
-        $rpc = \Mockery::mock(RPCInterface::class);
-        $rpc->shouldReceive('withServicePrefix')->once()->with('app', \Mockery::andAnyOtherArgs())->andReturnSelf();
+        $monolog = new Monolog('queue', [new Handler($this->appLogger(), loggerPrefix: 'app-')]);
 
-        $monolog = new Monolog('http');
+        $monolog->info('Log message');
 
-        $monolog->setHandlers([
-            new Handler(
-                logger: new Logger($rpc),
-            ),
+        Assert::same($this->attributes(), ['channel' => 'app-queue']);
+    }
+
+    #[Test]
+    public function sendsContextAndExtra(): void
+    {
+        $monolog = new Monolog('default', [new Handler($this->appLogger())]);
+        $monolog->pushProcessor(static function (LogRecord $record): LogRecord {
+            $record->extra['request_id'] = 'abc';
+            return $record;
+        });
+
+        $monolog->info('Log message', ['foo' => 'bar', 'count' => 42]);
+
+        Assert::same($this->attributes(), [
+            'channel' => 'default',
+            'foo' => 'bar',
+            'count' => '42',
+            'request_id' => 'abc',
+        ]);
+    }
+
+    #[Test]
+    public function flattensNestedMapsAndKeepsLists(): void
+    {
+        $monolog = new Monolog('default', [new Handler($this->appLogger())]);
+
+        $monolog->info('Log message', [
+            'user' => ['id' => 1, 'address' => ['city' => 'Москва']],
+            'tags' => ['/api/v1', 'Привет'],
+            'empty' => [],
         ]);
 
-        $rpc->shouldReceive('call')->once()->with('Log', \Mockery::on(static function (string $json): bool {
-            // Forward slashes must stay as-is, without the default json_encode "\/" escaping.
-            Assert::string($json)->contains('"path":"/api/v1/news/tag"')->notContains('\\/')->contains('Привет')->notContains('\\u');
+        Assert::same($this->attributes(), [
+            'channel' => 'default',
+            'user.id' => '1',
+            'user.address.city' => 'Москва',
+            'tags' => '["/api/v1","Привет"]',
+            'empty' => '[]',
+        ]);
+    }
 
-            return true;
-        }), \Mockery::andAnyOtherArgs())->andReturnSelf();
+    #[Test]
+    public function sendsExceptionAsSeparateAttributes(): void
+    {
+        $monolog = new Monolog('default', [new Handler($this->appLogger())]);
+        $exception = new \RuntimeException('Boom', 42);
 
-        $monolog->info('Log message', ['path' => '/api/v1/news/tag', 'greeting' => 'Привет']);
+        $monolog->error('Failed', ['exception' => $exception]);
+
+        $attributes = $this->attributes();
+        Assert::same($attributes['exception.class'], \RuntimeException::class);
+        Assert::same($attributes['exception.message'], 'Boom');
+        Assert::same($attributes['exception.code'], '42');
+        Assert::same($attributes['exception.line'], (string) $exception->getLine());
+        Assert::same($attributes['exception.trace'], $exception->getTraceAsString());
+    }
+
+    #[Test]
+    public function processorsRunBeforeSending(): void
+    {
+        $handler = new Handler($this->appLogger());
+        $handler->pushProcessor(static fn(LogRecord $record): LogRecord => $record->with(message: 'Processed'));
+
+        $handler->handle(new LogRecord(new \DateTimeImmutable(), 'ch', Level::Info, 'msg'));
+
+        Assert::same($this->entry()->getMessage(), 'Processed');
+    }
+
+    #[Test]
+    public function bubbling(): void
+    {
+        $record = new LogRecord(new \DateTimeImmutable(), 'ch', Level::Info, 'msg');
+
+        Assert::false((new Handler($this->appLogger()))->handle($record));
+        Assert::true((new Handler($this->appLogger(), bubble: false))->handle($record));
     }
 
     #[Test]
     #[DataProvider('dataLevelFilter')]
     public function levelFilter(Level $level, LogRecord $record, int $expectsCount = 0): void
     {
-        $rpc = \Mockery::mock(RPCInterface::class);
-        $rpc->shouldReceive('withServicePrefix')->once()->with('app', \Mockery::andAnyOtherArgs())->andReturnSelf();
-        $rpc->shouldReceive('call')->times($expectsCount);
+        $handler = new Handler($this->appLogger(), level: $level);
 
-        $handler = new Handler(new Logger($rpc), level: $level);
         $handler->handle($record);
+
+        Assert::count($this->calls, $expectsCount);
+    }
+
+    private function appLogger(): Logger
+    {
+        $rpc = \Mockery::mock(RPCInterface::class);
+        $rpc->shouldReceive('withServicePrefix')->with('app')->andReturnSelf();
+        $rpc->shouldReceive('withCodec')->andReturnSelf();
+        $rpc->shouldReceive('call')->andReturnUsing(function (string $method, mixed $payload): mixed {
+            $this->calls[] = [$method, $payload];
+            return null;
+        });
+
+        return new Logger($rpc);
+    }
+
+    private function entry(): LogEntry
+    {
+        $entry = $this->calls[0][1] ?? null;
+        Assert::instanceOf($entry, LogEntry::class);
+
+        return $entry;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function attributes(): array
+    {
+        $result = [];
+        /** @var LogAttrs $attr */
+        foreach ($this->entry()->getLogAttrs() as $attr) {
+            $result[$attr->getKey()] = $attr->getValue();
+        }
+
+        return $result;
     }
 }

@@ -18,10 +18,17 @@ final class LoggerTest extends ServerTestCase
         $response = Http::request('GET', self::$server->httpUrl("/log?message=$message"));
         Assert::same($response?->body, 'ok', self::$server->log());
 
-        $logged = self::eventually(
-            static fn(): ?bool => \str_contains(self::$server->log(), $message) ? true : null,
-        );
+        $line = self::eventually(static function () use ($message): ?string {
+            \preg_match('/^.*msg=' . $message . '.*$/m', self::$server->log(), $matches);
+            return $matches[0] ?? null;
+        });
 
-        Assert::true($logged === true, self::$server->log());
+        Assert::true($line !== null, self::$server->log());
+        // `logs.mode: development` in .rr.yaml: RoadRunner renders the record as key=value pairs
+        Assert::string((string) $line)
+            ->contains('level=WARN')
+            ->contains('logger=app')
+            ->contains('channel=roadrunner')
+            ->contains('user.id=7');
     }
 }

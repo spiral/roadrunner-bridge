@@ -61,7 +61,7 @@ final class Endpoints implements RequestHandlerInterface
 
     private function log(string $message): ResponseInterface
     {
-        $this->container->get(LoggerInterface::class)->warning($message);
+        $this->container->get(LoggerInterface::class)->warning($message, ['user' => ['id' => 7]]);
 
         return $this->text('ok');
     }
