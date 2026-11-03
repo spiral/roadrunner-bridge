@@ -48,7 +48,9 @@ addresses for RPC and relays are not the plugin and keep working.
 
 - `QueueBootloader` loads `LockBootloader`: pipelines are declared under a RoadRunner lock. The `lock`
   plugin needs no `.rr.yaml` section, but a custom rr build must include it; `lockPrefix` in the queue
-  config changes the lock names.
+  config changes the lock names. `LockBootloader` binds `RoadRunner\Lock\LockInterface`, replacing an own
+  binding made by an earlier bootloader; bind a custom lock after it. While 4.x processes still run in a
+  rolling upgrade, 5.x logs "declared by a process outside the declaration lock".
 - A push that creates a missing `consume: true` pipeline resumes it; 4.x left it paused until
   `rr:jobs:consume`.
 - A push may name a configured pipeline by its RoadRunner (connector) name: it gets the config defaults

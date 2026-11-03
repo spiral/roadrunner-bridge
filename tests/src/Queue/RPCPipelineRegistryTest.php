@@ -8,6 +8,7 @@ use Hamcrest\Matchers;
 use Mockery as m;
 use Psr\Log\LoggerInterface;
 use RoadRunner\Lock\LockInterface;
+use Spiral\Goridge\RPC\Exception\CodecException;
 use Spiral\Goridge\RPC\Exception\RPCException;
 use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\Queue\Options;
@@ -207,6 +208,9 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->jobs->shouldReceive('connect')->once()->with('memory', null)->andReturn($queue = $this->queue());
         # Its creator resumes it, or leaves it paused on purpose.
         $queue->shouldNotReceive('resume');
+        $this->logger->shouldReceive('warning')->once()->with(
+            'Pipeline "memory" was declared by a process outside the declaration lock: another bridge version or `lockPrefix`, or a declaration that outlived the lock.',
+        );
 
         Assert::same($this->registry->getPipeline('memory'), $queue);
     }
@@ -413,6 +417,47 @@ final class RPCPipelineRegistryTest extends TestCase
             ->with('Unable to release the lock "roadrunner-bridge:jobs:declare:mail". Reason: rpc down');
 
         Assert::same($registry->getPipeline('mail'), $queue);
+    }
+
+    #[Test]
+    public function expiredLockIsLogged(): void
+    {
+        $lock = m::mock(LockInterface::class);
+        $lock->shouldReceive('lock')->andReturn('id');
+        $lock->shouldReceive('release')->once()->with('roadrunner-bridge:jobs:declare:mail', 'id')->andReturnFalse();
+        $registry = new RPCPipelineRegistry(
+            $logger = m::mock(LoggerInterface::class),
+            $jobs = m::mock(JobsInterface::class),
+            RoadRunnerMode::Http,
+            $lock,
+            new QueueConfig(['mail' => ['connector' => new MemoryCreateInfo('mail')]]),
+        );
+        $jobs->shouldReceive('getIterator')->andReturn(new \ArrayIterator([]));
+        $jobs->shouldReceive('create')->once()->andReturn($queue = $this->queue());
+        $logger->shouldReceive('warning')->once()->with(
+            'The lock "roadrunner-bridge:jobs:declare:mail" expired before the declaration ended, so another process may have declared the pipeline too.',
+        );
+
+        Assert::same($registry->getPipeline('mail'), $queue);
+    }
+
+    #[Test]
+    public function undecodableLockResponseIsReportedAsJobsFailure(): void
+    {
+        $lock = m::mock(LockInterface::class);
+        $lock->shouldReceive('lock')->andThrow(new CodecException('unable to unmarshal'));
+        $registry = new RPCPipelineRegistry(
+            $logger = m::mock(LoggerInterface::class),
+            $jobs = m::mock(JobsInterface::class),
+            RoadRunnerMode::Jobs,
+            $lock,
+            new QueueConfig(['mail' => ['connector' => new MemoryCreateInfo('mail'), 'consume' => true]]),
+        );
+        $jobs->shouldReceive('getIterator')->andReturn(new \ArrayIterator([]));
+        $jobs->shouldNotReceive('create');
+        $logger->shouldReceive('warning')->once()->with(m::pattern('/^Unable to declare consumer pipeline "mail". Reason: .*unable to unmarshal$/'));
+
+        $registry->declareConsumerPipelines();
     }
 
     #[Test]

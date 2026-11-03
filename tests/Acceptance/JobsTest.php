@@ -20,6 +20,7 @@ final class JobsTest extends ServerTestCase
     {
         Assert::true(self::eventually(self::consumedPipeline(...)) === true, self::$server->log());
         Assert::string(self::$server->log())->notContains('Unable to declare consumer pipeline');
+        Assert::string(self::$server->log())->notContains('outside the declaration lock');
 
         $this->assertConsumed();
     }

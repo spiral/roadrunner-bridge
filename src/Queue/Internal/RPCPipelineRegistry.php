@@ -7,6 +7,7 @@ namespace Spiral\RoadRunnerBridge\Queue\Internal;
 use Psr\Log\LoggerInterface;
 use RoadRunner\Lock\LockInterface;
 use Spiral\Goridge\Exception\GoridgeException;
+use Spiral\Goridge\RPC\Exception\CodecException;
 use Spiral\Queue\Exception\InvalidArgumentException;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\Jobs;
@@ -233,7 +234,7 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         $resource = $this->lockPrefix . 'declare:' . $connector->getName();
         try {
             $id = $this->lock->lock($resource, null, self::LOCK_TTL, self::LOCK_WAIT);
-        } catch (GoridgeException $e) {
+        } catch (GoridgeException|CodecException $e) {
             throw new JobsException(
                 'RoadRunner lock call failed, check that the RoadRunner build includes the `lock` plugin: '
                 . $e->getMessage(),
@@ -295,6 +296,12 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
             throw $error;
         }
 
+        # Normally the lock keeps other processes out; reaching here means one ignored it.
+        $this->logger->warning(\sprintf(
+            'Pipeline "%s" was declared by a process outside the declaration lock: another bridge version or `lockPrefix`, or a declaration that outlived the lock.',
+            $connector->getName(),
+        ));
+
         return $this->connect($connector, $options);
     }
 
@@ -320,11 +327,20 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
         \assert($id !== '');
 
         try {
-            $this->lock->release($resource, $id);
-        } catch (GoridgeException $e) {
+            $released = $this->lock->release($resource, $id);
+        } catch (GoridgeException|CodecException $e) {
             $this->logger->warning(
                 \sprintf('Unable to release the lock "%s". Reason: %s', $resource, $e->getMessage()),
             );
+
+            return;
+        }
+
+        if (!$released) {
+            $this->logger->warning(\sprintf(
+                'The lock "%s" expired before the declaration ended, so another process may have declared the pipeline too.',
+                $resource,
+            ));
         }
     }
 

@@ -59,7 +59,11 @@ longer logs a warning, a push throws. RoadRunner creates the pipeline paused: a 
 resumed by its declarer (a failed resume is logged and leaves it paused), any other stays paused until
 `rr:jobs:consume`. A pipeline that already exists is left as is, so one paused with `rr:jobs:pause` stays
 paused across worker restarts. Change `lockPrefix` only when it clashes with lock names of the
-application itself.
+application itself; all processes sharing one RoadRunner must use the same prefix.
+
+Two warnings mean declarations overlapped: "declared by a process outside the declaration lock" (a 4.x
+process during a rolling upgrade, a different `lockPrefix`, or a declaration slower than the 20-second
+lock) and "the lock … expired before the declaration ended".
 To have pipelines ready before the first worker boots, declare them in `.rr.yaml` instead. Do not
 declare them from a `server.on_init` script: RoadRunner 3 fails to start the `jobs` plugin with a
 pipeline declared over RPC before it (`config not found by provided key: jobs.pipelines.<name>.config`).
