@@ -39,15 +39,17 @@ final class OptionsFactory
     }
 
     /**
-     * Creates specified options for the concrete driver, if needed.
+     * A Kafka push needs `KafkaOptions`: a Kafka pipeline without default options gets them for the topic
+     * `default`.
      */
-    public static function fromCreateInfo(CreateInfoInterface $connector): ?JobsOptionsInterface
-    {
-        $config = $connector->toArray();
+    public static function fromCreateInfo(
+        CreateInfoInterface $connector,
+        ?JobsOptionsInterface $options = null,
+    ): ?JobsOptionsInterface {
+        if ($options === null && $connector->getDriver() === Driver::Kafka) {
+            return new KafkaOptions('default');
+        }
 
-        return match ($connector->getDriver()) {
-            Driver::Kafka => new KafkaOptions($config['topic'] ?? 'default'),
-            default => null,
-        };
+        return $options;
     }
 }

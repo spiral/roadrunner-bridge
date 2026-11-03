@@ -22,7 +22,8 @@ http:
 jobs:
   consume: []
   pool:
-    num_workers: 1
+    # Several workers declare the pipelines at boot at once.
+    num_workers: 3
 
 kv:
   local:

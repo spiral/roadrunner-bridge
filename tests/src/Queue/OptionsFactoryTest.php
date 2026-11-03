@@ -36,8 +36,15 @@ final class OptionsFactoryTest
 
     public static function fromCreateInfoDataProvider(): \Traversable
     {
-        yield [null, new MemoryCreateInfo('bar')];
-        yield [new KafkaOptions('default'), new KafkaCreateInfo('foo', 10)];
+        yield 'other driver, no options' => [null, new MemoryCreateInfo('bar'), null];
+        yield 'other driver keeps options' => [new JobsOptions(5), new MemoryCreateInfo('bar'), new JobsOptions(5)];
+        yield 'kafka, no options' => [new KafkaOptions('default'), new KafkaCreateInfo('foo', 10), null];
+        yield 'kafka keeps kafka options' => [
+            new KafkaOptions('orders', 3),
+            new KafkaCreateInfo('foo'),
+            new KafkaOptions('orders', 3),
+        ];
+
     }
 
     #[DataProvider('createDataProvider')]
@@ -47,8 +54,11 @@ final class OptionsFactoryTest
     }
 
     #[DataProvider('fromCreateInfoDataProvider')]
-    public function fromCreateInfo(mixed $expected, CreateInfoInterface $createInfo): void
-    {
-        Assert::equals(OptionsFactory::fromCreateInfo($createInfo), $expected);
+    public function fromCreateInfo(
+        ?JobsOptionsInterface $expected,
+        CreateInfoInterface $createInfo,
+        ?JobsOptionsInterface $options,
+    ): void {
+        Assert::equals(OptionsFactory::fromCreateInfo($createInfo, $options), $expected);
     }
 }

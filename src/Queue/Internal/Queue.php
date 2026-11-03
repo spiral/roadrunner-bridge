@@ -13,6 +13,7 @@ use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface as RRQueueInterface;
 use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
+use Spiral\RoadRunner\Jobs\Task\ProvidesHeadersInterface;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 
 /**
@@ -97,6 +98,22 @@ final class Queue implements QueueInterface
             $this->serializer->getSerializer($name)->serialize($payload),
             OptionsFactory::create($options),
         );
+
+        # The merge in create() takes the push headers in place of the pipeline's, and reads a zero delay
+        # as unset.
+        $defaults = $queue->getDefaultOptions();
+        if ($defaults instanceof ProvidesHeadersInterface) {
+            /** @var array<non-empty-string> $values */
+            foreach ($defaults->getHeaders() as $header => $values) {
+                if (!$preparedTask->hasHeader($header)) {
+                    $preparedTask = $preparedTask->withHeader($header, $values);
+                }
+            }
+        }
+
+        if ($options instanceof OptionsInterface && ($delay = $options->getDelay()) !== null) {
+            $preparedTask = $preparedTask->withDelay($delay);
+        }
 
         if (\is_object($payload)) {
             $preparedTask = $preparedTask->withHeader(

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Acceptance;
 
+use RoadRunner\Jobs\DTO\V1\Pipelines;
+use Spiral\Goridge\RPC\Codec\ProtobufCodec;
 use Spiral\RoadRunner\Jobs\Jobs;
 use Spiral\Tests\Acceptance\Support\Http;
 use Testo\Assert;
-use Testo\Skip;
 use Testo\Test;
 
 #[Test]
@@ -17,21 +18,20 @@ final class JobsTest extends ServerTestCase
 
     public function consumesPushedJob(): void
     {
-        # Pushing before the jobs worker has declared the pipeline would leave it paused, see the skipped test below.
         Assert::true(self::eventually(self::consumedPipeline(...)) === true, self::$server->log());
+        Assert::string(self::$server->log())->notContains('Unable to declare consumer pipeline');
+        Assert::string(self::$server->log())->notContains('outside the declaration lock');
 
         $this->assertConsumed();
     }
 
-    #[Skip('Bug: declareConsumerPipelines() skips an existing paused pipeline, so a pipeline that a producer declared first is never consumed.')]
-    public function resumesPausedPipelineWhenConsumerBoots(): void
+    public function consumesPipelineDeclaredByProducer(): void
     {
         Assert::true(self::eventually(self::consumedPipeline(...)) === true, self::$server->log());
         $rpc = self::$server->rpc();
-        # Leaves the pipeline as `jobs.Declare` from a producer worker creates it: present but paused.
-        (new Jobs($rpc))->pause(self::PIPELINE);
-
-        $rpc->call('resetter.Reset', 'jobs');
+        $rpc->withCodec(new ProtobufCodec())->call('jobs.Destroy', new Pipelines(['pipelines' => [self::PIPELINE]]));
+        # Restarted HTTP workers read the pipeline list afresh, so the push declares the missing pipeline.
+        $rpc->call('resetter.Reset', 'http');
 
         $this->assertConsumed();
     }
