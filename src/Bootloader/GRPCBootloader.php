@@ -70,8 +70,8 @@ final class GRPCBootloader extends Bootloader
         LocatorInterface $listener,
     ): void {
         $this->initGrpcConfig();
-        \assert($listener instanceof TokenizationListenerInterface);
-        $listenerRegistry->addListener($listener);
+        // An application may bind its own LocatorInterface that knows the services without class scanning
+        $listener instanceof TokenizationListenerInterface and $listenerRegistry->addListener($listener);
     }
 
     public function boot(KernelInterface $kernel): void
