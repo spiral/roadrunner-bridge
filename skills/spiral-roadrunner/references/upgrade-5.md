@@ -56,6 +56,8 @@ addresses for RPC and relays are not the plugin and keep working.
   per-push delay of `0` overrides a non-zero default.
 - A Kafka pipeline whose `options` are not `KafkaOptions` throws `InvalidArgumentException` on push; 4.x
   sent such pushes with an empty topic.
+- A Kafka pipeline without `options` whose connector consumes a single topic pushes to that topic; 4.x
+  pushed to the topic `default`.
 
 ## Centrifugo `subrefresh`
 

@@ -18,6 +18,7 @@ use Spiral\RoadRunner\Jobs\KafkaOptions;
 use Spiral\RoadRunner\Jobs\Options as JobsOptions;
 use Spiral\RoadRunner\Jobs\Queue\AMQPCreateInfo;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
+use Spiral\RoadRunner\Jobs\Queue\Kafka\ConsumerOptions;
 use Spiral\RoadRunner\Jobs\Queue\KafkaCreateInfo;
 use Spiral\RoadRunner\Jobs\Queue\MemoryCreateInfo;
 use Spiral\RoadRunner\Jobs\QueueInterface;
@@ -146,12 +147,39 @@ final class RPCPipelineRegistryTest extends TestCase
     }
 
     #[Test]
-    public function kafkaPipelineWithoutOptionsPushesToTheDefaultTopic(): void
+    public function kafkaPipelineWithoutOptionsPushesToItsConsumerTopic(): void
+    {
+        $this->makeRegistry(pipelines: ['events' => [
+            'connector' => new KafkaCreateInfo('events', consumerOptions: new ConsumerOptions(['orders'])),
+        ]]);
+        $this->existing('events');
+        $this->jobs->shouldReceive('connect')->once()
+            ->with('events', Matchers::equalTo(new KafkaOptions('orders')))
+            ->andReturn($queue = $this->queue());
+
+        Assert::same($this->registry->getPipeline('events'), $queue);
+    }
+
+    #[Test]
+    public function kafkaPipelineWithoutTopicPushesToTheDefaultTopic(): void
     {
         $this->makeRegistry(pipelines: ['events' => ['connector' => new KafkaCreateInfo('events')]]);
         $this->existing('events');
         $this->jobs->shouldReceive('connect')->once()
             ->with('events', Matchers::equalTo(new KafkaOptions('default')))
+            ->andReturn($queue = $this->queue());
+
+        Assert::same($this->registry->getPipeline('events'), $queue);
+    }
+
+    #[Test]
+    public function missingKafkaPipelineIsCreatedWithItsConsumerTopic(): void
+    {
+        $connector = new KafkaCreateInfo('events', consumerOptions: new ConsumerOptions(['orders']));
+        $this->makeRegistry(pipelines: ['events' => ['connector' => $connector]]);
+        $this->existing();
+        $this->jobs->shouldReceive('create')->once()
+            ->with($connector, Matchers::equalTo(new KafkaOptions('orders')))
             ->andReturn($queue = $this->queue());
 
         Assert::same($this->registry->getPipeline('events'), $queue);
