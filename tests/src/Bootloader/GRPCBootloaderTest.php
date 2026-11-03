@@ -6,14 +6,18 @@ namespace Spiral\Tests\Bootloader;
 
 use Mockery as m;
 use Spiral\Config\ConfigManager;
+use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\LoaderInterface;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
+use Spiral\Grpc\Client\Config\GrpcClientConfig;
+use Spiral\Grpc\Client\Interceptor\RetryInterceptor;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunnerBridge\Bootloader\GRPCBootloader;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
+use Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\GeneratorRegistry;
@@ -148,6 +152,28 @@ final class GRPCBootloaderTest extends TestCase
         Assert::same($configs->getConfig(GRPCConfig::CONFIG)['generators'], [
             'foo', $generator, $autowire,
         ]);
+    }
+
+    #[Test]
+    public function putsTracingFirstAmongClientInterceptors(): void
+    {
+        $config = $this->getContainer()->get(GrpcClientConfig::class);
+
+        Assert::same($config->interceptors, [TracingInterceptor::class]);
+    }
+
+    #[Test]
+    public function keepsTracingWhereTheApplicationListsIt(): void
+    {
+        $listed = [RetryInterceptor::class, new Autowire(TracingInterceptor::class)];
+        $method = new \ReflectionMethod(GRPCBootloader::class, 'initClientConfig');
+
+        $config = $method->invoke(
+            new GRPCBootloader(m::mock(ConfiguratorInterface::class)),
+            new GRPCConfig(['client' => ['interceptors' => $listed]]),
+        );
+
+        Assert::same($config->interceptors, $listed);
     }
 
     private function binary(string $name): string

@@ -184,3 +184,12 @@ use Spiral\Grpc\Client\Interceptor\SetTimeoutInterceptor;
 
 Then inject `MailSenderInterface` and call it with a `new Spiral\RoadRunner\GRPC\Context([])`. TLS,
 connection rotation and interceptor order: `vendor/spiral/grpc-client/README.md`.
+
+### Client tracing
+
+The bridge puts `Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor` first among the client
+`interceptors`: each call is a `CLIENT` span with the same attributes as on the server (every status other
+than `OK` is an error), and the trace context goes to the server in the call metadata. The span joins the
+trace of the current request through the scoped `TracerInterface`. Being first, it makes one span per call,
+retries included; list it yourself after `RetryInterceptor` to get a span per attempt — the bridge then
+keeps your position.

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\RoadRunnerBridge\GRPC\Internal;
 
+use Spiral\Grpc\Client\Exception\ServiceClientException;
+use Spiral\Grpc\Client\Exception\TimeoutException;
 use Spiral\RoadRunner\GRPC\Exception\GRPCExceptionInterface;
 use Spiral\RoadRunner\GRPC\Method;
 use Spiral\RoadRunner\GRPC\ServiceInterface;
@@ -89,5 +91,46 @@ final class RpcSpanAttributes
                 ->setAttribute('error.type', $status)
                 ->setStatus('ERROR');
         }
+    }
+
+    /**
+     * @param non-empty-string $path The method as the client sends it: `/ping.dto.PingService/Ping`.
+     *
+     * @return non-empty-string The fully-qualified method, such as `ping.dto.PingService/Ping`.
+     */
+    public static function clientMethod(string $path): string
+    {
+        /** @var non-empty-string The service and the method names follow the slash */
+        return \ltrim($path, '/');
+    }
+
+    /**
+     * @param non-empty-string $path The method as the client sends it: `/ping.dto.PingService/Ping`.
+     *
+     * @return array<non-empty-string, string>
+     */
+    public static function clientRequest(string $path): array
+    {
+        return [
+            'rpc.system.name' => 'grpc',
+            'rpc.method' => self::clientMethod($path),
+        ];
+    }
+
+    /**
+     * For a client every status other than `OK` is a failure.
+     */
+    public static function applyClientFailure(SpanInterface $span, \Throwable $e): void
+    {
+        $status = match (true) {
+            $e instanceof ServiceClientException => self::STATUS_NAMES[$e->getCode()] ?? 'UNKNOWN',
+            $e instanceof TimeoutException => 'DEADLINE_EXCEEDED',
+            default => null,
+        };
+
+        $status === null or $span->setAttribute('rpc.response.status_code', $status);
+        $span
+            ->setAttribute('error.type', $status ?? $e::class)
+            ->setStatus('ERROR');
     }
 }

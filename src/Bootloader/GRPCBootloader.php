@@ -22,6 +22,7 @@ use Spiral\Interceptors\PipelineBuilderInterface;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
+use Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\GeneratorRegistry;
@@ -61,7 +62,7 @@ final class GRPCBootloader extends Bootloader
             LocatorInterface::class => ServiceLocator::class,
             ProtoFilesRepositoryInterface::class => [self::class, 'initProtoFilesRepository'],
             GeneratorRegistryInterface::class => [self::class, 'initGeneratorRegistry'],
-            GrpcClientConfig::class => [GRPCConfig::class, 'getClientConfig'],
+            GrpcClientConfig::class => [self::class, 'initClientConfig'],
         ];
     }
 
@@ -186,6 +187,32 @@ final class GRPCBootloader extends Bootloader
         }
 
         return $registry;
+    }
+
+    /**
+     * Puts {@see TracingInterceptor} first among the common client interceptors unless the application
+     * already lists it, in which case its position is kept.
+     */
+    private function initClientConfig(GRPCConfig $config): GrpcClientConfig
+    {
+        $client = $config->getClientConfig();
+
+        foreach ($client->interceptors as $interceptor) {
+            $class = match (true) {
+                \is_string($interceptor) => $interceptor,
+                $interceptor instanceof Autowire => $interceptor->alias,
+                default => $interceptor::class,
+            };
+
+            if ($class === TracingInterceptor::class) {
+                return $client;
+            }
+        }
+
+        return new GrpcClientConfig(
+            interceptors: [TracingInterceptor::class, ...$client->interceptors],
+            services: $client->services,
+        );
     }
 
     private function resolve(mixed $dependency, ContainerInterface $container, FactoryInterface $factory): object
