@@ -36,7 +36,6 @@ return [
             'options' => Options::delayed(5),             // defaults for pushes to this pipeline
         ],
     ],
-    // 'lockPrefix' => 'roadrunner-bridge:jobs:',         // prefix of the declaration locks (the default)
 ];
 ```
 
@@ -52,21 +51,14 @@ The pipeline a push goes to: `Options::onQueue()` / `withQueue()` → the connec
   the first push. The `.rr.yaml` then needs only the `jobs` section with a pool and the driver's own
   connection settings (e.g. `amqp`).
 
-A pipeline declared from PHP is created under the RoadRunner lock `<lockPrefix>declare:<pipeline>` (the
-`lock` plugin needs no `.rr.yaml` section, but a custom rr build must include it). One process declares
-the pipeline while the others wait up to 10 seconds and then connect; a booting jobs worker that waits
-longer logs a warning, a push throws. RoadRunner creates the pipeline paused: a `consume: true` one is
-resumed by its declarer (a failed resume is logged and leaves it paused), any other stays paused until
-`rr:jobs:consume`. A pipeline that already exists is left as is, so one paused with `rr:jobs:pause` stays
-paused across worker restarts. Change `lockPrefix` only when it clashes with lock names of the
-application itself; all processes sharing one RoadRunner must use the same prefix.
+Declaration runs under a RoadRunner lock, so a custom rr build must include the `lock` plugin (it needs
+no `.rr.yaml` section). RoadRunner creates a pipeline paused: a `consume: true` one is resumed by its
+declarer, any other stays paused until `rr:jobs:consume`. An existing pipeline is left as is, so one
+paused with `rr:jobs:pause` stays paused across worker restarts.
 
-Two warnings mean declarations overlapped: "declared by a process outside the declaration lock" (a 4.x
-process during a rolling upgrade, a different `lockPrefix`, or a declaration slower than the 20-second
-lock) and "the lock … expired before the declaration ended".
-To have pipelines ready before the first worker boots, declare them in `.rr.yaml` instead. Do not
-declare them from a `server.on_init` script: RoadRunner 3 fails to start the `jobs` plugin with a
-pipeline declared over RPC before it (`config not found by provided key: jobs.pipelines.<name>.config`).
+To have pipelines ready before the first worker boots, declare them in `.rr.yaml`, not from a
+`server.on_init` script: RoadRunner 3 then fails to start the `jobs` plugin
+(`config not found by provided key: jobs.pipelines.<name>.config`).
 
 The connector's name is the pipeline's name in RoadRunner; a push may name the pipeline by its
 `pipelines` key or by that name, and a `pipelines` key wins over a connector name. Give each pipeline a
