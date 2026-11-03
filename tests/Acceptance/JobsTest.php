@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Spiral\Tests\Acceptance;
 
 use RoadRunner\Jobs\DTO\V1\Pipelines;
-use RoadRunner\Lock\Lock;
 use Spiral\Goridge\RPC\Codec\ProtobufCodec;
 use Spiral\RoadRunner\Jobs\Jobs;
-use Spiral\RoadRunnerBridge\Config\QueueConfig;
 use Spiral\Tests\Acceptance\Support\Http;
 use Testo\Assert;
 use Testo\Test;
@@ -34,20 +32,6 @@ final class JobsTest extends ServerTestCase
         # Restarted HTTP workers read the pipeline list afresh, so the push declares the missing pipeline.
         $rpc->call('resetter.Reset', 'http');
 
-        $this->assertConsumed();
-    }
-
-    public function resumesPipelineLeftPendingWhenConsumerBoots(): void
-    {
-        Assert::true(self::eventually(self::consumedPipeline(...)) === true, self::$server->log());
-        $rpc = self::$server->rpc();
-        # As a declarer leaves it when it dies between the declaration and the resume.
-        (new Jobs($rpc))->pause(self::PIPELINE);
-        (new Lock($rpc))->lock(QueueConfig::DEFAULT_LOCK_PREFIX . 'pending:' . self::PIPELINE);
-
-        $rpc->call('resetter.Reset', 'jobs');
-
-        Assert::true(self::eventually(self::consumedPipeline(...)) === true, self::$server->log());
         $this->assertConsumed();
     }
 

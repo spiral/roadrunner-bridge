@@ -209,7 +209,6 @@ final class RPCPipelineRegistryTest extends TestCase
         $queue->shouldNotReceive('resume');
 
         Assert::same($this->registry->getPipeline('memory'), $queue);
-        Assert::same($this->lock->locks, []);
     }
 
     #[Test]
@@ -265,7 +264,7 @@ final class RPCPipelineRegistryTest extends TestCase
     }
 
     #[Test]
-    public function declarationHoldsTheLockAndClearsThePendingMarker(): void
+    public function declarationHoldsTheLock(): void
     {
         $this->makeRegistry();
         $this->existing();
@@ -274,25 +273,36 @@ final class RPCPipelineRegistryTest extends TestCase
 
         $this->registry->getPipeline('memory');
 
-        Assert::same($this->lock->log, [
-            'lock app:declare:memory ttl=20 wait=10',
-            'lock app:pending:memory ttl=0 wait=0',
-            'forceRelease app:pending:memory',
-            'release app:declare:memory',
-        ]);
+        Assert::same($this->lock->log, ['lock app:declare:memory ttl=20 wait=10', 'release app:declare:memory']);
         Assert::same($this->lock->locks, []);
     }
 
     #[Test]
-    public function pipelineWithoutConsumeGetsNoPendingMarker(): void
+    public function failedDeclarationReleasesTheLock(): void
     {
         $this->makeRegistry();
         $this->existing();
-        $this->jobs->shouldReceive('create')->once()->andReturn($this->queue());
+        $this->jobs->shouldReceive('create')->once()->andThrow(new JobsException('no driver'));
 
-        $this->registry->getPipeline('mail');
+        try {
+            $this->registry->getPipeline('memory');
+        } catch (JobsException) {
+        }
 
-        Assert::same($this->lock->log, ['lock app:declare:mail-rr ttl=20 wait=10', 'release app:declare:mail-rr']);
+        Assert::same($this->lock->locks, []);
+    }
+
+    #[Test]
+    public function existingConsumerPipelineIsLeftAsIsAtBoot(): void
+    {
+        $this->makeRegistry();
+        $this->existing('memory', 'local', 'amqp');
+        $this->jobs->shouldNotReceive('create');
+        $this->jobs->shouldNotReceive('connect');
+
+        $this->registry->declareConsumerPipelines();
+
+        Assert::same($this->lock->log, []);
     }
 
     #[Test]
@@ -320,49 +330,6 @@ final class RPCPipelineRegistryTest extends TestCase
         );
 
         $this->registry->declareConsumerPipelines();
-    }
-
-    #[Test]
-    public function pendingConsumerPipelineIsResumedAtBoot(): void
-    {
-        $this->makeRegistry();
-        $this->existing('memory', 'local', 'amqp');
-        $this->lock->locks['app:pending:memory'] = 'dead-declarer';
-        $this->jobs->shouldNotReceive('create');
-        $this->jobs->shouldReceive('connect')->once()->with('memory', null)->andReturn($queue = $this->queue());
-        $queue->shouldReceive('resume')->once();
-
-        $this->registry->declareConsumerPipelines();
-
-        Assert::same($this->lock->locks, []);
-        Assert::same($this->lock->log[0], 'lock app:declare:memory ttl=20 wait=25');
-    }
-
-    #[Test]
-    public function existingConsumerPipelineWithoutMarkerIsLeftPaused(): void
-    {
-        $this->makeRegistry();
-        $this->existing('memory', 'local', 'amqp');
-        $this->jobs->shouldNotReceive('create');
-        $this->jobs->shouldNotReceive('connect');
-
-        $this->registry->declareConsumerPipelines();
-
-        Assert::same($this->lock->log, []);
-    }
-
-    #[Test]
-    public function failedResumeKeepsThePendingMarker(): void
-    {
-        $this->makeRegistry();
-        $this->existing();
-        $this->jobs->shouldReceive('create')->once()->andReturn($queue = $this->queue());
-        $queue->shouldReceive('resume')->once()->andThrow(new JobsException('rpc error'));
-        $this->logger->shouldReceive('warning')->once();
-
-        $this->registry->getPipeline('memory');
-
-        Assert::same(\array_keys($this->lock->locks), ['app:pending:memory']);
     }
 
     #[Test]
@@ -421,25 +388,10 @@ final class RPCPipelineRegistryTest extends TestCase
         );
         $jobs->shouldReceive('getIterator')->andReturn(new \ArrayIterator([]));
         Expect::exception(JobsException::class)->withMessage(
-            'RoadRunner lock call failed, the RoadRunner build must include the `lock` plugin: lock.Lock: unknown service',
+            'RoadRunner lock call failed, check that the RoadRunner build includes the `lock` plugin: lock.Lock: unknown service',
         );
 
         $registry->getPipeline('mail');
-    }
-
-    #[Test]
-    public function failedCreateClearsThePendingMarker(): void
-    {
-        $this->makeRegistry();
-        $this->existing();
-        $this->jobs->shouldReceive('create')->once()->andThrow(new JobsException('no driver'));
-
-        try {
-            $this->registry->getPipeline('memory');
-        } catch (JobsException) {
-        }
-
-        Assert::same($this->lock->locks, []);
     }
 
     #[Test]
