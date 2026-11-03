@@ -9,6 +9,9 @@ use Spiral\RoadRunner\GRPC\ServiceInterface;
 /**
  * The gRPC service locator.
  *
+ * The bound implementation is registered as a tokenizer listener when it implements
+ * {@see \Spiral\Tokenizer\TokenizationListenerInterface}; otherwise it has to know the services itself.
+ *
  * @api
  */
 interface LocatorInterface

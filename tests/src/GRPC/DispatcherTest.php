@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\GRPC;
 
+use Psr\Log\LoggerInterface;
 use Spiral\App\GRPC\Ping\PingResponse;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\RoadRunner\Payload;
 use Spiral\RoadRunner\Worker;
 use Spiral\RoadRunner\WorkerInterface;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Dispatcher;
+use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\ConsoleTestCase;
 use Testo\Assert;
@@ -54,6 +56,21 @@ final class DispatcherTest extends ConsoleTestCase
         });
 
         $worker->shouldReceive('waitPayload')->once()->with()->andReturnNull();
+
+        $this->serveDispatcher(Dispatcher::class);
+    }
+
+    #[Test]
+    public function warnsWhenNoServicesFound(): void
+    {
+        $worker = $this->mockContainer(WorkerInterface::class, Worker::class);
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Grpc);
+        $this->mockContainer(FinalizerInterface::class)->shouldReceive('finalize');
+        $this->mockContainer(LocatorInterface::class)->shouldReceive('getServices')->andReturn([]);
+        $logger = $this->mockContainer(LoggerInterface::class);
+        $logger->shouldReceive('warning')->once()->with(\Mockery::pattern('/^No gRPC services found/'));
+
+        $worker->shouldReceive('waitPayload')->once()->andReturnNull();
 
         $this->serveDispatcher(Dispatcher::class);
     }
