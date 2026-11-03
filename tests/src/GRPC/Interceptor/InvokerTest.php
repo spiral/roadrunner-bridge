@@ -10,6 +10,7 @@ use Spiral\App\GRPC\Ping\PingRequest;
 use Spiral\App\GRPC\Ping\PingResponse;
 use Spiral\Interceptors\Context\CallContextInterface;
 use Spiral\Interceptors\HandlerInterface;
+use Spiral\RoadRunner\GRPC\Context;
 use Spiral\RoadRunner\GRPC\ContextInterface;
 use Spiral\RoadRunner\GRPC\Exception\InvokeException;
 use Spiral\RoadRunner\GRPC\Method;
@@ -33,7 +34,7 @@ final class InvokerTest extends TestCase
         $input = new PingRequest();
         $output = new PingResponse();
 
-        $ctx = m::mock(ContextInterface::class);
+        $ctx = new Context([]);
         $core
             ->shouldReceive('handle')
             ->once()
@@ -62,7 +63,7 @@ final class InvokerTest extends TestCase
         $input = 'input';
         $output = 'output';
 
-        $ctx = m::mock(ContextInterface::class);
+        $ctx = new Context([]);
         Assert::same($invoker->invoke($service, $method, $ctx, $input), $output);
     }
 }

@@ -89,6 +89,15 @@ final class AuthInterceptor implements InterceptorInterface
 }
 ```
 
+### Tracing
+
+Every call runs inside a `SERVER` span of the framework's `TracerFactoryInterface` (`spiral/telemetry`; the
+default null tracer records nothing; with `spiral/otel-bridge` the spans reach OpenTelemetry). The tracer
+continues the trace from the incoming metadata (`traceparent` …) and returns its context in the response
+headers. The span is named after the method (`ping.dto.PingService/Ping`) and carries `rpc.system.name`,
+`rpc.method`, `rpc.response.status_code` and, for server-side failures, `error.type`; the interceptors run
+inside it.
+
 ## Generating code: `grpc:generate`
 
 ```bash
