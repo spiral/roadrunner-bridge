@@ -75,6 +75,8 @@ Other `options` throw `InvalidArgumentException` on push.
 
 - a delay from Spiral `Options` wins whenever it is set, `0` included;
 - per-push headers are added to the default headers; a header set in both takes the per-push value;
+- a priority from the bridge `Options` replaces the default one; an auto-ack from them wins whenever it
+  is set, `false` included;
 - RoadRunner options override a default delay or priority only with a non-zero value, and auto-ack only
   with `true`.
 
@@ -87,10 +89,31 @@ use Spiral\Queue\QueueInterface;
 $id = $queue->push(SendMail::class, ['to' => $email], Options::onQueue('mail')->withDelay(30));
 ```
 
-`$options` is either a Spiral `OptionsInterface` (queue, delay and headers are carried over, merged with
-the pipeline defaults as above) or a
-RoadRunner `Spiral\RoadRunner\Jobs\OptionsInterface` for driver features such as priority or
-auto-ack — those go to the default pipeline, since they carry no queue name.
+`$options` is one of:
+
+- a Spiral `OptionsInterface` — queue, delay and headers are carried over, merged with the pipeline
+  defaults as above;
+- `Spiral\RoadRunnerBridge\Queue\Options` — Spiral `Options` plus the RoadRunner job priority and
+  auto-ack, so one push names the pipeline and sets both:
+
+  ```php
+  use Spiral\RoadRunnerBridge\Queue\Options;
+
+  $queue->push(SendMail::class, $payload, Options::onQueue('mail')->withPriority(1)->withAutoAck(true));
+  ```
+
+  It is a Spiral `OptionsInterface`, so it also fits `pushObject()`, `RetryException` (which uses only
+  its delay and headers) and pipeline `options`;
+- a RoadRunner `Spiral\RoadRunner\Jobs\OptionsInterface` (e.g. `KafkaOptions` with a topic) — it carries
+  no queue name, so the push goes to the default pipeline.
+
+A **lower** priority value runs first. Unset, the job takes the pipeline's `priority` from `.rr.yaml`
+(default `10`); RoadRunner reads `0` the same way, so `withPriority()` takes positive values only. The
+priority orders the jobs RoadRunner itself holds: a whole `memory` or `boltdb` pipeline, but for a broker
+(AMQP, Kafka, NATS, SQS, Beanstalk) only the jobs already prefetched — the broker still delivers in its
+own order. Broker-side priorities (RabbitMQ `x-max-priority`, Beanstalk `tube_priority`) are separate
+pipeline settings. An auto-acked job is acked as soon as a worker takes it, so a failing handler does not
+bring it back.
 
 ### Payload serialization
 

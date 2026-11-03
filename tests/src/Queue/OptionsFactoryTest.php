@@ -18,6 +18,7 @@ use Spiral\RoadRunner\Jobs\Queue\Kafka\OffsetType;
 use Spiral\RoadRunner\Jobs\Queue\KafkaCreateInfo;
 use Spiral\RoadRunner\Jobs\Queue\MemoryCreateInfo;
 use Spiral\RoadRunnerBridge\Queue\Internal\OptionsFactory;
+use Spiral\RoadRunnerBridge\Queue\Options as BridgeOptions;
 use Testo\Assert;
 use Testo\Data\DataProvider;
 use Testo\Test;
@@ -37,6 +38,11 @@ final class OptionsFactoryTest
         yield [
             (new JobsOptions())->withPriority(4)->withDelay(6)->withAutoAck(true),
             (new JobsOptions())->withPriority(4)->withDelay(6)->withAutoAck(true),
+        ];
+        yield 'bridge options without priority and auto-ack' => [new JobsOptions(5), BridgeOptions::delayed(5)];
+        yield 'bridge options' => [
+            (new JobsOptions(5, 4, true))->withHeader('foo', 'bar'),
+            BridgeOptions::onQueue('mail')->withDelay(5)->withPriority(4)->withAutoAck(true)->withHeader('foo', 'bar'),
         ];
     }
 

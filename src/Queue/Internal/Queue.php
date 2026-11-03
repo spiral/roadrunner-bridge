@@ -12,8 +12,10 @@ use Spiral\Queue\SerializerRegistryInterface;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface as RRQueueInterface;
+use Spiral\RoadRunner\Jobs\Task\PreparedTask;
 use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
 use Spiral\RoadRunner\Jobs\Task\ProvidesHeadersInterface;
+use Spiral\RoadRunnerBridge\Queue\Options as BridgeOptions;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 
 /**
@@ -100,7 +102,7 @@ final class Queue implements QueueInterface
         );
 
         # The merge in create() takes the push headers in place of the pipeline's, and reads a zero delay
-        # as unset.
+        # and a false auto-ack as unset.
         $defaults = $queue->getDefaultOptions();
         if ($defaults instanceof ProvidesHeadersInterface) {
             /** @var array<non-empty-string> $values */
@@ -113,6 +115,10 @@ final class Queue implements QueueInterface
 
         if ($options instanceof OptionsInterface && ($delay = $options->getDelay()) !== null) {
             $preparedTask = $preparedTask->withDelay($delay);
+        }
+
+        if ($options instanceof BridgeOptions && $options->getAutoAck() === false && $preparedTask instanceof PreparedTask) {
+            $preparedTask = $preparedTask->withAutoAck(false);
         }
 
         if (\is_object($payload)) {

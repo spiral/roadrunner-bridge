@@ -15,6 +15,7 @@ use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
 use Spiral\RoadRunner\Jobs\Task\QueuedTaskInterface;
 use Spiral\RoadRunnerBridge\Queue\Internal\Queue;
+use Spiral\RoadRunnerBridge\Queue\Options as BridgeOptions;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 use Spiral\Serializer\SerializerInterface;
 use Spiral\Tests\TestCase;
@@ -140,6 +141,49 @@ final class QueueTest extends TestCase
         $task = $this->pushTo(new JobsOptions(10), QueueOptions::delayed(3));
 
         Assert::same($task->getDelay(), 3);
+    }
+
+    #[Test]
+    public function bridgeOptionsSetQueueAndPriority(): void
+    {
+        $this->queue = new Queue($this->serializerRegistry, $this->registry, 'other');
+
+        $task = $this->pushTo(new JobsOptions(priority: 10), BridgeOptions::onQueue('default')->withPriority(3));
+
+        Assert::same($task->getPriority(), 3);
+    }
+
+    #[Test]
+    public function pipelineDefaultPriorityAppliesWhenPushSetsNone(): void
+    {
+        $task = $this->pushTo(new JobsOptions(priority: 10), BridgeOptions::delayed(5));
+
+        Assert::same($task->getPriority(), 10);
+        Assert::same($task->getDelay(), 5);
+    }
+
+    #[Test]
+    public function explicitFalseAutoAckOverridesPipelineDefault(): void
+    {
+        $task = $this->pushTo(new JobsOptions(autoAck: true), BridgeOptions::onQueue('default')->withAutoAck(false));
+
+        Assert::false($task->getAutoAck());
+    }
+
+    #[Test]
+    public function pushAutoAckOverridesPipelineDefault(): void
+    {
+        $task = $this->pushTo(new JobsOptions(), BridgeOptions::onQueue('default')->withAutoAck(true));
+
+        Assert::true($task->getAutoAck());
+    }
+
+    #[Test]
+    public function pipelineDefaultAutoAckAppliesWhenPushSetsNone(): void
+    {
+        $task = $this->pushTo(new JobsOptions(autoAck: true), BridgeOptions::onQueue('default'));
+
+        Assert::true($task->getAutoAck());
     }
 
     #[Test]
