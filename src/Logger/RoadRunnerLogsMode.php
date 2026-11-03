@@ -12,6 +12,7 @@ use Spiral\Boot\Injector\ProvideFrom;
  * @see https://docs.roadrunner.dev/docs/logging-and-observability/logger#modes
  *
  * @api
+ * @deprecated RoadRunner formats application logs itself according to its `logs.mode`; the bridge no longer uses this value.
  */
 #[ProvideFrom(method: 'detect')]
 enum RoadRunnerLogsMode: string implements InjectableEnumInterface

@@ -62,6 +62,29 @@ addresses for RPC and relays are not the plugin and keep working.
 `RequestType::SubRefresh` is now `subrefresh` (was `sub_refresh`). Rename the key in
 `centrifugo.services` and `centrifugo.interceptors`; `sub_refresh` now throws `ConfigurationException`.
 
+## Logger output
+
+The `roadrunner` handler sends records through the app-logger level methods, and RoadRunner formats them;
+see "Logger" in [`services.md`](services.md).
+
+- `RR_LOGGER_MODE` has no effect; the format follows `logs.mode` of `.rr.yaml`. Remove the variable.
+  `RoadRunnerLogsMode` is deprecated.
+- `new Handler(...)` no longer takes `loggerMode`, and `Handler` has no formatter; `RoadRunnerJsonFormatter`
+  is removed. Search for `loggerMode` and `setFormatter` on this handler.
+- RoadRunner now filters application records by `logs.level` (or `logs.channels.app.level`); 4.x lines
+  bypassed it. With `level: warn` in `.rr.yaml`, info and notice records disappear: set the RoadRunner
+  level as low as `MONOLOG_DEFAULT_LEVEL`.
+- Log consumers (dashboards, alerts, parsers):
+  - `development` mode gives `key=value` lines, not JSON;
+  - `time` (RFC 3339, RoadRunner's timezone, the moment RoadRunner received the record) replaces `ts`
+    (Unix microseconds); the level is upper-case (`WARN`, not `warning`); the channel is in `channel`,
+    `logger` is always `app`;
+  - every value is a string (`"42"`, `"true"`): numeric filters need a cast;
+  - nested context arrives as `key.subkey` fields; an exception as `exception.class`, `.message`, `.code`,
+    `.file` and `.line` (no longer `file:line` in one field), a string `exception.trace` (no longer a list
+    of 5 frames) and `exception.previous.*`; other objects as `<key>.@class` plus their public properties;
+  - context keys named `time`, `level`, `msg`, `logger` or `channel` arrive as `context.<key>`.
+
 ## Internal classes
 
 Classes outside the `@api` surface moved into `*\Internal\*` namespaces. Search the application for

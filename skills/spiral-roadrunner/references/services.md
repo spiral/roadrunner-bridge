@@ -67,10 +67,17 @@ Route the application log through it by making `roadrunner` the default channel 
 
 | Variable | Effect |
 |---|---|
-| `MONOLOG_DEFAULT_LEVEL` | Minimum level of the handler, default `INFO` |
-| `RR_LOGGER_MODE` | `production` (default): Unix-µs timestamps, lowercase levels; `development`: RFC 3339 timestamps, uppercase levels — match `logs.mode` of `.rr.yaml` |
-| `RR_LOGGER_PREFIX` | Prefix added to the channel name in the `logger` field |
+| `MONOLOG_DEFAULT_LEVEL` | Minimum level of the handler, default `INFO`; RoadRunner then drops records below `logs.level` (or `logs.channels.app.level`), so the stricter of the two wins |
+| `RR_LOGGER_PREFIX` | Prefix added to the channel name in the `channel` attribute |
 
-Records go out as JSON: `level`, `ts`, `logger`, `msg`, then the context and extra fields; exception
-traces are cut to 5 frames. `Spiral\RoadRunnerBridge\Logger\Handler` is public — construct it yourself
-to attach the formatter to another channel or with other settings.
+RoadRunner renders each record itself, by `logs.mode` and the `app` channel of `logs.channels`: JSON in
+`production`, `key=value` in `development`, with its own `time` and `DEBUG`/`INFO`/`WARN`/`ERROR` levels
+(notice → `INFO`; critical, alert, emergency → `ERROR`). `logger` is always `app`; the Monolog channel goes
+to the `channel` attribute, then come the context and extra fields, normalized by `roadrunner/psr-logger`.
+Every attribute value is a string (`"7"`, `"true"`): nested maps become dot-separated keys (`user.id`,
+`exception.class`, `exception.line`, `exception.previous.message`), lists a JSON string;
+`exception.trace` is a multi-line string of at most 8 frames without arguments. Context keys named `time`, `level`, `msg`, `logger` or `channel` are
+sent as `context.<key>`. `time` is when RoadRunner received the record, so a buffering Monolog handler in
+front of this one stamps a whole flush with one time.
+`Spiral\RoadRunnerBridge\Logger\Handler` is public — construct it yourself to attach it to another channel
+or with other settings.

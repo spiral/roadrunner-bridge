@@ -18,13 +18,21 @@ abstract class ServerTestCase
     #[BeforeClass]
     public static function startServer(): void
     {
-        static::$server = RoadRunner::start();
+        static::$server = RoadRunner::start(env: static::environment());
     }
 
     #[AfterClass]
     public static function stopServer(): void
     {
         static::$server->stop();
+    }
+
+    /**
+     * @return array<non-empty-string, string> Extra environment of the server, e.g. to fill a `.rr.yaml` variable.
+     */
+    protected static function environment(): array
+    {
+        return [];
     }
 
     /**
