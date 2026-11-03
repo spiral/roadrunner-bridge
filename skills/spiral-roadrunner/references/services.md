@@ -73,9 +73,10 @@ Route the application log through it by making `roadrunner` the default channel 
 RoadRunner renders each record itself, by `logs.mode` and the `app` channel of `logs.channels`: JSON in
 `production`, `key=value` in `development`, with its own `time` and `DEBUG`/`INFO`/`WARN`/`ERROR` levels
 (notice → `INFO`; critical, alert, emergency → `ERROR`). `logger` is always `app`; the Monolog channel goes
-to the `channel` attribute, then come the context and extra fields, normalized by Monolog. An attribute is a
-string: nested maps become dot-separated keys (`user.id`, `exception.previous.class`), lists a JSON string
-(`exception.trace`, cut to 5 frames). Context keys named `time`, `level`, `msg`, `logger` or `channel` are
+to the `channel` attribute, then come the context and extra fields, normalized by `roadrunner/psr-logger`.
+An attribute is a string: nested maps become dot-separated keys (`user.id`, `exception.class`,
+`exception.line`, `exception.previous.message`), lists a JSON string; `exception.trace` is a multi-line
+string of 8 frames. Context keys named `time`, `level`, `msg`, `logger` or `channel` are
 sent as `context.<key>`. `time` is when RoadRunner received the record, so a buffering Monolog handler in
 front of this one stamps a whole flush with one time.
 `Spiral\RoadRunnerBridge\Logger\Handler` is public — construct it yourself to attach it to another channel
