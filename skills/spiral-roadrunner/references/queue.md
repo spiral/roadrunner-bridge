@@ -64,9 +64,10 @@ The connector's name is the pipeline's name in RoadRunner; a push may name the p
 `pipelines` key or by that name, and a `pipelines` key wins over a connector name. Give each pipeline a
 connector name of its own.
 
-For a Kafka pipeline give `options` a `KafkaOptions` with the topic (`new KafkaOptions('orders')`): the
-bridge does not read topics from the connector. Other `options` throw `InvalidArgumentException` on push;
-without `options` pushes go to the topic `default`.
+A Kafka pipeline pushes to the topic of its `KafkaOptions` (`new KafkaOptions('orders')`). Without
+`options` it pushes to the single topic its connector consumes (`consumerOptions` topics and partitions
+naming one topic, no regexp), otherwise to `default`. A per-push `KafkaOptions` topic overrides either.
+Other `options` throw `InvalidArgumentException` on push.
 
 ### Default options
 

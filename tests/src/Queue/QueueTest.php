@@ -8,6 +8,7 @@ use Mockery as m;
 use Spiral\Goridge\RPC\RPCInterface;
 use Spiral\Queue\Options as QueueOptions;
 use Spiral\Queue\SerializerRegistryInterface;
+use Spiral\RoadRunner\Jobs\KafkaOptions;
 use Spiral\RoadRunner\Jobs\Options as JobsOptions;
 use Spiral\RoadRunner\Jobs\Queue as RoadRunnerQueue;
 use Spiral\RoadRunner\Jobs\QueueInterface;
@@ -141,6 +142,16 @@ final class QueueTest extends TestCase
         Assert::same($task->getDelay(), 3);
     }
 
+    #[Test]
+    public function pushTopicOverridesKafkaPipelineDefault(): void
+    {
+        $task = $this->pushTo(new KafkaOptions('default'), new KafkaOptions('refunds'));
+
+        $options = $task->getOptions();
+        \assert($options instanceof KafkaOptions);
+        Assert::same($options->getTopic(), 'refunds');
+    }
+
     #[BeforeTest]
     protected function prepare(): void
     {
@@ -153,7 +164,7 @@ final class QueueTest extends TestCase
     /**
      * Pushes through a real RoadRunner queue with the given defaults and returns the task it dispatches.
      */
-    private function pushTo(JobsOptions $defaults, ?QueueOptions $options): PreparedTaskInterface
+    private function pushTo(JobsOptions $defaults, QueueOptions|JobsOptions|null $options): PreparedTaskInterface
     {
         $rpc = m::mock(RPCInterface::class);
         $rpc->shouldReceive('withCodec')->andReturnSelf();

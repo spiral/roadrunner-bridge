@@ -11,6 +11,7 @@ use Spiral\RoadRunner\Jobs\Options;
 use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\Queue\Driver;
+use Spiral\RoadRunner\Jobs\Queue\KafkaCreateInfo;
 
 /**
  * @internal
@@ -39,17 +40,37 @@ final class OptionsFactory
     }
 
     /**
-     * A Kafka push needs `KafkaOptions`: a Kafka pipeline without default options gets them for the topic
-     * `default`.
+     * A Kafka push needs `KafkaOptions`, and a per-push topic only survives the merge into them: a Kafka
+     * pipeline without default options gets them for the single topic its connector consumes, or `default`.
      */
     public static function fromCreateInfo(
         CreateInfoInterface $connector,
         ?JobsOptionsInterface $options = null,
     ): ?JobsOptionsInterface {
-        if ($options === null && $connector->getDriver() === Driver::Kafka) {
-            return new KafkaOptions('default');
+        if ($options !== null || $connector->getDriver() !== Driver::Kafka) {
+            return $options;
         }
 
-        return $options;
+        return new KafkaOptions(self::consumedTopic($connector) ?? 'default');
+    }
+
+    /**
+     * @return non-empty-string|null
+     */
+    private static function consumedTopic(CreateInfoInterface $connector): ?string
+    {
+        $consumer = $connector instanceof KafkaCreateInfo ? $connector->consumerOptions : null;
+        if ($consumer === null || $consumer->consumeRegexp) {
+            return null;
+        }
+
+        $topics = $consumer->topics;
+        foreach ($consumer->consumePartitions as $partition) {
+            $topics[] = $partition->topic;
+        }
+
+        $topics = \array_values(\array_unique($topics));
+
+        return \count($topics) === 1 ? $topics[0] : null;
     }
 }
