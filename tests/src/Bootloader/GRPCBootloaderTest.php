@@ -24,6 +24,7 @@ use Spiral\RoadRunnerBridge\GRPC\Internal\ServiceLocator;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
 use Spiral\Tests\TestCase;
+use Spiral\Tokenizer\TokenizerListenerRegistryInterface;
 use Testo\Assert;
 use Testo\Test;
 
@@ -148,6 +149,30 @@ final class GRPCBootloaderTest extends TestCase
         Assert::same($configs->getConfig(GRPCConfig::CONFIG)['generators'], [
             'foo', $generator, $autowire,
         ]);
+    }
+
+    #[Test]
+    public function registersTokenizerListenerLocator(): void
+    {
+        $configs = new ConfigManager(m::mock(LoaderInterface::class)->shouldIgnoreMissing());
+        $locator = new ServiceLocator();
+        $registry = m::mock(TokenizerListenerRegistryInterface::class);
+        $registry->shouldReceive('addListener')->once()->with($locator);
+
+        (new GRPCBootloader($configs))->init($registry, $locator);
+    }
+
+    #[Test]
+    public function acceptsLocatorThatIsNotTokenizerListener(): void
+    {
+        $configs = new ConfigManager(m::mock(LoaderInterface::class)->shouldIgnoreMissing());
+        $locator = m::mock(LocatorInterface::class);
+        $registry = m::mock(TokenizerListenerRegistryInterface::class);
+        $registry->shouldNotReceive('addListener');
+
+        (new GRPCBootloader($configs))->init($registry, $locator);
+
+        Assert::true($configs->exists(GRPCConfig::CONFIG));
     }
 
     private function binary(string $name): string
