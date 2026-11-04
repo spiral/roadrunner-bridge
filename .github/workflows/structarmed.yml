@@ -39,5 +39,8 @@ jobs:
       - name: Install StructArmed
         run: composer bin structarmed install --no-interaction --no-progress
 
+      # The github report only annotates and always exits 0; the console run fails the job on violations.
       - name: Run StructArmed
-        run: composer structarmed -- --report=github --no-progress
+        run: |
+          composer structarmed -- --report=github --no-progress
+          composer structarmed -- --no-progress

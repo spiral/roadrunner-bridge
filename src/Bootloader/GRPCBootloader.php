@@ -22,6 +22,7 @@ use Spiral\Interceptors\PipelineBuilderInterface;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
+use Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\GeneratorRegistry;
@@ -31,6 +32,7 @@ use Spiral\RoadRunnerBridge\GRPC\Internal\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\Internal\ServiceLocator;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
+use Spiral\Telemetry\TracerFactoryInterface;
 use Spiral\Tokenizer\TokenizationListenerInterface;
 use Spiral\Tokenizer\TokenizerListenerRegistryInterface;
 
@@ -61,7 +63,7 @@ final class GRPCBootloader extends Bootloader
             LocatorInterface::class => ServiceLocator::class,
             ProtoFilesRepositoryInterface::class => [self::class, 'initProtoFilesRepository'],
             GeneratorRegistryInterface::class => [self::class, 'initGeneratorRegistry'],
-            GrpcClientConfig::class => [GRPCConfig::class, 'getClientConfig'],
+            GrpcClientConfig::class => [self::class, 'initClientConfig'],
         ];
     }
 
@@ -160,6 +162,8 @@ final class GRPCBootloader extends Bootloader
         /** @psalm-suppress ArgumentTypeCoercion The default CompatiblePipelineBuilder also accepts legacy interceptors */
         return $f->make(Invoker::class, [
             'handler' => $pipelineBuilder->withInterceptors(...$list)->build($handler),
+            # Resolved here: autowiring an optional argument would swallow a broken telemetry config.
+            'tracerFactory' => $c->has(TracerFactoryInterface::class) ? $c->get(TracerFactoryInterface::class) : null,
         ]);
     }
 
@@ -186,6 +190,35 @@ final class GRPCBootloader extends Bootloader
         }
 
         return $registry;
+    }
+
+    /**
+     * Puts {@see TracingInterceptor} first among the common client interceptors unless the application
+     * already lists it there, in which case its position is kept.
+     *
+     * Service interceptors are not looked at: a service listing would turn tracing off for the other
+     * services, and it runs only when `ExecuteServiceInterceptors` is in the common list.
+     */
+    private function initClientConfig(GRPCConfig $config): GrpcClientConfig
+    {
+        $client = $config->getClientConfig();
+
+        foreach ($client->interceptors as $interceptor) {
+            $class = match (true) {
+                \is_string($interceptor) => $interceptor,
+                $interceptor instanceof Autowire => $interceptor->alias,
+                default => $interceptor::class,
+            };
+
+            if ($class === TracingInterceptor::class) {
+                return $client;
+            }
+        }
+
+        return new GrpcClientConfig(
+            interceptors: [TracingInterceptor::class, ...$client->interceptors],
+            services: $client->services,
+        );
     }
 
     private function resolve(mixed $dependency, ContainerInterface $container, FactoryInterface $factory): object

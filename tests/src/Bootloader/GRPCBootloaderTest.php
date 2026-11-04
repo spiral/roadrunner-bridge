@@ -6,14 +6,20 @@ namespace Spiral\Tests\Bootloader;
 
 use Mockery as m;
 use Spiral\Config\ConfigManager;
+use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\LoaderInterface;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
+use Spiral\Grpc\Client\Config\ConnectionConfig;
+use Spiral\Grpc\Client\Config\GrpcClientConfig;
+use Spiral\Grpc\Client\Config\ServiceConfig;
+use Spiral\Grpc\Client\Interceptor\RetryInterceptor;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
 use Spiral\RoadRunnerBridge\Bootloader\GRPCBootloader;
 use Spiral\RoadRunnerBridge\Config\GRPCConfig;
+use Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorInterface;
 use Spiral\RoadRunnerBridge\GRPC\Generator\GeneratorRegistryInterface;
 use Spiral\RoadRunnerBridge\GRPC\Internal\Compiler\GeneratorRegistry;
@@ -23,6 +29,8 @@ use Spiral\RoadRunnerBridge\GRPC\Internal\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\Internal\ServiceLocator;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
+use Spiral\Telemetry\Exception\TracerException;
+use Spiral\Telemetry\TracerFactoryInterface;
 use Spiral\Tests\TestCase;
 use Spiral\Tokenizer\TokenizerListenerRegistryInterface;
 use Testo\Assert;
@@ -46,6 +54,27 @@ final class GRPCBootloaderTest extends TestCase
             InvokerInterface::class,
             Invoker::class,
         );
+    }
+
+    #[Test]
+    public function surfacesBrokenTelemetryConfig(): void
+    {
+        $this->getContainer()->bindSingleton(
+            TracerFactoryInterface::class,
+            static fn(): never => throw new TracerException('Unknown driver'),
+        );
+
+        $e = null;
+        try {
+            $this->getContainer()->get(InvokerInterface::class);
+        } catch (\Throwable $e) {
+        }
+
+        # The container wraps the failure of a dependency.
+        while ($e !== null && !$e instanceof TracerException) {
+            $e = $e->getPrevious();
+        }
+        Assert::instanceOf($e, TracerException::class);
     }
 
     #[Test]
@@ -149,6 +178,45 @@ final class GRPCBootloaderTest extends TestCase
         Assert::same($configs->getConfig(GRPCConfig::CONFIG)['generators'], [
             'foo', $generator, $autowire,
         ]);
+    }
+
+    #[Test]
+    public function putsTracingFirstAmongClientInterceptors(): void
+    {
+        $config = $this->getContainer()->get(GrpcClientConfig::class);
+
+        Assert::same($config->interceptors, [TracingInterceptor::class]);
+    }
+
+    #[Test]
+    public function keepsTracingWhereTheApplicationListsIt(): void
+    {
+        $listed = [RetryInterceptor::class, new Autowire(TracingInterceptor::class)];
+        $method = new \ReflectionMethod(GRPCBootloader::class, 'initClientConfig');
+
+        $config = $method->invoke(
+            new GRPCBootloader(m::mock(ConfiguratorInterface::class)),
+            new GRPCConfig(['client' => ['interceptors' => $listed]]),
+        );
+
+        Assert::same($config->interceptors, $listed);
+    }
+
+    #[Test]
+    public function addsTracingEvenWhenOneServiceListsIt(): void
+    {
+        $service = new ServiceConfig(
+            connections: new ConnectionConfig('localhost:9001'),
+            interceptors: [TracingInterceptor::class],
+        );
+        $method = new \ReflectionMethod(GRPCBootloader::class, 'initClientConfig');
+
+        $config = $method->invoke(
+            new GRPCBootloader(m::mock(ConfiguratorInterface::class)),
+            new GRPCConfig(['client' => ['interceptors' => [RetryInterceptor::class], 'services' => [$service]]]),
+        );
+
+        Assert::same($config->interceptors, [TracingInterceptor::class, RetryInterceptor::class]);
     }
 
     #[Test]
