@@ -74,6 +74,23 @@ protected const LOAD = [
 > [!NOTE]
 > Read more about RoadRunner configuration in the [RoadRunner documentation](https://docs.roadrunner.dev).
 
+## AI agent skill
+
+The package ships the `spiral-roadrunner` skill in [`skills/`](skills/spiral-roadrunner/SKILL.md).
+It teaches a coding agent (Claude Code, Codex, Cursor and others) to work with the bridge: bootloaders,
+`.rr.yaml` worker modes, queue jobs, gRPC services and code generation, Centrifugo, cache, locks, metrics
+and logging. Ask the agent to migrate the project and the skill walks it through:
+
+- upgrading the bridge from 4.x to 5.x;
+- migrating `.rr.yaml` and the binaries to RoadRunner 3.
+
+Install [llm/skills](https://github.com/roxblnfk/skills) to copy the skills of your Composer packages
+into the project (`.agents/skills/` by default) on every `composer install` and `update`:
+
+```bash
+composer require --dev llm/skills
+```
+
 ## gRPC code generation
 
 `php app.php grpc:generate` compiles the proto files from the `grpc` config with [buf](https://buf.build).
