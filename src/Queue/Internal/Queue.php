@@ -12,10 +12,9 @@ use Spiral\Queue\SerializerRegistryInterface;
 use Spiral\RoadRunner\Jobs\Exception\JobsException;
 use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\QueueInterface as RRQueueInterface;
-use Spiral\RoadRunner\Jobs\Task\PreparedTask;
 use Spiral\RoadRunner\Jobs\Task\PreparedTaskInterface;
 use Spiral\RoadRunner\Jobs\Task\ProvidesHeadersInterface;
-use Spiral\RoadRunnerBridge\Queue\Options as BridgeOptions;
+use Spiral\RoadRunnerBridge\Queue\JobOptions;
 use Spiral\RoadRunnerBridge\Queue\PipelineRegistryInterface;
 
 /**
@@ -117,7 +116,10 @@ final class Queue implements QueueInterface
             $preparedTask = $preparedTask->withDelay($delay);
         }
 
-        if ($options instanceof BridgeOptions && $options->getAutoAck() === false && $preparedTask instanceof PreparedTask) {
+        # PreparedTaskInterface has no withAutoAck(); a registry may hand out another implementation.
+        if ($options instanceof JobOptions && $options->getAutoAck() === false
+            && \method_exists($preparedTask, 'withAutoAck')) {
+            /** @var PreparedTaskInterface $preparedTask */
             $preparedTask = $preparedTask->withAutoAck(false);
         }
 

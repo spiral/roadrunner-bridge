@@ -24,6 +24,7 @@ use Spiral\RoadRunner\Jobs\Queue\MemoryCreateInfo;
 use Spiral\RoadRunner\Jobs\QueueInterface;
 use Spiral\RoadRunnerBridge\Config\QueueConfig;
 use Spiral\RoadRunnerBridge\Queue\Internal\RPCPipelineRegistry;
+use Spiral\RoadRunnerBridge\Queue\JobOptions;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Tests\Queue\Fixtures\MemoryLock;
 use Spiral\Tests\TestCase;
@@ -102,6 +103,23 @@ final class RPCPipelineRegistryTest extends TestCase
         $this->existing('mail-rr');
         $this->jobs->shouldReceive('connect')->once()
             ->with('mail-rr', Matchers::equalTo(new JobsOptions(5)))
+            ->andReturn($queue = $this->queue());
+
+        Assert::same($this->registry->getPipeline('mail'), $queue);
+    }
+
+    #[Test]
+    public function jobOptionsFromConfigBecomePipelineDefaults(): void
+    {
+        $this->makeRegistry(pipelines: [
+            'mail' => [
+                'connector' => new MemoryCreateInfo('mail-rr'),
+                'options' => JobOptions::delayed(5)->withPriority(2)->withAutoAck(true),
+            ],
+        ]);
+        $this->existing('mail-rr');
+        $this->jobs->shouldReceive('connect')->once()
+            ->with('mail-rr', Matchers::equalTo(new JobsOptions(5, 2, true)))
             ->andReturn($queue = $this->queue());
 
         Assert::same($this->registry->getPipeline('mail'), $queue);

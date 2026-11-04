@@ -7,12 +7,14 @@ namespace Spiral\Tests\Queue;
 use Mockery as m;
 use Spiral\App\Job\ScopedJob;
 use Spiral\Boot\FinalizerInterface;
+use Spiral\Queue\Exception\RetryException;
 use Spiral\Queue\HandlerRegistryInterface;
 use Spiral\Queue\JobHandler;
 use Spiral\Queue\Task;
 use Spiral\RoadRunner\Jobs\ConsumerInterface;
 use Spiral\RoadRunner\Jobs\Task\ReceivedTaskInterface;
 use Spiral\RoadRunnerBridge\Queue\Internal\Dispatcher;
+use Spiral\RoadRunnerBridge\Queue\JobOptions;
 use Spiral\RoadRunnerBridge\Queue\PayloadDeserializerInterface;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 use Spiral\Testing\Attribute\Config;
@@ -89,6 +91,37 @@ final class DispatcherTest extends TestCase
         $task->shouldReceive('getQueue')->once()->andReturn('queue-name');
         $task->shouldReceive('getHeaders')->once()->andReturn(['foo-headers']);
         $task->shouldReceive('nack')->once()->with($e);
+
+        $handler = $this->mockContainer(HandlerRegistryInterface::class);
+        $handler->shouldReceive('getHandler')->andThrow($e);
+
+        $consumer = $this->mockContainer(ConsumerInterface::class);
+        $consumer->shouldReceive('waitTask')->once()->andReturn($task);
+        $consumer->shouldReceive('waitTask')->once()->andReturnNull();
+
+        $this->serveDispatcher(Dispatcher::class);
+    }
+
+    #[Test]
+    public function retryTakesDelayAndHeadersFromJobOptions(): void
+    {
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Jobs);
+        $deserializer = $this->mockContainer(PayloadDeserializerInterface::class);
+        $deserializer->shouldReceive('deserialize')->once()->andReturn(['foo-id', 'bar-payload']);
+
+        $finalizer = $this->mockContainer(FinalizerInterface::class);
+        $finalizer->shouldReceive('finalize')->once()->with(false);
+
+        $e = new RetryException('later', JobOptions::delayed(10)->withHeader('attempt', '2')->withPriority(3));
+
+        $task = m::mock(ReceivedTaskInterface::class);
+        $task->shouldReceive('getId')->andReturn('foo-id');
+        $task->shouldReceive('getName')->andReturn('foo-task');
+        $task->shouldReceive('getQueue')->andReturn('default');
+        $task->shouldReceive('getHeaders')->andReturn([]);
+        $task->shouldReceive('withHeader')->once()->with('attempt', ['2'])->andReturnSelf();
+        $task->shouldReceive('withDelay')->once()->with(10)->andReturnSelf();
+        $task->shouldReceive('requeue')->once()->with($e);
 
         $handler = $this->mockContainer(HandlerRegistryInterface::class);
         $handler->shouldReceive('getHandler')->andThrow($e);

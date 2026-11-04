@@ -12,7 +12,7 @@ use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\Queue\Driver;
 use Spiral\RoadRunner\Jobs\Queue\KafkaCreateInfo;
-use Spiral\RoadRunnerBridge\Queue\Options as BridgeOptions;
+use Spiral\RoadRunnerBridge\Queue\JobOptions;
 
 /**
  * @internal
@@ -37,7 +37,7 @@ final class OptionsFactory
             }
         }
 
-        if ($from instanceof BridgeOptions) {
+        if ($from instanceof JobOptions) {
             ($priority = $from->getPriority()) === null or $options = $options->withPriority($priority);
             ($autoAck = $from->getAutoAck()) === null or $options = $options->withAutoAck($autoAck);
         }
