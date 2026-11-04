@@ -192,6 +192,7 @@ The bridge puts `Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor` first a
 `interceptors`: each call is a `CLIENT` span with the same name and attributes as on the server, and the
 trace context goes to the server in the call metadata. The span joins the trace of the current request
 through the scoped `TracerInterface`; without a bound `TracerInterface` the call goes out untraced. Being
-first, it makes one span per call, retries included; list it yourself after `RetryInterceptor`, or in
-a service's own `interceptors`, and the bridge keeps your position. The span carries no `server.address`:
-the connection is picked by the interceptors after it.
+first, it makes one span per call, retries included; list it yourself in the common `interceptors` after
+`RetryInterceptor` to get a span per attempt, and the bridge keeps your position. Do not list it in a
+service's `interceptors`: the bridge still adds it to the common list, and the call gets two spans. The
+span carries no `server.address`: the connection is picked by the interceptors after it.

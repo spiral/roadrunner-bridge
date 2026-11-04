@@ -202,7 +202,7 @@ final class GRPCBootloaderTest extends TestCase
     }
 
     #[Test]
-    public function keepsTracingListedForOneService(): void
+    public function addsTracingEvenWhenOneServiceListsIt(): void
     {
         $service = new ServiceConfig(
             connections: new ConnectionConfig('localhost:9001'),
@@ -215,7 +215,7 @@ final class GRPCBootloaderTest extends TestCase
             new GRPCConfig(['client' => ['interceptors' => [RetryInterceptor::class], 'services' => [$service]]]),
         );
 
-        Assert::same($config->interceptors, [RetryInterceptor::class]);
+        Assert::same($config->interceptors, [TracingInterceptor::class, RetryInterceptor::class]);
     }
 
     private function binary(string $name): string
