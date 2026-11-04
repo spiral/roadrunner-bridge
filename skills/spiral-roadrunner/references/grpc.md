@@ -89,16 +89,6 @@ final class AuthInterceptor implements InterceptorInterface
 }
 ```
 
-### Tracing
-
-Every call runs inside a `SERVER` span of the framework's `TracerFactoryInterface` (`spiral/telemetry`; the
-default null tracer records nothing; with `spiral/otel-bridge` the spans reach OpenTelemetry). The tracer
-continues the trace from the incoming metadata (`traceparent` …) and returns its context in the response
-headers. The span is named after the method (`ping.dto.PingService/Ping`) and carries `rpc.system.name`,
-`rpc.method` and `rpc.response.status_code`; a call that ends with any status other than `OK`, or with
-a non-gRPC exception, also gets `error.type` and the error status. The interceptors run inside the span.
-spiral/otel-bridge before 2.0.0 drops the attributes of a span whose callback throws.
-
 ## Generating code: `grpc:generate`
 
 ```bash
@@ -186,13 +176,17 @@ use Spiral\Grpc\Client\Interceptor\SetTimeoutInterceptor;
 Then inject `MailSenderInterface` and call it with a `new Spiral\RoadRunner\GRPC\Context([])`. TLS,
 connection rotation and interceptor order: `vendor/spiral/grpc-client/README.md`.
 
-### Client tracing
+## Tracing
 
-The bridge puts `Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor` first among the client
-`interceptors`: each call is a `CLIENT` span with the same name and attributes as on the server, and the
-trace context goes to the server in the call metadata. The span joins the trace of the current request
-through the scoped `TracerInterface`; without telemetry nothing is recorded and the metadata stays as it is. Being
-first, it makes one span per call, retries included; list it yourself in the common `interceptors` after
-`RetryInterceptor` to get a span per attempt, and the bridge keeps your position. Do not list it in a
-service's `interceptors`: the bridge still adds it to the common list, and the call gets two spans. The
-span carries no `server.address`: the connection is picked by the interceptors after it.
+Server and client calls are traced out of the box through the framework tracer (`spiral/telemetry`); spans
+reach OpenTelemetry with `spiral/otel-bridge` ^2.0 — earlier versions drop the attributes of failed calls.
+
+- Server: each call is a `SERVER` span named after the method (`ping.dto.PingService/Ping`), with the
+  interceptors inside it. The trace continues from the incoming `traceparent` metadata, and the response
+  headers carry the span context back.
+- Client: `Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor` already stands first in the common client
+  `interceptors` — one `CLIENT` span per call, retries included, with `traceparent` in the call metadata.
+  For a span per attempt, list it in the common list after `RetryInterceptor`; the bridge keeps that
+  position. Its place is the common list only: added to a service's `interceptors` as well, it wraps each
+  call twice.
+- Any status other than `OK` marks the span as an error.

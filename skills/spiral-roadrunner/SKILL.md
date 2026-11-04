@@ -1,6 +1,6 @@
 ---
 name: spiral-roadrunner
-description: Run a Spiral Framework app on RoadRunner with spiral/roadrunner-bridge — bootloaders, `.rr.yaml` worker modes, and the HTTP, Jobs queue, gRPC (services, interceptors, `grpc:generate` with buf, client), Centrifugo, KV cache, Lock, Metrics and Logger integrations. Use when installing or configuring the bridge, writing a gRPC service, queue job or Centrifugo handler, generating gRPC code from proto files, downloading the rr, buf or protoc binaries, upgrading the bridge to 5.x, or migrating `.rr.yaml` to RoadRunner 3.
+description: Run a Spiral Framework app on RoadRunner with spiral/roadrunner-bridge — bootloaders, `.rr.yaml` worker modes, and the HTTP, Jobs queue, gRPC (services, interceptors, `grpc:generate` with buf, client, tracing), Centrifugo, KV cache, Lock, Metrics and Logger integrations. Use when installing or configuring the bridge, writing a gRPC service, queue job or Centrifugo handler, generating gRPC code from proto files, downloading the rr, buf or protoc binaries, upgrading the bridge to 5.x, or migrating `.rr.yaml` to RoadRunner 3.
 ---
 
 # Spiral on RoadRunner: spiral/roadrunner-bridge
@@ -100,7 +100,8 @@ Read the file for the integration in hand:
 - [`references/queue.md`](references/queue.md) — Jobs: the `roadrunner` queue driver, pipelines declared
   from PHP, payload serialization, retries, `rr:jobs:*` commands.
 - [`references/grpc.md`](references/grpc.md) — gRPC server: services, discovery, interceptors, the `grpc`
-  config; `grpc:generate` with buf (binaries, imports, custom `buf.gen.yaml`, generators); the gRPC client.
+  config; `grpc:generate` with buf (binaries, imports, custom `buf.gen.yaml`, generators); the gRPC client;
+  server and client tracing.
 - [`references/centrifugo.md`](references/centrifugo.md) — Centrifugo: per-request-type services,
   interceptors, error handler, the broadcasting driver, `create:centrifugo-handler`.
 - [`references/services.md`](references/services.md) — KV cache storage, Lock, Metrics, Logger (Monolog
