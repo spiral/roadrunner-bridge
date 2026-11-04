@@ -17,8 +17,12 @@ final class RoadRunnerLogsModeTest
     #[DataSet(['', RoadRunnerLogsMode::Native], 'empty')]
     #[DataSet(['native', RoadRunnerLogsMode::Native])]
     #[DataSet(['production', RoadRunnerLogsMode::Production])]
-    #[DataSet(['Development', RoadRunnerLogsMode::Development], 'case-insensitive')]
-    #[DataSet(['prod', RoadRunnerLogsMode::Native], 'unknown')]
+    #[DataSet(['development', RoadRunnerLogsMode::Development])]
+    #[DataSet(['prod', RoadRunnerLogsMode::Production], 'alias prod')]
+    #[DataSet(['dev', RoadRunnerLogsMode::Development], 'alias dev')]
+    #[DataSet([' Development ', RoadRunnerLogsMode::Development], 'case and spaces')]
+    #[DataSet(['json', RoadRunnerLogsMode::Native], 'unknown')]
+    #[DataSet(['true', RoadRunnerLogsMode::Native], 'true')]
     public function detectsFromEnvironment(?string $value, RoadRunnerLogsMode $expected): void
     {
         $env = new Environment($value === null ? [] : ['RR_LOGGER_MODE' => $value]);

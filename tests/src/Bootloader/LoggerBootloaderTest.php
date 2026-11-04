@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Spiral\Tests\Bootloader;
 
 use Monolog\Handler\ErrorLogHandler;
+use Monolog\Handler\HandlerInterface;
 use Monolog\Level;
+use Monolog\LogRecord;
 use Spiral\Monolog\Config\MonologConfig;
 use Spiral\RoadRunnerBridge\Logger\Handler;
 use Spiral\RoadRunnerBridge\Logger\RawHandler;
@@ -31,14 +33,30 @@ final class LoggerBootloaderTest extends TestCase
 
     #[Env('RR_MODE', 'http')]
     #[Env('RR_LOGGER_MODE', 'production')]
+    #[Env('RR_LOGGER_PREFIX', 'app-')]
     #[Test]
-    public function registerRawHandlerForBridge4Mode(): void
+    public function registerRawHandlerInProductionMode(): void
     {
-        $config = $this->getConfig(MonologConfig::CONFIG);
+        $handler = $this->roadRunnerHandler();
 
-        $handler = $config['handlers']['roadrunner'][0];
         Assert::instanceOf($handler, RawHandler::class);
         Assert::equals($handler->getLevel(), Level::Info);
+        $line = $handler->getFormatter()->format(new LogRecord(new \DateTimeImmutable(), 'orders', Level::Warning, 'm'));
+        Assert::same($line['logger'], 'app-orders');
+        Assert::same($line['level'], 'warning');
+    }
+
+    #[Env('RR_MODE', 'http')]
+    #[Env('RR_LOGGER_MODE', 'dev')]
+    #[Test]
+    public function registerRawHandlerInDevelopmentMode(): void
+    {
+        $handler = $this->roadRunnerHandler();
+
+        Assert::instanceOf($handler, RawHandler::class);
+        $line = $handler->getFormatter()->format(new LogRecord(new \DateTimeImmutable(), 'orders', Level::Warning, 'm'));
+        Assert::same($line['logger'], 'orders');
+        Assert::same($line['level'], 'WARNING');
     }
 
     #[Test]
@@ -63,5 +81,13 @@ final class LoggerBootloaderTest extends TestCase
         $handler = $config['handlers']['roadrunner'][0];
         Assert::instanceOf($handler, Handler::class);
         Assert::equals($handler->getLevel(), Level::Alert);
+    }
+
+    private function roadRunnerHandler(): HandlerInterface
+    {
+        $handler = $this->getConfig(MonologConfig::CONFIG)['handlers']['roadrunner'][0];
+        Assert::instanceOf($handler, HandlerInterface::class);
+
+        return $handler;
     }
 }

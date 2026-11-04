@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Logger;
 
+use Monolog\Formatter\LineFormatter;
 use Monolog\Level;
 use Monolog\Logger as Monolog;
 use Monolog\LogRecord;
@@ -149,7 +150,7 @@ final class RawHandlerTest extends TestCase
                 return false;
             }
 
-            if (!isset($data['ts']) && !\is_int($data['ts'])) {
+            if (!isset($data['ts']) || !\is_string($data['ts']) || !\ctype_digit($data['ts'])) {
                 return false;
             }
             $data['ts'] = '_TS_';
@@ -316,6 +317,18 @@ final class RawHandlerTest extends TestCase
             message: 'Payment failed',
             context: ['order' => ['id' => 7]],
         ));
+    }
+
+    #[Test]
+    public function sendsTheStringOfACustomFormatterAsIs(): void
+    {
+        $rpc = \Mockery::mock(RPCInterface::class);
+        $rpc->shouldReceive('withServicePrefix')->with('app')->andReturnSelf();
+        $rpc->shouldReceive('call')->once()->with('Log', 'hello' . \PHP_EOL)->andReturnSelf();
+
+        $handler = new RawHandler(new Logger($rpc));
+        $handler->setFormatter(new LineFormatter('%message%'));
+        $handler->handle(new LogRecord(new \DateTimeImmutable(), 'ch', Level::Info, 'hello'));
     }
 
     #[Test]

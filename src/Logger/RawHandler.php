@@ -45,9 +45,11 @@ final class RawHandler extends AbstractProcessingHandler
     #[\Override]
     protected function write(LogRecord $record): void
     {
-        $this->logger->log(
-            \json_encode($record->formatted, \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE)
-            . \PHP_EOL,
-        );
+        // A formatter set with setFormatter() may return a ready string: it is sent as is, as in 4.x
+        $line = \is_string($record->formatted)
+            ? $record->formatted
+            : \json_encode($record->formatted, \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE);
+
+        $this->logger->log($line . \PHP_EOL);
     }
 }

@@ -69,19 +69,22 @@ addresses for RPC and relays are not the plugin and keep working.
 The `roadrunner` handler sends records through the app-logger level methods, and RoadRunner formats them;
 see "Logger" in [`services.md`](services.md).
 
-- Keeping the 4.x lines: set `RR_LOGGER_MODE=production` (or `development`) explicitly, in `.env` or
-  `server.env`. It selects `RawHandler`, which writes the same JSON line as 4.x, `logger` with the channel
-  included. Unset now means `native`, the RoadRunner-rendered format below; 4.x treated unset as `production`.
-  A consumer that reads `logger` or `ts` without the variable set breaks.
+- Keeping the 4.x lines: set `RR_LOGGER_MODE=production` (or `development`; `prod` and `dev` work too)
+  explicitly, in `.env` or `server.env`. It selects `RawHandler`, which writes the same JSON line as 4.x,
+  `logger` with the channel included, and bypasses `logs.level` as 4.x did. Unset and any other value now
+  mean `native`, the RoadRunner-rendered format below; 4.x treated them as `production`. A consumer that
+  reads `logger` or `ts` without the variable set breaks.
+- `RoadRunnerLogsMode` got the `Native` case, the value an injected enum has when the variable is unset; a
+  `match` over the enum without `default` needs an arm for it.
 - `new Handler(...)` no longer takes `loggerMode`, and `Handler` has no formatter. Code that constructs the
   4.x handler with `loggerMode` switches to `new RawHandler(...)`, which keeps that signature.
-- RoadRunner now filters application records by `logs.level` (or `logs.channels.app.level`); 4.x lines
-  bypassed it. With `level: warn` in `.rr.yaml`, info and notice records disappear: set the RoadRunner
+- In the native mode RoadRunner filters application records by `logs.level` (or
+  `logs.channels.app.level`); 4.x lines bypassed it. With `level: warn` in `.rr.yaml`, info and notice records disappear: set the RoadRunner
   level as low as `MONOLOG_DEFAULT_LEVEL`.
 - Log consumers (dashboards, alerts, parsers) of the native format:
   - `development` mode gives `key=value` lines, not JSON;
   - `time` (RFC 3339, RoadRunner's timezone, the moment RoadRunner received the record) replaces `ts`
-    (Unix microseconds); the level is upper-case (`WARN`, not `warning`); the channel is in `channel`,
+    (Unix nanoseconds in `production`, RFC 3339 in `development`); the level is upper-case (`WARN`, not `warning`); the channel is in `channel`,
     `logger` is always `app`;
   - every value is a string (`"42"`, `"true"`): numeric filters need a cast;
   - nested context arrives as `key.subkey` fields; an exception as `exception.class`, `.message`, `.code`,

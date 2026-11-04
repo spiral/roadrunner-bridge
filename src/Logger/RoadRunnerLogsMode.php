@@ -12,8 +12,10 @@ use Spiral\Boot\Injector\ProvideFrom;
  * How the `roadrunner` Monolog handler writes records, taken from the `RR_LOGGER_MODE` environment variable.
  *
  * RoadRunner does not set the variable: the application does, e.g. in `server.env` of `.rr.yaml`.
- * - {@see self::Native} (unset or `native`): {@see Handler}, RoadRunner renders the records by its `logs` config;
- * - {@see self::Production}, {@see self::Development}: {@see RawHandler}, the JSON lines of bridge 4.x.
+ * The value is case-insensitive:
+ * - `production` or `prod`, `development` or `dev`: {@see RawHandler}, the JSON lines of bridge 4.x;
+ * - anything else, unset included: {@see self::Native}, {@see Handler}, RoadRunner renders the records
+ *   by its `logs` config.
  *
  * @api
  */
@@ -28,6 +30,10 @@ enum RoadRunnerLogsMode: string implements InjectableEnumInterface
     {
         $value = $environment->get('RR_LOGGER_MODE', '');
 
-        return self::tryFrom(\is_string($value) ? \strtolower($value) : '') ?? self::Native;
+        return match (\is_string($value) ? \strtolower(\trim($value)) : '') {
+            'production', 'prod' => self::Production,
+            'development', 'dev' => self::Development,
+            default => self::Native,
+        };
     }
 }
