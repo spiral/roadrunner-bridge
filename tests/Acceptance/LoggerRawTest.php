@@ -29,6 +29,16 @@ final class LoggerRawTest extends LoggerTestCase
         Assert::same($record['user'] ?? null, ['id' => 7]);
     }
 
+    public function bypassesTheRoadRunnerLevel(): void
+    {
+        $message = 'acceptance-' . \bin2hex(\random_bytes(4));
+
+        // `.rr.yaml` sets `logs.level: warn`, so a native info record would not be printed
+        $line = self::logAndFind($message, 'info');
+
+        Assert::same(\json_decode($line, true, flags: \JSON_THROW_ON_ERROR)['level'] ?? null, 'info');
+    }
+
     #[\Override]
     protected static function environment(): array
     {

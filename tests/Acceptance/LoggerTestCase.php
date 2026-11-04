@@ -10,11 +10,11 @@ use Testo\Assert;
 abstract class LoggerTestCase extends ServerTestCase
 {
     /**
-     * Requests `/log`, which logs a warning with the given message, and returns the line RoadRunner wrote for it.
+     * Requests `/log`, which logs a record of the given PSR-3 level, and returns the line RoadRunner wrote for it.
      */
-    protected static function logAndFind(string $message): string
+    protected static function logAndFind(string $message, string $level = 'warning'): string
     {
-        $response = Http::request('GET', self::$server->httpUrl("/log?message=$message"));
+        $response = Http::request('GET', self::$server->httpUrl("/log?message=$message&level=$level"));
         Assert::same($response?->body, 'ok', self::$server->log());
 
         $line = self::eventually(static function () use ($message): ?string {

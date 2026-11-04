@@ -42,7 +42,7 @@ final class Endpoints implements RequestHandlerInterface
                 ['name' => $query['name'], 'value' => $query['value']],
             )),
             '/metrics/hit' => $this->hit(),
-            '/log' => $this->log($query['message']),
+            '/log' => $this->log($query['message'], $query['level'] ?? 'warning'),
             default => $this->text('Not found', 404),
         };
     }
@@ -59,9 +59,9 @@ final class Endpoints implements RequestHandlerInterface
         return $this->text('ok');
     }
 
-    private function log(string $message): ResponseInterface
+    private function log(string $message, string $level): ResponseInterface
     {
-        $this->container->get(LoggerInterface::class)->warning($message, ['user' => ['id' => 7], 'msg' => 'from-context']);
+        $this->container->get(LoggerInterface::class)->log($level, $message, ['user' => ['id' => 7], 'msg' => 'from-context']);
 
         return $this->text('ok');
     }
