@@ -69,8 +69,8 @@ addresses for RPC and relays are not the plugin and keep working.
 The `roadrunner` handler sends records through the app-logger level methods, and RoadRunner formats them;
 see "Logger" in [`services.md`](services.md).
 
-- `RR_LOGGER_MODE` has no effect; the format follows `logs.mode` of `.rr.yaml`. Remove the variable.
-  `RoadRunnerLogsMode` is deprecated.
+- `RoadRunnerLogsMode` is removed and `RR_LOGGER_MODE` has no effect; the format follows `logs.mode` of
+  `.rr.yaml`. Remove the variable and any injection of the enum.
 - `new Handler(...)` no longer takes `loggerMode`, and `Handler` has no formatter; `RoadRunnerJsonFormatter`
   is removed. Search for `loggerMode` and `setFormatter` on this handler.
 - RoadRunner now filters application records by `logs.level` (or `logs.channels.app.level`); 4.x lines
