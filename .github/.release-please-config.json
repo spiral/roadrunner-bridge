@@ -8,6 +8,7 @@
         }
     },
     "bootstrap-sha": "c97896deeb5fca293ecc4be3c580d830cd9e366d",
+    "last-release-sha": "32e8a3425bbc0510e44b85e8d261d6a7447fdec8",
     "include-component-in-tag": false,
     "include-v-in-tag": true,
     "changelog-sections": [
