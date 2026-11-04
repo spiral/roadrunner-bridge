@@ -68,7 +68,16 @@ Route the application log through it by making `roadrunner` the default channel 
 | Variable | Effect |
 |---|---|
 | `MONOLOG_DEFAULT_LEVEL` | Minimum level of the handler, default `INFO`; RoadRunner then drops records below `logs.level` (or `logs.channels.app.level`), so the stricter of the two wins |
-| `RR_LOGGER_PREFIX` | Prefix added to the channel name in the `channel` attribute |
+| `RR_LOGGER_PREFIX` | Prefix added to the channel name: in the `channel` attribute, or in `logger` with `RawHandler` |
+| `RR_LOGGER_MODE` | `native` (default): `Handler`, described below. `production` / `development`: `RawHandler`, the JSON line of bridge 4.x. RoadRunner does not set it |
+
+`RawHandler` (`RR_LOGGER_MODE=production|development`) keeps the 4.x line for consumers that parse it, e.g. by
+the `logger` field: `{"level":"warning","ts":"1793784005123456000","logger":"app-roadrunner","msg":"Payment failed","order":{"id":7}}`.
+`ts` is Unix nanoseconds and the level lower-case in `production`, RFC 3339 and upper-case in `development`;
+the context stays nested with its types. RoadRunner prints the line as is: it ignores `logs.mode` and
+`logs.level` for it. Construct `RawHandler` yourself to hardcode the mode.
+
+The default `Handler`:
 
 RoadRunner renders each record itself, by `logs.mode` and the `app` channel of `logs.channels`: JSON in
 `production`, `key=value` in `development`, with its own `time` and `DEBUG`/`INFO`/`WARN`/`ERROR` levels

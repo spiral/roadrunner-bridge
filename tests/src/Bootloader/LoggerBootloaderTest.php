@@ -8,6 +8,7 @@ use Monolog\Handler\ErrorLogHandler;
 use Monolog\Level;
 use Spiral\Monolog\Config\MonologConfig;
 use Spiral\RoadRunnerBridge\Logger\Handler;
+use Spiral\RoadRunnerBridge\Logger\RawHandler;
 use Spiral\Testing\Attribute\Env;
 use Spiral\Tests\TestCase;
 use Testo\Assert;
@@ -25,6 +26,18 @@ final class LoggerBootloaderTest extends TestCase
         $handler = $config['handlers']['roadrunner'][0];
         Assert::instanceOf($handler, Handler::class);
         // MONOLOG_DEFAULT_LEVEL=INFO
+        Assert::equals($handler->getLevel(), Level::Info);
+    }
+
+    #[Env('RR_MODE', 'http')]
+    #[Env('RR_LOGGER_MODE', 'production')]
+    #[Test]
+    public function registerRawHandlerForBridge4Mode(): void
+    {
+        $config = $this->getConfig(MonologConfig::CONFIG);
+
+        $handler = $config['handlers']['roadrunner'][0];
+        Assert::instanceOf($handler, RawHandler::class);
         Assert::equals($handler->getLevel(), Level::Info);
     }
 
