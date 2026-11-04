@@ -53,7 +53,8 @@ return Architecture::define()
         Spiral\Boot\Exception\BootException::class,
     ], segment: 'Exception'))
 
-    // Dependency direction between modules.
+    // Dependency direction between modules. A module's public classes may use its own internals;
+    // bridge.internal_must_not_leak_into_public_signature keeps them out of the public signatures.
     ->layer('RoadRunnerMode', 'src/RoadRunnerMode.php')
     ->layer('Exception', 'src/Exception')
     ->layer('Logger', 'src/Logger')
@@ -74,14 +75,14 @@ return Architecture::define()
         'Exception'          => [],
         'Logger'             => [],
         'Http'               => ['RoadRunnerMode'],
-        'Centrifugo'         => [],
+        'Centrifugo'         => ['CentrifugoInternal'],
         'CentrifugoInternal' => ['Centrifugo', 'RoadRunnerMode'],
-        'GRPC'               => [],
+        'GRPC'               => ['GRPCInternal'],
         'GRPCInternal'       => ['Config', 'GRPC', 'RoadRunnerMode'],
-        'Queue'              => [],
+        'Queue'              => ['QueueInternal'],
         'QueueInternal'      => ['Config', 'Queue', 'RoadRunnerMode'],
         'Config'             => ['Centrifugo', 'GRPC'],
-        'Scaffolder'         => ['Centrifugo'],
+        'Scaffolder'         => ['Centrifugo', 'ScaffolderInternal'],
         'ScaffolderInternal' => ['+Scaffolder'],
         'BootloaderInternal' => ['Bootloader', 'Exception', 'RoadRunnerMode'],
         'Bootloader'         => ['BootloaderInternal', 'CentrifugoInternal', 'Exception', '+Http', '+GRPCInternal', '+QueueInternal', '+ScaffolderInternal', 'Logger'],
