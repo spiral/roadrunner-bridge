@@ -56,7 +56,7 @@ final class TracingInterceptor implements InterceptorInterface
                 try {
                     $result = $handler->handle($context->withArguments($arguments));
                 } catch (\Throwable $e) {
-                    RpcSpanAttributes::applyFailure($span, $e);
+                    RpcSpanAttributes::applyClientFailure($span, $e);
                     throw $e;
                 }
 

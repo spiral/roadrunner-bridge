@@ -65,7 +65,7 @@ final readonly class Invoker implements InvokerInterface
                             )),
                         );
                     } catch (\Throwable $e) {
-                        RpcSpanAttributes::applyFailure($span, $e);
+                        RpcSpanAttributes::applyServerFailure($span, $e);
                         throw $e;
                     }
 

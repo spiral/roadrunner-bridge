@@ -32,6 +32,7 @@ use Spiral\RoadRunnerBridge\GRPC\Internal\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\Internal\ServiceLocator;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
+use Spiral\Telemetry\TracerFactoryInterface;
 use Spiral\Tokenizer\TokenizationListenerInterface;
 use Spiral\Tokenizer\TokenizerListenerRegistryInterface;
 
@@ -161,6 +162,8 @@ final class GRPCBootloader extends Bootloader
         /** @psalm-suppress ArgumentTypeCoercion The default CompatiblePipelineBuilder also accepts legacy interceptors */
         return $f->make(Invoker::class, [
             'handler' => $pipelineBuilder->withInterceptors(...$list)->build($handler),
+            # Resolved here: autowiring an optional argument would swallow a broken telemetry config.
+            'tracerFactory' => $c->has(TracerFactoryInterface::class) ? $c->get(TracerFactoryInterface::class) : null,
         ]);
     }
 

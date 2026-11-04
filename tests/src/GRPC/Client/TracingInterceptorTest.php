@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Spiral\Tests\GRPC\Client;
 
 use Mockery as m;
+use Psr\Container\ContainerInterface;
 use Spiral\App\GRPC\Ping\PingRequest;
 use Spiral\App\GRPC\Ping\PingResponse;
+use Spiral\Core\Config\Proxy;
 use Spiral\Core\Container;
 use Spiral\Core\ContainerScope;
 use Spiral\Grpc\Client\Exception\ServiceClientException;
@@ -17,8 +19,10 @@ use Spiral\Interceptors\Context\Target;
 use Spiral\Interceptors\HandlerInterface;
 use Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor;
 use Spiral\Telemetry\TraceKind;
+use Spiral\Telemetry\TracerFactoryInterface;
 use Spiral\Telemetry\TracerInterface;
 use Spiral\Tests\GRPC\Stub\RecordingTracer;
+use Spiral\Tests\GRPC\Stub\ScopedTracer;
 use Testo\Assert;
 use Testo\Test;
 
@@ -116,6 +120,36 @@ final class TracingInterceptorTest
         $handler->shouldReceive('handle')->once()->andReturn($response = new PingResponse());
 
         Assert::same((new TracingInterceptor())->intercept(self::context(), $handler), $response);
+    }
+
+    #[Test]
+    public function sendsContextThroughTelemetryProxyBinding(): void
+    {
+        $handler = m::mock(HandlerInterface::class);
+        $handler->shouldReceive('handle')->once()->andReturnUsing(
+            static fn(CallContextInterface $context): array => $context->getArguments()[4],
+        );
+
+        # The binding TelemetryBootloader makes: every call on the proxy asks the factory for a new tracer.
+        $container = new Container();
+        $container->bindSingleton(TracerFactoryInterface::class, new class implements TracerFactoryInterface {
+            public function make(array $context = []): TracerInterface
+            {
+                return new ScopedTracer();
+            }
+        });
+        $container->bind(TracerInterface::class, new Proxy(
+            TracerInterface::class,
+            false,
+            static fn(ContainerInterface $c): TracerInterface => $c->get(TracerFactoryInterface::class)->make(),
+        ));
+
+        $sent = ContainerScope::runScope(
+            $container,
+            static fn(): mixed => (new TracingInterceptor())->intercept(self::context(), $handler),
+        );
+
+        Assert::same($sent, ['traceparent' => ['ping.dto.PingService/Ping']]);
     }
 
     #[Test]

@@ -29,6 +29,8 @@ use Spiral\RoadRunnerBridge\GRPC\Internal\ProtoRepository\FileRepository;
 use Spiral\RoadRunnerBridge\GRPC\Internal\ServiceLocator;
 use Spiral\RoadRunnerBridge\GRPC\LocatorInterface;
 use Spiral\RoadRunnerBridge\GRPC\ProtoRepository\ProtoFilesRepositoryInterface;
+use Spiral\Telemetry\Exception\TracerException;
+use Spiral\Telemetry\TracerFactoryInterface;
 use Spiral\Tests\TestCase;
 use Testo\Assert;
 use Testo\Test;
@@ -51,6 +53,27 @@ final class GRPCBootloaderTest extends TestCase
             InvokerInterface::class,
             Invoker::class,
         );
+    }
+
+    #[Test]
+    public function surfacesBrokenTelemetryConfig(): void
+    {
+        $this->getContainer()->bindSingleton(
+            TracerFactoryInterface::class,
+            static fn(): never => throw new TracerException('Unknown driver'),
+        );
+
+        $e = null;
+        try {
+            $this->getContainer()->get(InvokerInterface::class);
+        } catch (\Throwable $e) {
+        }
+
+        # The container wraps the failure of a dependency.
+        while ($e !== null && !$e instanceof TracerException) {
+            $e = $e->getPrevious();
+        }
+        Assert::instanceOf($e, TracerException::class);
     }
 
     #[Test]

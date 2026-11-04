@@ -72,20 +72,20 @@ final class RpcSpanAttributes
      * Every status other than `OK` is an error, on the server too: the call ends with an exception, and
      * spiral/otel-bridge exports a span whose callback throws as an error anyway.
      */
-    public static function applyFailure(SpanInterface $span, \Throwable $e): void
+    public static function applyServerFailure(SpanInterface $span, \Throwable $e): void
     {
-        $status = match (true) {
-            $e instanceof GRPCExceptionInterface,
-            $e instanceof ServiceClientException => self::STATUS_NAMES[$e->getCode()] ?? 'UNKNOWN',
-            $e instanceof TimeoutException => 'DEADLINE_EXCEEDED',
-            # A server worker fails without a gRPC status, and RoadRunner picks the code the client sees.
-            default => null,
-        };
+        # Only a gRPC exception reaches the caller as a status; any other one, a client exception of
+        # a downstream call included, fails the worker, and RoadRunner picks the code the caller sees.
+        self::applyFailure($span, $e, $e instanceof GRPCExceptionInterface ? self::statusName($e->getCode()) : null);
+    }
 
-        $status === null or $span->setAttribute('rpc.response.status_code', $status);
-        $span
-            ->setAttribute('error.type', $status ?? $e::class)
-            ->setStatus('ERROR');
+    public static function applyClientFailure(SpanInterface $span, \Throwable $e): void
+    {
+        self::applyFailure($span, $e, match (true) {
+            $e instanceof ServiceClientException => self::statusName($e->getCode()),
+            $e instanceof TimeoutException => 'DEADLINE_EXCEEDED',
+            default => null,
+        });
     }
 
     /**
@@ -110,5 +110,24 @@ final class RpcSpanAttributes
             'rpc.system.name' => 'grpc',
             'rpc.method' => self::clientMethod($path),
         ];
+    }
+
+    /**
+     * @param non-empty-string|null $status Null when the call ended without a gRPC status.
+     */
+    private static function applyFailure(SpanInterface $span, \Throwable $e, ?string $status): void
+    {
+        $status === null or $span->setAttribute('rpc.response.status_code', $status);
+        $span
+            ->setAttribute('error.type', $status ?? $e::class)
+            ->setStatus('ERROR');
+    }
+
+    /**
+     * @return non-empty-string
+     */
+    private static function statusName(int $code): string
+    {
+        return self::STATUS_NAMES[$code] ?? 'UNKNOWN';
     }
 }

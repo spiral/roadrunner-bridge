@@ -9,6 +9,7 @@ use Spiral\App\GRPC\Ping\PingRequest;
 use Spiral\App\GRPC\Ping\PingResponse;
 use Spiral\App\GRPC\Ping\PingService;
 use Spiral\App\GRPC\Ping\PingServiceInterface;
+use Spiral\Grpc\Client\Exception\ServiceClientException;
 use Spiral\Interceptors\HandlerInterface;
 use Spiral\RoadRunner\GRPC\Context;
 use Spiral\RoadRunner\GRPC\Exception\GRPCException;
@@ -100,6 +101,22 @@ final class InvokerTracingTest extends TestCase
         Assert::same($tracer->span?->getAttribute('rpc.response.status_code'), 'NOT_FOUND');
         Assert::same($tracer->span->getAttribute('error.type'), 'NOT_FOUND');
         Assert::same($tracer->span->getStatus()?->code, 'ERROR');
+    }
+
+    #[Test]
+    public function keepsDownstreamClientStatusOutOfServerSpan(): void
+    {
+        $tracer = new RecordingTracer();
+        $status = (object) ['code' => StatusCode::NOT_FOUND, 'details' => 'missing', 'metadata' => []];
+
+        try {
+            $this->invoke($tracer, static fn() => throw new ServiceClientException($status));
+            Assert::fail('The exception must reach the server.');
+        } catch (ServiceClientException) {
+        }
+
+        Assert::false($tracer->span?->hasAttribute('rpc.response.status_code'));
+        Assert::same($tracer->span?->getAttribute('error.type'), ServiceClientException::class);
     }
 
     #[Test]
