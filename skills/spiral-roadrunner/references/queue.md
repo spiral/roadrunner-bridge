@@ -113,13 +113,13 @@ A **lower** priority value runs first. Unset, the job takes its pipeline's prior
 reads `0` the same way, so `withPriority()` takes positive values only.
 
 All pipelines feed one RoadRunner priority queue, and the priority orders the jobs waiting there, across
-pipelines too. A `memory` pipeline sends its jobs there as they are pushed (up to the queue's
-`pipeline_size`); a broker pipeline only what the driver has fetched (`prefetch`), while the rest waits in
-the broker in its own order. The priority stays inside
-RoadRunner: AMQP carries it in a header, not as the RabbitMQ message priority, and Beanstalk puts every job
-with the pipeline's `tube_priority`.
+pipelines too. Each driver moves there at most its `prefetch` jobs (also for `memory`); the rest waits
+in the driver or the broker in its own order. The priority stays inside RoadRunner: AMQP carries it in a
+header, not as the RabbitMQ message priority, and Beanstalk puts every job with the pipeline's
+`tube_priority`.
 
-An auto-acked job is acked as soon as a worker takes it, so a failing handler does not bring it back.
+An auto-acked job is acked before any worker runs it — a broker driver (AMQP, SQS, NATS, Beanstalk) acks
+it as soon as RoadRunner fetches it. Neither a failing handler nor a RoadRunner restart brings it back.
 
 ### Payload serialization
 

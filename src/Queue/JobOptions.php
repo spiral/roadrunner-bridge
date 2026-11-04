@@ -67,7 +67,7 @@ final class JobOptions extends Options
 
     /**
      * RoadRunner hands out jobs with a lower value first. All pipelines share one RoadRunner priority
-     * queue, but a broker pipeline puts there only the jobs it has prefetched.
+     * queue, but each pipeline puts there only the jobs it has prefetched.
      *
      * @param int|null $priority A positive value, or null for the pipeline priority. RoadRunner reads `0`
      *        as the pipeline priority too, so it is rejected.
@@ -95,8 +95,8 @@ final class JobOptions extends Options
     }
 
     /**
-     * @param bool|null $autoAck True acks the job when a worker takes it, before the handler runs.
-     *        Null takes the pipeline default.
+     * @param bool|null $autoAck True acks the job before any worker runs it (a broker driver acks on fetch),
+     *        so a failure or a RoadRunner restart loses it. Null takes the pipeline default.
      */
     public function withAutoAck(?bool $autoAck): static
     {
