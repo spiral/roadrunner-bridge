@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\GRPC\Internal;
 
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\FinalizerInterface;
@@ -43,8 +44,15 @@ final readonly class Dispatcher implements DispatcherInterface
         $worker = $container->get(WorkerInterface::class);
         /** @var LocatorInterface $locator */
         $locator = $container->get(LocatorInterface::class);
+        $services = $locator->getServices();
 
-        foreach ($locator->getServices() as $interface => $service) {
+        $services === [] and $this->warn(
+            'No gRPC services found, the worker serves no methods. A service is an instantiable class implementing'
+            . ' a ServiceInterface descendant in the directories the tokenizer scans (scope `grpc-services`);'
+            . ' a custom LocatorInterface gets them only as a TokenizationListenerInterface.',
+        );
+
+        foreach ($services as $interface => $service) {
             try {
                 $server->registerService($interface, $container->get($service->getName()));
             } catch (\Throwable $e) {
@@ -65,6 +73,15 @@ final readonly class Dispatcher implements DispatcherInterface
                 $this->finalizer->finalize(false);
             },
         );
+    }
+
+    private function warn(string $message): void
+    {
+        try {
+            $this->container->get(LoggerInterface::class)->warning($message);
+        } catch (\Throwable) {
+            // logging is optional here
+        }
     }
 
     private function handleException(\Throwable $e): void
