@@ -75,6 +75,8 @@ Other `options` throw `InvalidArgumentException` on push.
 
 - a delay from Spiral `Options` wins whenever it is set, `0` included;
 - per-push headers are added to the default headers; a header set in both takes the per-push value;
+- a priority from `JobOptions` replaces the default one; an auto-ack from them wins whenever it is set,
+  `false` included;
 - RoadRunner options override a default delay or priority only with a non-zero value, and auto-ack only
   with `true`.
 
@@ -87,10 +89,33 @@ use Spiral\Queue\QueueInterface;
 $id = $queue->push(SendMail::class, ['to' => $email], Options::onQueue('mail')->withDelay(30));
 ```
 
-`$options` is either a Spiral `OptionsInterface` (queue, delay and headers are carried over, merged with
-the pipeline defaults as above) or a
-RoadRunner `Spiral\RoadRunner\Jobs\OptionsInterface` for driver features such as priority or
-auto-ack — those go to the default pipeline, since they carry no queue name.
+`$options` is one of:
+
+- a Spiral `OptionsInterface` — queue, delay and headers are carried over, merged with the pipeline
+  defaults as above;
+- `Spiral\RoadRunnerBridge\Queue\JobOptions` — Spiral `Options` plus job priority and auto-ack, below;
+- a RoadRunner `Spiral\RoadRunner\Jobs\OptionsInterface` (e.g. `KafkaOptions` with a topic) — it carries
+  no queue name, so the push goes to the default pipeline.
+
+### Job priority and auto-ack
+
+```php
+use Spiral\RoadRunnerBridge\Queue\JobOptions;
+
+$queue->push(SendMail::class, $payload, JobOptions::onQueue('mail')->withPriority(1)->withAutoAck(true));
+```
+
+- **Lower value runs first.** Unset, the job takes its pipeline's priority: `priority` in `.rr.yaml` or
+  the connector's, `10` by default. `withPriority()` takes positive values only — RoadRunner reads `0` as
+  unset.
+- **Reach.** All pipelines share one RoadRunner priority queue, and each driver feeds it at most its
+  `prefetch` jobs; the broker's own order ignores the job priority. So it reorders a `memory` pipeline
+  or a short queue. For urgent jobs behind a broker backlog, push them to a separate pipeline with a
+  lower pipeline `priority`.
+- **Auto-ack** acks the job before any worker runs it (a broker driver acks on fetch): a failing handler
+  or a RoadRunner restart loses it.
+- `JobOptions` works wherever Spiral options do — `pushObject()`, `RetryException` (delay and headers
+  only), pipeline `options` except Kafka's. A per-push `JobOptions` keeps a Kafka pipeline's topic.
 
 ### Payload serialization
 

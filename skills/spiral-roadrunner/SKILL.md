@@ -98,7 +98,7 @@ outside production. Each request, job, gRPC call and Centrifugo event ends with
 Read the file for the integration in hand:
 
 - [`references/queue.md`](references/queue.md) — Jobs: the `roadrunner` queue driver, pipelines declared
-  from PHP, payload serialization, retries, `rr:jobs:*` commands.
+  from PHP, job priority, payload serialization, retries, `rr:jobs:*` commands.
 - [`references/grpc.md`](references/grpc.md) — gRPC server: services, discovery, interceptors, the `grpc`
   config; `grpc:generate` with buf (binaries, imports, custom `buf.gen.yaml`, generators); the gRPC client.
 - [`references/centrifugo.md`](references/centrifugo.md) — Centrifugo: per-request-type services,

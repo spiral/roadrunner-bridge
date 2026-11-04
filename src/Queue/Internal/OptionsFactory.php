@@ -12,6 +12,7 @@ use Spiral\RoadRunner\Jobs\OptionsInterface as JobsOptionsInterface;
 use Spiral\RoadRunner\Jobs\Queue\CreateInfoInterface;
 use Spiral\RoadRunner\Jobs\Queue\Driver;
 use Spiral\RoadRunner\Jobs\Queue\KafkaCreateInfo;
+use Spiral\RoadRunnerBridge\Queue\JobOptions;
 
 /**
  * @internal
@@ -34,6 +35,11 @@ final class OptionsFactory
             foreach ($from->getHeaders() as $header => $values) {
                 $options = $options->withHeader($header, $values);
             }
+        }
+
+        if ($from instanceof JobOptions) {
+            ($priority = $from->getPriority()) === null or $options = $options->withPriority($priority);
+            ($autoAck = $from->getAutoAck()) === null or $options = $options->withAutoAck($autoAck);
         }
 
         return $options;
