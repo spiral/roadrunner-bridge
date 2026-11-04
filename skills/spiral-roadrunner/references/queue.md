@@ -67,8 +67,7 @@ connector name of its own.
 A Kafka pipeline pushes to the topic of its `KafkaOptions` (`new KafkaOptions('orders')`). Without
 `options` it pushes to the single topic its connector consumes (`consumerOptions` topics and partitions
 naming one topic, no regexp), otherwise to `default`. A per-push `KafkaOptions` topic overrides either.
-Other `options`, `JobOptions` included, throw `InvalidArgumentException` on push. A per-push `JobOptions`
-keeps the pipeline's topic and sets the delay, headers, priority and auto-ack.
+Other `options` throw `InvalidArgumentException` on push.
 
 ### Default options
 
@@ -94,32 +93,29 @@ $id = $queue->push(SendMail::class, ['to' => $email], Options::onQueue('mail')->
 
 - a Spiral `OptionsInterface` — queue, delay and headers are carried over, merged with the pipeline
   defaults as above;
-- `Spiral\RoadRunnerBridge\Queue\JobOptions` — Spiral `Options` plus the RoadRunner job priority and
-  auto-ack, so one push names the pipeline and sets both:
-
-  ```php
-  use Spiral\RoadRunnerBridge\Queue\JobOptions;
-
-  $queue->push(SendMail::class, $payload, JobOptions::onQueue('mail')->withPriority(1));
-  ```
-
-  It is a Spiral `OptionsInterface`, so it also fits `pushObject()`, `RetryException` (which uses only
-  its delay and headers) and the `options` of a non-Kafka pipeline;
+- `Spiral\RoadRunnerBridge\Queue\JobOptions` — Spiral `Options` plus job priority and auto-ack, below;
 - a RoadRunner `Spiral\RoadRunner\Jobs\OptionsInterface` (e.g. `KafkaOptions` with a topic) — it carries
   no queue name, so the push goes to the default pipeline.
 
-A **lower** priority value runs first. Unset, the job takes its pipeline's priority — `priority` in
-`.rr.yaml`, or the connector's `priority` for a pipeline declared from PHP, `10` by default. RoadRunner
-reads `0` the same way, so `withPriority()` takes positive values only.
+### Job priority and auto-ack
 
-All pipelines feed one RoadRunner priority queue, and the priority orders the jobs waiting there, across
-pipelines too. Each driver moves there at most its `prefetch` jobs (also for `memory`); the rest waits
-in the driver or the broker in its own order. The priority stays inside RoadRunner: AMQP carries it in a
-header, not as the RabbitMQ message priority, and Beanstalk puts every job with the pipeline's
-`tube_priority`.
+```php
+use Spiral\RoadRunnerBridge\Queue\JobOptions;
 
-An auto-acked job is acked before any worker runs it — a broker driver (AMQP, SQS, NATS, Beanstalk) acks
-it as soon as RoadRunner fetches it. Neither a failing handler nor a RoadRunner restart brings it back.
+$queue->push(SendMail::class, $payload, JobOptions::onQueue('mail')->withPriority(1)->withAutoAck(true));
+```
+
+- **Lower value runs first.** Unset, the job takes its pipeline's priority: `priority` in `.rr.yaml` or
+  the connector's, `10` by default. `withPriority()` takes positive values only — RoadRunner reads `0` as
+  unset.
+- **Reach.** All pipelines share one RoadRunner priority queue, and each driver feeds it at most its
+  `prefetch` jobs; the broker's own order ignores the job priority. So it reorders a `memory` pipeline
+  or a short queue. For urgent jobs behind a broker backlog, push them to a separate pipeline with a
+  lower pipeline `priority`.
+- **Auto-ack** acks the job before any worker runs it (a broker driver acks on fetch): a failing handler
+  or a RoadRunner restart loses it.
+- `JobOptions` works wherever Spiral options do — `pushObject()`, `RetryException` (delay and headers
+  only), pipeline `options` except Kafka's. A per-push `JobOptions` keeps a Kafka pipeline's topic.
 
 ### Payload serialization
 
