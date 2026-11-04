@@ -71,7 +71,7 @@ final class TracingInterceptor implements InterceptorInterface
 
     /**
      * The tracer of the current scope, so the span joins the trace of the request that makes the call.
-     * Null without telemetry: the call then skips the span instead of running it through a null tracer.
+     * Null when no tracer is bound, outside any traced scope without telemetry: the call then skips the span.
      */
     private static function tracer(): ?TracerInterface
     {

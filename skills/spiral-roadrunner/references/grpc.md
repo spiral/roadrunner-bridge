@@ -191,7 +191,7 @@ connection rotation and interceptor order: `vendor/spiral/grpc-client/README.md`
 The bridge puts `Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor` first among the client
 `interceptors`: each call is a `CLIENT` span with the same name and attributes as on the server, and the
 trace context goes to the server in the call metadata. The span joins the trace of the current request
-through the scoped `TracerInterface`; without a bound `TracerInterface` the call goes out untraced. Being
+through the scoped `TracerInterface`; without telemetry nothing is recorded and the metadata stays as it is. Being
 first, it makes one span per call, retries included; list it yourself in the common `interceptors` after
 `RetryInterceptor` to get a span per attempt, and the bridge keeps your position. Do not list it in a
 service's `interceptors`: the bridge still adds it to the common list, and the call gets two spans. The
