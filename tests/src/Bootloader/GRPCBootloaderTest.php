@@ -11,7 +11,9 @@ use Spiral\Config\LoaderInterface;
 use Spiral\Core\ConfigsInterface;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\CoreInterceptorInterface;
+use Spiral\Grpc\Client\Config\ConnectionConfig;
 use Spiral\Grpc\Client\Config\GrpcClientConfig;
+use Spiral\Grpc\Client\Config\ServiceConfig;
 use Spiral\Grpc\Client\Interceptor\RetryInterceptor;
 use Spiral\RoadRunner\GRPC\InvokerInterface;
 use Spiral\RoadRunner\GRPC\Server;
@@ -174,6 +176,23 @@ final class GRPCBootloaderTest extends TestCase
         );
 
         Assert::same($config->interceptors, $listed);
+    }
+
+    #[Test]
+    public function keepsTracingListedForOneService(): void
+    {
+        $service = new ServiceConfig(
+            connections: new ConnectionConfig('localhost:9001'),
+            interceptors: [TracingInterceptor::class],
+        );
+        $method = new \ReflectionMethod(GRPCBootloader::class, 'initClientConfig');
+
+        $config = $method->invoke(
+            new GRPCBootloader(m::mock(ConfiguratorInterface::class)),
+            new GRPCConfig(['client' => ['interceptors' => [RetryInterceptor::class], 'services' => [$service]]]),
+        );
+
+        Assert::same($config->interceptors, [RetryInterceptor::class]);
     }
 
     private function binary(string $name): string

@@ -191,13 +191,18 @@ final class GRPCBootloader extends Bootloader
 
     /**
      * Puts {@see TracingInterceptor} first among the common client interceptors unless the application
-     * already lists it, in which case its position is kept.
+     * already lists it, in common or service interceptors, in which case its position is kept.
      */
     private function initClientConfig(GRPCConfig $config): GrpcClientConfig
     {
         $client = $config->getClientConfig();
 
-        foreach ($client->interceptors as $interceptor) {
+        $lists = [$client->interceptors];
+        foreach ($client->services as $service) {
+            $lists[] = $service->interceptors;
+        }
+
+        foreach (\array_merge(...$lists) as $interceptor) {
             $class = match (true) {
                 \is_string($interceptor) => $interceptor,
                 $interceptor instanceof Autowire => $interceptor->alias,

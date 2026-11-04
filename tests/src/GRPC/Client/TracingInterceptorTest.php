@@ -118,6 +118,22 @@ final class TracingInterceptorTest
         Assert::same((new TracingInterceptor())->intercept(self::context(), $handler), $response);
     }
 
+    #[Test]
+    public function leavesMetadataAloneWhenNoTracerIsBound(): void
+    {
+        $handler = m::mock(HandlerInterface::class);
+        $handler->shouldReceive('handle')->once()->andReturnUsing(
+            static fn(CallContextInterface $context): array => $context->getArguments()[4],
+        );
+
+        $sent = ContainerScope::runScope(
+            new Container(),
+            static fn(): mixed => (new TracingInterceptor())->intercept(self::context(['a' => ['1']]), $handler),
+        );
+
+        Assert::same($sent, ['a' => ['1']]);
+    }
+
     /**
      * Arguments in the order spiral/grpc-client builds them.
      *

@@ -87,7 +87,7 @@ final class InvokerTracingTest extends TestCase
     }
 
     #[Test]
-    public function keepsClientErrorStatusUnset(): void
+    public function marksClientErrorStatusToo(): void
     {
         $tracer = new RecordingTracer();
 
@@ -98,8 +98,8 @@ final class InvokerTracingTest extends TestCase
         }
 
         Assert::same($tracer->span?->getAttribute('rpc.response.status_code'), 'NOT_FOUND');
-        Assert::false($tracer->span->hasAttribute('error.type'));
-        Assert::null($tracer->span->getStatus());
+        Assert::same($tracer->span->getAttribute('error.type'), 'NOT_FOUND');
+        Assert::same($tracer->span->getStatus()?->code, 'ERROR');
     }
 
     #[Test]

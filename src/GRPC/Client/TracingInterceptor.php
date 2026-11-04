@@ -9,7 +9,6 @@ use Spiral\Interceptors\Context\CallContextInterface;
 use Spiral\Interceptors\HandlerInterface;
 use Spiral\Interceptors\InterceptorInterface;
 use Spiral\RoadRunnerBridge\GRPC\Internal\RpcSpanAttributes;
-use Spiral\Telemetry\NullTracer;
 use Spiral\Telemetry\SpanInterface;
 use Spiral\Telemetry\TraceKind;
 use Spiral\Telemetry\TracerInterface;
@@ -35,10 +34,14 @@ final class TracingInterceptor implements InterceptorInterface
     #[\Override]
     public function intercept(CallContextInterface $context, HandlerInterface $handler): mixed
     {
+        $tracer = self::tracer();
+        if ($tracer === null) {
+            return $handler->handle($context);
+        }
+
         $arguments = $context->getArguments();
         /** @var non-empty-string $method */
         $method = $arguments[self::ARG_METHOD];
-        $tracer = self::tracer();
 
         return $tracer->trace(
             name: RpcSpanAttributes::clientMethod($method),
@@ -53,7 +56,7 @@ final class TracingInterceptor implements InterceptorInterface
                 try {
                     $result = $handler->handle($context->withArguments($arguments));
                 } catch (\Throwable $e) {
-                    RpcSpanAttributes::applyClientFailure($span, $e);
+                    RpcSpanAttributes::applyFailure($span, $e);
                     throw $e;
                 }
 
@@ -68,15 +71,18 @@ final class TracingInterceptor implements InterceptorInterface
 
     /**
      * The tracer of the current scope, so the span joins the trace of the request that makes the call.
+     * Null without telemetry: the call then skips the span instead of running it through a null tracer.
      */
-    private static function tracer(): TracerInterface
+    private static function tracer(): ?TracerInterface
     {
-        try {
-            $tracer = ContainerScope::getContainer()?->get(TracerInterface::class);
-        } catch (\Throwable) {
-            $tracer = null;
+        $container = ContainerScope::getContainer();
+        if ($container === null || !$container->has(TracerInterface::class)) {
+            return null;
         }
 
-        return $tracer instanceof TracerInterface ? $tracer : new NullTracer();
+        $tracer = $container->get(TracerInterface::class);
+        \assert($tracer instanceof TracerInterface);
+
+        return $tracer;
     }
 }

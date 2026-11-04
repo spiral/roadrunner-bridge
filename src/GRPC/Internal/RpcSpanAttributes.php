@@ -41,11 +41,6 @@ final class RpcSpanAttributes
     ];
 
     /**
-     * Codes a server reports as its own failure; the rest are the caller's fault.
-     */
-    private const SERVER_ERRORS = ['UNKNOWN', 'DEADLINE_EXCEEDED', 'UNIMPLEMENTED', 'INTERNAL', 'UNAVAILABLE', 'DATA_LOSS'];
-
-    /**
      * @return non-empty-string The fully-qualified method, such as `ping.dto.PingService/Ping`.
      */
     public static function method(ServiceInterface $service, Method $method): string
@@ -73,24 +68,24 @@ final class RpcSpanAttributes
         $span->setAttribute('rpc.response.status_code', self::STATUS_NAMES[0]);
     }
 
+    /**
+     * Every status other than `OK` is an error, on the server too: the call ends with an exception, and
+     * spiral/otel-bridge exports a span whose callback throws as an error anyway.
+     */
     public static function applyFailure(SpanInterface $span, \Throwable $e): void
     {
-        if (!$e instanceof GRPCExceptionInterface) {
-            # The worker fails without a gRPC status, and RoadRunner picks the code the client sees.
-            $span
-                ->setAttribute('error.type', $e::class)
-                ->setStatus('ERROR');
-            return;
-        }
+        $status = match (true) {
+            $e instanceof GRPCExceptionInterface,
+            $e instanceof ServiceClientException => self::STATUS_NAMES[$e->getCode()] ?? 'UNKNOWN',
+            $e instanceof TimeoutException => 'DEADLINE_EXCEEDED',
+            # A server worker fails without a gRPC status, and RoadRunner picks the code the client sees.
+            default => null,
+        };
 
-        $status = self::STATUS_NAMES[$e->getCode()] ?? 'UNKNOWN';
-        $span->setAttribute('rpc.response.status_code', $status);
-
-        if (\in_array($status, self::SERVER_ERRORS, true)) {
-            $span
-                ->setAttribute('error.type', $status)
-                ->setStatus('ERROR');
-        }
+        $status === null or $span->setAttribute('rpc.response.status_code', $status);
+        $span
+            ->setAttribute('error.type', $status ?? $e::class)
+            ->setStatus('ERROR');
     }
 
     /**
@@ -115,22 +110,5 @@ final class RpcSpanAttributes
             'rpc.system.name' => 'grpc',
             'rpc.method' => self::clientMethod($path),
         ];
-    }
-
-    /**
-     * For a client every status other than `OK` is a failure.
-     */
-    public static function applyClientFailure(SpanInterface $span, \Throwable $e): void
-    {
-        $status = match (true) {
-            $e instanceof ServiceClientException => self::STATUS_NAMES[$e->getCode()] ?? 'UNKNOWN',
-            $e instanceof TimeoutException => 'DEADLINE_EXCEEDED',
-            default => null,
-        };
-
-        $status === null or $span->setAttribute('rpc.response.status_code', $status);
-        $span
-            ->setAttribute('error.type', $status ?? $e::class)
-            ->setStatus('ERROR');
     }
 }

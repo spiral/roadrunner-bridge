@@ -95,8 +95,9 @@ Every call runs inside a `SERVER` span of the framework's `TracerFactoryInterfac
 default null tracer records nothing; with `spiral/otel-bridge` the spans reach OpenTelemetry). The tracer
 continues the trace from the incoming metadata (`traceparent` …) and returns its context in the response
 headers. The span is named after the method (`ping.dto.PingService/Ping`) and carries `rpc.system.name`,
-`rpc.method`, `rpc.response.status_code` and, for server-side failures, `error.type`; the interceptors run
-inside it.
+`rpc.method` and `rpc.response.status_code`; a call that ends with any status other than `OK`, or with
+a non-gRPC exception, also gets `error.type` and the error status. The interceptors run inside the span.
+spiral/otel-bridge before 2.0.0 drops the attributes of a span whose callback throws.
 
 ## Generating code: `grpc:generate`
 
@@ -188,8 +189,9 @@ connection rotation and interceptor order: `vendor/spiral/grpc-client/README.md`
 ### Client tracing
 
 The bridge puts `Spiral\RoadRunnerBridge\GRPC\Client\TracingInterceptor` first among the client
-`interceptors`: each call is a `CLIENT` span with the same attributes as on the server (every status other
-than `OK` is an error), and the trace context goes to the server in the call metadata. The span joins the
-trace of the current request through the scoped `TracerInterface`. Being first, it makes one span per call,
-retries included; list it yourself after `RetryInterceptor` to get a span per attempt — the bridge then
-keeps your position.
+`interceptors`: each call is a `CLIENT` span with the same name and attributes as on the server, and the
+trace context goes to the server in the call metadata. The span joins the trace of the current request
+through the scoped `TracerInterface`; without a bound `TracerInterface` the call goes out untraced. Being
+first, it makes one span per call, retries included; list it yourself after `RetryInterceptor`, or in
+a service's own `interceptors`, and the bridge keeps your position. The span carries no `server.address`:
+the connection is picked by the interceptors after it.
