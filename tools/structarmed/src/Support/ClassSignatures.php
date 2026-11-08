@@ -6,30 +6,25 @@ namespace Spiral\RoadRunnerBridge\Tools\StructArmed\Support;
 
 use PhpParser\Comment\Doc;
 use PhpParser\NameContext;
-use PhpParser\Node;
-use PhpParser\Node\IntersectionType;
 use PhpParser\Node\Name;
-use PhpParser\Node\NullableType;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassLike;
-use PhpParser\Node\UnionType;
 use PhpParser\NodeFinder;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\ParserFactory;
 
 /**
- * Extracts the fully-qualified type names a class exposes on its public surface:
- * the parameter and return types of its public and protected methods, and the
- * types of its public and protected properties (promoted ones included), both
- * native and from their docblock tags, plus the types in the class docblock's
- * `@method`, `@property`, `@extends`, `@template` and similar tags. Protected
- * members of a final class and members annotated @internal are not surface.
+ * Extracts the fully-qualified type names a class exposes in its docblocks: the
+ * class docblock's `@method`, `@property`, `@extends`, `@template` and similar tags,
+ * and the `@param`, `@return` and `@var` tags of its public and protected members.
+ * Protected members of a final class and members annotated @internal are not surface.
+ * Also gives the lines those surface members span.
  *
- * StructArmed's MethodNode records only counts (paramCount, hasReturnType), not
- * type names, so a signature-level rule has to read them from the AST. Names are
- * resolved to FQCN with NameResolver so callers can match against a namespace.
- * Parsed once per file and cached.
+ * StructArmed's ClassNode::$signatures covers the native types, but neither docblocks
+ * nor which member a parameter type belongs to; the lines tell the latter.
+ * Names are resolved to FQCN with NameResolver so callers can match against a
+ * namespace. Parsed once per file and cached.
  */
 final class ClassSignatures
 {
@@ -39,19 +34,19 @@ final class ClassSignatures
     /** Tags whose types do not come first: `@method Ret name(Arg $a)`, `@template T of Bound`. */
     private const LINE_TAGS = ['method', 'template', 'template-covariant', 'template-contravariant'];
 
-    /** @var array<string, array<string, list<string>>> file => short class name => FQ type names on its public surface */
+    /** @var array<string, array<string, array{list<string>, array<int, true>}>> file => short class name => [FQ docblock type names, surface member lines] */
     private static array $cache = [];
 
     /**
-     * @return list<string>
+     * @return array{list<string>, array<int, true>}
      */
-    public static function publicTypes(string $file, string $shortName): array
+    public static function surface(string $file, string $shortName): array
     {
-        return (self::$cache[$file] ??= self::parse($file))[$shortName] ?? [];
+        return (self::$cache[$file] ??= self::parse($file))[$shortName] ?? [[], []];
     }
 
     /**
-     * @return array<string, list<string>>
+     * @return array<string, array{list<string>, array<int, true>}>
      */
     private static function parse(string $file): array
     {
@@ -84,71 +79,27 @@ final class ClassSignatures
 
             $final = $class instanceof Class_ && $class->isFinal();
             $types = [];
+            $lines = [];
             self::collectDoc($class->getDocComment(), $context, self::CLASS_TAGS, $types);
 
-            foreach ($class->getMethods() as $method) {
-                $exposed = ! self::isInternal($method->getDocComment())
-                    && self::isExposed($method->isPrivate(), $method->isProtected(), $final);
+            foreach ([...$class->getMethods(), ...$class->getProperties()] as $member) {
+                $doc = $member->getDocComment();
 
-                foreach ($method->params as $param) {
-                    // A promoted param is also a property, exposed by either visibility.
-                    $paramExposed = $exposed
-                        || ($param->isPromoted() && self::isExposed($param->isPrivate(), $param->isProtected(), $final));
-
-                    $paramExposed and self::collect($param->type, $types);
-                }
-
-                if ($exposed) {
-                    self::collect($method->returnType, $types);
-                    self::collectDoc($method->getDocComment(), $context, self::MEMBER_TAGS, $types);
-                }
-            }
-
-            foreach ($class->getProperties() as $property) {
-                $doc = $property->getDocComment();
-
-                if (! self::isInternal($doc) && self::isExposed($property->isPrivate(), $property->isProtected(), $final)) {
-                    self::collect($property->type, $types);
+                if (! self::isInternal($doc) && ! $member->isPrivate() && ! ($member->isProtected() && $final)) {
                     self::collectDoc($doc, $context, self::MEMBER_TAGS, $types);
+                    $lines += \array_fill_keys(\range($member->getStartLine(), $member->getEndLine()), true);
                 }
             }
 
-            $signatures[$name] = \array_values(\array_unique($types));
+            $signatures[$name] = [\array_values(\array_unique($types)), $lines];
         }
 
         return $signatures;
     }
 
-    private static function isExposed(bool $private, bool $protected, bool $final): bool
-    {
-        return ! $private && ! ($protected && $final);
-    }
-
     private static function isInternal(?Doc $doc): bool
     {
         return $doc !== null && \preg_match('/^[\/*\s]*@internal(?![\w-])/m', $doc->getText()) === 1;
-    }
-
-    /**
-     * @param list<string> $types
-     */
-    private static function collect(?Node $type, array &$types): void
-    {
-        switch (true) {
-            case $type instanceof Name:
-                $types[] = $type->toString();
-                break;
-            case $type instanceof NullableType:
-                self::collect($type->type, $types);
-                break;
-            case $type instanceof UnionType:
-            case $type instanceof IntersectionType:
-                foreach ($type->types as $inner) {
-                    self::collect($inner, $types);
-                }
-                break;
-                // A plain Identifier (int, string, void, self, static, ...) carries no namespace: ignore.
-        }
     }
 
     /**
