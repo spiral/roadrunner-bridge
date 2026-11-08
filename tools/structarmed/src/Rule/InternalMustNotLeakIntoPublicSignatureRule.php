@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Spiral\RoadRunnerBridge\Tools\StructArmed\Rule;
 
 use Boundwize\StructArmed\Analyser\ClassNode;
+use Boundwize\StructArmed\Analyser\ClassSignature;
 use Boundwize\StructArmed\Rule\AbstractLayerAwareRule;
 use Boundwize\StructArmed\Rule\MultipleRuleViolationInterface;
-use Boundwize\StructArmed\Rule\RuleInterface;
 use Boundwize\StructArmed\Rule\RuleViolation;
+use Boundwize\StructArmed\Rule\SignatureTypesAwareRuleInterface;
 use Spiral\RoadRunnerBridge\Tools\StructArmed\Support\ClassSignatures;
 
 /**
@@ -23,7 +24,7 @@ use Spiral\RoadRunnerBridge\Tools\StructArmed\Support\ClassSignatures;
  * `Google\Protobuf\Internal\Message`, the base of every generated message) are that
  * vendor's business, not a leak of ours.
  */
-final class InternalMustNotLeakIntoPublicSignatureRule extends AbstractLayerAwareRule implements RuleInterface, MultipleRuleViolationInterface
+final class InternalMustNotLeakIntoPublicSignatureRule extends AbstractLayerAwareRule implements SignatureTypesAwareRuleInterface, MultipleRuleViolationInterface
 {
     private const SEGMENT = '\\Internal\\';
 
@@ -69,7 +70,19 @@ final class InternalMustNotLeakIntoPublicSignatureRule extends AbstractLayerAwar
             );
         }
 
-        foreach (ClassSignatures::publicTypes($classNode->file, $classNode->shortName()) as $type) {
+        [$types, $surfaceLines] = ClassSignatures::surface($classNode->file, $classNode->shortName());
+
+        foreach ($classNode->signatures as $signature) {
+            // Written in a surface member, or a promoted property exposed by its own visibility.
+            $promotedExposed = $signature->kind === ClassSignature::PROPERTY && $signature->isPromoted
+                && $signature->isExposed() && ! ($signature->visibility === 'protected' && $classNode->isFinal);
+
+            if ($promotedExposed || isset($surfaceLines[$signature->line])) {
+                $types[] = $signature->type;
+            }
+        }
+
+        foreach (\array_unique($types) as $type) {
             if (! $this->isInternalType($type)) {
                 continue;
             }
