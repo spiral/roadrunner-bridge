@@ -6,6 +6,7 @@ namespace Spiral\RoadRunnerBridge\Http\Internal;
 
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Attribute\DispatcherScope;
 use Spiral\Boot\DispatcherInterface;
 use Spiral\Boot\Environment\AppEnvironment;
@@ -13,7 +14,9 @@ use Spiral\Boot\FinalizerInterface;
 use Spiral\Exceptions\ExceptionHandlerInterface;
 use Spiral\Exceptions\Verbosity;
 use Spiral\Http\Http;
+use Spiral\RoadRunner\Http\PSR7Worker;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
+use Spiral\RoadRunnerBridge\Config\HttpWorkerConfig;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
 
 /**
@@ -29,6 +32,7 @@ final readonly class Dispatcher implements DispatcherInterface
         private ResponseFactoryInterface $responseFactory,
         private FinalizerInterface $finalizer,
         private AppEnvironment $environment,
+        private HttpWorkerConfig $config,
     ) {}
 
     public static function canServe(RoadRunnerMode $mode): bool
@@ -39,13 +43,19 @@ final readonly class Dispatcher implements DispatcherInterface
     #[\Override]
     public function serve(): void
     {
+        $worker = $this->worker;
+        $populateServer = $this->config->shouldPopulateServer();
+        // The interface method takes no flag: a custom or decorated worker keeps its own $_SERVER handling.
+        $wReq = $worker instanceof PSR7Worker
+            ? static fn(): ?ServerRequestInterface => $worker->waitRequest($populateServer)
+            : static fn(): ?ServerRequestInterface => $worker->waitRequest();
         do {
             $failure = null;
             try {
                 // Wrapped in do/while and try/catch to prevent Worker restart if request parsing is failed
                 //
                 do {
-                    $request = $this->worker->waitRequest();
+                    $request = $wReq();
                     if ($request === null) {
                         // Worker got Close signal, stop serving
                         return;
@@ -53,9 +63,9 @@ final readonly class Dispatcher implements DispatcherInterface
 
                     try {
                         $response = $this->http->handle($request);
-                        $this->worker->respond($response);
+                        $worker->respond($response);
                     } catch (\Throwable $failure) {
-                        $this->worker->respond($this->errorToResponse($failure));
+                        $worker->respond($this->errorToResponse($failure));
                         unset($failure);
                     } finally {
                         $this->finalizer->finalize(false);
@@ -67,7 +77,7 @@ final readonly class Dispatcher implements DispatcherInterface
                     break;
                 }
 
-                $this->worker->respond($this->errorToResponse($e));
+                $worker->respond($this->errorToResponse($e));
             }
         } while (true);
     }

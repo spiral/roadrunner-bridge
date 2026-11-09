@@ -79,7 +79,9 @@ the console/other dispatchers run as usual.
 
 The HTTP worker hands every request to `Spiral\Http\Http`. An exception that escapes the HTTP pipeline is
 reported through `ExceptionHandlerInterface` and answered with 500 — with the rendered error in the body
-outside production. Each request, job, gRPC call and Centrifugo event ends with
+outside production. It does not fill `$_SERVER` per request — read request data from the PSR-7 request,
+or set `populateServer` to `true` in `app/config/http-worker.php` (`HttpWorkerConfig`) for code that
+needs the superglobal. Each request, job, gRPC call and Centrifugo event ends with
 `FinalizerInterface::finalize()`.
 
 ## Commands

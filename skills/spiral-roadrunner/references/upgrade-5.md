@@ -59,6 +59,18 @@ addresses for RPC and relays are not the plugin and keep working.
 - A Kafka pipeline without `options` whose connector consumes a single topic pushes to that topic; 4.x
   pushed to the topic `default`.
 
+## HTTP worker leaves `$_SERVER` alone
+
+The HTTP worker no longer overwrites `$_SERVER` on every request: it keeps the values the worker started
+with. Request data lives in the PSR-7 request (`getServerParams()`, headers, URI). Search for `$_SERVER`
+reads of request data (`REQUEST_URI`, `REMOTE_ADDR`, `HTTP_*`, `REQUEST_TIME` …), including in
+libraries that read the superglobal themselves, and move them to the request. When that is not possible,
+restore the old behaviour in `app/config/http-worker.php`:
+
+```php
+return ['populateServer' => true];
+```
+
 ## Centrifugo `subrefresh`
 
 `RequestType::SubRefresh` is now `subrefresh` (was `sub_refresh`). Rename the key in
