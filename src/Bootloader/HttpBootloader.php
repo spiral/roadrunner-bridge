@@ -10,9 +10,11 @@ use Psr\Http\Message\UploadedFileFactoryInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Boot\KernelInterface;
 use Spiral\Bootloader\Http\HttpBootloader as BaseHttpBootloader;
+use Spiral\Config\ConfiguratorInterface;
 use Spiral\RoadRunner\Http\PSR7Worker;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunner\WorkerInterface;
+use Spiral\RoadRunnerBridge\Config\HttpWorkerConfig;
 use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher;
 
 /**
@@ -42,6 +44,13 @@ final class HttpBootloader extends Bootloader
                 UploadedFileFactoryInterface $uploads,
             ): PSR7WorkerInterface => new PSR7Worker($worker, $requests, $streams, $uploads),
         ];
+    }
+
+    public function init(ConfiguratorInterface $config): void
+    {
+        $config->setDefaults(HttpWorkerConfig::CONFIG, [
+            'populateServer' => false,
+        ]);
     }
 
     public function boot(KernelInterface $kernel): void

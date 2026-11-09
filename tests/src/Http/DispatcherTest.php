@@ -8,9 +8,11 @@ use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spiral\Boot\FinalizerInterface;
+use Spiral\RoadRunner\Http\PSR7Worker;
 use Spiral\RoadRunner\Http\PSR7WorkerInterface;
 use Spiral\RoadRunnerBridge\Http\Internal\Dispatcher;
 use Spiral\RoadRunnerBridge\RoadRunnerMode;
+use Spiral\Testing\Attribute\Config;
 use Spiral\Tests\TestCase;
 use Testo\Test;
 
@@ -79,6 +81,31 @@ final class DispatcherTest extends TestCase
 
         $worker = $this->mockContainer(PSR7WorkerInterface::class);
         $worker->shouldReceive('waitRequest')->andReturnNull();
+
+        $this->serveDispatcher(Dispatcher::class);
+    }
+
+    #[Test]
+    public function serverSuperglobalIsNotPopulatedByDefault(): void
+    {
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
+
+        $this->mockContainer(RequestHandlerInterface::class)->shouldNotReceive('handle');
+        $worker = $this->mockContainer(PSR7WorkerInterface::class, PSR7Worker::class);
+        $worker->shouldReceive('waitRequest')->once()->with(false)->andReturnNull();
+
+        $this->serveDispatcher(Dispatcher::class);
+    }
+
+    #[Config('http-worker.populateServer', true)]
+    #[Test]
+    public function serverSuperglobalIsPopulatedWhenEnabled(): void
+    {
+        $this->getContainer()->bind(RoadRunnerMode::class, RoadRunnerMode::Http);
+
+        $this->mockContainer(RequestHandlerInterface::class)->shouldNotReceive('handle');
+        $worker = $this->mockContainer(PSR7WorkerInterface::class, PSR7Worker::class);
+        $worker->shouldReceive('waitRequest')->once()->with(true)->andReturnNull();
 
         $this->serveDispatcher(Dispatcher::class);
     }
