@@ -74,7 +74,7 @@ return Architecture::define()
         'RoadRunnerMode'     => [],
         'Exception'          => [],
         'Logger'             => [],
-        'Http'               => ['RoadRunnerMode'],
+        'Http'               => ['Config', 'RoadRunnerMode'],
         'Centrifugo'         => ['CentrifugoInternal'],
         'CentrifugoInternal' => ['Centrifugo', 'RoadRunnerMode'],
         'GRPC'               => ['GRPCInternal'],
