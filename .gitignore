@@ -9,6 +9,7 @@
 /tools/*/composer.lock
 /tools/*/.*/
 /tools/*/skills.json
+!/tools/psalm/skills.json
 /composer.lock
 /.env
 *.log

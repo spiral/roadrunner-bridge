@@ -156,6 +156,8 @@ final class RPCPipelineRegistry implements PipelineRegistryInterface
             );
         }
 
+        // The config file is user input: TPipeline documents its shape but does not enforce it.
+        /** @psalm-suppress DocblockTypeContradiction */
         if (!$this->pipelines[$name]['connector'] instanceof CreateInfoInterface) {
             throw new InvalidArgumentException(
                 \sprintf('Connector should implement %s interface.', CreateInfoInterface::class),
