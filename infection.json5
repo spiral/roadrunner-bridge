@@ -1,0 +1,18 @@
+{
+    "$schema": "tools/infection/vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": ["src"]
+    },
+    "testFramework": "testo",
+    // Acceptance tests run the application in RoadRunner processes, which report no coverage.
+    "testFrameworkOptions": "--suite=Unit",
+    "tmpDir": "runtime",
+    "timeout": 10,
+    "logs": {
+        "text": "runtime/infection.log",
+        "github": true,
+        "stryker": {
+            "report": "5.x"
+        }
+    }
+}
