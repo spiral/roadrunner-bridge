@@ -20,6 +20,9 @@ jobs:
     name: StructArmed
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      # DLoad downloads rr, buf and protoc from the post-update script; unauthenticated GitHub API calls share a low rate limit.
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
