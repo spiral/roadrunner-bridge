@@ -18,6 +18,12 @@ jobs:
       dependencies: >-
         ['lowest', 'highest']
       run: vendor/bin/testo --suite=Unit
+      # Acceptance tests run the app in separate processes, so only the Unit suite reports coverage.
+      codecov: true
+      codecov-php: '8.5'
+      codecov-dependencies: highest
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   testo-windows:
     uses: spiral/gh-actions/.github/workflows/testo.yml@master

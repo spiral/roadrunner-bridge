@@ -11,6 +11,7 @@
 
 [![Psalm Level](https://shepherd.dev/github/spiral/roadrunner-bridge/level.svg)](https://shepherd.dev/github/spiral/roadrunner-bridge)
 [![Type Coverage](https://shepherd.dev/github/spiral/roadrunner-bridge/coverage.svg)](https://shepherd.dev/github/spiral/roadrunner-bridge)
+[![Codecov](https://codecov.io/gh/spiral/roadrunner-bridge/branch/5.x/graph/badge.svg)](https://codecov.io/gh/spiral/roadrunner-bridge/tree/5.x)
 
 </div>
 
