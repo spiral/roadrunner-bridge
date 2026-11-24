@@ -1,0 +1,49 @@
+on:
+  pull_request: null
+  push:
+    branches:
+      - '5.x'
+
+name: mutation testing
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  mutation:
+    name: Infection
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # DLoad downloads rr from the post-update script; unauthenticated GitHub API calls share a low rate limit.
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.4'
+          extensions: sockets
+          coverage: xdebug
+          ini-values: memory_limit=-1
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
+        with:
+          dependency-versions: highest
+
+      - name: Install Infection
+        run: composer bin infection install --no-interaction --no-progress
+
+      - name: Run Infection
+        run: composer infect:ci
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ github.event_name == 'push' && secrets.STRYKER_DASHBOARD_API_KEY || '' }}
