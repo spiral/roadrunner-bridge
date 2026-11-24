@@ -1,7 +1,11 @@
 {
     "require": {
-        "vimeo/psalm": "^7"
+        "llm/skills": "^1.22",
+        "vimeo/psalm": "^7.17"
     },
-    "minimum-stability": "RC",
-    "prefer-stable": true
+    "config": {
+        "allow-plugins": {
+            "llm/skills": true
+        }
+    }
 }
