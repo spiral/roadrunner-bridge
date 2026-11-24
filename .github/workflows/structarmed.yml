@@ -35,7 +35,7 @@ jobs:
       - name: Install Composer dependencies
         uses: ramsey/composer-install@v3
 
-      # StructArmed is isolated in tools/structarmed via bamarni/composer-bin-plugin.
+      # StructArmed is isolated in vendor-bin/structarmed via bamarni/composer-bin-plugin.
       - name: Install StructArmed
         run: composer bin structarmed install --no-interaction --no-progress
 

@@ -5,11 +5,11 @@
 !/.idea/icon.svg
 /runtime/
 /vendor/
-/tools/*/vendor/
-/tools/*/composer.lock
-/tools/*/.*/
-/tools/*/skills.json
-!/tools/psalm/skills.json
+/vendor-bin/*/vendor/
+/vendor-bin/*/composer.lock
+/vendor-bin/*/.*/
+/vendor-bin/*/skills.json
+!/vendor-bin/psalm/skills.json
 /composer.lock
 /.env
 *.log
