@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-// Lives next to the isolated php-cs-fixer install in tools/code-style/; source paths reach the project root via ../../.
+// Lives next to the isolated php-cs-fixer install in vendor-bin/code-style/; source paths reach the project root via ../../.
 require_once __DIR__ . '/vendor/autoload.php';
 
 // Protobuf-generated code stays as the compilers emit it.

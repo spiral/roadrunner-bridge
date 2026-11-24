@@ -20,6 +20,9 @@ jobs:
     name: StructArmed
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      # DLoad downloads rr, buf and protoc from the post-update script; unauthenticated GitHub API calls share a low rate limit.
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -35,7 +38,7 @@ jobs:
       - name: Install Composer dependencies
         uses: ramsey/composer-install@v3
 
-      # StructArmed is isolated in tools/structarmed via bamarni/composer-bin-plugin.
+      # StructArmed is isolated in vendor-bin/structarmed via bamarni/composer-bin-plugin.
       - name: Install StructArmed
         run: composer bin structarmed install --no-interaction --no-progress
 

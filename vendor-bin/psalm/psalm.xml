@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-    Lives next to the isolated Psalm install in tools/psalm/. resolveFromConfigFile is off, so paths
+    Lives next to the isolated Psalm install in vendor-bin/psalm/. resolveFromConfigFile is off, so paths
     below resolve against the project root (where `composer psalm` runs) and Psalm loads the
     project's own vendor/autoload.php from there.
 -->

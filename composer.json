@@ -94,15 +94,15 @@
         "post-update-cmd": [
             "dload get --no-interaction"
         ],
-        "cs:diff": "php-cs-fixer fix --dry-run -v --diff --config=tools/code-style/.php-cs-fixer.dist.php",
-        "cs:fix": "php-cs-fixer fix -v --config=tools/code-style/.php-cs-fixer.dist.php",
+        "cs:diff": "php-cs-fixer fix --dry-run -v --diff --config=vendor-bin/code-style/.php-cs-fixer.dist.php",
+        "cs:fix": "php-cs-fixer fix -v --config=vendor-bin/code-style/.php-cs-fixer.dist.php",
         "test": "vendor/bin/testo",
         "infect": "infection --configuration=infection.json5",
         "infect:ci": "infection --configuration=infection.json5 --threads=max --show-mutations --ignore-msi-with-no-mutations --min-msi=85 --min-covered-msi=85",
-        "psalm": "psalm -c tools/psalm/psalm.xml",
-        "psalm:baseline": "psalm -c tools/psalm/psalm.xml --set-baseline=tools/psalm/psalm-baseline.xml",
-        "psalm:ci": "psalm -c tools/psalm/psalm.xml --output-format=github --shepherd --show-info=false --stats --threads=4",
-        "structarmed": "structarmed analyze --config=tools/structarmed/structarmed.php"
+        "psalm": "psalm -c vendor-bin/psalm/psalm.xml",
+        "psalm:baseline": "psalm -c vendor-bin/psalm/psalm.xml --set-baseline=vendor-bin/psalm/psalm-baseline.xml",
+        "psalm:ci": "psalm -c vendor-bin/psalm/psalm.xml --output-format=github --shepherd --show-info=false --stats --threads=4",
+        "structarmed": "structarmed analyze --config=vendor-bin/structarmed/structarmed.php"
     },
     "config": {
         "sort-packages": true,
@@ -116,7 +116,7 @@
         "bamarni-bin": {
             "bin-links": true,
             "forward-command": false,
-            "target-directory": "tools"
+            "target-directory": "vendor-bin"
         },
         "skills": {
             "source": "skills"

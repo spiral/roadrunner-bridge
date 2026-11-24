@@ -1,6 +1,6 @@
 {
     "$schema": "https://raw.githubusercontent.com/roxblnfk/skills/master/resources/skills.schema.json",
-    "path-from-root": "tools/psalm",
+    "path-from-root": "vendor-bin/psalm",
     "target": ".agents/skills",
     "dependencies": {
         "composer": {
